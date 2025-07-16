@@ -64,7 +64,7 @@ const getCategory = asyncHandler(async (req, res) => {
 // @route   POST /api/categories
 // @access  Private (Admin only)
 const createCategory = asyncHandler(async (req, res) => {
-  const { name, description } = req.body;
+  const { name, description, image } = req.body;
 
   // Check if category with same name exists
   const existingCategory = await Category.findOne({ 
@@ -75,11 +75,18 @@ const createCategory = asyncHandler(async (req, res) => {
     return sendError(res, 400, 'Category with this name already exists');
   }
 
-  const category = await Category.create({
+  const categoryData = {
     name,
     description,
     createdBy: req.user._id
-  });
+  };
+
+  // Add image if provided
+  if (image) {
+    categoryData.image = image;
+  }
+
+  const category = await Category.create(categoryData);
 
   await category.populate('createdBy', 'name');
 
@@ -90,7 +97,7 @@ const createCategory = asyncHandler(async (req, res) => {
 // @route   PUT /api/categories/:id
 // @access  Private (Admin only)
 const updateCategory = asyncHandler(async (req, res) => {
-  const { name, description, isActive } = req.body;
+  const { name, description, isActive, image } = req.body;
 
   let category = await Category.findById(req.params.id);
 
@@ -110,14 +117,22 @@ const updateCategory = asyncHandler(async (req, res) => {
     }
   }
 
+  // Prepare update data
+  const updateData = {
+    name: name || category.name,
+    description: description !== undefined ? description : category.description,
+    isActive: isActive !== undefined ? isActive : category.isActive
+  };
+
+  // Update image if provided
+  if (image) {
+    updateData.image = image;
+  }
+
   // Update category
   category = await Category.findByIdAndUpdate(
     req.params.id,
-    {
-      name: name || category.name,
-      description: description !== undefined ? description : category.description,
-      isActive: isActive !== undefined ? isActive : category.isActive
-    },
+    updateData,
     { new: true, runValidators: true }
   ).populate('createdBy', 'name');
 

@@ -29,6 +29,7 @@ import Register from './Auth/Register';
 // Admin Pages
 import AdminDashboard from './Admin/AdminDashboard';
 import ProductManagement from './Admin/ProductManagement';
+import CategoriesManagement from './Admin/CategoriesManagement';
 import Inventory from './Admin/Inventory';
 import Sales from './Admin/Sales';
 import Employees from './Admin/Employees';
@@ -115,6 +116,11 @@ const App = () => {
                   <Route path="products" element={
                     <ProtectedRoute allowedRoles={['admin']}>
                       <ProductManagement />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="categories" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <CategoriesManagement />
                     </ProtectedRoute>
                   } />
                   <Route path="inventory" element={

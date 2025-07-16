@@ -65,11 +65,14 @@ const ProductCard = ({ product }) => {
       )}
 
       {/* Product Image Section */}
-      <Link to={`/product/${product._id}`} className="block overflow-hidden">
+      <Link to={`/products/${product._id}`} className="block overflow-hidden">
         <img 
-          src={product.images?.[0] || '/placeholder-image.jpg'} 
+          src={product.images?.[0]?.url || product.images?.[0] || '/api/placeholder/400/300'} 
           alt={product.name}
           className="w-full h-52 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
+          onError={(e) => {
+            e.target.src = '/api/placeholder/400/300';
+          }}
         />
       </Link>
       
@@ -79,7 +82,7 @@ const ProductCard = ({ product }) => {
           <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
             {product.category?.name || 'Electronics'}
           </p>
-          <Link to={`/product/${product._id}`}>
+          <Link to={`/products/${product._id}`}>
             <h3 className="text-lg font-bold text-gray-900 mt-1 hover:text-blue-600 transition-colors" title={product.name}>
               {product.name}
             </h3>

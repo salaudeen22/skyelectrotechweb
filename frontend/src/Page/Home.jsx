@@ -17,36 +17,36 @@ const Home = () => {
       try {
         setLoading(true);
         
-        // Fetch featured products (first 8 products)
-        const productsResponse = await productsAPI.getProducts({ 
+        // First try to fetch featured products
+        let productsResponse = await productsAPI.getProducts({ 
           page: 1, 
           limit: 8, 
           featured: true 
         });
-        setFeaturedProducts(productsResponse.data.products);
+        
+        // If no featured products found, fetch regular products (top performing)
+        if (!productsResponse.data.products || productsResponse.data.products.length === 0) {
+          console.log('No featured products found, fetching regular products...');
+          productsResponse = await productsAPI.getProducts({ 
+            page: 1, 
+            limit: 8,
+            sort: '-ratings.average' // Sort by rating descending
+          });
+        }
+        
+        setFeaturedProducts(productsResponse.data.products || []);
 
         // Fetch categories (first 4 categories)
         const categoriesResponse = await categoriesAPI.getCategories();
-        setCategories(categoriesResponse.data.categories.slice(0, 4));
+        setCategories(categoriesResponse.data.categories.slice(0, 4) || []);
         
       } catch (error) {
         console.error('Error fetching homepage data:', error);
         toast.error('Failed to load homepage data');
         
-        // Fallback to dummy data
-        setFeaturedProducts([
-          { _id: '1', name: 'Arduino Uno R3', price: 550, images: ['https://www.theengineerstore.in/cdn/shop/products/arduino-uno-r3-1.png?v=1701086206'], category: { name: 'Development Board' } },
-          { _id: '2', name: 'Raspberry Pi 4 Model B (2GB)', price: 4500, images: ['https://m.media-amazon.com/images/I/6120PfrjBqL.jpg'], category: { name: 'SBC' } },
-          { _id: '3', name: 'ESP32-WROOM-32 Dev Board', price: 750, images: ['https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuBZkNT4gPIhsPepZy6C4e-SZ_0Y7T4St__g&s'], category: { name: 'Module' } },
-          { _id: '4', name: '37-in-1 Sensor Kit for Arduino', price: 1999, images: ['https://m.media-amazon.com/images/I/71rwFl8vLEL.jpg'], category: { name: 'Sensor' } },
-        ]);
-        
-        setCategories([
-          { _id: '1', name: 'Sensors', image: 'https://rfidunion.com/wp-content/uploads/2022/10/Sensors-and-Actuators.jpg' },
-          { _id: '2', name: 'Dev Boards', image: 'https://robu.in/wp-content/uploads/2020/05/development-boards-1024x768.jpeg' },
-          { _id: '3', name: 'Motors', image: 'https://www.kindpng.com/picc/m/750-7504672_electric-motor-banner-siemens-ie4-motor-hd-png.png' },
-          { _id: '4', name: 'Tools', image: 'https://www.jameco.com/Jameco/Products/MakeImag/2311999.jpg' },
-        ]);
+        // Set empty arrays on error instead of dummy data
+        setFeaturedProducts([]);
+        setCategories([]);
       } finally {
         setLoading(false);
       }
@@ -74,20 +74,29 @@ const Home = () => {
             <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">Shop by Category</h2>
             <p className="mt-4 text-lg text-gray-600">Find the perfect components for your next project.</p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-8">
-            {categories.map((category) => (
-              <Link key={category._id} to={`/category/${category._id}`} className="group block text-center">
-                <div className="relative rounded-lg overflow-hidden aspect-w-3 aspect-h-2">
-                  <img 
-                    src={category.image || category.imageUrl} 
-                    alt={category.name} 
-                    className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-105" 
-                  />
-                </div>
-                <h3 className="mt-4 text-md font-semibold text-gray-800 group-hover:text-blue-600">{category.name}</h3>
-              </Link>
-            ))}
-          </div>
+          {categories.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-8">
+              {categories.map((category) => (
+                <Link key={category._id} to={`/category/${category._id}`} className="group block text-center">
+                  <div className="relative rounded-lg overflow-hidden aspect-w-3 aspect-h-2">
+                    <img 
+                      src={category.image?.url || category.image || '/api/placeholder/300/200'} 
+                      alt={category.name} 
+                      className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        e.target.src = '/api/placeholder/300/200';
+                      }}
+                    />
+                  </div>
+                  <h3 className="mt-4 text-md font-semibold text-gray-800 group-hover:text-blue-600">{category.name}</h3>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No categories available at the moment.</p>
+            </div>
+          )}
         </section>
 
         {/* Featured Products Section */}
@@ -95,29 +104,43 @@ const Home = () => {
             <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="text-center mb-12">
                 <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-                Featured Products
+                {featuredProducts.length > 0 ? 'Featured Products' : 'Our Products'}
                 </h2>
                 <p className="mt-4 text-lg text-gray-600">
-                Check out our most popular items and best sellers.
+                {featuredProducts.length > 0 ? 'Check out our most popular items and best sellers.' : 'Discover amazing products for your projects.'}
                 </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                {featuredProducts.map((product) => (
-                <ProductCard
-                    key={product._id}
-                    product={product}
-                />
-                ))}
-            </div>
-            
-            <div className="text-center mt-12">
-              <Link 
-                to="/products" 
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
-              >
-                View All Products
-              </Link>
-            </div>
+            {featuredProducts.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                    {featuredProducts.map((product) => (
+                    <ProductCard
+                        key={product._id}
+                        product={product}
+                    />
+                    ))}
+                </div>
+                
+                <div className="text-center mt-12">
+                  <Link 
+                    to="/products" 
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+                  >
+                    View All Products
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-6">No products available at the moment.</p>
+                <Link 
+                  to="/products" 
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+                >
+                  Browse Products
+                </Link>
+              </div>
+            )}
             </div>
         </section>
 

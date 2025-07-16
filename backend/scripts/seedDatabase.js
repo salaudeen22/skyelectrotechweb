@@ -57,23 +57,43 @@ const sampleUsers = [
 const sampleCategories = [
   {
     name: 'Smartphones',
-    description: 'Latest smartphones and mobile devices'
+    description: 'Latest smartphones and mobile devices',
+    image: {
+      public_id: 'categories/smartphones',
+      url: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80'
+    }
   },
   {
     name: 'Laptops',
-    description: 'High-performance laptops and notebooks'
+    description: 'High-performance laptops and notebooks',
+    image: {
+      public_id: 'categories/laptops',
+      url: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80'
+    }
   },
   {
     name: 'Tablets',
-    description: 'Tablets and e-readers'
+    description: 'Tablets and e-readers',
+    image: {
+      public_id: 'categories/tablets',
+      url: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80'
+    }
   },
   {
     name: 'Audio',
-    description: 'Headphones, speakers, and audio equipment'
+    description: 'Headphones, speakers, and audio equipment',
+    image: {
+      public_id: 'categories/audio',
+      url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80'
+    }
   },
   {
     name: 'Accessories',
-    description: 'Electronic accessories and peripherals'
+    description: 'Electronic accessories and peripherals',
+    image: {
+      public_id: 'categories/accessories',
+      url: 'https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80'
+    }
   }
 ];
 
@@ -258,6 +278,7 @@ const seedDatabase = async () => {
         category: categoryMap[productData.name],
         sku,
         createdBy: adminUser._id,
+        isFeatured: productData.isFeatured || false, // Use the isFeatured from productData
         images: [
           {
             public_id: `sample_${productData.name.replace(/\s+/g, '_').toLowerCase()}`,
@@ -266,7 +287,7 @@ const seedDatabase = async () => {
         ]
       });
       
-      console.log(`Created product: ${product.name} (SKU: ${product.sku})`);
+      console.log(`Created product: ${product.name} (SKU: ${product.sku})${product.isFeatured ? ' [FEATURED]' : ''}`);
     }
 
     console.log('\n🎉 Database seeded successfully!');

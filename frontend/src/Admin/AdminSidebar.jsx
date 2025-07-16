@@ -8,7 +8,8 @@ import {
     FaUsers, 
     FaSignOutAlt,
     FaBolt, // A great icon for electronics
-    FaUserCircle
+    FaUserCircle,
+    FaTags // Icon for categories
 } from 'react-icons/fa';
 
 const AdminSidebar = () => {
@@ -50,6 +51,13 @@ const AdminSidebar = () => {
                 > 
                     <FaBoxOpen className="mr-4 h-5 w-5" />
                     <span>Products</span>
+                </NavLink>
+                <NavLink 
+                    to="/admin/categories" 
+                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
+                > 
+                    <FaTags className="mr-4 h-5 w-5" />
+                    <span>Categories</span>
                 </NavLink>
                 <NavLink 
                     to="/admin/sales" 
