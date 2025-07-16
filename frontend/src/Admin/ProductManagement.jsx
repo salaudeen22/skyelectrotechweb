@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { FaPlus, FaSearch, FaPencilAlt, FaTrashAlt, FaTimes } from 'react-icons/fa';
-import { productsAPI, categoriesAPI } from '../services/apiServices';
+import React, { useState, useMemo, useEffect, useContext } from 'react';
+import { FaPlus, FaSearch, FaPencilAlt, FaTrashAlt, FaTimes, FaUpload, FaSpinner, FaImage, FaShoppingCart } from 'react-icons/fa';
+import { productsAPI, categoriesAPI, uploadAPI } from '../services/apiServices';
+import { CartContext } from '../contexts/CartContext';
 import toast from 'react-hot-toast';
 import ProductForm from './ProductForm';
 
@@ -25,9 +26,13 @@ const ProductModal = ({ product, categories, onClose, onSave }) => {
         isFeatured: product?.isFeatured || false,
         specifications: product?.specifications || [],
         features: product?.features || [],
-        tags: product?.tags || []
+        tags: product?.tags || [],
+        images: product?.images || []
     });
     const [loading, setLoading] = useState(false);
+    const [imagePreviews, setImagePreviews] = useState(product?.images || []);
+    const [imageFiles, setImageFiles] = useState([]);
+    const [uploading, setUploading] = useState(false);
 
     const isEditing = !!product;
 
@@ -47,13 +52,101 @@ const ProductModal = ({ product, categories, onClose, onSave }) => {
         }));
     };
 
+    const handleImageUpload = (e) => {
+        const files = Array.from(e.target.files);
+        
+        if (imageFiles.length + files.length > 5) {
+            toast.error('Maximum 5 images allowed');
+            return;
+        }
+
+        const validFiles = [];
+        const newPreviews = [];
+
+        files.forEach(file => {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                toast.error(`${file.name} is not a valid image file`);
+                return;
+            }
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error(`${file.name} is too large. Maximum size is 5MB`);
+                return;
+            }
+
+            validFiles.push(file);
+            
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                newPreviews.push(e.target.result);
+                if (newPreviews.length === validFiles.length) {
+                    setImagePreviews(prev => [...prev, ...newPreviews]);
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        setImageFiles(prev => [...prev, ...validFiles]);
+    };
+
+    const removeImage = (index, isExisting = false) => {
+        if (isExisting) {
+            // Remove from existing images
+            setFormData(prev => ({
+                ...prev,
+                images: prev.images.filter((_, i) => i !== index)
+            }));
+        } else {
+            // Remove from new images
+            const existingCount = formData.images.length;
+            const newIndex = index - existingCount;
+            setImageFiles(prev => prev.filter((_, i) => i !== newIndex));
+        }
+        setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const uploadImages = async () => {
+        if (imageFiles.length === 0) return [];
+
+        setUploading(true);
+        const uploadedUrls = [];
+
+        try {
+            for (const file of imageFiles) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const response = await uploadAPI.uploadImage(formData);
+                uploadedUrls.push(response.imageUrl);
+            }
+        } catch (error) {
+            console.error('Error uploading images:', error);
+            toast.error('Failed to upload some images');
+            throw error;
+        } finally {
+            setUploading(false);
+        }
+
+        return uploadedUrls;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
         try {
+            // Upload new images
+            const newImageUrls = await uploadImages();
+            
+            // Combine existing and new image URLs
+            const allImages = [...formData.images, ...newImageUrls];
+
             const productData = {
                 ...formData,
+                images: allImages,
                 price: parseFloat(formData.price),
                 originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : undefined,
                 stock: parseInt(formData.stock),
@@ -101,6 +194,62 @@ const ProductModal = ({ product, categories, onClose, onSave }) => {
                                 required
                                 className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
                             />
+                        </div>
+
+                        {/* Product Images */}
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                                Product Images (Max 5 images)
+                            </label>
+                            
+                            {/* Image Upload Area */}
+                            <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:border-slate-400 transition-colors">
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    className="hidden"
+                                    id="image-upload"
+                                    disabled={uploading || loading}
+                                />
+                                <label
+                                    htmlFor="image-upload"
+                                    className="cursor-pointer flex flex-col items-center space-y-2"
+                                >
+                                    {uploading ? (
+                                        <FaSpinner className="text-2xl text-slate-400 animate-spin" />
+                                    ) : (
+                                        <FaUpload className="text-2xl text-slate-400" />
+                                    )}
+                                    <span className="text-sm text-slate-600">
+                                        {uploading ? 'Uploading...' : 'Click to upload images or drag and drop'}
+                                    </span>
+                                </label>
+                            </div>
+
+                            {/* Image Previews */}
+                            {imagePreviews.length > 0 && (
+                                <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    {imagePreviews.map((preview, index) => (
+                                        <div key={index} className="relative group">
+                                            <img
+                                                src={preview}
+                                                alt={`Preview ${index + 1}`}
+                                                className="w-full h-32 object-cover rounded-lg border"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(index, index < formData.images.length)}
+                                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                disabled={loading || uploading}
+                                            >
+                                                <FaTimes className="text-xs" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         <div>
@@ -264,6 +413,7 @@ const ProductManagement = () => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { addToCart } = useContext(CartContext);
 
     useEffect(() => {
         fetchProducts();
@@ -315,6 +465,16 @@ const ProductManagement = () => {
         fetchProducts(); // Refresh the products list
     };
 
+    const handleAddToCart = (product) => {
+        try {
+            addToCart(product, 1);
+            toast.success(`${product.name} added to cart!`);
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            toast.error('Failed to add product to cart');
+        }
+    };
+
     const handleDeleteProduct = async (productId) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
             try {
@@ -358,15 +518,6 @@ const ProductManagement = () => {
 
     return (
         <div className="space-y-6">
-            {isModalOpen && (
-                <ProductModal 
-                    product={selectedProduct} 
-                    categories={categories}
-                    onClose={handleCloseModal} 
-                    onSave={handleSaveProduct}
-                />
-            )}
-            
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-800">Product Management</h1>
@@ -450,17 +601,25 @@ const ProductManagement = () => {
                                         <div className="text-xs text-slate-500 mt-1">{product.stock} units</div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="flex items-center justify-center space-x-4">
+                                        <div className="flex items-center justify-center space-x-2">
                                             <button 
                                                 onClick={() => handleOpenProductForm(product._id)} 
-                                                className="text-blue-600 hover:text-blue-900" 
+                                                className="text-blue-600 hover:text-blue-900 p-1" 
                                                 title="Edit"
                                             >
                                                 <FaPencilAlt />
                                             </button>
                                             <button 
+                                                onClick={() => handleAddToCart(product)}
+                                                className="text-green-600 hover:text-green-900 p-1" 
+                                                title="Add to Cart"
+                                                disabled={product.stock === 0}
+                                            >
+                                                <FaShoppingCart />
+                                            </button>
+                                            <button 
                                                 onClick={() => handleDeleteProduct(product._id)}
-                                                className="text-red-600 hover:text-red-900" 
+                                                className="text-red-600 hover:text-red-900 p-1" 
                                                 title="Delete"
                                             >
                                                 <FaTrashAlt />
@@ -482,16 +641,12 @@ const ProductManagement = () => {
 
             {/* Product Form Modal */}
             {showProductForm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                        <ProductModal
-                            product={editingProductId ? products.find(p => p._id === editingProductId) : null}
-                            categories={categories}
-                            onClose={handleCloseProductForm}
-                            onSave={handleSaveProduct}
-                        />
-                    </div>
-                </div>
+                <ProductForm
+                    product={editingProductId ? products.find(p => p._id === editingProductId) : null}
+                    categories={categories}
+                    onClose={handleCloseProductForm}
+                    onSave={handleSaveProduct}
+                />
             )}
         </div>
     );
