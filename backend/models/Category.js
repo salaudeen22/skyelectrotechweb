@@ -4,9 +4,13 @@ const categorySchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Category name is required'],
-    unique: true,
     trim: true,
     maxlength: [50, 'Category name cannot exceed 50 characters']
+  },
+  slug: {
+    type: String,
+    unique: true,
+    lowercase: true
   },
   description: {
     type: String,
@@ -15,6 +19,19 @@ const categorySchema = new mongoose.Schema({
   image: {
     public_id: String,
     url: String
+  },
+  parentCategory: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    default: null
+  },
+  isMainCategory: {
+    type: Boolean,
+    default: true
+  },
+  order: {
+    type: Number,
+    default: 0
   },
   isActive: {
     type: Boolean,
@@ -30,5 +47,16 @@ const categorySchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+// Create slug before saving
+categorySchema.pre('save', function(next) {
+  if (this.isModified('name')) {
+    this.slug = this.name.toLowerCase().replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  }
+  next();
+});
+
+// Ensure unique name within the same parent category
+categorySchema.index({ name: 1, parentCategory: 1 }, { unique: true });
 
 module.exports = mongoose.model('Category', categorySchema);

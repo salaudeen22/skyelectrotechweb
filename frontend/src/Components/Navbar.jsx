@@ -2,11 +2,14 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import { CartContext } from '../contexts/CartContext';
+import { useCategories } from '../hooks/useCategories';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
   const { cartItems } = useContext(CartContext);
+  const { categories } = useCategories();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -40,12 +43,73 @@ const Navbar = () => {
             >
               Home
             </Link>
-            <Link 
-              to="/products" 
-              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Products
-            </Link>
+            
+            {/* Products with Categories Dropdown */}
+            <div className="relative">
+              <button
+                onMouseEnter={() => setIsProductsDropdownOpen(true)}
+                onMouseLeave={() => setIsProductsDropdownOpen(false)}
+                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
+              >
+                Products
+                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {isProductsDropdownOpen && (
+                <div 
+                  className="absolute left-0 mt-2 w-64 bg-white rounded-md shadow-lg py-2 z-50"
+                  onMouseEnter={() => setIsProductsDropdownOpen(true)}
+                  onMouseLeave={() => setIsProductsDropdownOpen(false)}
+                >
+                  {/* All Products Link */}
+                  <Link
+                    to="/products"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 font-medium"
+                  >
+                    All Products
+                  </Link>
+                  
+                  {/* Divider */}
+                  {categories.length > 0 && (
+                    <div className="border-t border-gray-200 my-2"></div>
+                  )}
+                  
+                  {/* Categories */}
+                  {categories.map((category) => (
+                    <div key={category._id} className="relative">
+                      <Link
+                        to={`/products?category=${category.slug}`}
+                        className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <span>{category.name}</span>
+                        {category.subcategories && category.subcategories.length > 0 && (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        )}
+                      </Link>
+                      
+                      {/* Subcategories */}
+                      {category.subcategories && category.subcategories.length > 0 && (
+                        <div className="ml-4 border-l border-gray-200">
+                          {category.subcategories.map((subcategory) => (
+                            <Link
+                              key={subcategory._id}
+                              to={`/products?category=${subcategory.slug}`}
+                              className="block px-4 py-1.5 text-xs text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                            >
+                              {subcategory.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             
             {user ? (
               <>
@@ -157,13 +221,44 @@ const Navbar = () => {
               >
                 Home
               </Link>
+              
+              {/* Products Link */}
               <Link
                 to="/products"
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Products
+                All Products
               </Link>
+              
+              {/* Categories for Mobile */}
+              {categories.map((category) => (
+                <div key={category._id}>
+                  <Link
+                    to={`/products?category=${category.slug}`}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {category.name}
+                  </Link>
+                  
+                  {/* Mobile Subcategories */}
+                  {category.subcategories && category.subcategories.length > 0 && (
+                    <div className="ml-4">
+                      {category.subcategories.map((subcategory) => (
+                        <Link
+                          key={subcategory._id}
+                          to={`/products?category=${subcategory.slug}`}
+                          className="block px-3 py-1.5 rounded-md text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          - {subcategory.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
               
               {user ? (
                 <>

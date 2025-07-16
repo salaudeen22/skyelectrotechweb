@@ -10,6 +10,7 @@ const CategoriesManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [parentCategory, setParentCategory] = useState(null);
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -36,18 +37,29 @@ const CategoriesManagement = () => {
   useEffect(() => {
     const filtered = categories.filter(category =>
       category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      category.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      category.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (category.subcategories && category.subcategories.some(sub => 
+        sub.name.toLowerCase().includes(searchTerm.toLowerCase())
+      ))
     );
     setFilteredCategories(filtered);
   }, [searchTerm, categories]);
 
   const handleCreate = () => {
     setSelectedCategory(null);
+    setParentCategory(null);
+    setShowModal(true);
+  };
+
+  const handleCreateSubcategory = (category) => {
+    setSelectedCategory(null);
+    setParentCategory(category);
     setShowModal(true);
   };
 
   const handleEdit = (category) => {
     setSelectedCategory(category);
+    setParentCategory(null);
     setShowModal(true);
   };
 
@@ -71,6 +83,7 @@ const CategoriesManagement = () => {
   const handleModalClose = () => {
     setShowModal(false);
     setSelectedCategory(null);
+    setParentCategory(null);
   };
 
   const handleSave = () => {
@@ -118,64 +131,127 @@ const CategoriesManagement = () => {
       </div>
 
       {/* Categories Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="space-y-6">
         {filteredCategories.map((category) => (
-          <div key={category._id} className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
-            {/* Category Image */}
-            <div className="relative h-48 bg-gray-100">
-              {category.image?.url ? (
-                <img
-                  src={category.image.url}
-                  alt={category.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.src = '/api/placeholder/400/300';
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                  <FaImage className="w-12 h-12 text-gray-400" />
+          <div key={category._id} className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            {/* Main Category */}
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start space-x-4">
+                  {/* Category Image */}
+                  <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                    {category.image?.url ? (
+                      <img
+                        src={category.image.url}
+                        alt={category.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = '/api/placeholder/400/300';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                        <FaImage className="w-8 h-8 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Category Info */}
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        category.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {category.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                        {category.productCount || 0} products
+                      </span>
+                    </div>
+                    {category.description && (
+                      <p className="text-gray-600 text-sm mb-2">{category.description}</p>
+                    )}
+                    <p className="text-xs text-gray-500">Created by {category.createdBy?.name}</p>
+                  </div>
                 </div>
-              )}
-              
-              {/* Action buttons */}
-              <div className="absolute top-2 right-2 flex gap-2">
-                <button
-                  onClick={() => handleEdit(category)}
-                  className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
-                  title="Edit Category"
-                >
-                  <FaPencilAlt className="w-3 h-3 text-blue-600" />
-                </button>
-                <button
-                  onClick={() => handleDelete(category._id)}
-                  className="p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
-                  title="Delete Category"
-                >
-                  <FaTrashAlt className="w-3 h-3 text-red-600" />
-                </button>
-              </div>
 
-              {/* Product count badge */}
-              <div className="absolute bottom-2 left-2 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
-                {category.productCount || 0} products
+                {/* Action buttons */}
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleCreateSubcategory(category)}
+                    className="px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1"
+                    title="Add Subcategory"
+                  >
+                    <FaPlus className="w-3 h-3" />
+                    Sub
+                  </button>
+                  <button
+                    onClick={() => handleEdit(category)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="Edit Category"
+                  >
+                    <FaPencilAlt className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(category._id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Delete Category"
+                  >
+                    <FaTrashAlt className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Category Info */}
-            <div className="p-4">
-              <h3 className="font-semibold text-lg text-gray-900 mb-2">{category.name}</h3>
-              {category.description && (
-                <p className="text-gray-600 text-sm line-clamp-2 mb-3">{category.description}</p>
-              )}
-              
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>Created by {category.createdBy?.name}</span>
-                <span className={`px-2 py-1 rounded-full ${category.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                  {category.isActive ? 'Active' : 'Inactive'}
-                </span>
+            {/* Subcategories */}
+            {category.subcategories && category.subcategories.length > 0 && (
+              <div className="bg-gray-50 px-6 py-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">
+                  Subcategories ({category.subcategories.length})
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {category.subcategories.map((subcategory) => (
+                    <div key={subcategory._id} className="bg-white p-3 rounded-lg border border-gray-200">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h5 className="font-medium text-gray-900 text-sm">{subcategory.name}</h5>
+                            <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+                              subcategory.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {subcategory.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+                          {subcategory.description && (
+                            <p className="text-gray-600 text-xs mb-1 line-clamp-2">{subcategory.description}</p>
+                          )}
+                          <div className="flex items-center justify-between text-xs text-gray-500">
+                            <span>{subcategory.productCount || 0} products</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-1 ml-2">
+                          <button
+                            onClick={() => handleEdit(subcategory)}
+                            className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                            title="Edit Subcategory"
+                          >
+                            <FaPencilAlt className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(subcategory._id)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                            title="Delete Subcategory"
+                          >
+                            <FaTrashAlt className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         ))}
       </div>
@@ -203,6 +279,8 @@ const CategoriesManagement = () => {
       {showModal && (
         <CategoryModal
           category={selectedCategory}
+          parentCategory={parentCategory}
+          allCategories={categories}
           onClose={handleModalClose}
           onSave={handleSave}
         />
@@ -212,11 +290,13 @@ const CategoriesManagement = () => {
 };
 
 // Category Modal Component
-const CategoryModal = ({ category, onClose, onSave }) => {
+const CategoryModal = ({ category, parentCategory, allCategories, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     name: category?.name || '',
     description: category?.description || '',
-    isActive: category?.isActive ?? true
+    isActive: category?.isActive ?? true,
+    parentCategory: category?.parentCategory?._id || parentCategory?._id || '',
+    order: category?.order || 0
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(category?.image?.url || '');
@@ -224,6 +304,7 @@ const CategoryModal = ({ category, onClose, onSave }) => {
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const isEditing = !!category;
+  const isSubcategory = !!formData.parentCategory;
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -269,6 +350,7 @@ const CategoryModal = ({ category, onClose, onSave }) => {
 
       const categoryData = {
         ...formData,
+        parentCategory: formData.parentCategory || null,
         ...(imageData && { image: imageData })
       };
 
@@ -280,12 +362,12 @@ const CategoryModal = ({ category, onClose, onSave }) => {
       }
 
       if (response.success) {
-        toast.success(`Category ${isEditing ? 'updated' : 'created'} successfully`);
+        toast.success(`${isSubcategory ? 'Subcategory' : 'Category'} ${isEditing ? 'updated' : 'created'} successfully`);
         onSave();
       }
     } catch (error) {
       console.error('Error saving category:', error);
-      toast.error(`Failed to ${isEditing ? 'update' : 'create'} category`);
+      toast.error(`Failed to ${isEditing ? 'update' : 'create'} ${isSubcategory ? 'subcategory' : 'category'}`);
     } finally {
       setLoading(false);
       setUploadingImage(false);
@@ -298,7 +380,15 @@ const CategoryModal = ({ category, onClose, onSave }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold">
-            {isEditing ? 'Edit Category' : 'Create Category'}
+            {isEditing 
+              ? `Edit ${isSubcategory ? 'Subcategory' : 'Category'}` 
+              : `Create ${isSubcategory ? 'Subcategory' : 'Category'}`
+            }
+            {parentCategory && !isEditing && (
+              <span className="text-sm font-normal text-gray-600 ml-2">
+                under "{parentCategory.name}"
+              </span>
+            )}
           </h2>
           <button
             onClick={onClose}
@@ -310,6 +400,49 @@ const CategoryModal = ({ category, onClose, onSave }) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Parent Category Selection */}
+          {!parentCategory && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Parent Category
+              </label>
+              <select
+                name="parentCategory"
+                value={formData.parentCategory}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Main Category (No Parent)</option>
+                {allCategories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Leave empty to create a main category, or select a parent to create a subcategory
+              </p>
+            </div>
+          )}
+
+          {/* Order */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Display Order
+            </label>
+            <input
+              type="number"
+              name="order"
+              value={formData.order}
+              onChange={handleInputChange}
+              min="0"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="0"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Lower numbers appear first
+            </p>
+          </div>
           {/* Image Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

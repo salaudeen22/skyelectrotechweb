@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // Context Providers
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
+import { CategoriesProvider } from './contexts/CategoriesContext';
 
 // Layouts
 import MainLayout from './Layouts/MainLayout';
@@ -54,25 +55,26 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
-          <Router>
-            <div className="App">
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: '#363636',
-                    color: '#fff',
-                  },
-                  success: {
-                    duration: 3000,
-                    theme: {
-                      primary: 'green',
-                      secondary: 'black',
+          <CategoriesProvider>
+            <Router>
+              <div className="App">
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    duration: 4000,
+                    style: {
+                      background: '#363636',
+                      color: '#fff',
                     },
-                  },
-                }}
-              />
+                    success: {
+                      duration: 3000,
+                      theme: {
+                        primary: 'green',
+                        secondary: 'black',
+                      },
+                    },
+                  }}
+                />
               
               <Routes>
                 {/* Public Routes */}
@@ -151,9 +153,10 @@ const App = () => {
               </Routes>
             </div>
           </Router>
-        </CartProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+        </CategoriesProvider>
+      </CartProvider>
+    </AuthProvider>
+  </QueryClientProvider>
   );
 };
 

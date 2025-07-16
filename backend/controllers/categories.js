@@ -2,51 +2,124 @@ const Category = require('../models/Category');
 const Product = require('../models/Product');
 const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 
-// @desc    Get all categories
+// @desc    Get all categories with hierarchy
 // @route   GET /api/categories
 // @access  Public
 const getCategories = asyncHandler(async (req, res) => {
-  const { active = true } = req.query;
+  const { active = true, includeSubcategories = true } = req.query;
 
   const query = active === 'true' ? { isActive: true } : {};
 
-  const categories = await Category.find(query)
-    .populate('createdBy', 'name')
-    .sort('name')
-    .lean();
+  let categories;
+  
+  if (includeSubcategories === 'true') {
+    // Get all categories with their subcategories
+    const allCategories = await Category.find(query)
+      .populate('createdBy', 'name')
+      .populate('parentCategory', 'name')
+      .sort({ order: 1, name: 1 })
+      .lean();
 
-  // Add product count for each category
-  const categoriesWithCount = await Promise.all(
-    categories.map(async (category) => {
-      const productCount = await Product.countDocuments({ 
-        category: category._id, 
-        isActive: true 
-      });
-      return {
-        ...category,
-        productCount
-      };
-    })
-  );
+    // Organize into hierarchy
+    const mainCategories = allCategories.filter(cat => !cat.parentCategory);
+    
+    const categoriesWithSubcategories = await Promise.all(
+      mainCategories.map(async (category) => {
+        const subcategories = allCategories.filter(cat => 
+          cat.parentCategory && cat.parentCategory._id.toString() === category._id.toString()
+        );
+        
+        const productCount = await Product.countDocuments({ 
+          category: category._id, 
+          isActive: true 
+        });
+        
+        const subcategoriesWithCount = await Promise.all(
+          subcategories.map(async (subcat) => {
+            const subProductCount = await Product.countDocuments({ 
+              category: subcat._id, 
+              isActive: true 
+            });
+            return {
+              ...subcat,
+              productCount: subProductCount
+            };
+          })
+        );
+
+        return {
+          ...category,
+          productCount,
+          subcategories: subcategoriesWithCount
+        };
+      })
+    );
+
+    categories = categoriesWithSubcategories;
+  } else {
+    // Get only main categories
+    categories = await Category.find({ ...query, parentCategory: null })
+      .populate('createdBy', 'name')
+      .sort({ order: 1, name: 1 })
+      .lean();
+
+    // Add product count for each category
+    categories = await Promise.all(
+      categories.map(async (category) => {
+        const productCount = await Product.countDocuments({ 
+          category: category._id, 
+          isActive: true 
+        });
+        return {
+          ...category,
+          productCount
+        };
+      })
+    );
+  }
 
   sendResponse(res, 200, { 
-    categories: categoriesWithCount 
+    categories 
   }, 'Categories retrieved successfully');
 });
 
-// @desc    Get single category
+// @desc    Get single category with subcategories
 // @route   GET /api/categories/:id
 // @access  Public
 const getCategory = asyncHandler(async (req, res) => {
   const category = await Category.findById(req.params.id)
     .populate('createdBy', 'name')
+    .populate('parentCategory', 'name')
     .lean();
 
   if (!category || !category.isActive) {
     return sendError(res, 404, 'Category not found');
   }
 
-  // Get product count
+  // Get subcategories if this is a main category
+  let subcategories = [];
+  if (!category.parentCategory) {
+    subcategories = await Category.find({ 
+      parentCategory: category._id, 
+      isActive: true 
+    }).populate('createdBy', 'name').lean();
+    
+    // Add product count for subcategories
+    subcategories = await Promise.all(
+      subcategories.map(async (subcat) => {
+        const subProductCount = await Product.countDocuments({ 
+          category: subcat._id, 
+          isActive: true 
+        });
+        return {
+          ...subcat,
+          productCount: subProductCount
+        };
+      })
+    );
+  }
+
+  // Get product count for this category
   const productCount = await Product.countDocuments({ 
     category: category._id, 
     isActive: true 
@@ -55,30 +128,46 @@ const getCategory = asyncHandler(async (req, res) => {
   sendResponse(res, 200, { 
     category: {
       ...category,
-      productCount
+      productCount,
+      subcategories
     }
   }, 'Category retrieved successfully');
 });
 
-// @desc    Create new category
+// @desc    Create new category or subcategory
 // @route   POST /api/categories
 // @access  Private (Admin only)
 const createCategory = asyncHandler(async (req, res) => {
-  const { name, description, image } = req.body;
+  const { name, description, image, parentCategory, order } = req.body;
 
-  // Check if category with same name exists
-  const existingCategory = await Category.findOne({ 
-    name: { $regex: new RegExp(`^${name}$`, 'i') } 
-  });
+  // Check if category with same name exists in the same parent level
+  const existingQuery = { 
+    name: { $regex: new RegExp(`^${name}$`, 'i') },
+    parentCategory: parentCategory || null
+  };
+  
+  const existingCategory = await Category.findOne(existingQuery);
 
   if (existingCategory) {
-    return sendError(res, 400, 'Category with this name already exists');
+    const level = parentCategory ? 'subcategory' : 'category';
+    return sendError(res, 400, `A ${level} with this name already exists`);
+  }
+
+  // If this is a subcategory, validate parent exists
+  if (parentCategory) {
+    const parent = await Category.findById(parentCategory);
+    if (!parent || !parent.isActive) {
+      return sendError(res, 400, 'Parent category not found or inactive');
+    }
   }
 
   const categoryData = {
     name,
     description,
-    createdBy: req.user._id
+    createdBy: req.user._id,
+    parentCategory: parentCategory || null,
+    isMainCategory: !parentCategory,
+    order: order || 0
   };
 
   // Add image if provided
@@ -89,6 +178,9 @@ const createCategory = asyncHandler(async (req, res) => {
   const category = await Category.create(categoryData);
 
   await category.populate('createdBy', 'name');
+  if (parentCategory) {
+    await category.populate('parentCategory', 'name');
+  }
 
   sendResponse(res, 201, { category }, 'Category created successfully');
 });
@@ -97,7 +189,7 @@ const createCategory = asyncHandler(async (req, res) => {
 // @route   PUT /api/categories/:id
 // @access  Private (Admin only)
 const updateCategory = asyncHandler(async (req, res) => {
-  const { name, description, isActive, image } = req.body;
+  const { name, description, isActive, image, parentCategory, order } = req.body;
 
   let category = await Category.findById(req.params.id);
 
@@ -105,15 +197,25 @@ const updateCategory = asyncHandler(async (req, res) => {
     return sendError(res, 404, 'Category not found');
   }
 
-  // Check if another category with same name exists
+  // Check if another category with same name exists in the same parent level
   if (name && name !== category.name) {
     const existingCategory = await Category.findOne({
       name: { $regex: new RegExp(`^${name}$`, 'i') },
-      _id: { $ne: category._id }
+      _id: { $ne: category._id },
+      parentCategory: parentCategory !== undefined ? parentCategory : category.parentCategory
     });
 
     if (existingCategory) {
-      return sendError(res, 400, 'Category with this name already exists');
+      const level = parentCategory ? 'subcategory' : 'category';
+      return sendError(res, 400, `Another ${level} with this name already exists`);
+    }
+  }
+
+  // If changing parent category, validate it exists
+  if (parentCategory !== undefined && parentCategory !== null) {
+    const parent = await Category.findById(parentCategory);
+    if (!parent || !parent.isActive) {
+      return sendError(res, 400, 'Parent category not found or inactive');
     }
   }
 
@@ -121,7 +223,10 @@ const updateCategory = asyncHandler(async (req, res) => {
   const updateData = {
     name: name || category.name,
     description: description !== undefined ? description : category.description,
-    isActive: isActive !== undefined ? isActive : category.isActive
+    isActive: isActive !== undefined ? isActive : category.isActive,
+    parentCategory: parentCategory !== undefined ? parentCategory : category.parentCategory,
+    isMainCategory: parentCategory !== undefined ? !parentCategory : category.isMainCategory,
+    order: order !== undefined ? order : category.order
   };
 
   // Update image if provided
@@ -134,7 +239,7 @@ const updateCategory = asyncHandler(async (req, res) => {
     req.params.id,
     updateData,
     { new: true, runValidators: true }
-  ).populate('createdBy', 'name');
+  ).populate('createdBy', 'name').populate('parentCategory', 'name');
 
   sendResponse(res, 200, { category }, 'Category updated successfully');
 });
@@ -158,6 +263,18 @@ const deleteCategory = asyncHandler(async (req, res) => {
   if (productCount > 0) {
     return sendError(res, 400, 
       `Cannot delete category. It has ${productCount} active products. Please move or delete products first.`
+    );
+  }
+
+  // Check if category has subcategories
+  const subcategoryCount = await Category.countDocuments({
+    parentCategory: category._id,
+    isActive: true
+  });
+
+  if (subcategoryCount > 0) {
+    return sendError(res, 400,
+      `Cannot delete category. It has ${subcategoryCount} active subcategories. Please delete subcategories first.`
     );
   }
 
