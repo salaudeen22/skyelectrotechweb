@@ -1,162 +1,229 @@
-// src/components/Navbar.js
-
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FiShoppingCart, FiUser, FiMenu, FiX, FiChevronDown } from 'react-icons/fi';
-
-// Define navigation links with categories
-const navLinks = [
-  { name: 'Home', href: '/' },
-  { name: 'All Products', href: '/products' },
-  {
-    name: 'Categories',
-    href: '#',
-    subCategories: [
-      {
-        name: 'Core Components',
-        href: '#',
-        subItems: [
-          { name: 'Microcontrollers', href: '/category/microcontrollers' },
-          { name: 'SBCs (Raspberry Pi)', href: '/category/sbc' },
-          { name: 'Development Boards', href: '/category/dev-boards' },
-        ],
-      },
-      {
-        name: 'Sensors & Modules',
-        href: '#',
-        subItems: [
-          { name: 'Environmental Sensors', href: '/category/env-sensors' },
-          { name: 'Motion Sensors', href: '/category/motion-sensors' },
-          { name: 'Communication Modules', href: '/category/comms-modules' },
-        ],
-      },
-      { name: 'Robotics', href: '/category/robotics' },
-      { name: 'Tools & Prototyping', href: '/category/tools' },
-    ],
-  },
-  { name: 'About Us', href: '/about' },
-];
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext';
+import { CartContext } from '../contexts/CartContext';
 
 const Navbar = () => {
-  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [openMobileSubMenu, setOpenMobileSubMenu] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useContext(AuthContext);
+  const { cartItems } = useContext(CartContext);
+  const navigate = useNavigate();
 
-  const toggleMobileSubMenu = (categoryName) => {
-    setOpenMobileSubMenu(openMobileSubMenu === categoryName ? null : categoryName);
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
+  const cartItemCount = cartItems?.length || 0;
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg shadow-sm">
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+    <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="text-3xl font-bold text-indigo-600">
-            Sky<span className="text-gray-800">electro</span>
-          </Link>
-
-          {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center space-x-8">
-            {navLinks.map((link) =>
-              link.subCategories ? (
-                <div key={link.name} className="relative group">
-                  <button className="flex items-center text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-medium transition-colors">
-                    <span>{link.name}</span>
-                    <FiChevronDown className="ml-1 h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
-                  </button>
-                  {/* Dropdown Menu */}
-                  <div className="absolute top-full -left-4 w-64 mt-2 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 opacity-0 group-hover:opacity-100 transform scale-95 group-hover:scale-100 transition-all duration-200 ease-out z-10 origin-top-left">
-                    <div className="py-2">
-                      {link.subCategories.map((subCat) =>
-                        subCat.subItems ? (
-                          <div key={subCat.name} className="relative group/sub">
-                            <button className="w-full text-left flex justify-between items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
-                              <span>{subCat.name}</span>
-                              <FiChevronDown className="-rotate-90 h-4 w-4" />
-                            </button>
-                            {/* Sub-Dropdown Menu */}
-                            <div className="absolute top-0 left-full w-56 ml-1 bg-white rounded-lg shadow-xl ring-1 ring-black ring-opacity-5 opacity-0 group-hover/sub:opacity-100 transform scale-95 group-hover/sub:scale-100 transition-all duration-200 ease-out z-10 origin-left">
-                              {subCat.subItems.map((item) => (
-                                <Link key={item.name} to={item.href} className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
-                                  {item.name}
-                                </Link>
-                              ))}
-                            </div>
-                          </div>
-                        ) : (
-                          <Link key={subCat.name} to={subCat.href} className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
-                            {subCat.name}
-                          </Link>
-                        )
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <Link key={link.name} to={link.href} className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-base font-medium transition-colors">
-                  {link.name}
-                </Link>
-              )
-            )}
-          </div>
-
-          {/* Icons & Mobile Menu Button */}
           <div className="flex items-center">
-            <div className="hidden sm:flex items-center space-x-5">
-              <Link to="/cart" className="relative text-gray-600 hover:text-indigo-600 transition-colors">
-                <FiShoppingCart size={24} />
-                <span className="absolute -top-2 -right-2 bg-indigo-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">3</span>
-              </Link>
-              <Link to="/admin/login" className="text-gray-600 hover:text-indigo-600 transition-colors">
-                <FiUser size={24} />
-              </Link>
-            </div>
-            <div className="ml-4 flex lg:hidden">
-              <button onClick={() => setMobileMenuOpen(!isMobileMenuOpen)} className="p-2 rounded-md text-gray-700 hover:text-indigo-600">
-                {isMobileMenuOpen ? <FiX size={26} /> : <FiMenu size={26} />}
-              </button>
-            </div>
+            <Link to="/" className="flex-shrink-0">
+              <span className="text-2xl font-bold text-blue-600">SkyElectroTech</span>
+            </Link>
           </div>
-        </div>
-      </div>
 
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden bg-white border-t border-gray-200">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            {navLinks.map((link) =>
-              link.subCategories ? (
-                <div key={link.name}>
-                  <button onClick={() => toggleMobileSubMenu(link.name)} className="w-full flex justify-between items-center text-left text-gray-800 hover:bg-indigo-50 block px-3 py-2 rounded-md text-base font-medium">
-                    <span>{link.name}</span>
-                    <FiChevronDown className={`ml-1 h-5 w-5 transition-transform duration-200 ${openMobileSubMenu === link.name ? 'rotate-180' : ''}`} />
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link 
+              to="/" 
+              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Home
+            </Link>
+            <Link 
+              to="/products" 
+              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Products
+            </Link>
+            
+            {user ? (
+              <>
+                {/* Cart Icon */}
+                <Link 
+                  to="/user/cart" 
+                  className="relative text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m-2.4 8L3 3v0M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6m-8 0V9a2 2 0 012-2h4a2 2 0 012 2v4.01" />
+                  </svg>
+                  {cartItemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {cartItemCount}
+                    </span>
+                  )}
+                </Link>
+
+                {/* User Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    className="flex items-center text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    <span className="mr-2">Welcome, {user.name}</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </button>
-                  {openMobileSubMenu === link.name && (
-                    <div className="pl-4 mt-1 space-y-1">
-                      {link.subCategories.map((subCat) => (
-                        <Link key={subCat.name} to={subCat.href} className="text-gray-600 hover:bg-indigo-50 block pl-3 pr-3 py-2 rounded-md text-base font-medium border-l-2 border-indigo-200">
-                          {subCat.name}
+
+                  {isMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                      <Link
+                        to="/user/profile"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        to="/user/orders"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Order History
+                      </Link>
+                      {user.role === 'admin' && (
+                        <Link
+                          to="/admin"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          Admin Dashboard
                         </Link>
-                      ))}
+                      )}
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Logout
+                      </button>
                     </div>
                   )}
                 </div>
-              ) : (
-                <Link key={link.name} to={link.href} className="text-gray-800 hover:bg-indigo-50 block px-3 py-2 rounded-md text-base font-medium">
-                  {link.name}
+              </>
+            ) : (
+              <>
+                <Link 
+                  to="/auth/login" 
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Login
                 </Link>
-              )
+                <Link 
+                  to="/auth/register" 
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Register
+                </Link>
+              </>
             )}
-            <div className="border-t border-gray-200 mt-4 pt-4 flex items-center space-x-4 px-3">
-               <Link to="/cart" className="relative text-gray-600 hover:text-indigo-600 transition-colors">
-                <FiShoppingCart size={24} />
-              </Link>
-              <Link to="/admin/login" className="text-gray-600 hover:text-indigo-600 transition-colors">
-                <FiUser size={24} />
-              </Link>
-            </div>
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-gray-700 hover:text-blue-600 focus:outline-none focus:text-blue-600"
+            >
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
           </div>
         </div>
-      )}
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
+              <Link
+                to="/"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link
+                to="/products"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Products
+              </Link>
+              
+              {user ? (
+                <>
+                  <Link
+                    to="/user/cart"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Cart ({cartItemCount})
+                  </Link>
+                  <Link
+                    to="/user/profile"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    to="/user/orders"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Order History
+                  </Link>
+                  {user.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/auth/login"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/auth/register"
+                    className="block px-3 py-2 rounded-md text-base font-medium bg-blue-600 text-white hover:bg-blue-700"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </nav>
   );
 };

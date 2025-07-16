@@ -1,40 +1,70 @@
-// src/pages/Home.js
-
-import React from 'react';
-import Navbar from '../Components/Navbar';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import HeroSlider from '../Components/Subcompo/HeroSlider';
 import ProductCard from '../Components/ProductCard'; 
-import { FaShippingFast, FaShieldAlt, FaHeadset } from 'react-icons/fa'; // Icons for the "Why Choose Us" section
-
-// --- Data for the page ---
-
-// Expanded dummy data for featured products
-const featuredProducts = [
-  { id: 1, imageUrl: 'https://www.theengineerstore.in/cdn/shop/products/arduino-uno-r3-1.png?v=1701086206', category: 'Development Board', name: 'Arduino Uno R3', price: '550.00' },
-  { id: 2, imageUrl: 'https://m.media-amazon.com/images/I/6120PfrjBqL.jpg', category: 'SBC', name: 'Raspberry Pi 4 Model B (2GB)', price: '4500.00' },
-  { id: 3, imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuBZkNT4gPIhsPepZy6C4e-SZ_0Y7T4St__g&s', category: 'Module', name: 'ESP32-WROOM-32 Dev Board', price: '750.00' },
-  { id: 4, imageUrl: 'https://m.media-amazon.com/images/I/71rwFl8vLEL.jpg', category: 'Sensor', name: '37-in-1 Sensor Kit for Arduino', price: '1999.00' },
-  { id: 5, imageUrl: 'https://5.imimg.com/data5/SELLER/Default/2024/12/471505966/XG/QI/MP/562456/sg90-tower-pro-micro-servo-motor.jpg', category: 'Actuator', name: 'SG90 Micro Servo Motor', price: '120.00' },
-  { id: 6, imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBtM4MWK07O_g5Dy3LTtr6XSlwNAQYR0n3pA&s', category: 'Prototyping', name: 'MB-102 Breadboard + Jumper Wires', price: '250.00' },
-  { id: 7, imageUrl: 'https://m.media-amazon.com/images/I/61CwFjA8PSL.jpg', category: 'Tools', name: '60W Adjustable Soldering Iron Kit', price: '950.00' },
-  { id: 8, imageUrl: 'https://ibots.in/wp-content/uploads/2023/06/ibots-711919-01.jpg', category: 'Robotics', name: '2WD Smart Robot Car Chassis Kit', price: '800.00' },
-];
-
-// Data for the category section
-const categories = [
-    { name: 'Sensors', imageUrl: 'https://rfidunion.com/wp-content/uploads/2022/10/Sensors-and-Actuators.jpg', href: '#' },
-    { name: 'Dev Boards', imageUrl: 'https://robu.in/wp-content/uploads/2020/05/development-boards-1024x768.jpeg', href: '#' },
-    { name: 'Motors', imageUrl: 'https://www.kindpng.com/picc/m/750-7504672_electric-motor-banner-siemens-ie4-motor-hd-png.png', href: '#' },
-    { name: 'Tools', imageUrl: 'https://www.jameco.com/Jameco/Products/MakeImag/2311999.jpg', href: '#' },
-];
+import { FaShippingFast, FaShieldAlt, FaHeadset } from 'react-icons/fa';
+import { productsAPI, categoriesAPI } from '../services/apiServices';
+import { toast } from 'react-hot-toast';
 
 
 const Home = () => {
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch featured products (first 8 products)
+        const productsResponse = await productsAPI.getProducts({ 
+          page: 1, 
+          limit: 8, 
+          featured: true 
+        });
+        setFeaturedProducts(productsResponse.data.products);
+
+        // Fetch categories (first 4 categories)
+        const categoriesResponse = await categoriesAPI.getCategories();
+        setCategories(categoriesResponse.data.categories.slice(0, 4));
+        
+      } catch (error) {
+        console.error('Error fetching homepage data:', error);
+        toast.error('Failed to load homepage data');
+        
+        // Fallback to dummy data
+        setFeaturedProducts([
+          { _id: '1', name: 'Arduino Uno R3', price: 550, images: ['https://www.theengineerstore.in/cdn/shop/products/arduino-uno-r3-1.png?v=1701086206'], category: { name: 'Development Board' } },
+          { _id: '2', name: 'Raspberry Pi 4 Model B (2GB)', price: 4500, images: ['https://m.media-amazon.com/images/I/6120PfrjBqL.jpg'], category: { name: 'SBC' } },
+          { _id: '3', name: 'ESP32-WROOM-32 Dev Board', price: 750, images: ['https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuBZkNT4gPIhsPepZy6C4e-SZ_0Y7T4St__g&s'], category: { name: 'Module' } },
+          { _id: '4', name: '37-in-1 Sensor Kit for Arduino', price: 1999, images: ['https://m.media-amazon.com/images/I/71rwFl8vLEL.jpg'], category: { name: 'Sensor' } },
+        ]);
+        
+        setCategories([
+          { _id: '1', name: 'Sensors', image: 'https://rfidunion.com/wp-content/uploads/2022/10/Sensors-and-Actuators.jpg' },
+          { _id: '2', name: 'Dev Boards', image: 'https://robu.in/wp-content/uploads/2020/05/development-boards-1024x768.jpeg' },
+          { _id: '3', name: 'Motors', image: 'https://www.kindpng.com/picc/m/750-7504672_electric-motor-banner-siemens-ie4-motor-hd-png.png' },
+          { _id: '4', name: 'Tools', image: 'https://www.jameco.com/Jameco/Products/MakeImag/2311999.jpg' },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
   return (
     <div className="bg-gray-50">
-      <Navbar />
-
-      <main className="pt-16 md:pt-28"> 
+      <main className="pt-16 md:pt-0"> 
         
         <HeroSlider />
 
@@ -46,16 +76,19 @@ const Home = () => {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-8">
             {categories.map((category) => (
-              <a key={category.name} href={category.href} className="group block text-center">
+              <Link key={category._id} to={`/category/${category._id}`} className="group block text-center">
                 <div className="relative rounded-lg overflow-hidden aspect-w-3 aspect-h-2">
-                  <img src={category.imageUrl} alt={category.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                  <img 
+                    src={category.image || category.imageUrl} 
+                    alt={category.name} 
+                    className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-105" 
+                  />
                 </div>
                 <h3 className="mt-4 text-md font-semibold text-gray-800 group-hover:text-blue-600">{category.name}</h3>
-              </a>
+              </Link>
             ))}
           </div>
         </section>
-
 
         {/* Featured Products Section */}
         <section className="bg-white">
@@ -71,15 +104,19 @@ const Home = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                 {featuredProducts.map((product) => (
                 <ProductCard
-                    key={product.id}
-                    imageUrl={product.imageUrl}
-                    category={product.category}
-                    name={product.name}
-                    price={product.price}
-                    // Pass the whole product object if you plan to use more data (e.g., for 'Add to Cart')
-                    // product={product} 
+                    key={product._id}
+                    product={product}
                 />
                 ))}
+            </div>
+            
+            <div className="text-center mt-12">
+              <Link 
+                to="/products" 
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+              >
+                View All Products
+              </Link>
             </div>
             </div>
         </section>
@@ -106,8 +143,6 @@ const Home = () => {
         </section>
 
       </main>
-
-
     </div>
   );
 };

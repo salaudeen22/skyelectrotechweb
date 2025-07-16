@@ -1,223 +1,301 @@
-// src/pages/ProductList.js
-
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useParams } from 'react-router-dom';
 import ProductCard from '../Components/ProductCard';
-import { FiSearch, FiX } from 'react-icons/fi';
-
-const dummyProducts = [
-  { id: 1, imageUrl: 'https://www.theengineerstore.in/cdn/shop/products/arduino-uno-r3-1.png?v=1701086206', category: 'Development Board', name: 'Arduino Uno R3', price: '550.00' },
-  { id: 2, imageUrl: 'https://m.media-amazon.com/images/I/6120PfrjBqL.jpg', category: 'SBC', name: 'Raspberry Pi 4 Model B (2GB)', price: '4500.00' },
-  { id: 3, imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuBZkNT4gPIhsPepZy6C4e-SZ_0Y7T4St__g&s', category: 'Module', name: 'ESP32-WROOM-32 Dev Board', price: '750.00' },
-  { id: 4, imageUrl: 'https://m.media-amazon.com/images/I/71rwFl8vLEL.jpg', category: 'Sensor', name: '37-in-1 Sensor Kit for Arduino', price: '1999.00' },
-  { id: 5, imageUrl: 'https://5.imimg.com/data5/SELLER/Default/2024/12/471505966/XG/QI/MP/562456/sg90-tower-pro-micro-servo-motor.jpg', category: 'Actuator', name: 'SG90 Micro Servo Motor', price: '120.00' },
-  { id: 6, imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBtM4MWK07O_g5Dy3LTtr6XSlwNAQYR0n3pA&s', category: 'Prototyping', name: 'MB-102 Breadboard + Jumper Wires', price: '250.00' },
-  { id: 7, imageUrl: 'https://m.media-amazon.com/images/I/61CwFjA8PSL.jpg', category: 'Tools', name: '60W Adjustable Soldering Iron Kit', price: '950.00' },
-  { id: 8, imageUrl: 'https://ibots.in/wp-content/uploads/2023/06/ibots-711919-01.jpg', category: 'Robotics', name: '2WD Smart Robot Car Chassis Kit', price: '800.00' },
-  { id: 9, imageUrl: 'https://m.media-amazon.com/images/I/61eQm53nJTL.jpg', category: 'Sensor', name: 'Ultrasonic Sensor HC-SR04', price: '99.00' },
-  { id: 10, imageUrl: 'https://www.electronicscomp.com/image/cache/catalog/dht11-temperature-and-humidity-sensor-4-400x400.jpg', category: 'Sensor', name: 'DHT11 Temp & Humidity Sensor', price: '150.00' },
-];
+import { FiSearch, FiX, FiFilter } from 'react-icons/fi';
+import { productsAPI, categoriesAPI } from '../services/apiServices';
+import { toast } from 'react-hot-toast';
 
 const ProductList = () => {
-  // State for all filters
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
-  const [sortOrder, setSortOrder] = useState('default');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { categoryId } = useParams();
   
-  // State for the products that will be displayed
-  const [filteredProducts, setFilteredProducts] = useState(dummyProducts);
+  // State
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   
-  // Memoize the list of unique categories to prevent re-calculation on every render
-  const allCategories = useMemo(() => {
-    return [...new Set(dummyProducts.map(p => p.category))];
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
+  const [selectedCategories, setSelectedCategories] = useState(categoryId ? [categoryId] : []);
+  const [priceRange, setPriceRange] = useState({ 
+    min: searchParams.get('minPrice') || '', 
+    max: searchParams.get('maxPrice') || '' 
+  });
+  const [sortOrder, setSortOrder] = useState(searchParams.get('sort') || 'createdAt');
+
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await categoriesAPI.getCategories();
+        setCategories(response.data.categories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        toast.error('Failed to load categories');
+      }
+    };
+    fetchCategories();
   }, []);
 
-  // Handler for category checkbox changes
-  const handleCategoryChange = (category) => {
+  // Fetch products when filters change
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        
+        const params = {
+          page: currentPage,
+          limit: 12,
+          ...(searchTerm && { search: searchTerm }),
+          ...(selectedCategories.length > 0 && { category: selectedCategories.join(',') }),
+          ...(priceRange.min && { minPrice: priceRange.min }),
+          ...(priceRange.max && { maxPrice: priceRange.max }),
+          ...(sortOrder && { sort: sortOrder })
+        };
+
+        const response = await productsAPI.getProducts(params);
+        setProducts(response.data.products);
+        setTotalProducts(response.data.total);
+        
+        // Update URL params
+        const newSearchParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+          if (value && key !== 'page' && key !== 'limit') {
+            newSearchParams.set(key, value);
+          }
+        });
+        setSearchParams(newSearchParams);
+        
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        toast.error('Failed to load products');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [searchTerm, selectedCategories, priceRange, sortOrder, currentPage, setSearchParams]);
+
+  // Handle category change
+  const handleCategoryChange = (categoryId) => {
     setSelectedCategories(prev =>
-      prev.includes(category)
-        ? prev.filter(c => c !== category) // Uncheck: remove from array
-        : [...prev, category]              // Check: add to array
+      prev.includes(categoryId)
+        ? prev.filter(c => c !== categoryId)
+        : [...prev, categoryId]
     );
+    setCurrentPage(1);
   };
 
-  // Handler to clear all filters
+  // Handle reset filters
   const handleResetFilters = () => {
     setSearchTerm('');
     setSelectedCategories([]);
     setPriceRange({ min: '', max: '' });
-    setSortOrder('default');
+    setSortOrder('createdAt');
+    setCurrentPage(1);
   };
 
-  // The core logic: useEffect runs whenever a filter state changes
-  useEffect(() => {
-    let products = [...dummyProducts];
+  // Handle search submit
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setCurrentPage(1);
+  };
 
-    // 1. Filter by search term
-    if (searchTerm) {
-      products = products.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // 2. Filter by category
-    if (selectedCategories.length > 0) {
-      products = products.filter(p => selectedCategories.includes(p.category));
-    }
-
-    // 3. Filter by price range
-    const minPrice = parseFloat(priceRange.min);
-    const maxPrice = parseFloat(priceRange.max);
-
-    if (!isNaN(minPrice)) {
-      products = products.filter(p => parseFloat(p.price) >= minPrice);
-    }
-    if (!isNaN(maxPrice)) {
-      products = products.filter(p => parseFloat(p.price) <= maxPrice);
-    }
-
-    // 4. Apply sorting
-    switch (sortOrder) {
-      case 'price-asc':
-        products.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-        break;
-      case 'price-desc':
-        products.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
-        break;
-      case 'name-asc':
-        products.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case 'name-desc':
-        products.sort((a, b) => b.name.localeCompare(a.name));
-        break;
-      default:
-        // No sorting or default sort (e.g., by ID)
-        products.sort((a,b) => a.id - b.id);
-        break;
-    }
-
-    setFilteredProducts(products);
-  }, [searchTerm, selectedCategories, priceRange, sortOrder]);
-
+  // Calculate pagination
+  const totalPages = Math.ceil(totalProducts / 12);
 
   return (
-    <main className="min-h-screen w-full bg-slate-100">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <main className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">
-            Our Electronics Collection
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+            {categoryId ? 
+              categories.find(c => c._id === categoryId)?.name + ' Products' || 'Products' 
+              : searchParams.get('q') ? 
+              `Search Results for "${searchParams.get('q')}"` 
+              : 'All Products'
+            }
           </h1>
-          <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
-            Find everything you need for your next big project.
+          <p className="mt-2 text-gray-600">
+            Discover our wide range of electronic components and tools
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* == FILTER SIDEBAR == */}
-          <aside className="lg:col-span-1 bg-white p-6 rounded-xl shadow-md h-fit sticky top-24">
-            <h3 className="text-xl font-bold text-gray-800 mb-6">Filters</h3>
-
-            {/* -- Search Filter -- */}
-            <div className="relative mb-6">
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            </div>
-
-            {/* -- Category Filter -- */}
-            <div className="mb-6">
-              <h4 className="font-semibold text-gray-700 mb-3">Category</h4>
-              <div className="space-y-2">
-                {allCategories.map(category => (
-                  <label key={category} className="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.includes(category)}
-                      onChange={() => handleCategoryChange(category)}
-                      className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <span className="text-gray-600">{category}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* -- Price Range Filter -- */}
-            <div className="mb-6">
-              <h4 className="font-semibold text-gray-700 mb-3">Price Range</h4>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="number"
-                  placeholder="Min"
-                  value={priceRange.min}
-                  onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                />
-                <span className="text-gray-500">-</span>
-                <input
-                  type="number"
-                  placeholder="Max"
-                  value={priceRange.max}
-                  onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
-                  className="w-full p-2 border border-gray-300 rounded-lg text-sm"
-                />
-              </div>
-            </div>
-            
-            {/* -- Reset Button -- */}
+          {/* Mobile Filter Button */}
+          <div className="lg:hidden">
             <button
-                onClick={handleResetFilters}
-                className="w-full flex items-center justify-center text-sm font-medium text-red-600 hover:text-red-800 transition-colors"
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className="w-full flex items-center justify-center bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50"
             >
-                <FiX className="mr-1"/>
-                Clear All Filters
+              <FiFilter className="mr-2" />
+              Filters
             </button>
+          </div>
+
+          {/* Filter Sidebar */}
+          <aside className={`lg:col-span-1 ${isFilterOpen ? 'block' : 'hidden lg:block'}`}>
+            <div className="bg-white p-6 rounded-lg shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+                <button
+                  onClick={handleResetFilters}
+                  className="text-sm text-red-600 hover:text-red-800 flex items-center"
+                >
+                  <FiX className="mr-1" />
+                  Clear All
+                </button>
+              </div>
+
+              {/* Search Filter */}
+              <div className="mb-6">
+                <h4 className="font-medium text-gray-700 mb-3">Search</h4>
+                <form onSubmit={handleSearchSubmit}>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search products..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  </div>
+                </form>
+              </div>
+
+              {/* Category Filter */}
+              <div className="mb-6">
+                <h4 className="font-medium text-gray-700 mb-3">Categories</h4>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {categories.map(category => (
+                    <label key={category._id} className="flex items-center space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(category._id)}
+                        onChange={() => handleCategoryChange(category._id)}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-gray-600 text-sm">{category.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Range Filter */}
+              <div className="mb-6">
+                <h4 className="font-medium text-gray-700 mb-3">Price Range</h4>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={priceRange.min}
+                    onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
+                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                  <span className="text-gray-500">-</span>
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={priceRange.max}
+                    onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
+                    className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+              </div>
+            </div>
           </aside>
 
-          {/* == PRODUCTS GRID == */}
+          {/* Products Grid */}
           <div className="lg:col-span-3">
-            {/* -- Sort & Info Header -- */}
-            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm">
-                <p className="text-sm text-gray-600 mb-2 sm:mb-0">
-                    Showing <span className="font-bold">{filteredProducts.length}</span> of <span className="font-bold">{dummyProducts.length}</span> products
-                </p>
-                <select
-                    value={sortOrder}
-                    onChange={(e) => setSortOrder(e.target.value)}
-                    className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
-                >
-                    <option value="default">Default</option>
-                    <option value="price-asc">Price: Low to High</option>
-                    <option value="price-desc">Price: High to Low</option>
-                    <option value="name-asc">Name: A to Z</option>
-                    <option value="name-desc">Name: Z to A</option>
-                </select>
+            {/* Sort & Info Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 bg-white p-4 rounded-lg shadow-sm">
+              <p className="text-sm text-gray-600 mb-2 sm:mb-0">
+                Showing <span className="font-semibold">{products.length}</span> of <span className="font-semibold">{totalProducts}</span> products
+              </p>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="createdAt">Newest First</option>
+                <option value="-createdAt">Oldest First</option>
+                <option value="price">Price: Low to High</option>
+                <option value="-price">Price: High to Low</option>
+                <option value="name">Name: A to Z</option>
+                <option value="-name">Name: Z to A</option>
+                <option value="-averageRating">Highest Rated</option>
+              </select>
             </div>
-          
-            {filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {filteredProducts.map((product) => (
-                        <ProductCard
-                            key={product.id}
-                            id={product.id}
-                            imageUrl={product.imageUrl}
-                            category={product.category}
-                            name={product.name}
-                            price={product.price}
-                        />
+
+            {/* Loading State */}
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-lg shadow-sm animate-pulse">
+                    <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+                    <div className="p-4">
+                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : products.length > 0 ? (
+              <>
+                {/* Products Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  {products.map((product) => (
+                    <ProductCard key={product._id} product={product} />
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center items-center space-x-2">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+                    
+                    {[...Array(totalPages)].map((_, i) => (
+                      <button
+                        key={i + 1}
+                        onClick={() => setCurrentPage(i + 1)}
+                        className={`px-3 py-2 border rounded-lg ${
+                          currentPage === i + 1
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {i + 1}
+                      </button>
                     ))}
-                </div>
+                    
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
-                <div className="text-center py-20 bg-white rounded-xl shadow-sm">
-                    <h3 className="text-2xl font-semibold text-gray-700">No Products Found</h3>
-                    <p className="text-gray-500 mt-2">Try adjusting your filters to find what you're looking for.</p>
-                </div>
+              <div className="text-center py-20 bg-white rounded-lg shadow-sm">
+                <h3 className="text-xl font-semibold text-gray-700">No Products Found</h3>
+                <p className="text-gray-500 mt-2">Try adjusting your filters to find what you're looking for.</p>
+              </div>
             )}
           </div>
         </div>

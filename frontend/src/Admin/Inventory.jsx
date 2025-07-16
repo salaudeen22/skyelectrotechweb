@@ -1,25 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
     FaPlus, 
     FaSearch, 
     FaCheckCircle, 
     FaExclamationTriangle, 
     FaPencilAlt, 
-    FaTrashAlt 
+    FaTrashAlt,
+    FaSpinner
 } from 'react-icons/fa';
-
-// --- Updated Dummy Data with Images ---
-const dummyInventory = [
-  { id: 1, name: 'Arduino Uno R3', sku: 'SKU-UNO-R3', stock: 58, threshold: 10, imageUrl: 'https://www.theengineerstore.in/cdn/shop/products/arduino-uno-r3-1.png?v=1701086206' },
-  { id: 2, name: 'Raspberry Pi 4 (2GB)', sku: 'SKU-RPI4-2G', stock: 4, threshold: 5, imageUrl: 'https://m.media-amazon.com/images/I/6120PfrjBqL.jpg' },
-  { id: 3, name: 'ESP32-WROOM-32 Dev Board', sku: 'SKU-ESP32-DEV', stock: 35, threshold: 15, imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuBZkNT4gPIhsPepZy6C4e-SZ_0Y7T4St__g&s' },
-  { id: 4, name: 'SG90 Micro Servo Motor', sku: 'SKU-SG90-SRV', stock: 150, threshold: 20, imageUrl: 'https://5.imimg.com/data5/SELLER/Default/2024/12/471505966/XG/QI/MP/562456/sg90-tower-pro-micro-servo-motor.jpg' },
-  { id: 5, name: '37-in-1 Sensor Kit', sku: 'SKU-SENS-37', stock: 12, threshold: 10, imageUrl: 'https://m.media-amazon.com/images/I/71rwFl8vLEL.jpg' },
-  { id: 6, name: '2WD Robot Car Chassis', sku: 'SKU-ROBO-2WD', stock: 0, threshold: 5, imageUrl: 'https://ibots.in/wp-content/uploads/2023/06/ibots-711919-01.jpg' },
-];
+import { productsAPI } from '../services/apiServices';
+import toast from 'react-hot-toast';
 
 // --- Helper Components ---
-const StockStatus = ({ stock, threshold }) => {
+const StockStatus = ({ stock, threshold = 10 }) => {
     const isLow = stock <= threshold;
     const isOutOfStock = stock === 0;
 
@@ -48,18 +41,93 @@ const StockStatus = ({ stock, threshold }) => {
 
 const Inventory = () => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterStatus, setFilterStatus] = useState('All'); // 'All', 'In Stock', 'Low Stock', 'Out of Stock'
+    const [filterStatus, setFilterStatus] = useState('All');
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    const fetchProducts = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const response = await productsAPI.getProducts();
+            
+            if (response.success) {
+                setProducts(response.data.products || []);
+            } else {
+                throw new Error(response.message || 'Failed to fetch products');
+            }
+        } catch (error) {
+            console.error('Error fetching products:', error);
+            setError(error.message);
+            toast.error(`Failed to load inventory: ${error.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteProduct = async (productId) => {
+        if (!window.confirm('Are you sure you want to delete this product?')) {
+            return;
+        }
+
+        try {
+            const response = await productsAPI.deleteProduct(productId);
+            
+            if (response.success) {
+                setProducts(prev => prev.filter(product => product._id !== productId));
+                toast.success('Product deleted successfully');
+            } else {
+                throw new Error(response.message || 'Failed to delete product');
+            }
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            toast.error(`Failed to delete product: ${error.message}`);
+        }
+    };
 
     const filteredInventory = useMemo(() => {
-        return dummyInventory.filter(item => {
-            const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+        return products.filter(item => {
+            const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                 item.sku?.toLowerCase().includes(searchTerm.toLowerCase());
             
-            const stockStatus = item.stock === 0 ? 'Out of Stock' : (item.stock <= item.threshold ? 'Low Stock' : 'In Stock');
+            const threshold = item.lowStockThreshold || 10;
+            const stockStatus = item.stockQuantity === 0 ? 'Out of Stock' : 
+                               (item.stockQuantity <= threshold ? 'Low Stock' : 'In Stock');
             const matchesFilter = filterStatus === 'All' || stockStatus === filterStatus;
             
             return matchesSearch && matchesFilter;
         });
-    }, [searchTerm, filterStatus]);
+    }, [products, searchTerm, filterStatus]);
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <FaSpinner className="animate-spin text-4xl text-blue-600" />
+                <span className="ml-2 text-lg">Loading inventory...</span>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                <h2 className="text-lg font-semibold text-red-800 mb-2">Error Loading Inventory</h2>
+                <p className="text-red-600">{error}</p>
+                <button 
+                    onClick={fetchProducts}
+                    className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                >
+                    Retry
+                </button>
+            </div>
+        );
+    }
 
   return (
     <div className="space-y-6">
@@ -69,7 +137,13 @@ const Inventory = () => {
             <h1 className="text-3xl font-bold text-slate-800">Inventory Management</h1>
             <p className="text-slate-500 mt-1">Track and manage product stock levels.</p>
         </div>
-        <button className="flex items-center justify-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors">
+        <button 
+            className="flex items-center justify-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+            onClick={() => {
+                // Navigate to add product page or open modal
+                toast.info('Add product feature - redirecting to product management...');
+            }}
+        >
             <FaPlus className="mr-2" /> Add New Product
         </button>
       </div>
@@ -117,51 +191,81 @@ const Inventory = () => {
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                    {filteredInventory.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                                <div className="flex-shrink-0 h-12 w-12">
-                                <img className="h-12 w-12 rounded-md object-cover" src={item.imageUrl} alt={item.name} />
+                    {filteredInventory.length > 0 ? filteredInventory.map((item) => {
+                        const threshold = item.lowStockThreshold || 10;
+                        const stockQuantity = item.stockQuantity || 0;
+                        const progressPercentage = Math.min((stockQuantity / (threshold * 2)) * 100, 100);
+                        
+                        return (
+                            <tr key={item._id} className="hover:bg-slate-50">
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="flex items-center">
+                                        <div className="flex-shrink-0 h-12 w-12">
+                                            <img 
+                                                className="h-12 w-12 rounded-md object-cover" 
+                                                src={item.images?.[0]?.url || '/placeholder-product.png'} 
+                                                alt={item.name}
+                                                onError={(e) => {
+                                                    e.target.src = '/placeholder-product.png';
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="ml-4">
+                                            <div className="text-sm font-medium text-slate-900">{item.name}</div>
+                                            <div className="text-xs text-slate-500">{item.category?.name || 'Uncategorized'}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                    {item.sku || `SKU-${item._id.slice(-6).toUpperCase()}`}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-slate-900 font-bold">{stockQuantity} units</div>
+                                    <div className="w-full bg-slate-200 rounded-full h-1.5 mt-1">
+                                        <div 
+                                            className={`h-1.5 rounded-full ${stockQuantity <= threshold ? 'bg-red-500' : 'bg-green-500'}`} 
+                                            style={{ width: `${progressPercentage}%` }}
+                                        ></div>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <StockStatus stock={stockQuantity} threshold={threshold} />
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-center">
+                                    <div className="flex items-center justify-center space-x-4">
+                                        <button 
+                                            className="text-blue-600 hover:text-blue-900" 
+                                            title="Edit Product"
+                                            onClick={() => {
+                                                toast.info(`Edit product: ${item.name} - Feature coming soon!`);
+                                            }}
+                                        >
+                                            <FaPencilAlt size={16} />
+                                        </button>
+                                        <button 
+                                            className="text-red-600 hover:text-red-900" 
+                                            title="Delete Product"
+                                            onClick={() => handleDeleteProduct(item._id)}
+                                        >
+                                            <FaTrashAlt size={16} />
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        );
+                    }) : (
+                        <tr>
+                            <td colSpan="5" className="px-6 py-12 text-center text-slate-500">
+                                <div className="flex flex-col items-center">
+                                    <FaSearch className="text-4xl mb-4 text-slate-300" />
+                                    <p className="text-lg font-semibold">No products found</p>
+                                    <p className="text-sm">Try adjusting your search or filter criteria</p>
                                 </div>
-                                <div className="ml-4">
-                                <div className="text-sm font-medium text-slate-900">{item.name}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{item.sku}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-slate-900 font-bold">{item.stock} units</div>
-                            <div className="w-full bg-slate-200 rounded-full h-1.5 mt-1">
-                                <div 
-                                    className={`h-1.5 rounded-full ${item.stock <= item.threshold ? 'bg-red-500' : 'bg-green-500'}`} 
-                                    style={{ width: `${Math.min((item.stock / (item.threshold * 2)) * 100, 100)}%` }}
-                                ></div>
-                            </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                            <StockStatus stock={item.stock} threshold={item.threshold} />
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                            <div className="flex items-center justify-center space-x-4">
-                                <button className="text-blue-600 hover:text-blue-900" title="Edit Product">
-                                    <FaPencilAlt size={16} />
-                                </button>
-                                <button className="text-red-600 hover:text-red-900" title="Delete Product">
-                                    <FaTrashAlt size={16} />
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    ))}
+                            </td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
-            {filteredInventory.length === 0 && (
-                <div className="text-center py-12 text-slate-500">
-                    <p className="font-semibold">No products found.</p>
-                    <p className="text-sm">Try adjusting your search or filter.</p>
-                </div>
-            )}
         </div>
       </div>
     </div>
