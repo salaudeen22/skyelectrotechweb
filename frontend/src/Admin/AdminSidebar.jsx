@@ -9,10 +9,12 @@ import {
     FaSignOutAlt,
     FaBolt, // A great icon for electronics
     FaUserCircle,
-    FaTags // Icon for categories
+    FaTags, // Icon for categories
+    FaTimes,
+    FaBars
 } from 'react-icons/fa';
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ isOpen, onToggle }) => {
     // --- Style Definitions for NavLinks ---
     const commonLinkStyles = "flex items-center w-full px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 group";
     
@@ -22,9 +24,40 @@ const AdminSidebar = () => {
     // Style for inactive links
     const inactiveLinkStyle = "text-gray-600 hover:bg-blue-50 hover:text-blue-600";
 
+    // Handle mobile menu close when clicking on a link
+    const handleLinkClick = () => {
+        if (window.innerWidth < 1024) { // lg breakpoint
+            onToggle();
+        }
+    };
+
     return (
-        <aside className="fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-xl flex flex-col z-40">
+        <>
+            {/* Mobile overlay */}
+            {isOpen && (
+                <div 
+                    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                    onClick={onToggle}
+                />
+            )}
             
+            {/* Sidebar */}
+            <aside className={`
+                fixed top-0 left-0 h-screen w-64 bg-white border-r border-gray-200 shadow-xl flex flex-col z-50 
+                transform transition-transform duration-300 ease-in-out
+                ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
+                lg:translate-x-0 lg:relative lg:z-40
+            `}>
+                
+                {/* Mobile close button */}
+                <div className="lg:hidden absolute top-4 right-4 z-10">
+                    <button
+                        onClick={onToggle}
+                        className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                    >
+                        <FaTimes className="h-5 w-5" />
+                    </button>
+                </div>
             {/* Logo / Brand Header */}
             <div className="flex items-center justify-center px-4 h-32 border-b border-gray-200">
                 <Link to="/" className="flex items-center justify-center">
@@ -41,6 +74,7 @@ const AdminSidebar = () => {
                 <NavLink 
                     to="/admin" 
                     end 
+                    onClick={handleLinkClick}
                     className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
                 > 
                     <FaTachometerAlt className="mr-4 h-5 w-5" />
@@ -48,6 +82,7 @@ const AdminSidebar = () => {
                 </NavLink>
                 <NavLink 
                     to="/admin/products" 
+                    onClick={handleLinkClick}
                     className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
                 > 
                     <FaBoxOpen className="mr-4 h-5 w-5" />
@@ -55,6 +90,7 @@ const AdminSidebar = () => {
                 </NavLink>
                 <NavLink 
                     to="/admin/categories" 
+                    onClick={handleLinkClick}
                     className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
                 > 
                     <FaTags className="mr-4 h-5 w-5" />
@@ -62,6 +98,7 @@ const AdminSidebar = () => {
                 </NavLink>
                 <NavLink 
                     to="/admin/sales" 
+                    onClick={handleLinkClick}
                     className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
                 > 
                     <FaChartBar className="mr-4 h-5 w-5" />
@@ -69,6 +106,7 @@ const AdminSidebar = () => {
                 </NavLink>
                 <NavLink 
                     to="/admin/inventory" 
+                    onClick={handleLinkClick}
                     className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
                 > 
                     <FaWarehouse className="mr-4 h-5 w-5" />
@@ -76,6 +114,7 @@ const AdminSidebar = () => {
                 </NavLink>
                 <NavLink 
                     to="/admin/employees" 
+                    onClick={handleLinkClick}
                     className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
                 > 
                     <FaUsers className="mr-4 h-5 w-5" />
@@ -107,6 +146,7 @@ const AdminSidebar = () => {
                 </button>
             </div>
         </aside>
+        </>
     );
 };
 

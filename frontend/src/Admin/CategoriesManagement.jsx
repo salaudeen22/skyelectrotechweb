@@ -100,16 +100,16 @@ const CategoriesManagement = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Categories Management</h1>
-          <p className="text-gray-600">Manage product categories with images for homepage display</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Categories Management</h1>
+          <p className="text-gray-600 text-sm sm:text-base">Manage product categories with images for homepage display</p>
         </div>
         <button
           onClick={handleCreate}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors whitespace-nowrap"
         >
           <FaPlus className="w-4 h-4" />
           Add Category
@@ -135,11 +135,11 @@ const CategoriesManagement = () => {
         {filteredCategories.map((category) => (
           <div key={category._id} className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
             {/* Main Category */}
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start space-x-4">
+            <div className="p-4 sm:p-6 border-b border-gray-100">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
                   {/* Category Image */}
-                  <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                     {category.image?.url ? (
                       <img
                         src={category.image.url}
@@ -151,13 +151,13 @@ const CategoriesManagement = () => {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                        <FaImage className="w-8 h-8 text-gray-400" />
+                        <FaImage className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
                       </div>
                     )}
                   </div>
 
                   {/* Category Info */}
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-3 mb-2">
                       <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -177,25 +177,25 @@ const CategoriesManagement = () => {
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
                   <button
                     onClick={() => handleCreateSubcategory(category)}
-                    className="px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1.5 bg-green-600 text-white text-xs sm:text-sm rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1"
                     title="Add Subcategory"
                   >
                     <FaPlus className="w-3 h-3" />
-                    Sub
+                    <span className="hidden sm:inline">Sub</span>
                   </button>
                   <button
                     onClick={() => handleEdit(category)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                     title="Edit Category"
                   >
-                    <FaPencilAlt className="w-4 h-4" />
+                    <FaPencilAlt className="w-3 h-3 sm:w-4 sm:h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(category._id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                     title="Delete Category"
                   >
                     <FaTrashAlt className="w-4 h-4" />

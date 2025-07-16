@@ -518,16 +518,16 @@ const ProductManagement = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-800">Product Management</h1>
-                    <p className="text-slate-500 mt-1">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">Product Management</h1>
+                    <p className="text-slate-500 mt-1 text-sm sm:text-base">
                         Add, edit, and manage all products. Total: {products.length} products
                     </p>
                 </div>
                 <button 
                     onClick={() => handleOpenProductForm()} 
-                    className="flex items-center justify-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+                    className="flex items-center justify-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors whitespace-nowrap"
                 >
                     <FaPlus className="mr-2" /> Add New Product
                 </button>
@@ -551,19 +551,19 @@ const ProductManagement = () => {
                     <table className="w-full">
                         <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Product</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Category</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Price</th>
-                                <th className="px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Stock</th>
-                                <th className="px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Product</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider hidden sm:table-cell">Category</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Price</th>
+                                <th className="px-3 sm:px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider hidden md:table-cell">Stock</th>
+                                <th className="px-3 sm:px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200">
                             {filteredProducts.map((product) => (
                                 <tr key={product._id} className="hover:bg-slate-50">
-                                    <td className="px-6 py-4">
+                                    <td className="px-3 sm:px-6 py-4">
                                         <div className="flex items-center">
-                                            <div className="h-10 w-10 rounded-md bg-gray-200 flex items-center justify-center overflow-hidden">
+                                            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-md bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
                                                 {product.images && product.images.length > 0 ? (
                                                     <img 
                                                         className="h-full w-full object-cover" 
@@ -579,50 +579,55 @@ const ProductManagement = () => {
                                                     No Image
                                                 </div>
                                             </div>
-                                            <div className="ml-4">
-                                                <div className="font-medium text-slate-900">{product.name}</div>
-                                                <div className="text-sm text-slate-500">{product.brand}</div>
+                                            <div className="ml-2 sm:ml-4 min-w-0">
+                                                <div className="font-medium text-slate-900 text-sm sm:text-base truncate">{product.name}</div>
+                                                <div className="text-xs sm:text-sm text-slate-500 truncate">{product.brand}</div>
+                                                <div className="sm:hidden text-xs text-slate-500 mt-1">{product.category?.name || 'Uncategorized'}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-slate-500">
+                                    <td className="px-3 sm:px-6 py-4 text-sm text-slate-500 hidden sm:table-cell">
                                         {product.category?.name || 'Uncategorized'}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-slate-700">
-                                        {formatCurrency(product.price)}
+                                    <td className="px-3 sm:px-6 py-4 text-sm text-slate-700">
+                                        <div className="font-medium">{formatCurrency(product.price)}</div>
                                         {product.originalPrice && product.originalPrice > product.price && (
                                             <div className="text-xs text-slate-400 line-through">
                                                 {formatCurrency(product.originalPrice)}
                                             </div>
                                         )}
+                                        <div className="sm:hidden mt-1">
+                                            <StockStatusBadge stock={product.stock} />
+                                            <div className="text-xs text-slate-500 mt-1">{product.stock} units</div>
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4 text-center">
+                                    <td className="px-3 sm:px-6 py-4 text-center hidden md:table-cell">
                                         <StockStatusBadge stock={product.stock} />
                                         <div className="text-xs text-slate-500 mt-1">{product.stock} units</div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center justify-center space-x-2">
+                                    <td className="px-3 sm:px-6 py-4">
+                                        <div className="flex items-center justify-center space-x-1 sm:space-x-2">
                                             <button 
                                                 onClick={() => handleOpenProductForm(product._id)} 
-                                                className="text-blue-600 hover:text-blue-900 p-1" 
+                                                className="text-blue-600 hover:text-blue-900 p-1 sm:p-2" 
                                                 title="Edit"
                                             >
-                                                <FaPencilAlt />
+                                                <FaPencilAlt className="w-3 h-3 sm:w-4 sm:h-4" />
                                             </button>
                                             <button 
                                                 onClick={() => handleAddToCart(product)}
-                                                className="text-green-600 hover:text-green-900 p-1" 
+                                                className="text-green-600 hover:text-green-900 p-1 sm:p-2" 
                                                 title="Add to Cart"
                                                 disabled={product.stock === 0}
                                             >
-                                                <FaShoppingCart />
+                                                <FaShoppingCart className="w-3 h-3 sm:w-4 sm:h-4" />
                                             </button>
                                             <button 
                                                 onClick={() => handleDeleteProduct(product._id)}
-                                                className="text-red-600 hover:text-red-900 p-1" 
+                                                className="text-red-600 hover:text-red-900 p-1 sm:p-2" 
                                                 title="Delete"
                                             >
-                                                <FaTrashAlt />
+                                                <FaTrashAlt className="w-3 h-3 sm:w-4 sm:h-4" />
                                             </button>
                                         </div>
                                     </td>

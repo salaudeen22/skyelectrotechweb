@@ -108,31 +108,31 @@ const Sales = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-800">Sales & Orders</h1>
-        <p className="text-slate-500 mt-1">Review orders and track sales performance.</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">Sales & Orders</h1>
+        <p className="text-slate-500 mt-1 text-sm sm:text-base">Review orders and track sales performance.</p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4">
-            <div className="p-3 rounded-full bg-green-100"><FaDollarSign className="w-6 h-6 text-green-600" /></div>
-            <div>
-                <p className="text-sm text-slate-500">Total Revenue</p>
-                <p className="text-2xl font-bold text-slate-800">{formatCurrency(analytics.totalRevenue)}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg flex items-center space-x-3 sm:space-x-4">
+            <div className="p-2 sm:p-3 rounded-full bg-green-100 flex-shrink-0"><FaDollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-green-600" /></div>
+            <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-slate-500">Total Revenue</p>
+                <p className="text-lg sm:text-2xl font-bold text-slate-800 truncate">{formatCurrency(analytics.totalRevenue)}</p>
             </div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4">
-            <div className="p-3 rounded-full bg-blue-100"><FaShoppingCart className="w-6 h-6 text-blue-600" /></div>
-            <div>
-                <p className="text-sm text-slate-500">Total Orders</p>
-                <p className="text-2xl font-bold text-slate-800">{analytics.totalOrders}</p>
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg flex items-center space-x-3 sm:space-x-4">
+            <div className="p-2 sm:p-3 rounded-full bg-blue-100 flex-shrink-0"><FaShoppingCart className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600" /></div>
+            <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-slate-500">Total Orders</p>
+                <p className="text-lg sm:text-2xl font-bold text-slate-800">{analytics.totalOrders}</p>
             </div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4">
-            <div className="p-3 rounded-full bg-purple-100"><FaEye className="w-6 h-6 text-purple-600" /></div>
-            <div>
-                <p className="text-sm text-slate-500">Average Order Value</p>
-                <p className="text-2xl font-bold text-slate-800">
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg flex items-center space-x-3 sm:space-x-4">
+            <div className="p-2 sm:p-3 rounded-full bg-purple-100 flex-shrink-0"><FaEye className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600" /></div>
+            <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-slate-500">Average Order Value</p>
+                <p className="text-lg sm:text-2xl font-bold text-slate-800 truncate">
                     {analytics.totalOrders > 0 ? formatCurrency(analytics.totalRevenue / analytics.totalOrders) : '₹0.00'}
                 </p>
             </div>
@@ -156,34 +156,45 @@ const Sales = () => {
             <table className="w-full">
               <thead className="bg-slate-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Order ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Customer</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Total</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Action</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Order</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider hidden sm:table-cell">Customer</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Total</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider hidden md:table-cell">Date</th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider hidden lg:table-cell">Status</th>
+                  <th className="px-3 sm:px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
                 {filteredOrders.length > 0 ? filteredOrders.map((order) => (
                   <tr key={order._id || order.id} className="hover:bg-slate-50">
-                    <td className="px-6 py-4 font-mono text-sm text-slate-700">#{order._id?.slice(-6) || order.id}</td>
-                    <td className="px-6 py-4 font-medium text-slate-900">
+                    <td className="px-3 sm:px-6 py-4">
+                        <div className="font-mono text-sm text-slate-700">#{order._id?.slice(-6) || order.id}</div>
+                        <div className="sm:hidden text-xs text-slate-500 mt-1">
+                            {order.user?.name || order.user?.email || 'Unknown Customer'}
+                        </div>
+                        <div className="md:hidden text-xs text-slate-500 mt-1">
+                            {formatDate(order.createdAt || order.date)}
+                        </div>
+                        <div className="lg:hidden mt-1">
+                            <OrderStatus status={order.status} />
+                        </div>
+                    </td>
+                    <td className="px-3 sm:px-6 py-4 font-medium text-slate-900 hidden sm:table-cell">
                         {order.user?.name || order.user?.email || 'Unknown Customer'}
                     </td>
-                    <td className="px-6 py-4 text-slate-700">{formatCurrency(order.totalAmount || order.total || 0)}</td>
-                    <td className="px-6 py-4 text-slate-500">{formatDate(order.createdAt || order.date)}</td>
-                    <td className="px-6 py-4"><OrderStatus status={order.status} /></td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-3 sm:px-6 py-4 text-slate-700 font-medium">{formatCurrency(order.totalAmount || order.total || 0)}</td>
+                    <td className="px-3 sm:px-6 py-4 text-slate-500 hidden md:table-cell">{formatDate(order.createdAt || order.date)}</td>
+                    <td className="px-3 sm:px-6 py-4 hidden lg:table-cell"><OrderStatus status={order.status} /></td>
+                    <td className="px-3 sm:px-6 py-4 text-center">
                         <button 
-                            className="text-blue-600 hover:text-blue-900" 
+                            className="text-blue-600 hover:text-blue-900 p-1 sm:p-2" 
                             title="View Details"
                             onClick={() => {
                                 // Navigate to order details or show modal
                                 toast.info(`Order details for #${order._id?.slice(-6) || order.id} - Feature coming soon!`);
                             }}
                         >
-                            <FaEye />
+                            <FaEye className="w-3 h-3 sm:w-4 sm:h-4" />
                         </button>
                     </td>
                   </tr>

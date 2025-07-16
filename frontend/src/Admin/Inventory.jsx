@@ -132,13 +132,13 @@ const Inventory = () => {
   return (
     <div className="space-y-6">
       {/* Header with Title and Action Button */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 className="text-3xl font-bold text-slate-800">Inventory Management</h1>
-            <p className="text-slate-500 mt-1">Track and manage product stock levels.</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">Inventory Management</h1>
+            <p className="text-slate-500 mt-1 text-sm sm:text-base">Track and manage product stock levels.</p>
         </div>
         <button 
-            className="flex items-center justify-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+            className="flex items-center justify-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors whitespace-nowrap"
             onClick={() => {
                 // Navigate to add product page or open modal
                 toast.info('Add product feature - redirecting to product management...');
@@ -149,31 +149,33 @@ const Inventory = () => {
       </div>
 
       {/* Search and Filter Controls */}
-      <div className="bg-white p-4 rounded-lg shadow-lg flex items-center justify-between">
-        <div className="relative w-1/3">
-            <FaSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400" />
-            <input 
-                type="text" 
-                placeholder="Search products..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-        </div>
-        <div className="flex items-center space-x-2">
-            {['All', 'In Stock', 'Low Stock', 'Out of Stock'].map(status => (
-                <button 
-                    key={status}
-                    onClick={() => setFilterStatus(status)}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                        filterStatus === status 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
-                >
-                    {status}
-                </button>
-            ))}
+      <div className="bg-white p-4 rounded-lg shadow-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="relative flex-1 sm:max-w-md">
+                <FaSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400" />
+                <input 
+                    type="text" 
+                    placeholder="Search products..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+            </div>
+            <div className="flex flex-wrap gap-2">
+                {['All', 'In Stock', 'Low Stock', 'Out of Stock'].map(status => (
+                    <button 
+                        key={status}
+                        onClick={() => setFilterStatus(status)}
+                        className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors ${
+                            filterStatus === status 
+                            ? 'bg-blue-600 text-white' 
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                    >
+                        {status}
+                    </button>
+                ))}
+            </div>
         </div>
       </div>
       
@@ -183,11 +185,11 @@ const Inventory = () => {
             <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Product</th>
-                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">SKU</th>
-                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Stock Level</th>
-                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-4 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
+                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Product</th>
+                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider hidden md:table-cell">SKU</th>
+                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Stock</th>
+                        <th className="px-3 sm:px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider hidden sm:table-cell">Status</th>
+                        <th className="px-3 sm:px-6 py-4 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
@@ -198,11 +200,11 @@ const Inventory = () => {
                         
                         return (
                             <tr key={item._id} className="hover:bg-slate-50">
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                <td className="px-3 sm:px-6 py-4">
                                     <div className="flex items-center">
-                                        <div className="flex-shrink-0 h-12 w-12">
+                                        <div className="flex-shrink-0 h-8 w-8 sm:h-12 sm:w-12">
                                             <img 
-                                                className="h-12 w-12 rounded-md object-cover" 
+                                                className="h-8 w-8 sm:h-12 sm:w-12 rounded-md object-cover" 
                                                 src={item.images?.[0]?.url || '/placeholder-product.png'} 
                                                 alt={item.name}
                                                 onError={(e) => {
@@ -210,16 +212,22 @@ const Inventory = () => {
                                                 }}
                                             />
                                         </div>
-                                        <div className="ml-4">
-                                            <div className="text-sm font-medium text-slate-900">{item.name}</div>
-                                            <div className="text-xs text-slate-500">{item.category?.name || 'Uncategorized'}</div>
+                                        <div className="ml-2 sm:ml-4 min-w-0 flex-1">
+                                            <div className="text-sm font-medium text-slate-900 truncate">{item.name}</div>
+                                            <div className="text-xs text-slate-500 truncate">{item.category?.name || 'Uncategorized'}</div>
+                                            <div className="md:hidden text-xs text-slate-500 mt-1">
+                                                SKU: {item.sku || `SKU-${item._id.slice(-6).toUpperCase()}`}
+                                            </div>
+                                            <div className="sm:hidden mt-1">
+                                                <StockStatus stock={stockQuantity} threshold={threshold} />
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                <td className="px-3 sm:px-6 py-4 text-sm text-slate-500 hidden md:table-cell">
                                     {item.sku || `SKU-${item._id.slice(-6).toUpperCase()}`}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                <td className="px-3 sm:px-6 py-4">
                                     <div className="text-sm text-slate-900 font-bold">{stockQuantity} units</div>
                                     <div className="w-full bg-slate-200 rounded-full h-1.5 mt-1">
                                         <div 
@@ -228,26 +236,26 @@ const Inventory = () => {
                                         ></div>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                <td className="px-3 sm:px-6 py-4 hidden sm:table-cell">
                                     <StockStatus stock={stockQuantity} threshold={threshold} />
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-center">
-                                    <div className="flex items-center justify-center space-x-4">
+                                <td className="px-3 sm:px-6 py-4 text-center">
+                                    <div className="flex items-center justify-center space-x-2 sm:space-x-4">
                                         <button 
-                                            className="text-blue-600 hover:text-blue-900" 
+                                            className="text-blue-600 hover:text-blue-900 p-1 sm:p-2" 
                                             title="Edit Product"
                                             onClick={() => {
                                                 toast.info(`Edit product: ${item.name} - Feature coming soon!`);
                                             }}
                                         >
-                                            <FaPencilAlt size={16} />
+                                            <FaPencilAlt className="w-3 h-3 sm:w-4 sm:h-4" />
                                         </button>
                                         <button 
-                                            className="text-red-600 hover:text-red-900" 
+                                            className="text-red-600 hover:text-red-900 p-1 sm:p-2" 
                                             title="Delete Product"
                                             onClick={() => handleDeleteProduct(item._id)}
                                         >
-                                            <FaTrashAlt size={16} />
+                                            <FaTrashAlt className="w-3 h-3 sm:w-4 sm:h-4" />
                                         </button>
                                     </div>
                                 </td>

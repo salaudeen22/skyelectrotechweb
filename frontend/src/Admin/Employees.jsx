@@ -282,16 +282,16 @@ const Employees = () => {
                 />
             )}
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-800">Employee Management</h1>
-                    <p className="text-slate-500 mt-1">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">Employee Management</h1>
+                    <p className="text-slate-500 mt-1 text-sm sm:text-base">
                         Manage your team members and their roles. Total: {employees.length} staff members
                     </p>
                 </div>
                 <button 
                     onClick={() => handleOpenModal()} 
-                    className="flex items-center justify-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+                    className="flex items-center justify-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors whitespace-nowrap"
                 >
                     <FaPlus className="mr-2" /> Add Employee
                 </button>
@@ -315,39 +315,51 @@ const Employees = () => {
                     <table className="w-full">
                         <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Employee</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Role</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Employee</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider hidden sm:table-cell">Role</th>
+                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider hidden md:table-cell">Status</th>
+                                <th className="px-3 sm:px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200">
                             {filteredEmployees.map((emp) => (
                                 <tr key={emp._id} className="hover:bg-slate-50">
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-3 sm:px-6 py-4">
                                         <div className="flex items-center">
-                                            <div className="flex-shrink-0 h-10 w-10">
+                                            <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
                                                 {emp.avatar?.url ? (
-                                                    <img className="h-10 w-10 rounded-full" src={emp.avatar.url} alt={emp.name} />
+                                                    <img className="h-8 w-8 sm:h-10 sm:w-10 rounded-full" src={emp.avatar.url} alt={emp.name} />
                                                 ) : (
-                                                    <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                                                        <FaUser className="text-gray-600" />
+                                                    <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                        <FaUser className="text-gray-600 w-3 h-3 sm:w-4 sm:h-4" />
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="ml-4">
-                                                <div className="text-sm font-medium text-slate-900">{emp.name}</div>
-                                                <div className="text-sm text-slate-500">{emp.email}</div>
+                                            <div className="ml-2 sm:ml-4 min-w-0 flex-1">
+                                                <div className="text-sm font-medium text-slate-900 truncate">{emp.name}</div>
+                                                <div className="text-xs sm:text-sm text-slate-500 truncate">{emp.email}</div>
                                                 {emp.phone && (
-                                                    <div className="text-xs text-slate-400">{emp.phone}</div>
+                                                    <div className="text-xs text-slate-400 truncate">{emp.phone}</div>
                                                 )}
+                                                <div className="sm:hidden mt-1">
+                                                    <RoleBadge role={emp.role} />
+                                                </div>
+                                                <div className="md:hidden mt-1">
+                                                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                                        emp.isActive 
+                                                            ? 'bg-green-100 text-green-800' 
+                                                            : 'bg-red-100 text-red-800'
+                                                    }`}>
+                                                        {emp.isActive ? 'Active' : 'Inactive'}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-3 sm:px-6 py-4 hidden sm:table-cell">
                                         <RoleBadge role={emp.role} />
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-3 sm:px-6 py-4 hidden md:table-cell">
                                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                                             emp.isActive 
                                                 ? 'bg-green-100 text-green-800' 
@@ -356,21 +368,21 @@ const Employees = () => {
                                             {emp.isActive ? 'Active' : 'Inactive'}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                                        <div className="flex items-center justify-center space-x-4">
+                                    <td className="px-3 sm:px-6 py-4 text-center">
+                                        <div className="flex items-center justify-center space-x-2 sm:space-x-4">
                                             <button 
                                                 onClick={() => handleOpenModal(emp)} 
-                                                className="text-blue-600 hover:text-blue-900" 
+                                                className="text-blue-600 hover:text-blue-900 p-1 sm:p-2" 
                                                 title="Edit Employee"
                                             >
-                                                <FaPencilAlt />
+                                                <FaPencilAlt className="w-3 h-3 sm:w-4 sm:h-4" />
                                             </button>
                                             <button 
                                                 onClick={() => handleDeleteEmployee(emp._id, emp.name)}
-                                                className="text-red-600 hover:text-red-900" 
+                                                className="text-red-600 hover:text-red-900 p-1 sm:p-2" 
                                                 title="Remove Employee"
                                             >
-                                                <FaTrashAlt />
+                                                <FaTrashAlt className="w-3 h-3 sm:w-4 sm:h-4" />
                                             </button>
                                         </div>
                                     </td>
