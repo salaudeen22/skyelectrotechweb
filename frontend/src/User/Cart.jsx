@@ -1,19 +1,43 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaMinus, FaTrash, FaShoppingCart } from 'react-icons/fa';
-
-// --- Data with images ---
-const dummyCart = [
-  { id: 1, name: 'Arduino Uno R3', price: 550, qty: 2, imageUrl: 'https://www.theengineerstore.in/cdn/shop/products/arduino-uno-r3-1.png?v=1701086206' },
-  { id: 2, name: 'ESP32 Dev Board', price: 750, qty: 1, imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuBZkNT4gPIhsPepZy6C4e-SZ_0Y7T4St__g&s' },
-];
+import { CartContext } from '../contexts/CartContext';
+import toast from 'react-hot-toast';
 
 const Cart = () => {
-  const subtotal = dummyCart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const shipping = 50;
+  const { items: cartItems, updateCartItem, removeFromCart, totalPrice, loading } = useContext(CartContext);
+  
+  const subtotal = totalPrice || 0;
+  const shipping = subtotal > 1000 ? 0 : 50; // Free shipping over ₹1000
   const total = subtotal + shipping;
 
-  if (dummyCart.length === 0) {
+  const handleQuantityChange = async (productId, newQuantity) => {
+    if (newQuantity < 1) return;
+    try {
+      await updateCartItem(productId, newQuantity);
+    } catch {
+      toast.error('Failed to update quantity');
+    }
+  };
+
+  const handleRemoveItem = async (productId) => {
+    try {
+      await removeFromCart(productId);
+      toast.success('Item removed from cart');
+    } catch {
+      toast.error('Failed to remove item');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!cartItems || cartItems.length === 0) {
       return (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
               <FaShoppingCart className="text-6xl text-slate-300 mb-4" />
@@ -34,20 +58,43 @@ const Cart = () => {
                 
                 {/* Cart Items */}
                 <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 space-y-6">
-                    {dummyCart.map((item) => (
-                        <div key={item.id} className="flex items-center space-x-4 border-b border-slate-200 pb-6 last:border-b-0">
-                            <img src={item.imageUrl} alt={item.name} className="w-24 h-24 rounded-lg object-cover"/>
+                    {cartItems.map((item) => (
+                        <div key={item.product._id} className="flex items-center space-x-4 border-b border-slate-200 pb-6 last:border-b-0">
+                            <img 
+                                src={item.product.images?.[0]?.url || 'https://via.placeholder.com/150'} 
+                                alt={item.product.name} 
+                                className="w-24 h-24 rounded-lg object-cover"
+                            />
                             <div className="flex-grow">
-                                <h2 className="font-bold text-slate-800">{item.name}</h2>
-                                <p className="text-sm text-slate-500">Price: ₹{item.price.toFixed(2)}</p>
+                                <h2 className="font-bold text-slate-800">{item.product.name}</h2>
+                                <p className="text-sm text-slate-500">Price: ₹{item.product.price.toFixed(2)}</p>
+                                <p className="text-xs text-slate-400">{item.product.brand}</p>
                             </div>
                             <div className="flex items-center space-x-3">
-                                <button className="p-1 rounded-full bg-slate-200 hover:bg-slate-300"><FaMinus size={12}/></button>
-                                <span className="font-bold w-8 text-center">{item.qty}</span>
-                                <button className="p-1 rounded-full bg-slate-200 hover:bg-slate-300"><FaPlus size={12}/></button>
+                                <button 
+                                    onClick={() => handleQuantityChange(item.product._id, item.quantity - 1)}
+                                    disabled={item.quantity <= 1}
+                                    className="p-1 rounded-full bg-slate-200 hover:bg-slate-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <FaMinus size={12}/>
+                                </button>
+                                <span className="font-bold w-8 text-center">{item.quantity}</span>
+                                <button 
+                                    onClick={() => handleQuantityChange(item.product._id, item.quantity + 1)}
+                                    className="p-1 rounded-full bg-slate-200 hover:bg-slate-300"
+                                >
+                                    <FaPlus size={12}/>
+                                </button>
                             </div>
-                            <p className="font-bold text-slate-800 w-24 text-right">₹{(item.price * item.qty).toFixed(2)}</p>
-                            <button className="text-slate-400 hover:text-red-500"><FaTrash /></button>
+                            <p className="font-bold text-slate-800 w-24 text-right">
+                                ₹{(item.product.price * item.quantity).toFixed(2)}
+                            </p>
+                            <button 
+                                onClick={() => handleRemoveItem(item.product._id)}
+                                className="text-slate-400 hover:text-red-500"
+                            >
+                                <FaTrash />
+                            </button>
                         </div>
                     ))}
                 </div>
@@ -56,12 +103,41 @@ const Cart = () => {
                 <div className="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 sticky top-28">
                     <h2 className="text-xl font-bold border-b pb-4 mb-4">Order Summary</h2>
                     <div className="space-y-3">
-                        <div className="flex justify-between text-slate-600"><span>Subtotal</span><span>₹{subtotal.toFixed(2)}</span></div>
-                        <div className="flex justify-between text-slate-600"><span>Shipping</span><span>₹{shipping.toFixed(2)}</span></div>
-                        <div className="flex justify-between font-bold text-slate-900 text-lg border-t pt-3 mt-3"><span>Total</span><span>₹{total.toFixed(2)}</span></div>
+                        <div className="flex justify-between text-slate-600">
+                            <span>Subtotal ({cartItems.length} items)</span>
+                            <span>₹{subtotal.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-600">
+                            <span>Shipping</span>
+                            <span>
+                                {shipping === 0 ? (
+                                    <span className="text-green-600 font-medium">FREE</span>
+                                ) : (
+                                    `₹${shipping.toFixed(2)}`
+                                )}
+                            </span>
+                        </div>
+                        {shipping > 0 && (
+                            <div className="text-xs text-slate-500 bg-blue-50 p-2 rounded">
+                                Add ₹{(1000 - subtotal).toFixed(2)} more for free shipping!
+                            </div>
+                        )}
+                        <div className="flex justify-between font-bold text-slate-900 text-lg border-t pt-3 mt-3">
+                            <span>Total</span>
+                            <span>₹{total.toFixed(2)}</span>
+                        </div>
                     </div>
-                    <Link to="/checkout" className="mt-6 w-full block text-center bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition">
+                    <Link 
+                        to="/user/checkout" 
+                        className="mt-6 w-full block text-center bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition"
+                    >
                         Proceed to Checkout
+                    </Link>
+                    <Link 
+                        to="/products" 
+                        className="mt-3 w-full block text-center border border-blue-600 text-blue-600 font-semibold py-3 rounded-lg hover:bg-blue-50 transition"
+                    >
+                        Continue Shopping
                     </Link>
                 </div>
             </div>
