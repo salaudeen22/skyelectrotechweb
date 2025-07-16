@@ -22,8 +22,13 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0">
-              <span className="text-2xl font-bold text-blue-600">SkyElectroTech</span>
+            <Link to="/" className="flex-shrink-0 flex items-center space-x-2">
+              <img 
+                src="https://i.postimg.cc/brZN4ngb/Sky-Logo-Only.png" 
+                alt="SkyElectroTech" 
+                className="h-12 w-24 object-contain"
+              />
+            
             </Link>
           </div>
 

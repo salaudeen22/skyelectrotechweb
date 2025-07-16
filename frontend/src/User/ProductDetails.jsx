@@ -139,25 +139,31 @@ const ProductDetails = () => {
           <div className="space-y-4">
             <div className="aspect-square bg-white rounded-lg shadow-sm overflow-hidden">
               <img
-                src={product.images?.[selectedImage] || '/placeholder-image.jpg'}
+                src={product.images?.[selectedImage]?.url || product.images?.[selectedImage] || '/api/placeholder/600/600'}
                 alt={product.name}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = '/api/placeholder/600/600';
+                }}
               />
             </div>
             {product.images && product.images.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
                 {product.images.map((image, index) => (
                   <button
-                    key={index}
+                    key={image._id || index}
                     onClick={() => setSelectedImage(index)}
                     className={`aspect-square bg-white rounded-lg overflow-hidden border-2 ${
                       selectedImage === index ? 'border-blue-600' : 'border-gray-200'
                     }`}
                   >
                     <img
-                      src={image}
+                      src={image.url || image || '/api/placeholder/150/150'}
                       alt={`${product.name} ${index + 1}`}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.src = '/api/placeholder/150/150';
+                      }}
                     />
                   </button>
                 ))}

@@ -4,6 +4,7 @@ import { productsAPI, categoriesAPI } from '../services/apiServices';
 import toast from 'react-hot-toast';
 import ProductForm from './ProductForm';
 
+
 const StockStatusBadge = ({ stock }) => {
     if (stock > 10) return <span className="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">In Stock</span>;
     if (stock > 0) return <span className="px-2 py-1 text-xs font-semibold text-orange-800 bg-orange-100 rounded-full">Low Stock</span>;
@@ -258,9 +259,7 @@ const ProductModal = ({ product, categories, onClose, onSave }) => {
 
 const ProductManagement = () => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [showProductForm, setShowProductForm] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState(null);
     const [editingProductId, setEditingProductId] = useState(null);
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -301,19 +300,7 @@ const ProductManagement = () => {
             p.category?.name?.toLowerCase().includes(searchTerm.toLowerCase())
         ),
         [products, searchTerm]
-    );
-
-    const handleOpenModal = (product = null) => {
-        setSelectedProduct(product);
-        setIsModalOpen(true);
-    };
-
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setSelectedProduct(null);
-    };
-
-    const handleOpenProductForm = (productId = null) => {
+    );    const handleOpenProductForm = (productId = null) => {
         setEditingProductId(productId);
         setShowProductForm(true);
     };
@@ -322,13 +309,8 @@ const ProductManagement = () => {
         setShowProductForm(false);
         setEditingProductId(null);
     };
-    
-    const handleSaveProduct = () => {
-        handleCloseModal();
-        fetchProducts(); // Refresh the products list
-    };
 
-    const handleProductFormSuccess = () => {
+    const handleSaveProduct = () => {
         handleCloseProductForm();
         fetchProducts(); // Refresh the products list
     };
@@ -502,23 +484,14 @@ const ProductManagement = () => {
             {showProductForm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                        <ProductForm
-                            productId={editingProductId}
+                        <ProductModal
+                            product={editingProductId ? products.find(p => p._id === editingProductId) : null}
+                            categories={categories}
                             onClose={handleCloseProductForm}
-                            onSuccess={handleProductFormSuccess}
+                            onSave={handleSaveProduct}
                         />
                     </div>
                 </div>
-            )}
-
-            {/* Old Modal - keeping for compatibility */}
-            {isModalOpen && (
-                <ProductModal 
-                    product={selectedProduct} 
-                    categories={categories} 
-                    onClose={handleCloseModal} 
-                    onSave={handleSaveProduct} 
-                />
             )}
         </div>
     );

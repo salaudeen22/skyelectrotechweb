@@ -26,12 +26,13 @@ const AdminSidebar = () => {
         <aside className="fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-xl flex flex-col z-40">
             
             {/* Logo / Brand Header */}
-            <div className="flex items-center justify-center px-4 h-24 border-b border-gray-200">
-                <Link to="/" className="flex items-center space-x-2">
-                    <FaBolt className="h-8 w-8 text-blue-600" />
-                    <h1 className="text-2xl font-bold text-gray-800">
-                        Sky<span className="text-blue-600">electro</span>
-                    </h1>
+            <div className="flex items-center justify-center px-4 h-32 border-b border-gray-200">
+                <Link to="/" className="flex items-center justify-center">
+                    <img 
+                        src="https://i.postimg.cc/brZN4ngb/Sky-Logo-Only.png" 
+                        alt="SkyElectroTech" 
+                        className="h-32 w-32 object-contain"
+                    />
                 </Link>
             </div>
 

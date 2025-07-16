@@ -5,6 +5,17 @@ const Footer = () => {
   return (
     <footer className="bg-white border-t">
       <div className="max-w-screen-xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        {/* Brand Section */}
+        <div className="mb-8 pb-8 border-b border-gray-200">
+          <div className="flex items-center justify-center space-x-3">
+           
+            <span className="text-3xl font-bold text-blue-600">SkyElectroTech</span>
+          </div>
+          <p className="text-center text-gray-600 mt-4 max-w-md mx-auto">
+            Your trusted partner for all electrical and electronic needs.
+          </p>
+        </div>
+        
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
