@@ -4,6 +4,9 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  VITE_API_URL = "https://skyelectrotechweb.onrender.com/api"
+  VITE_APP_NAME = "SkyElectroTech"
+  VITE_APP_VERSION = "1.0.0"
 
 [[headers]]
   for = "/*"
@@ -26,6 +29,21 @@
   for = "*.mjs"
   [headers.values]
     Content-Type = "application/javascript; charset=utf-8"
+
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Content-Type = "text/css; charset=utf-8"
+
+[[headers]]
+  for = "*.woff"
+  [headers.values]
+    Content-Type = "font/woff"
+
+[[headers]]
+  for = "*.woff2"
+  [headers.values]
+    Content-Type = "font/woff2"
 
 [[redirects]]
   from = "/*"
