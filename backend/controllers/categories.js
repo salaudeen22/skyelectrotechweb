@@ -6,7 +6,7 @@ const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 // @route   GET /api/categories
 // @access  Public
 const getCategories = asyncHandler(async (req, res) => {
-  const { active = true, includeSubcategories = true } = req.query;
+  const { active = 'true', includeSubcategories = 'true' } = req.query;
 
   const query = active === 'true' ? { isActive: true } : {};
 
@@ -248,6 +248,7 @@ const updateCategory = asyncHandler(async (req, res) => {
 // @route   DELETE /api/categories/:id
 // @access  Private (Admin only)
 const deleteCategory = asyncHandler(async (req, res) => {
+  const { force = false } = req.query;
   const category = await Category.findById(req.params.id);
 
   if (!category) {
@@ -260,9 +261,9 @@ const deleteCategory = asyncHandler(async (req, res) => {
     isActive: true 
   });
 
-  if (productCount > 0) {
+  if (productCount > 0 && !force) {
     return sendError(res, 400, 
-      `Cannot delete category. It has ${productCount} active products. Please move or delete products first.`
+      `Cannot delete category. It has ${productCount} active products. Please move or delete products first, or use force delete.`
     );
   }
 
@@ -272,16 +273,35 @@ const deleteCategory = asyncHandler(async (req, res) => {
     isActive: true
   });
 
-  if (subcategoryCount > 0) {
+  if (subcategoryCount > 0 && !force) {
     return sendError(res, 400,
-      `Cannot delete category. It has ${subcategoryCount} active subcategories. Please delete subcategories first.`
+      `Cannot delete category. It has ${subcategoryCount} active subcategories. Please delete subcategories first, or use force delete.`
+    );
+  }
+
+  // If force delete, also deactivate associated products and subcategories
+  if (force) {
+    // Deactivate all products in this category
+    await Product.updateMany(
+      { category: category._id },
+      { isActive: false }
+    );
+    
+    // Deactivate all subcategories
+    await Category.updateMany(
+      { parentCategory: category._id },
+      { isActive: false }
     );
   }
 
   // Soft delete - set isActive to false
   await Category.findByIdAndUpdate(req.params.id, { isActive: false });
 
-  sendResponse(res, 200, null, 'Category deleted successfully');
+  const message = force 
+    ? `Category and all associated products/subcategories deleted successfully`
+    : 'Category deleted successfully';
+
+  sendResponse(res, 200, null, message);
 });
 
 module.exports = {

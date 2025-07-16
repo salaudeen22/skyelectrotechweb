@@ -71,16 +71,16 @@ const cartReducer = (state, action) => {
 // Cart Provider Component
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
-  // Load cart when user is authenticated
+  // Load cart when user is authenticated and is a regular user
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user?.role === 'user') {
       fetchCart();
     } else {
       dispatch({ type: CART_ACTIONS.CLEAR_CART });
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user?.role]);
 
   // Fetch cart
   const fetchCart = async () => {
@@ -92,6 +92,7 @@ export const CartProvider = ({ children }) => {
         payload: response.data.cart
       });
     } catch (error) {
+      console.error('Cart fetch error:', error);
       dispatch({
         type: CART_ACTIONS.SET_ERROR,
         payload: error.response?.data?.message || 'Failed to fetch cart'

@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 
 const ProductCard = ({ product }) => {
   const { addToCart, addingToCart } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
@@ -15,6 +15,12 @@ const ProductCard = ({ product }) => {
     
     if (!isAuthenticated) {
       toast.error('Please login to add items to cart');
+      return;
+    }
+
+    // Restrict cart functionality for admin/employee users
+    if (user?.role === 'admin' || user?.role === 'employee') {
+      toast.error('Cart functionality is only available for regular users');
       return;
     }
 
@@ -36,6 +42,12 @@ const ProductCard = ({ product }) => {
       return;
     }
     
+    // Restrict wishlist functionality for admin/employee users
+    if (user?.role === 'admin' || user?.role === 'employee') {
+      toast.error('Wishlist functionality is only available for regular users');
+      return;
+    }
+    
     // TODO: Implement wishlist functionality
     toast.success('Added to wishlist!');
   };
@@ -43,13 +55,15 @@ const ProductCard = ({ product }) => {
   return (
     <div className="group relative bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 flex flex-col">
       
-      {/* Wishlist Button */}
-      <button
-        onClick={handleAddToWishlist}
-        className="absolute top-3 right-3 z-10 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-50"
-      >
-        <FiHeart className="h-4 w-4 text-gray-600 hover:text-red-500" />
-      </button>
+      {/* Wishlist Button - Only show for regular users */}
+      {isAuthenticated && user?.role === 'user' && (
+        <button
+          onClick={handleAddToWishlist}
+          className="absolute top-3 right-3 z-10 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-50"
+        >
+          <FiHeart className="h-4 w-4 text-gray-600 hover:text-red-500" />
+        </button>
+      )}
 
       {/* Stock Badge */}
       {product.stock <= 5 && product.stock > 0 && (
@@ -131,21 +145,44 @@ const ProductCard = ({ product }) => {
           </div>
         </div>
         
-        {/* Add to Cart Button */}
-        <div className="mt-4 pt-4 border-t border-gray-100">
-          <button 
-            onClick={handleAddToCart}
-            disabled={product.stock === 0 || addingToCart}
-            className={`w-full flex items-center justify-center py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 ${
-              product.stock === 0
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0'
-            }`}
-          >
-            <FiShoppingCart className="mr-2 h-5 w-5" />
-            {addingToCart ? 'Adding...' : product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-          </button>
-        </div>
+        {/* Add to Cart Button - Only show for regular users */}
+        {isAuthenticated && user?.role === 'user' && (
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <button 
+              onClick={handleAddToCart}
+              disabled={product.stock === 0 || addingToCart}
+              className={`w-full flex items-center justify-center py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 ${
+                product.stock === 0
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0'
+              }`}
+            >
+              <FiShoppingCart className="mr-2 h-5 w-5" />
+              {addingToCart ? 'Adding...' : product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+            </button>
+          </div>
+        )}
+        
+        {/* For non-authenticated users, show login prompt */}
+        {!isAuthenticated && (
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <Link 
+              to="/auth/login"
+              className="w-full flex items-center justify-center py-2.5 rounded-lg text-sm font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all duration-300 ease-in-out opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0"
+            >
+              Login to Purchase
+            </Link>
+          </div>
+        )}
+        
+        {/* For admin/employee users, show view-only message */}
+        {isAuthenticated && (user?.role === 'admin' || user?.role === 'employee') && (
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <div className="w-full flex items-center justify-center py-2.5 rounded-lg text-sm font-medium bg-blue-50 text-blue-600 border border-blue-200">
+              Admin/Employee View
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

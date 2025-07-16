@@ -63,20 +63,39 @@ const CategoriesManagement = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (categoryId) => {
-    if (!window.confirm('Are you sure you want to delete this category?')) {
+  const handleDelete = async (categoryId, forceDelete = false) => {
+    const confirmMessage = forceDelete 
+      ? 'Are you sure you want to force delete this category? This will also deactivate all associated products and subcategories.'
+      : 'Are you sure you want to delete this category?';
+      
+    if (!window.confirm(confirmMessage)) {
       return;
     }
 
     try {
-      const response = await categoriesAPI.deleteCategory(categoryId);
+      const response = await categoriesAPI.deleteCategory(categoryId, forceDelete);
       if (response.success) {
-        toast.success('Category deleted successfully');
+        toast.success(response.message || 'Category deleted successfully');
         fetchCategories();
+      } else {
+        toast.error(response.message || 'Failed to delete category');
       }
     } catch (error) {
       console.error('Error deleting category:', error);
-      toast.error('Failed to delete category');
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to delete category';
+      
+      // If deletion failed due to products/subcategories, offer force delete option
+      if (errorMessage.includes('active products') || errorMessage.includes('active subcategories')) {
+        const forceConfirm = window.confirm(
+          `${errorMessage}\n\nWould you like to force delete this category and deactivate all associated products/subcategories?`
+        );
+        if (forceConfirm) {
+          handleDelete(categoryId, true);
+          return;
+        }
+      }
+      
+      toast.error(errorMessage);
     }
   };
 

@@ -27,8 +27,10 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
     // Redirect based on user role
     if (user?.role === 'admin' || user?.role === 'employee') {
-      return <Navigate to="/admin/dashboard" replace />;
+      // If admin/employee tries to access user routes, redirect to admin dashboard
+      return <Navigate to="/admin" replace />;
     } else {
+      // If user tries to access admin routes, redirect to home
       return <Navigate to="/" replace />;
     }
   }

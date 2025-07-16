@@ -119,8 +119,8 @@ export const productsAPI = {
 // Categories API calls
 export const categoriesAPI = {
   // Get all categories
-  getCategories: async () => {
-    const response = await api.get('/categories');
+  getCategories: async (active = true) => {
+    const response = await api.get(`/categories?active=${active}`);
     return response.data;
   },
 
@@ -143,8 +143,8 @@ export const categoriesAPI = {
   },
 
   // Delete category (Admin only)
-  deleteCategory: async (id) => {
-    const response = await api.delete(`/categories/${id}`);
+  deleteCategory: async (id, force = false) => {
+    const response = await api.delete(`/categories/${id}?force=${force}`);
     return response.data;
   }
 };

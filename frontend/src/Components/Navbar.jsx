@@ -8,7 +8,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
-  const { cartItems } = useContext(CartContext);
+  const { items: cartItems, totalItems } = useContext(CartContext);
   const { categories } = useCategories();
   const navigate = useNavigate();
 
@@ -17,7 +17,7 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const cartItemCount = cartItems?.length || 0;
+  const cartItemCount = totalItems || cartItems?.length || 0;
 
   return (
     <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
@@ -113,20 +113,32 @@ const Navbar = () => {
             
             {user ? (
               <>
-                {/* Cart Icon */}
-                <Link 
-                  to="/user/cart" 
-                  className="relative text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m-2.4 8L3 3v0M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6m-8 0V9a2 2 0 012-2h4a2 2 0 012 2v4.01" />
-                  </svg>
-                  {cartItemCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {cartItemCount}
-                    </span>
-                  )}
-                </Link>
+                {/* Cart Icon - Only show for regular users */}
+                {user.role === 'user' && (
+                  <Link 
+                    to="/user/cart" 
+                    className="relative text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m-2.4 8L3 3v0m0 0h18M7 13v8a2 2 0 002 2h8a2 2 0 002-2v-8" />
+                    </svg>
+                    {cartItemCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                        {cartItemCount > 99 ? '99+' : cartItemCount}
+                      </span>
+                    )}
+                  </Link>
+                )}
+
+                {/* Admin/Employee Dashboard Link */}
+                {(user.role === 'admin' || user.role === 'employee') && (
+                  <Link 
+                    to="/admin" 
+                    className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
 
                 {/* User Dropdown */}
                 <div className="relative">
@@ -142,21 +154,28 @@ const Navbar = () => {
 
                   {isMenuOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                      <Link
-                        to="/user/profile"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Profile
-                      </Link>
-                      <Link
-                        to="/user/orders"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Order History
-                      </Link>
-                      {user.role === 'admin' && (
+                      {/* User-specific links */}
+                      {user.role === 'user' && (
+                        <>
+                          <Link
+                            to="/user/profile"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            Profile
+                          </Link>
+                          <Link
+                            to="/user/orders"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            Order History
+                          </Link>
+                        </>
+                      )}
+                      
+                      {/* Admin/Employee links */}
+                      {(user.role === 'admin' || user.role === 'employee') && (
                         <Link
                           to="/admin"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -165,6 +184,7 @@ const Navbar = () => {
                           Admin Dashboard
                         </Link>
                       )}
+                      
                       <button
                         onClick={handleLogout}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -262,28 +282,35 @@ const Navbar = () => {
               
               {user ? (
                 <>
-                  <Link
-                    to="/user/cart"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Cart ({cartItemCount})
-                  </Link>
-                  <Link
-                    to="/user/profile"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    to="/user/orders"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Order History
-                  </Link>
-                  {user.role === 'admin' && (
+                  {/* User-specific mobile links */}
+                  {user.role === 'user' && (
+                    <>
+                      <Link
+                        to="/user/cart"
+                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Cart ({cartItemCount})
+                      </Link>
+                      <Link
+                        to="/user/profile"
+                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        to="/user/orders"
+                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Order History
+                      </Link>
+                    </>
+                  )}
+                  
+                  {/* Admin/Employee mobile links */}
+                  {(user.role === 'admin' || user.role === 'employee') && (
                     <Link
                       to="/admin"
                       className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"

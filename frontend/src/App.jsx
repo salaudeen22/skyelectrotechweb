@@ -94,7 +94,7 @@ const App = () => {
 
                 {/* Protected User Routes */}
                 <Route path="/user" element={
-                  <ProtectedRoute allowedRoles={['user', 'employee', 'admin']}>
+                  <ProtectedRoute allowedRoles={['user']}>
                     <MainLayout />
                   </ProtectedRoute>
                 }>
