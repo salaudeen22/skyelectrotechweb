@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import GoogleSignInButton from '../Components/GoogleSignInButton';
 import toast from 'react-hot-toast';
 import { 
     FiEye, 
@@ -13,7 +14,7 @@ import {
     FiShield,
     FiAlertCircle
 } from 'react-icons/fi';
-import { FaGoogle, FaApple } from 'react-icons/fa';
+import { FaApple } from 'react-icons/fa';
 
 const Login = () => {
     // --- All existing state and logic functions remain exactly the same ---
@@ -155,7 +156,7 @@ const Login = () => {
                         <div className="mt-8">
                             <div className="relative"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300"></div></div><div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-gray-500">Or continue with</span></div></div>
                             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <SocialButton icon={<FaGoogle />} provider="Google" />
+                                <GoogleSignInButton text="Google" />
                                 <SocialButton icon={<FaApple />} provider="Apple" />
                             </div>
                         </div>

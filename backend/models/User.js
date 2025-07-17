@@ -17,9 +17,17 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
+    required: function() {
+      // Password is required only if googleId is not present (regular registration)
+      return !this.googleId;
+    },
     minlength: [6, 'Password must be at least 6 characters'],
     select: false
+  },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true // Allows multiple null values
   },
   role: {
     type: String,
@@ -27,8 +35,8 @@ const userSchema = new mongoose.Schema({
     default: 'user'
   },
   avatar: {
-    public_id: String,
-    url: String
+    type: String, // For Google OAuth, we'll store the image URL directly
+    default: null
   },
   phone: {
     type: String,
@@ -52,6 +60,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  isEmailVerified: { // Alternative field name for clarity
+    type: Boolean,
+    default: false
+  },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
   createdAt: {
@@ -62,7 +74,7 @@ const userSchema = new mongoose.Schema({
 
 // Encrypt password before saving
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
+  if (!this.isModified('password') || !this.password) {
     next();
   }
   this.password = await bcrypt.hash(this.password, 12);

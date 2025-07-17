@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import GoogleSignInButton from '../Components/GoogleSignInButton';
 import toast from 'react-hot-toast';
 import { 
     FiEye, 
@@ -13,7 +14,7 @@ import {
     FiAlertCircle,
     FiArrowRight
 } from 'react-icons/fi';
-import { FaGoogle, FaApple } from 'react-icons/fa';
+import { FaApple } from 'react-icons/fa';
 
 const Register = () => {
     // ... All existing state and logic functions remain exactly the same ...
@@ -178,7 +179,7 @@ const Register = () => {
                                 <div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-gray-500">Or sign up with</span></div>
                             </div>
                             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <SocialButton icon={<FaGoogle />} provider="Google" />
+                                <GoogleSignInButton text="Sign up with Google" />
                                 <SocialButton icon={<FaApple />} provider="Apple" />
                             </div>
                         </div>
