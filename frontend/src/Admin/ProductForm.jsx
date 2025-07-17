@@ -6,7 +6,7 @@ import {
     FaUpload,
     FaExclamationCircle,
     FaStar,
-    FaDollarSign,
+    FaRupeeSign,
     FaBoxOpen,
     FaPlus
 } from 'react-icons/fa';
@@ -404,8 +404,8 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
                                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-900 mb-6">Pricing & Inventory</h3>
                                     <div className="space-y-6">
-                                        <FormInput label="Price *" name="price" type="number" value={formData.price} onChange={handleInputChange} error={errors.price} step="0.01" min="0" placeholder="0.00" icon={<FaDollarSign className="text-gray-400" />} />
-                                        <FormInput label="Original Price" name="originalPrice" type="number" value={formData.originalPrice} onChange={handleInputChange} step="0.01" min="0" placeholder="0.00" icon={<FaDollarSign className="text-gray-400" />} />
+                                        <FormInput label="Price *" name="price" type="number" value={formData.price} onChange={handleInputChange} error={errors.price} step="0.01" min="0" placeholder="0.00" icon={<FaRupeeSign  className="text-gray-400" />} />
+                                        <FormInput label="Original Price" name="originalPrice" type="number" value={formData.originalPrice} onChange={handleInputChange} step="0.01" min="0" placeholder="0.00" icon={<FaRupeeSign className="text-gray-400" />} />
                                         <FormInput label="Discount (%)" name="discount" type="number" value={formData.discount} onChange={handleInputChange} min="0" max="100" placeholder="0" />
                                         <hr className="my-6"/>
                                         <FormInput label="Stock Quantity *" name="stock" type="number" value={formData.stock} onChange={handleInputChange} error={errors.stock} min="0" placeholder="0" icon={<FaBoxOpen className="text-gray-400" />} />
