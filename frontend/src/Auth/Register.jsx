@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import GoogleOAuthButton from '../Components/GoogleOAuthButton';
 import toast from 'react-hot-toast';
 import { 
     FiEye, 
@@ -13,7 +14,6 @@ import {
     FiAlertCircle,
     FiArrowRight
 } from 'react-icons/fi';
-import { FaGoogle, FaApple } from 'react-icons/fa';
 
 const Register = () => {
     // ... All existing state and logic functions remain exactly the same ...
@@ -174,12 +174,18 @@ const Register = () => {
                         {/* Social Login Divider */}
                         <div className="mt-8">
                             <div className="relative">
-                                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300"></div></div>
-                                <div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-gray-500">Or sign up with</span></div>
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-gray-300"></div>
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-2 bg-white text-gray-500">Or sign up with</span>
+                                </div>
                             </div>
-                            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <SocialButton icon={<FaGoogle />} provider="Google" />
-                                <SocialButton icon={<FaApple />} provider="Apple" />
+                            <div className="mt-6">
+                                <GoogleOAuthButton 
+                                    text="Sign up with Google"
+                                    disabled={isLoading}
+                                />
                             </div>
                         </div>
                     </div>
@@ -217,14 +223,6 @@ const InputField = ({ icon, name, type, placeholder, value, onChange, error, chi
 const PasswordToggle = ({ isVisible, onToggle }) => (
     <button type="button" className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600" onClick={onToggle}>
         {isVisible ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
-    </button>
-);
-
-// Helper component for social login buttons
-const SocialButton = ({ icon, provider }) => (
-    <button className="w-full inline-flex items-center justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all">
-        <div className="h-5 w-5 mr-2">{icon}</div>
-        <span>{provider}</span>
     </button>
 );
 

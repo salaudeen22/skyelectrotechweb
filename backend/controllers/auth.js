@@ -2,12 +2,18 @@ const User = require('../models/User');
 const { generateToken } = require('../utils/jwt');
 const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 const crypto = require('crypto');
+const passport = require('../config/passport');
 
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
 const register = asyncHandler(async (req, res) => {
-  const { name, email, password, role = 'user' } = req.body;
+  const { name, email, password, googleId, role = 'user' } = req.body;
+
+  // Validate that either password or googleId is provided
+  if (!password && !googleId) {
+    return sendError(res, 400, 'Either password or Google ID is required');
+  }
 
   // Check if user already exists
   const existingUser = await User.findOne({ email });
@@ -15,13 +21,25 @@ const register = asyncHandler(async (req, res) => {
     return sendError(res, 400, 'User already exists with this email');
   }
 
-  // Create user
-  const user = await User.create({
+  // Prepare user data
+  const userData = {
     name,
     email,
-    password,
     role: role === 'admin' ? 'user' : role // Prevent admin creation via registration
-  });
+  };
+
+  // Add password or googleId
+  if (password) {
+    userData.password = password;
+  }
+  
+  if (googleId) {
+    userData.googleId = googleId;
+    userData.emailVerified = true; // Google users are pre-verified
+  }
+
+  // Create user
+  const user = await User.create(userData);
 
   // Generate token
   const token = generateToken(user._id);
@@ -195,6 +213,74 @@ const resetPassword = asyncHandler(async (req, res) => {
   sendResponse(res, 200, null, 'Password reset successful');
 });
 
+// @desc    Google OAuth
+// @route   GET /api/auth/google
+// @access  Public
+const googleAuth = (req, res, next) => {
+  // Check if Google OAuth is configured
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    return sendError(res, 500, 'Google OAuth is not configured');
+  }
+  
+  // Import passport here to avoid initialization issues
+  const passport = require('../config/passport');
+  return passport.authenticate('google', {
+    scope: ['profile', 'email']
+  })(req, res, next);
+};
+
+// @desc    Google OAuth Callback
+// @route   GET /api/auth/google/callback
+// @access  Public
+const googleCallback = (req, res, next) => {
+  // Check if Google OAuth is configured
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    return res.redirect(`${process.env.CLIENT_URL}/login?error=oauth_not_configured`);
+  }
+
+  const passport = require('../config/passport');
+  passport.authenticate('google', { session: false }, async (err, user, info) => {
+    if (err) {
+      console.error('Google OAuth Error:', err);
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=oauth_error`);
+    }
+
+    if (!user) {
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=oauth_failed`);
+    }
+
+    try {
+      // Generate JWT token
+      const token = generateToken(user._id);
+      
+      // Update last login
+      await user.updateLastLogin();
+
+      // Redirect to frontend with token
+      const redirectUrl = `${process.env.CLIENT_URL}/auth/callback?token=${token}`;
+      return res.redirect(redirectUrl);
+    } catch (error) {
+      console.error('Token generation error:', error);
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=token_error`);
+    }
+  })(req, res, next);
+};
+
+// @desc    Link Google account to existing user
+// @route   POST /api/auth/link-google
+// @access  Private
+const linkGoogleAccount = asyncHandler(async (req, res) => {
+  const { googleToken } = req.body;
+  
+  if (!googleToken) {
+    return sendError(res, 400, 'Google token is required');
+  }
+
+  // Here you would verify the Google token with Google's API
+  // For now, this is a placeholder
+  sendResponse(res, 200, null, 'Google account linked successfully');
+});
+
 module.exports = {
   register,
   login,
@@ -203,5 +289,8 @@ module.exports = {
   updateProfile,
   changePassword,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  googleAuth,
+  googleCallback,
+  linkGoogleAccount
 };

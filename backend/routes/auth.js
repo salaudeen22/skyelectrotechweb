@@ -8,7 +8,10 @@ const {
   updateProfile, 
   changePassword,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  googleAuth,
+  googleCallback,
+  linkGoogleAccount
 } = require('../controllers/auth');
 const { auth } = require('../middleware/auth');
 const validate = require('../middleware/validate');
@@ -27,12 +30,24 @@ const registerValidation = [
     .normalizeEmail()
     .withMessage('Please provide a valid email'),
   body('password')
+    .optional()
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
+  body('googleId')
+    .optional()
+    .isString()
+    .withMessage('Google ID must be a string'),
   body('role')
     .optional()
     .isIn(['user', 'employee', 'admin'])
-    .withMessage('Invalid role')
+    .withMessage('Invalid role'),
+  // Custom validation to ensure either password or googleId is provided
+  body().custom((value, { req }) => {
+    if (!req.body.password && !req.body.googleId) {
+      throw new Error('Either password or Google ID is required');
+    }
+    return true;
+  })
 ];
 
 const loginValidation = [
@@ -96,5 +111,21 @@ router.post('/forgot-password', [
 router.put('/reset-password/:token', [
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
 ], validate, resetPassword);
+
+// Google OAuth routes
+router.get('/google', googleAuth);
+router.get('/google/callback', googleCallback);
+router.post('/link-google', auth, [
+  body('googleToken').notEmpty().withMessage('Google token is required')
+], validate, linkGoogleAccount);
+
+// Test endpoint to verify OAuth setup
+router.get('/oauth-status', (req, res) => {
+  res.json({
+    googleConfigured: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
+    callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'Not set',
+    clientUrl: process.env.CLIENT_URL || 'Not set'
+  });
+});
 
 module.exports = router;

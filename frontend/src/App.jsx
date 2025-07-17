@@ -26,6 +26,7 @@ import Profile from './User/Profile';
 // Auth Pages
 import Login from './Auth/Login';
 import Register from './Auth/Register';
+import AuthCallback from './Auth/AuthCallback';
 
 // Admin Pages
 import AdminDashboard from './Admin/AdminDashboard';
@@ -90,6 +91,7 @@ const App = () => {
                 <Route path="/auth" element={<AuthLayout />}>
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
+                  <Route path="callback" element={<AuthCallback />} />
                 </Route>
 
                 {/* Protected User Routes */}

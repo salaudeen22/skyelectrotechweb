@@ -14,7 +14,8 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = Cookies.get('token');
+    // Try to get token from both cookies and localStorage
+    let token = Cookies.get('token') || localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -37,6 +38,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       Cookies.remove('token');
       Cookies.remove('user');
+      localStorage.removeItem('token');
       window.location.href = '/auth/login';
       toast.error('Session expired. Please login again.');
     } else if (error.response?.status === 403) {

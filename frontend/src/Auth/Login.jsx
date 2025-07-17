@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import GoogleOAuthButton from '../Components/GoogleOAuthButton';
 import toast from 'react-hot-toast';
 import { 
     FiEye, 
@@ -153,10 +154,19 @@ const Login = () => {
                         </form>
                         
                         <div className="mt-8">
-                            <div className="relative"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300"></div></div><div className="relative flex justify-center text-sm"><span className="px-2 bg-white text-gray-500">Or continue with</span></div></div>
-                            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <SocialButton icon={<FaGoogle />} provider="Google" />
-                                <SocialButton icon={<FaApple />} provider="Apple" />
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-gray-300"></div>
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                                </div>
+                            </div>
+                            <div className="mt-6">
+                                <GoogleOAuthButton 
+                                    text="Sign in with Google"
+                                    disabled={isLoading}
+                                />
                             </div>
                         </div>
                     </div>
@@ -190,13 +200,5 @@ const PasswordToggle = ({ isVisible, onToggle }) => (
         {isVisible ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
     </button>
 );
-
-const SocialButton = ({ icon, provider }) => (
-    <button className="w-full inline-flex items-center justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all">
-        <div className="h-5 w-5 mr-3">{icon}</div>
-        <span>Sign in with {provider}</span>
-    </button>
-);
-
 
 export default Login;

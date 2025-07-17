@@ -17,9 +17,16 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
+    required: function() {
+      // Password is required only if googleId is not present
+      return !this.googleId;
+    },
     minlength: [6, 'Password must be at least 6 characters'],
     select: false
+  },
+  googleId: {
+    type: String,
+    sparse: true // Allows multiple null values
   },
   role: {
     type: String,
@@ -62,7 +69,7 @@ const userSchema = new mongoose.Schema({
 
 // Encrypt password before saving
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
+  if (!this.isModified('password') || !this.password) {
     next();
   }
   this.password = await bcrypt.hash(this.password, 12);
@@ -70,6 +77,9 @@ userSchema.pre('save', async function(next) {
 
 // Compare password method
 userSchema.methods.comparePassword = async function(enteredPassword) {
+  if (!this.password) {
+    return false; // For Google OAuth users without password
+  }
   return await bcrypt.compare(enteredPassword, this.password);
 };
 

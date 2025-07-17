@@ -242,6 +242,29 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
   };
 
+  // Set authentication data (for OAuth callbacks)
+  const setAuthData = async (userData, token) => {
+    try {
+      // Store token and user in cookies
+      Cookies.set('token', token, { expires: 30 }); // 30 days
+      Cookies.set('user', JSON.stringify(userData), { expires: 30 });
+
+      dispatch({
+        type: AUTH_ACTIONS.LOGIN_SUCCESS,
+        payload: { user: userData, token }
+      });
+
+      return { success: true, user: userData };
+    } catch (error) {
+      console.error('Error setting auth data:', error);
+      dispatch({
+        type: AUTH_ACTIONS.LOGIN_FAILURE,
+        payload: 'Failed to set authentication data'
+      });
+      return { success: false, error: 'Failed to set authentication data' };
+    }
+  };
+
   // Check if user has specific role
   const hasRole = (role) => {
     return state.user?.role === role;
@@ -260,6 +283,7 @@ export const AuthProvider = ({ children }) => {
     updateProfile,
     changePassword,
     clearError,
+    setAuthData,
     hasRole,
     hasAnyRole
   };
