@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import { CartContext } from '../contexts/CartContext';
@@ -7,6 +7,8 @@ import { useCategories } from '../hooks/useCategories';
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
+  const [hoveredCategoryId, setHoveredCategoryId] = useState(null);
+  const [dropdownTimeout, setDropdownTimeout] = useState(null);
   const { user, logout } = useContext(AuthContext);
   const { items: cartItems, totalItems } = useContext(CartContext);
   const { categories } = useCategories();
@@ -17,7 +19,41 @@ const Navbar = () => {
     navigate('/');
   };
 
+  // Helper functions for dropdown behavior
+  const handleDropdownEnter = () => {
+    if (dropdownTimeout) {
+      clearTimeout(dropdownTimeout);
+      setDropdownTimeout(null);
+    }
+    setIsProductsDropdownOpen(true);
+  };
+
+  const handleDropdownLeave = () => {
+    const timeout = setTimeout(() => {
+      setIsProductsDropdownOpen(false);
+      setHoveredCategoryId(null);
+    }, 150); // Small delay to allow mouse movement
+    setDropdownTimeout(timeout);
+  };
+
+  const handleCategoryEnter = (categoryId) => {
+    setHoveredCategoryId(categoryId);
+  };
+
+  const handleCategoryLeave = () => {
+    // Don't immediately hide subcategory, let the main dropdown handle it
+  };
+
   const cartItemCount = totalItems || cartItems?.length || 0;
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (dropdownTimeout) {
+        clearTimeout(dropdownTimeout);
+      }
+    };
+  }, [dropdownTimeout]);
 
   return (
     <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
@@ -47,8 +83,8 @@ const Navbar = () => {
             {/* Products with Categories Dropdown */}
             <div className="relative">
               <button
-                onMouseEnter={() => setIsProductsDropdownOpen(true)}
-                onMouseLeave={() => setIsProductsDropdownOpen(false)}
+                onMouseEnter={handleDropdownEnter}
+                onMouseLeave={handleDropdownLeave}
                 className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
               >
                 Products
@@ -59,14 +95,14 @@ const Navbar = () => {
 
               {isProductsDropdownOpen && (
                 <div 
-                  className="absolute left-0 mt-2 w-64 bg-white rounded-md shadow-lg py-2 z-50"
-                  onMouseEnter={() => setIsProductsDropdownOpen(true)}
-                  onMouseLeave={() => setIsProductsDropdownOpen(false)}
+                  className="absolute left-0 mt-1 w-72 bg-white rounded-md shadow-lg py-2 z-50 border border-gray-200"
+                  onMouseEnter={handleDropdownEnter}
+                  onMouseLeave={handleDropdownLeave}
                 >
                   {/* All Products Link */}
                   <Link
                     to="/products"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 font-medium"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 font-medium transition-colors"
                   >
                     All Products
                   </Link>
@@ -79,32 +115,44 @@ const Navbar = () => {
                   {/* Categories */}
                   {categories.map((category) => (
                     <div key={category._id} className="relative">
-                      <Link
-                        to={`/products?category=${category.slug}`}
-                        className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      <div
+                        onMouseEnter={() => handleCategoryEnter(category._id)}
+                        onMouseLeave={handleCategoryLeave}
+                        className="relative"
                       >
-                        <span>{category.name}</span>
-                        {category.subcategories && category.subcategories.length > 0 && (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
+                        <Link
+                          to={`/products?category=${category.slug}`}
+                          className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                        >
+                          <span>{category.name}</span>
+                          {category.subcategories && category.subcategories.length > 0 && (
+                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          )}
+                        </Link>
+                        
+                        {/* Subcategories Dropdown */}
+                        {category.subcategories && 
+                         category.subcategories.length > 0 && 
+                         hoveredCategoryId === category._id && (
+                          <div 
+                            className="absolute left-full top-0 w-56 bg-white rounded-md shadow-lg py-2 z-50 border border-gray-200"
+                            onMouseEnter={() => handleCategoryEnter(category._id)}
+                            onMouseLeave={handleCategoryLeave}
+                          >
+                            {category.subcategories.map((subcategory) => (
+                              <Link
+                                key={subcategory._id}
+                                to={`/products?category=${subcategory.slug}`}
+                                className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                              >
+                                {subcategory.name}
+                              </Link>
+                            ))}
+                          </div>
                         )}
-                      </Link>
-                      
-                      {/* Subcategories */}
-                      {category.subcategories && category.subcategories.length > 0 && (
-                        <div className="ml-4 border-l border-gray-200">
-                          {category.subcategories.map((subcategory) => (
-                            <Link
-                              key={subcategory._id}
-                              to={`/products?category=${subcategory.slug}`}
-                              className="block px-4 py-1.5 text-xs text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                            >
-                              {subcategory.name}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
+                      </div>
                     </div>
                   ))}
                 </div>
