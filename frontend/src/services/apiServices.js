@@ -48,12 +48,6 @@ export const authAPI = {
   resetPassword: async (token, password) => {
     const response = await api.put(`/auth/reset-password/${token}`, { password });
     return response.data;
-  },
-
-  // Google OAuth login
-  googleLogin: async (idToken) => {
-    const response = await api.post('/auth/google', { idToken });
-    return response.data;
   }
 };
 

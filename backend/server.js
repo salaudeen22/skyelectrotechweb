@@ -62,7 +62,7 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // Log environment info on startup
 console.log('Environment:', process.env.NODE_ENV || 'development');
-console.log('Port:', process.env.PORT || 5001);
+console.log('Port:', process.env.PORT || 5000);
 console.log('Frontend URL:', process.env.FRONTEND_URL);
 console.log('MongoDB URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
 

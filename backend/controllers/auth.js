@@ -1,11 +1,7 @@
 const User = require('../models/User');
 const { generateToken } = require('../utils/jwt');
 const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
-const { OAuth2Client } = require('google-auth-library');
 const crypto = require('crypto');
-
-// Initialize Google OAuth client
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -199,76 +195,6 @@ const resetPassword = asyncHandler(async (req, res) => {
   sendResponse(res, 200, null, 'Password reset successful');
 });
 
-// @desc    Google OAuth login
-// @route   POST /api/auth/google
-// @access  Public
-const googleLogin = asyncHandler(async (req, res) => {
-  const { idToken } = req.body;
-
-  if (!idToken) {
-    return sendError(res, 400, 'Google ID token is required');
-  }
-
-  try {
-    // Verify the Google ID token
-    const ticket = await googleClient.verifyIdToken({
-      idToken,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-
-    const payload = ticket.getPayload();
-    const { sub: googleId, email, name, picture } = payload;
-
-    // Check if user already exists
-    let user = await User.findOne({ 
-      $or: [
-        { email },
-        { googleId }
-      ]
-    });
-
-    if (user) {
-      // Update user with Google data if missing
-      if (!user.googleId) {
-        user.googleId = googleId;
-        user.avatar = picture;
-        await user.save();
-      }
-      
-      // Update last login
-      await user.updateLastLogin();
-    } else {
-      // Create new user
-      user = await User.create({
-        name,
-        email,
-        googleId,
-        avatar: picture,
-        role: 'user',
-        isActive: true,
-        isEmailVerified: true, // Google accounts are pre-verified
-        lastLogin: new Date()
-      });
-    }
-
-    // Generate token
-    const token = generateToken(user._id);
-
-    // Remove sensitive fields from response
-    user.password = undefined;
-    user.googleId = undefined;
-
-    sendResponse(res, 200, {
-      user,
-      token
-    }, 'Google login successful');
-
-  } catch (error) {
-    console.error('Google OAuth error:', error);
-    return sendError(res, 400, 'Invalid Google token');
-  }
-});
-
 module.exports = {
   register,
   login,
@@ -277,6 +203,5 @@ module.exports = {
   updateProfile,
   changePassword,
   forgotPassword,
-  resetPassword,
-  googleLogin
+  resetPassword
 };

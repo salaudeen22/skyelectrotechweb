@@ -2,7 +2,6 @@ import React, { createContext, useReducer, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { authAPI } from '../services/apiServices';
 import toast from 'react-hot-toast';
-import googleIdentityService from '../services/googleAuth';
 
 // Initial state
 const initialState = {
@@ -243,40 +242,6 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
   };
 
-  // Google OAuth login
-  const googleLogin = async () => {
-    try {
-      dispatch({ type: AUTH_ACTIONS.LOGIN_START });
-      
-      // Get Google user data
-      const googleUser = await googleIdentityService.signInWithCredential();
-      
-      // Send ID token to backend for verification
-      const response = await authAPI.googleLogin(googleUser.idToken);
-      const { user, token } = response.data;
-
-      // Store token and user in cookies
-      Cookies.set('token', token, { expires: 30 });
-      Cookies.set('user', JSON.stringify(user), { expires: 30 });
-
-      dispatch({
-        type: AUTH_ACTIONS.LOGIN_SUCCESS,
-        payload: { user, token }
-      });
-
-      toast.success('Google login successful!');
-      return { success: true, user };
-    } catch (error) {
-      const message = error.message || 'Google login failed';
-      dispatch({
-        type: AUTH_ACTIONS.LOGIN_FAILURE,
-        payload: message
-      });
-      toast.error(message);
-      return { success: false, error: message };
-    }
-  };
-
   // Check if user has specific role
   const hasRole = (role) => {
     return state.user?.role === role;
@@ -295,7 +260,6 @@ export const AuthProvider = ({ children }) => {
     updateProfile,
     changePassword,
     clearError,
-    googleLogin,
     hasRole,
     hasAnyRole
   };

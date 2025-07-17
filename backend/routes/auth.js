@@ -8,8 +8,7 @@ const {
   updateProfile, 
   changePassword,
   forgotPassword,
-  resetPassword,
-  googleLogin
+  resetPassword
 } = require('../controllers/auth');
 const { auth } = require('../middleware/auth');
 const validate = require('../middleware/validate');
@@ -87,9 +86,6 @@ const changePasswordValidation = [
 // Routes
 router.post('/register', registerValidation, validate, register);
 router.post('/login', loginValidation, validate, logActivity('login', 'system'), login);
-router.post('/google', [
-  body('idToken').notEmpty().withMessage('Google ID token is required')
-], validate, logActivity('google_login', 'system'), googleLogin);
 router.post('/logout', auth, logActivity('logout', 'system'), logout);
 router.get('/me', auth, getMe);
 router.put('/profile', auth, updateProfileValidation, validate, updateProfile);
