@@ -1,7 +1,6 @@
-import React, { useState, useMemo, useEffect, useContext } from 'react';
-import { FaPlus, FaSearch, FaPencilAlt, FaTrashAlt, FaShoppingCart, FaUpload, FaCog } from 'react-icons/fa';
+import React, { useState, useMemo, useEffect } from 'react';
+import { FaPlus, FaSearch, FaPencilAlt, FaTrashAlt, FaUpload, FaCog, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { productsAPI } from '../services/apiServices';
-import { CartContext } from '../contexts/CartContext';
 import toast from 'react-hot-toast';
 import ProductForm from './ProductForm';
 import BulkUpload from './BulkUpload';
@@ -23,7 +22,8 @@ const ProductManagement = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedProducts, setSelectedProducts] = useState([]);
-    const { addToCart } = useContext(CartContext);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
 
     useEffect(() => {
         fetchProducts();
@@ -49,7 +49,25 @@ const ProductManagement = () => {
             p.category?.name?.toLowerCase().includes(searchTerm.toLowerCase())
         ),
         [products, searchTerm]
-    );    const handleOpenProductForm = (productId = null) => {
+    );
+
+    // Pagination logic
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const paginatedProducts = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        return filteredProducts.slice(startIndex, endIndex);
+    }, [filteredProducts, currentPage, itemsPerPage]);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        setSelectedProducts([]); // Clear selections when changing pages
+    };
+
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1); // Reset to first page when searching
+    };    const handleOpenProductForm = (productId = null) => {
         setEditingProductId(productId);
         setShowProductForm(true);
     };
@@ -99,20 +117,18 @@ const ProductManagement = () => {
     };
 
     const handleSelectAll = () => {
-        if (selectedProducts.length === filteredProducts.length) {
-            setSelectedProducts([]);
+        const currentPageProductIds = paginatedProducts.map(p => p._id);
+        const allCurrentPageSelected = currentPageProductIds.every(id => selectedProducts.includes(id));
+        
+        if (allCurrentPageSelected) {
+            // Deselect all products on current page
+            setSelectedProducts(prev => prev.filter(id => !currentPageProductIds.includes(id)));
         } else {
-            setSelectedProducts(filteredProducts.map(p => p._id));
-        }
-    };
-
-    const handleAddToCart = (product) => {
-        try {
-            addToCart(product, 1);
-            toast.success(`${product.name} added to cart!`);
-        } catch (error) {
-            console.error('Error adding to cart:', error);
-            toast.error('Failed to add product to cart');
+            // Select all products on current page
+            setSelectedProducts(prev => [
+                ...prev.filter(id => !currentPageProductIds.includes(id)), // Remove any existing from current page
+                ...currentPageProductIds // Add all from current page
+            ]);
         }
     };
 
@@ -197,7 +213,7 @@ const ProductManagement = () => {
                         type="text" 
                         placeholder="Search products by name, brand, or category..." 
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={handleSearchChange}
                         className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </div>
@@ -211,7 +227,7 @@ const ProductManagement = () => {
                                 <th className="px-3 py-3 text-center">
                                     <input
                                         type="checkbox"
-                                        checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
+                                        checked={paginatedProducts.length > 0 && paginatedProducts.every(p => selectedProducts.includes(p._id))}
                                         onChange={handleSelectAll}
                                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                     />
@@ -224,7 +240,7 @@ const ProductManagement = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200">
-                            {filteredProducts.map((product) => (
+                            {paginatedProducts.map((product) => (
                                 <tr key={product._id} className="hover:bg-slate-50">
                                     <td className="px-3 py-4 text-center">
                                         <input
@@ -288,14 +304,6 @@ const ProductManagement = () => {
                                                 <FaPencilAlt className="w-3 h-3 sm:w-4 sm:h-4" />
                                             </button>
                                             <button 
-                                                onClick={() => handleAddToCart(product)}
-                                                className="text-green-600 hover:text-green-900 p-1 sm:p-2" 
-                                                title="Add to Cart"
-                                                disabled={product.stock === 0}
-                                            >
-                                                <FaShoppingCart className="w-3 h-3 sm:w-4 sm:h-4" />
-                                            </button>
-                                            <button 
                                                 onClick={() => handleDeleteProduct(product._id)}
                                                 className="text-red-600 hover:text-red-900 p-1 sm:p-2" 
                                                 title="Delete"
@@ -315,6 +323,68 @@ const ProductManagement = () => {
                         </div>
                     )}
                 </div>
+                
+                {/* Pagination Controls */}
+                {filteredProducts.length > 0 && (
+                    <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
+                        <div className="text-sm text-slate-500">
+                            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} products
+                        </div>
+                        
+                        {totalPages > 1 && (
+                            <div className="flex items-center space-x-2">
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="px-3 py-1 text-sm border border-slate-300 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                >
+                                    <FaChevronLeft className="w-3 h-3 mr-1" />
+                                    Previous
+                                </button>
+                                
+                                <div className="flex items-center space-x-1">
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                                        // Show first page, last page, current page, and pages around current
+                                        const showPage = page === 1 || 
+                                                        page === totalPages || 
+                                                        (page >= currentPage - 1 && page <= currentPage + 1);
+                                        
+                                        if (!showPage) {
+                                            // Show ellipsis if there's a gap
+                                            if (page === currentPage - 2 || page === currentPage + 2) {
+                                                return <span key={page} className="px-2 text-slate-400">...</span>;
+                                            }
+                                            return null;
+                                        }
+                                        
+                                        return (
+                                            <button
+                                                key={page}
+                                                onClick={() => handlePageChange(page)}
+                                                className={`px-3 py-1 text-sm border rounded-md ${
+                                                    currentPage === page
+                                                        ? 'bg-blue-600 text-white border-blue-600'
+                                                        : 'border-slate-300 hover:bg-slate-50'
+                                                }`}
+                                            >
+                                                {page}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className="px-3 py-1 text-sm border border-slate-300 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                >
+                                    Next
+                                    <FaChevronRight className="w-3 h-3 ml-1" />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Product Form Modal */}
