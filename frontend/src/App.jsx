@@ -27,6 +27,8 @@ import Profile from './User/Profile';
 import Login from './Auth/Login';
 import Register from './Auth/Register';
 import AuthCallback from './Auth/AuthCallback';
+import ForgotPassword from './Auth/ForgotPassword';
+import ResetPassword from './Auth/ResetPassword';
 
 // Admin Pages
 import AdminDashboard from './Admin/AdminDashboard';
@@ -92,6 +94,8 @@ const App = () => {
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
                   <Route path="callback" element={<AuthCallback />} />
+                  <Route path="forgot-password" element={<ForgotPassword />} />
+                  <Route path="reset-password" element={<ResetPassword />} />
                 </Route>
 
                 {/* Protected User Routes */}

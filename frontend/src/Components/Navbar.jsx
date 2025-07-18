@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import { CartContext } from '../contexts/CartContext';
 import { useCategories } from '../hooks/useCategories';
+import { IoCartOutline } from 'react-icons/io5';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -167,9 +168,7 @@ const Navbar = () => {
                     to="/user/cart" 
                     className="relative text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m-2.4 8L3 3v0m0 0h18M7 13v8a2 2 0 002 2h8a2 2 0 002-2v-8" />
-                    </svg>
+                    <IoCartOutline className="w-6 h-6" />
                     {cartItemCount > 0 && (
                       <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
                         {cartItemCount > 99 ? '99+' : cartItemCount}

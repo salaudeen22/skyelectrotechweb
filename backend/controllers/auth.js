@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const { generateToken } = require('../utils/jwt');
 const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
+const { sendWelcomeEmail, sendForgotPasswordEmail } = require('../utils/email');
 const crypto = require('crypto');
 const passport = require('../config/passport');
 
@@ -46,6 +47,14 @@ const register = asyncHandler(async (req, res) => {
 
   // Remove password from response
   user.password = undefined;
+
+  // Send welcome email (don't wait for it to complete)
+  try {
+    await sendWelcomeEmail(user.email, user.name);
+  } catch (emailError) {
+    console.error('Failed to send welcome email:', emailError);
+    // Don't fail registration if email fails
+  }
 
   sendResponse(res, 201, {
     user,
@@ -174,11 +183,20 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
   await user.save();
 
-  // In a real application, send email with reset link
-  // For now, we'll return the token (not recommended for production)
-  sendResponse(res, 200, { 
-    resetToken 
-  }, 'Password reset token generated. Check your email.');
+  // Send password reset email
+  try {
+    await sendForgotPasswordEmail(user.email, user.name, resetToken);
+    sendResponse(res, 200, null, 'Password reset email sent successfully');
+  } catch (emailError) {
+    console.error('Failed to send password reset email:', emailError);
+    
+    // Reset the token fields if email fails
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+    
+    return sendError(res, 500, 'Failed to send password reset email. Please try again.');
+  }
 });
 
 // @desc    Reset password

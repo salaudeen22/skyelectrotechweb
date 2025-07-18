@@ -368,3 +368,14 @@ export const uploadAPI = {
     return response.data;
   }
 };
+
+// Export aliases for backward compatibility
+export const authServices = authAPI;
+export const productServices = productsAPI;
+export const categoryServices = categoriesAPI;
+export const orderServices = ordersAPI;
+export const cartServices = cartAPI;
+export const wishlistServices = wishlistAPI;
+export const userServices = usersAPI;
+export const analyticsServices = analyticsAPI;
+export const uploadServices = uploadAPI;
