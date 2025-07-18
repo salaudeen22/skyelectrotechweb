@@ -401,6 +401,59 @@ export const uploadAPI = {
   }
 };
 
+// Bulk Upload API
+export const bulkUploadAPI = {
+  // Download CSV template
+  downloadTemplate: async () => {
+    const response = await api.get('/bulk-upload/template', {
+      responseType: 'blob',
+    });
+    return response;
+  },
+
+  // Export existing products to CSV
+  exportProducts: async () => {
+    const response = await api.get('/bulk-upload/export', {
+      responseType: 'blob',
+    });
+    return response;
+  },
+
+  // Get database statistics
+  getDatabaseStats: async () => {
+    const response = await api.get('/bulk-upload/stats');
+    return response.data;
+  },
+
+  // Bulk upload products from CSV
+  uploadProducts: async (csvFile, onProgress) => {
+    const formData = new FormData();
+    formData.append('csvFile', csvFile);
+
+    const response = await api.post('/bulk-upload/products', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: onProgress,
+    });
+    return response.data;
+  },
+
+  // Bulk update products
+  updateProducts: async (updates) => {
+    const response = await api.put('/bulk-upload/products', { updates });
+    return response.data;
+  },
+
+  // Bulk delete products
+  deleteProducts: async (productIds) => {
+    const response = await api.delete('/bulk-upload/products', {
+      data: { productIds }
+    });
+    return response.data;
+  }
+};
+
 // Export aliases for backward compatibility
 export const authServices = authAPI;
 export const productServices = productsAPI;
@@ -411,3 +464,4 @@ export const wishlistServices = wishlistAPI;
 export const userServices = usersAPI;
 export const analyticsServices = analyticsAPI;
 export const uploadServices = uploadAPI;
+export const bulkUploadServices = bulkUploadAPI;

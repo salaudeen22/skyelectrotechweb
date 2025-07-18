@@ -1,9 +1,11 @@
 import React, { useState, useMemo, useEffect, useContext } from 'react';
-import { FaPlus, FaSearch, FaPencilAlt, FaTrashAlt, FaShoppingCart } from 'react-icons/fa';
+import { FaPlus, FaSearch, FaPencilAlt, FaTrashAlt, FaShoppingCart, FaUpload, FaCog } from 'react-icons/fa';
 import { productsAPI } from '../services/apiServices';
 import { CartContext } from '../contexts/CartContext';
 import toast from 'react-hot-toast';
 import ProductForm from './ProductForm';
+import BulkUpload from './BulkUpload';
+import BulkActions from './BulkActions';
 
 
 const StockStatusBadge = ({ stock }) => {
@@ -15,9 +17,12 @@ const StockStatusBadge = ({ stock }) => {
 const ProductManagement = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [showProductForm, setShowProductForm] = useState(false);
+    const [showBulkUpload, setShowBulkUpload] = useState(false);
+    const [showBulkActions, setShowBulkActions] = useState(false);
     const [editingProductId, setEditingProductId] = useState(null);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedProducts, setSelectedProducts] = useState([]);
     const { addToCart } = useContext(CartContext);
 
     useEffect(() => {
@@ -57,6 +62,48 @@ const ProductManagement = () => {
     const handleSaveProduct = () => {
         handleCloseProductForm();
         fetchProducts(); // Refresh the products list
+    };
+
+    const handleOpenBulkUpload = () => {
+        setShowBulkUpload(true);
+    };
+
+    const handleCloseBulkUpload = () => {
+        setShowBulkUpload(false);
+    };
+
+    const handleBulkUploadSuccess = () => {
+        fetchProducts(); // Refresh the products list
+    };
+
+    const handleOpenBulkActions = () => {
+        setShowBulkActions(true);
+    };
+
+    const handleCloseBulkActions = () => {
+        setShowBulkActions(false);
+        setSelectedProducts([]);
+    };
+
+    const handleBulkActionsSuccess = () => {
+        fetchProducts(); // Refresh the products list
+        setSelectedProducts([]);
+    };
+
+    const handleSelectProduct = (productId) => {
+        setSelectedProducts(prev => 
+            prev.includes(productId) 
+                ? prev.filter(id => id !== productId)
+                : [...prev, productId]
+        );
+    };
+
+    const handleSelectAll = () => {
+        if (selectedProducts.length === filteredProducts.length) {
+            setSelectedProducts([]);
+        } else {
+            setSelectedProducts(filteredProducts.map(p => p._id));
+        }
     };
 
     const handleAddToCart = (product) => {
@@ -119,12 +166,28 @@ const ProductManagement = () => {
                         Add, edit, and manage all products. Total: {products.length} products
                     </p>
                 </div>
-                <button 
-                    onClick={() => handleOpenProductForm()} 
-                    className="flex items-center justify-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors whitespace-nowrap"
-                >
-                    <FaPlus className="mr-2" /> Add New Product
-                </button>
+                <div className="flex flex-col sm:flex-row gap-2">
+                    {selectedProducts.length > 0 && (
+                        <button 
+                            onClick={handleOpenBulkActions}
+                            className="flex items-center justify-center bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-purple-700 transition-colors whitespace-nowrap"
+                        >
+                            <FaCog className="mr-2" /> Bulk Actions ({selectedProducts.length})
+                        </button>
+                    )}
+                    <button 
+                        onClick={handleOpenBulkUpload}
+                        className="flex items-center justify-center bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition-colors whitespace-nowrap"
+                    >
+                        <FaUpload className="mr-2" /> Bulk Upload
+                    </button>
+                    <button 
+                        onClick={() => handleOpenProductForm()} 
+                        className="flex items-center justify-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors whitespace-nowrap"
+                    >
+                        <FaPlus className="mr-2" /> Add New Product
+                    </button>
+                </div>
             </div>
 
             <div className="bg-white p-4 rounded-lg shadow-lg">
@@ -145,6 +208,14 @@ const ProductManagement = () => {
                     <table className="w-full">
                         <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
+                                <th className="px-3 py-3 text-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedProducts.length === filteredProducts.length && filteredProducts.length > 0}
+                                        onChange={handleSelectAll}
+                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    />
+                                </th>
                                 <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Product</th>
                                 <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider hidden sm:table-cell">Category</th>
                                 <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Price</th>
@@ -155,6 +226,14 @@ const ProductManagement = () => {
                         <tbody className="divide-y divide-slate-200">
                             {filteredProducts.map((product) => (
                                 <tr key={product._id} className="hover:bg-slate-50">
+                                    <td className="px-3 py-4 text-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedProducts.includes(product._id)}
+                                            onChange={() => handleSelectProduct(product._id)}
+                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        />
+                                    </td>
                                     <td className="px-3 sm:px-6 py-4">
                                         <div className="flex items-center">
                                             <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-md bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -244,6 +323,24 @@ const ProductManagement = () => {
                     productId={editingProductId}
                     onClose={handleCloseProductForm}
                     onSuccess={handleSaveProduct}
+                />
+            )}
+
+            {/* Bulk Upload Modal */}
+            {showBulkUpload && (
+                <BulkUpload
+                    onClose={handleCloseBulkUpload}
+                    onSuccess={handleBulkUploadSuccess}
+                />
+            )}
+
+            {/* Bulk Actions Modal */}
+            {showBulkActions && (
+                <BulkActions
+                    selectedProducts={selectedProducts}
+                    products={products}
+                    onClose={handleCloseBulkActions}
+                    onSuccess={handleBulkActionsSuccess}
                 />
             )}
         </div>
