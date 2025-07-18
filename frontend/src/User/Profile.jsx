@@ -1,16 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { FiUser, FiMail, FiPhone, FiMapPin, FiEdit2, FiSave, FiX, FiLock, FiPackage, FiHeart } from 'react-icons/fi';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FiUser, FiMail, FiPhone, FiMapPin, FiEdit2, FiSave, FiX, FiLock, FiPackage, FiHeart, FiPlus, FiTrash2, FiStar } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
-import { toast } from 'react-hot-toast';
 
 const Profile = () => {
-  const { user, updateProfile } = useAuth();
+  const navigate = useNavigate();
+  const { 
+    user, 
+    requestProfileUpdateOTP, 
+    updateProfile, 
+    getAddresses, 
+    addAddress, 
+    updateAddress, 
+    deleteAddress, 
+    setDefaultAddress 
+  } = useAuth();
+  
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [showAddresses, setShowAddresses] = useState(false);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
+  const [addresses, setAddresses] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
+    otp: '',
     address: {
       street: '',
       city: '',
@@ -19,23 +36,56 @@ const Profile = () => {
       country: ''
     }
   });
+  const [addressFormData, setAddressFormData] = useState({
+    name: '',
+    street: '',
+    city: '',
+    state: '',
+    country: 'India',
+    zipCode: '',
+    isDefault: false
+  });
+
+
+  // Get default address from addresses array
+  const defaultAddress = addresses.find(addr => addr.isDefault) || addresses[0];
 
   useEffect(() => {
     if (user) {
       setFormData({
-        name: user.name || '',
+        fullName: user.fullName || '',
         email: user.email || '',
         phone: user.phone || '',
         address: {
-          street: user.address?.street || '',
-          city: user.address?.city || '',
-          state: user.address?.state || '',
-          zipCode: user.address?.zipCode || '',
-          country: user.address?.country || 'India'
+          street: defaultAddress?.street || '',
+          city: defaultAddress?.city || '',
+          state: defaultAddress?.state || '',
+          zipCode: defaultAddress?.zipCode || '',
+          country: defaultAddress?.country || 'India'
         }
       });
     }
-  }, [user]);
+  }, [user, defaultAddress]);
+
+  const fetchAddresses = useCallback(async () => {
+    const result = await getAddresses();
+    if (result.success) {
+      setAddresses(result.data);
+    }
+  }, [getAddresses]);
+
+  useEffect(() => {
+    if (showAddresses) {
+      fetchAddresses();
+    }
+  }, [showAddresses, fetchAddresses]);
+
+  // Fetch addresses on component mount to get default address
+  useEffect(() => {
+    if (user) {
+      fetchAddresses();
+    }
+  }, [user, fetchAddresses]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -56,15 +106,32 @@ const Profile = () => {
     }
   };
 
+  const handleAddressFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setAddressFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleRequestOTP = async () => {
+    const result = await requestProfileUpdateOTP();
+    if (result.success) {
+      setOtpSent(true);
+    }
+  };
+
   const handleSave = async () => {
     try {
       setLoading(true);
-      await updateProfile(formData);
-      setIsEditing(false);
-      toast.success('Profile updated successfully');
+      const result = await updateProfile(formData);
+      if (result.success) {
+        setIsEditing(false);
+        setOtpSent(false);
+        setFormData(prev => ({ ...prev, otp: '' }));
+      }
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
     } finally {
       setLoading(false);
     }
@@ -77,6 +144,7 @@ const Profile = () => {
         name: user.name || '',
         email: user.email || '',
         phone: user.phone || '',
+        otp: '',
         address: {
           street: user.address?.street || '',
           city: user.address?.city || '',
@@ -87,6 +155,71 @@ const Profile = () => {
       });
     }
     setIsEditing(false);
+    setOtpSent(false);
+  };
+
+  const handleAddAddress = async () => {
+    // If this is the first address, ensure it's set as default
+    const finalAddressData = {
+      ...addressFormData,
+      isDefault: addressFormData.isDefault || addresses.length === 0
+    };
+    
+    const result = await addAddress(finalAddressData);
+    if (result.success) {
+      setShowAddressForm(false);
+      setAddressFormData({
+        name: '',
+        street: '',
+        city: '',
+        state: '',
+        country: 'India',
+        zipCode: '',
+        isDefault: false
+      });
+      fetchAddresses();
+    }
+  };
+
+  const handleUpdateAddress = async () => {
+    if (editingAddress) {
+      const result = await updateAddress(editingAddress.id, addressFormData);
+      if (result.success) {
+        setEditingAddress(null);
+        setShowAddressForm(false);
+        fetchAddresses();
+      }
+    }
+  };
+
+  const handleDeleteAddress = async (addressId) => {
+    if (window.confirm('Are you sure you want to delete this address?')) {
+      const result = await deleteAddress(addressId);
+      if (result.success) {
+        fetchAddresses();
+      }
+    }
+  };
+
+  const handleSetDefault = async (addressId) => {
+    const result = await setDefaultAddress(addressId);
+    if (result.success) {
+      fetchAddresses();
+    }
+  };
+
+  const startEditAddress = (address) => {
+    setEditingAddress(address);
+    setAddressFormData({
+      name: address.name,
+      street: address.street,
+      city: address.city,
+      state: address.state,
+      country: address.country,
+      zipCode: address.zipCode,
+      isDefault: address.isDefault
+    });
+    setShowAddressForm(true);
   };
 
   return (
@@ -113,22 +246,35 @@ const Profile = () => {
                       Edit
                     </button>
                   ) : (
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={handleSave}
-                        disabled={loading}
-                        className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
-                      >
-                        <FiSave className="w-4 h-4 mr-1" />
-                        {loading ? 'Saving...' : 'Save'}
-                      </button>
-                      <button
-                        onClick={handleCancel}
-                        className="flex items-center text-gray-600 hover:text-gray-700 px-4 py-2 rounded-lg font-medium"
-                      >
-                        <FiX className="w-4 h-4 mr-1" />
-                        Cancel
-                      </button>
+                    <div className="flex flex-col space-y-2">
+                      {!otpSent ? (
+                        <button
+                          onClick={handleRequestOTP}
+                          disabled={loading}
+                          className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
+                        >
+                          <FiMail className="w-4 h-4 mr-1" />
+                          {loading ? 'Sending OTP...' : 'Send OTP'}
+                        </button>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={handleSave}
+                            disabled={loading || !formData.otp}
+                            className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
+                          >
+                            <FiSave className="w-4 h-4 mr-1" />
+                            {loading ? 'Saving...' : 'Save'}
+                          </button>
+                          <button
+                            onClick={handleCancel}
+                            className="flex items-center text-gray-600 hover:text-gray-700 px-4 py-2 rounded-lg font-medium"
+                          >
+                            <FiX className="w-4 h-4 mr-1" />
+                            Cancel
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -188,6 +334,26 @@ const Profile = () => {
                     )}
                   </div>
 
+                  {isEditing && otpSent && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        OTP Verification
+                      </label>
+                      <input
+                        type="text"
+                        name="otp"
+                        value={formData.otp}
+                        onChange={handleInputChange}
+                        placeholder="Enter 6-digit OTP sent to your email"
+                        maxLength="6"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <p className="text-xs text-blue-600 mt-1">
+                        Check your email for the OTP. It expires in 10 minutes.
+                      </p>
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Member Since
@@ -220,7 +386,7 @@ const Profile = () => {
                       ) : (
                         <div className="flex items-center space-x-2">
                           <FiMapPin className="w-5 h-5 text-gray-400" />
-                          <span className="text-gray-900">{user?.address?.street || 'Not provided'}</span>
+                          <span className="text-gray-900">{defaultAddress?.street || 'Not provided'}</span>
                         </div>
                       )}
                     </div>
@@ -238,7 +404,7 @@ const Profile = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       ) : (
-                        <span className="text-gray-900">{user?.address?.city || 'Not provided'}</span>
+                        <span className="text-gray-900">{defaultAddress?.city || 'Not provided'}</span>
                       )}
                     </div>
 
@@ -255,7 +421,7 @@ const Profile = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       ) : (
-                        <span className="text-gray-900">{user?.address?.state || 'Not provided'}</span>
+                        <span className="text-gray-900">{defaultAddress?.state || 'Not provided'}</span>
                       )}
                     </div>
 
@@ -272,7 +438,7 @@ const Profile = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       ) : (
-                        <span className="text-gray-900">{user?.address?.zipCode || 'Not provided'}</span>
+                        <span className="text-gray-900">{defaultAddress?.zipCode || 'Not provided'}</span>
                       )}
                     </div>
 
@@ -294,7 +460,7 @@ const Profile = () => {
                           <option value="Australia">Australia</option>
                         </select>
                       ) : (
-                        <span className="text-gray-900">{user?.address?.country || 'Not provided'}</span>
+                        <span className="text-gray-900">{defaultAddress?.country || 'Not provided'}</span>
                       )}
                     </div>
                   </div>
@@ -322,23 +488,252 @@ const Profile = () => {
               </div>
             </div>
 
+            {/* Address Management */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  My Addresses
+                  {addresses.length > 0 && (
+                    <span className="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                      {addresses.length}
+                    </span>
+                  )}
+                </h3>
+                <button
+                  onClick={() => setShowAddresses(!showAddresses)}
+                  className="text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  {showAddresses ? 'Hide' : 'Manage'}
+                </button>
+              </div>
+
+              {showAddresses && (
+                <div className="space-y-4">
+                  <button
+                    onClick={() => setShowAddressForm(true)}
+                    className="w-full flex items-center justify-center p-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                  >
+                    <FiPlus className="w-5 h-5 mr-2 text-gray-400" />
+                    <span className="text-gray-600">Add New Address</span>
+                  </button>
+
+                  {addresses.length === 0 && (
+                    <div className="text-center py-8">
+                      <FiMapPin className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500 text-sm">No addresses saved yet</p>
+                      <p className="text-gray-400 text-xs mt-1">Add your first address to get started</p>
+                    </div>
+                  )}
+
+                  {addresses.map((address) => (
+                    <div key={address.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <h4 className="font-medium text-gray-900">{address.name}</h4>
+                            {address.isDefault && (
+                              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium flex items-center">
+                                <FiStar className="w-3 h-3 mr-1" />
+                                Default
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-gray-600 text-sm">
+                            {address.street}, {address.city}, {address.state} {address.zipCode}, {address.country}
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-4">
+                          {!address.isDefault && (
+                            <button
+                              onClick={() => handleSetDefault(address.id)}
+                              className="text-blue-600 hover:text-blue-700 text-sm"
+                            >
+                              Set Default
+                            </button>
+                          )}
+                          <button
+                            onClick={() => startEditAddress(address)}
+                            className="text-gray-600 hover:text-gray-700"
+                          >
+                            <FiEdit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAddress(address.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <FiTrash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Address Form Modal */}
+                  {showAddressForm && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                          {editingAddress ? 'Edit Address' : 'Add New Address'}
+                        </h3>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Address Name
+                            </label>
+                            <input
+                              type="text"
+                              name="name"
+                              value={addressFormData.name}
+                              onChange={handleAddressFormChange}
+                              placeholder="e.g., Home, Office"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Street Address
+                            </label>
+                            <input
+                              type="text"
+                              name="street"
+                              value={addressFormData.street}
+                              onChange={handleAddressFormChange}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                City
+                              </label>
+                              <input
+                                type="text"
+                                name="city"
+                                value={addressFormData.city}
+                                onChange={handleAddressFormChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                State
+                              </label>
+                              <input
+                                type="text"
+                                name="state"
+                                value={addressFormData.state}
+                                onChange={handleAddressFormChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                ZIP Code
+                              </label>
+                              <input
+                                type="text"
+                                name="zipCode"
+                                value={addressFormData.zipCode}
+                                onChange={handleAddressFormChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Country
+                              </label>
+                              <select
+                                name="country"
+                                value={addressFormData.country}
+                                onChange={handleAddressFormChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              >
+                                <option value="India">India</option>
+                                <option value="USA">United States</option>
+                                <option value="UK">United Kingdom</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Australia">Australia</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div className="flex items-center">
+                            <input
+                              type="checkbox"
+                              name="isDefault"
+                              checked={addressFormData.isDefault || addresses.length === 0}
+                              onChange={handleAddressFormChange}
+                              disabled={addresses.length === 0}
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <label className="ml-2 text-sm text-gray-700">
+                              Set as default address
+                              {addresses.length === 0 && (
+                                <span className="text-blue-600"> (First address will be default)</span>
+                              )}
+                            </label>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-end space-x-3 mt-6">
+                          <button
+                            onClick={() => {
+                              setShowAddressForm(false);
+                              setEditingAddress(null);
+                            }}
+                            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={editingAddress ? handleUpdateAddress : handleAddAddress}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                          >
+                            {editingAddress ? 'Update' : 'Add'} Address
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* Quick Actions */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
               <div className="space-y-3">
-                <button className="w-full flex items-center justify-between text-left p-3 rounded-lg hover:bg-gray-50 border border-gray-200">
+                <button 
+                  onClick={() => setShowAddresses(true)}
+                  className="w-full flex items-center justify-between text-left p-3 rounded-lg hover:bg-gray-50 border border-gray-200"
+                >
+                  <div className="flex items-center space-x-3">
+                    <FiMapPin className="w-5 h-5 text-gray-400" />
+                    <span className="text-gray-700">Manage Addresses</span>
+                  </div>
+                </button>
+                <button 
+                  onClick={() => navigate('/auth/change-password')}
+                  className="w-full flex items-center justify-between text-left p-3 rounded-lg hover:bg-gray-50 border border-gray-200"
+                >
                   <div className="flex items-center space-x-3">
                     <FiLock className="w-5 h-5 text-gray-400" />
                     <span className="text-gray-700">Change Password</span>
                   </div>
                 </button>
-                <button className="w-full flex items-center justify-between text-left p-3 rounded-lg hover:bg-gray-50 border border-gray-200">
+                <button 
+                  onClick={() => navigate('/orders')}
+                  className="w-full flex items-center justify-between text-left p-3 rounded-lg hover:bg-gray-50 border border-gray-200"
+                >
                   <div className="flex items-center space-x-3">
                     <FiPackage className="w-5 h-5 text-gray-400" />
                     <span className="text-gray-700">Order History</span>
                   </div>
                 </button>
-                <button className="w-full flex items-center justify-between text-left p-3 rounded-lg hover:bg-gray-50 border border-gray-200">
+                <button 
+                  onClick={() => navigate('/wishlist')}
+                  className="w-full flex items-center justify-between text-left p-3 rounded-lg hover:bg-gray-50 border border-gray-200"
+                >
                   <div className="flex items-center space-x-3">
                     <FiHeart className="w-5 h-5 text-gray-400" />
                     <span className="text-gray-700">Wishlist</span>

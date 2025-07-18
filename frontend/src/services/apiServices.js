@@ -26,9 +26,41 @@ export const authAPI = {
     return response.data;
   },
 
-  // Update profile
+  // Request OTP for profile update
+  requestProfileUpdateOTP: async () => {
+    const response = await api.post('/auth/profile/request-otp');
+    return response.data;
+  },
+
+  // Update profile with OTP
   updateProfile: async (userData) => {
     const response = await api.put('/auth/profile', userData);
+    return response.data;
+  },
+
+  // Address management
+  getAddresses: async () => {
+    const response = await api.get('/auth/addresses');
+    return response.data;
+  },
+
+  addAddress: async (addressData) => {
+    const response = await api.post('/auth/addresses', addressData);
+    return response.data;
+  },
+
+  updateAddress: async (addressId, addressData) => {
+    const response = await api.put(`/auth/addresses/${addressId}`, addressData);
+    return response.data;
+  },
+
+  deleteAddress: async (addressId) => {
+    const response = await api.delete(`/auth/addresses/${addressId}`);
+    return response.data;
+  },
+
+  setDefaultAddress: async (addressId) => {
+    const response = await api.put(`/auth/addresses/${addressId}/default`);
     return response.data;
   },
 

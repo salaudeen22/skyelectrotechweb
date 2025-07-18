@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiShoppingCart, FiHeart } from 'react-icons/fi';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
+import { wishlistAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, showWishlistButton = true }) => {
   const { addToCart, addingToCart } = useCart();
   const { isAuthenticated, user } = useAuth();
+  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
@@ -33,7 +35,7 @@ const ProductCard = ({ product }) => {
     }
   };
 
-  const handleAddToWishlist = (e) => {
+  const handleAddToWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -48,20 +50,33 @@ const ProductCard = ({ product }) => {
       return;
     }
     
-    // TODO: Implement wishlist functionality
-    toast.success('Added to wishlist!');
+    try {
+      setIsAddingToWishlist(true);
+      await wishlistAPI.addToWishlist(product._id);
+      toast.success('Added to wishlist!');
+    } catch (error) {
+      console.error('Wishlist error:', error);
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error('Failed to add to wishlist');
+      }
+    } finally {
+      setIsAddingToWishlist(false);
+    }
   };
 
   return (
     <div className="group relative bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 flex flex-col">
       
       {/* Wishlist Button - Only show for regular users */}
-      {isAuthenticated && user?.role === 'user' && (
+      {isAuthenticated && user?.role === 'user' && showWishlistButton && (
         <button
           onClick={handleAddToWishlist}
-          className="absolute top-3 right-3 z-10 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-50"
+          disabled={isAddingToWishlist}
+          className="absolute top-3 right-3 z-10 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-50 disabled:opacity-50"
         >
-          <FiHeart className="h-4 w-4 text-gray-600 hover:text-red-500" />
+          <FiHeart className={`h-4 w-4 ${isAddingToWishlist ? 'text-red-500 animate-pulse' : 'text-gray-600 hover:text-red-500'}`} />
         </button>
       )}
 

@@ -381,6 +381,147 @@ const getForgotPasswordEmailTemplate = (userName, resetUrl) => {
   };
 };
 
+// Email template for OTP verification
+const getOTPEmailTemplate = (userName, otpCode, purpose = 'profile update') => {
+  const purposeText = {
+    'profile_update': 'verify your profile update',
+    'phone_verification': 'verify your phone number',
+    'email_verification': 'verify your email address'
+  };
+
+  return {
+    subject: `OTP Verification - SkyElectroTech`,
+    html: `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+        <title>OTP Verification</title>
+        <style>
+          :root {
+            --primary-color: #3b82f6;
+            --background-color: #f4f7f9;
+            --text-color: #334155;
+            --card-background: #ffffff;
+            --footer-text: #94a3b8;
+          }
+          body {
+            font-family: 'Poppins', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--card-background);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+          }
+          .header {
+            background-color: #1f2937;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+          }
+          .content {
+            padding: 30px;
+          }
+          .otp-box {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 12px;
+            margin: 20px 0;
+          }
+          .otp-code {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 8px;
+            margin: 15px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            display: inline-block;
+          }
+          .notice {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+          }
+          .footer {
+            background-color: #f8fafc;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+          }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>SkyElectroTech</h1>
+                <p>OTP Verification</p>
+            </div>
+            <div class="content">
+                <h2>Hello ${userName}!</h2>
+                <p>We received a request to ${purposeText[purpose] || purpose}. Please use the OTP code below to complete the verification:</p>
+                
+                <div class="otp-box">
+                    <p style="margin: 0; font-size: 18px;">Your OTP Code:</p>
+                    <div class="otp-code">${otpCode}</div>
+                    <p style="margin: 0; font-size: 14px; opacity: 0.9;">This code expires in 10 minutes</p>
+                </div>
+
+                <div class="notice">
+                    <strong>Security Notice:</strong> Never share this OTP with anyone. Our team will never ask for your OTP via email or phone.
+                </div>
+
+                <p>If you didn't request this verification, please ignore this email or contact our support team.</p>
+            </div>
+            <div class="footer">
+                <p style="color: var(--footer-text); margin: 0;">
+                    © 2024 SkyElectroTech. All rights reserved.<br>
+                    This is an automated message, please do not reply.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `,
+    text: `
+    Hello ${userName}!
+
+    We received a request to ${purposeText[purpose] || purpose}.
+
+    Your OTP Code: ${otpCode}
+
+    This code expires in 10 minutes.
+
+    Security Notice: Never share this OTP with anyone. Our team will never ask for your OTP via email or phone.
+
+    If you didn't request this verification, please ignore this email or contact our support team.
+
+    © 2024 SkyElectroTech. All rights reserved.
+    `
+  };
+};
+
 
 // Send welcome email
 const sendWelcomeEmail = async (userEmail, userName) => {
@@ -396,6 +537,24 @@ const sendWelcomeEmail = async (userEmail, userName) => {
   } catch (error) {
     console.error(`Failed to send welcome email to ${userEmail}:`, error);
     // Don't re-throw, as a failed welcome email shouldn't block user registration.
+  }
+};
+
+// Send OTP verification email
+const sendOTPEmail = async (userEmail, userName, otpCode, purpose = 'profile update') => {
+  try {
+    const emailTemplate = getOTPEmailTemplate(userName, otpCode, purpose);
+    
+    await sendEmail({
+      to: userEmail,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
+    });
+    console.log(`OTP email sent to ${userEmail}`);
+  } catch (error) {
+    console.error(`Failed to send OTP email to ${userEmail}:`, error);
+    throw error;
   }
 };
 
@@ -423,7 +582,9 @@ const sendForgotPasswordEmail = async (userEmail, userName, resetToken) => {
 module.exports = {
   sendEmail,
   sendWelcomeEmail,
+  sendOTPEmail,
   sendForgotPasswordEmail,
   getWelcomeEmailTemplate,
+  getOTPEmailTemplate,
   getForgotPasswordEmailTemplate,
 };

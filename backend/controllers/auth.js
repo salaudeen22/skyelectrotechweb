@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const { generateToken } = require('../utils/jwt');
 const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
-const { sendWelcomeEmail, sendForgotPasswordEmail } = require('../utils/email');
+const { sendWelcomeEmail, sendForgotPasswordEmail, sendOTPEmail } = require('../utils/email');
 const crypto = require('crypto');
 const passport = require('../config/passport');
 
@@ -117,27 +117,193 @@ const getMe = asyncHandler(async (req, res) => {
   sendResponse(res, 200, { user }, 'User profile retrieved successfully');
 });
 
-// @desc    Update user profile
+// @desc    Request OTP for profile update
+// @route   POST /api/auth/profile/request-otp
+// @access  Private
+const requestProfileUpdateOTP = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  
+  // Generate OTP
+  const otp = user.generateOTP('profile_update');
+  await user.save();
+
+  // Send OTP email
+  try {
+    await sendOTPEmail(user.email, user.name, otp, 'profile_update');
+    sendResponse(res, 200, null, 'OTP sent to your email. Please check and verify to update your profile.');
+  } catch (error) {
+    console.error('Failed to send OTP email:', error);
+    user.clearOTP();
+    await user.save();
+    return sendError(res, 500, 'Failed to send OTP. Please try again.');
+  }
+});
+
+// @desc    Update user profile with OTP verification
 // @route   PUT /api/auth/profile
 // @access  Private
 const updateProfile = asyncHandler(async (req, res) => {
+  const { otp, ...profileData } = req.body;
+
+  const user = await User.findById(req.user._id);
+
+  // Verify OTP
+  if (!user.verifyOTP(otp, 'profile_update')) {
+    return sendError(res, 400, 'Invalid or expired OTP. Please request a new OTP.');
+  }
+
+  // Clear OTP after successful verification
+  user.clearOTP();
+
   const allowedFields = ['name', 'phone', 'address'];
   const updates = {};
 
   // Only include allowed fields
   allowedFields.forEach(field => {
-    if (req.body[field] !== undefined) {
-      updates[field] = req.body[field];
+    if (profileData[field] !== undefined) {
+      updates[field] = profileData[field];
     }
   });
 
-  const user = await User.findByIdAndUpdate(
+  // Update user profile
+  const updatedUser = await User.findByIdAndUpdate(
     req.user._id,
     updates,
     { new: true, runValidators: true }
   );
 
-  sendResponse(res, 200, { user }, 'Profile updated successfully');
+  sendResponse(res, 200, { user: updatedUser }, 'Profile updated successfully');
+});
+
+// @desc    Add new address
+// @route   POST /api/auth/addresses
+// @access  Private
+const addAddress = asyncHandler(async (req, res) => {
+  const { name, street, city, state, country, zipCode, isDefault } = req.body;
+
+  const user = await User.findById(req.user._id);
+
+  // If this is set as default, unset all other default addresses
+  if (isDefault) {
+    user.addresses.forEach(addr => {
+      addr.isDefault = false;
+    });
+  }
+
+  // Add new address
+  const newAddress = {
+    name,
+    street,
+    city,
+    state,
+    country,
+    zipCode,
+    isDefault: isDefault || user.addresses.length === 0 // First address is default by default
+  };
+
+  user.addresses.push(newAddress);
+  await user.save();
+
+  const addedAddress = user.addresses[user.addresses.length - 1];
+  sendResponse(res, 201, { address: addedAddress }, 'Address added successfully');
+});
+
+// @desc    Update address
+// @route   PUT /api/auth/addresses/:addressId
+// @access  Private
+const updateAddress = asyncHandler(async (req, res) => {
+  const { addressId } = req.params;
+  const { name, street, city, state, country, zipCode, isDefault } = req.body;
+
+  const user = await User.findById(req.user._id);
+  const addressIndex = user.addresses.findIndex(addr => addr.id === addressId);
+
+  if (addressIndex === -1) {
+    return sendError(res, 404, 'Address not found');
+  }
+
+  // If this is set as default, unset all other default addresses
+  if (isDefault) {
+    user.addresses.forEach(addr => {
+      addr.isDefault = false;
+    });
+  }
+
+  // Update address
+  const address = user.addresses[addressIndex];
+  address.name = name || address.name;
+  address.street = street || address.street;
+  address.city = city || address.city;
+  address.state = state || address.state;
+  address.country = country || address.country;
+  address.zipCode = zipCode || address.zipCode;
+  address.isDefault = isDefault !== undefined ? isDefault : address.isDefault;
+
+  await user.save();
+
+  sendResponse(res, 200, { address }, 'Address updated successfully');
+});
+
+// @desc    Delete address
+// @route   DELETE /api/auth/addresses/:addressId
+// @access  Private
+const deleteAddress = asyncHandler(async (req, res) => {
+  const { addressId } = req.params;
+
+  const user = await User.findById(req.user._id);
+  const addressIndex = user.addresses.findIndex(addr => addr.id === addressId);
+
+  if (addressIndex === -1) {
+    return sendError(res, 404, 'Address not found');
+  }
+
+  const wasDefault = user.addresses[addressIndex].isDefault;
+
+  // Remove address
+  user.addresses.splice(addressIndex, 1);
+
+  // If deleted address was default and there are other addresses, make the first one default
+  if (wasDefault && user.addresses.length > 0) {
+    user.addresses[0].isDefault = true;
+  }
+
+  await user.save();
+
+  sendResponse(res, 200, null, 'Address deleted successfully');
+});
+
+// @desc    Get all addresses
+// @route   GET /api/auth/addresses
+// @access  Private
+const getAddresses = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  sendResponse(res, 200, { addresses: user.addresses }, 'Addresses retrieved successfully');
+});
+
+// @desc    Set default address
+// @route   PUT /api/auth/addresses/:addressId/default
+// @access  Private
+const setDefaultAddress = asyncHandler(async (req, res) => {
+  const { addressId } = req.params;
+
+  const user = await User.findById(req.user._id);
+  const addressIndex = user.addresses.findIndex(addr => addr.id === addressId);
+
+  if (addressIndex === -1) {
+    return sendError(res, 404, 'Address not found');
+  }
+
+  // Unset all default addresses
+  user.addresses.forEach(addr => {
+    addr.isDefault = false;
+  });
+
+  // Set new default
+  user.addresses[addressIndex].isDefault = true;
+
+  await user.save();
+
+  sendResponse(res, 200, { address: user.addresses[addressIndex] }, 'Default address updated successfully');
 });
 
 // @desc    Change password
@@ -304,7 +470,13 @@ module.exports = {
   login,
   logout,
   getMe,
+  requestProfileUpdateOTP,
   updateProfile,
+  addAddress,
+  updateAddress,
+  deleteAddress,
+  getAddresses,
+  setDefaultAddress,
   changePassword,
   forgotPassword,
   resetPassword,

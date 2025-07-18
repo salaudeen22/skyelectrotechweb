@@ -41,6 +41,52 @@ const userSchema = new mongoose.Schema({
     type: String,
     maxlength: [15, 'Phone number cannot exceed 15 characters']
   },
+  addresses: [{
+    id: {
+      type: String,
+      required: true,
+      default: () => new mongoose.Types.ObjectId().toString()
+    },
+    name: {
+      type: String,
+      required: true,
+      maxlength: [50, 'Address name cannot exceed 50 characters']
+    },
+    street: {
+      type: String,
+      required: true,
+      maxlength: [100, 'Street address cannot exceed 100 characters']
+    },
+    city: {
+      type: String,
+      required: true,
+      maxlength: [50, 'City cannot exceed 50 characters']
+    },
+    state: {
+      type: String,
+      required: true,
+      maxlength: [50, 'State cannot exceed 50 characters']
+    },
+    country: {
+      type: String,
+      required: true,
+      maxlength: [50, 'Country cannot exceed 50 characters']
+    },
+    zipCode: {
+      type: String,
+      required: true,
+      maxlength: [10, 'ZIP code cannot exceed 10 characters']
+    },
+    isDefault: {
+      type: Boolean,
+      default: false
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  // Legacy address field for backward compatibility
   address: {
     street: String,
     city: String,
@@ -61,6 +107,13 @@ const userSchema = new mongoose.Schema({
   },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
+  otpCode: String,
+  otpExpire: Date,
+  otpPurpose: {
+    type: String,
+    enum: ['profile_update', 'phone_verification', 'email_verification'],
+    default: 'profile_update'
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -87,6 +140,43 @@ userSchema.methods.comparePassword = async function(enteredPassword) {
 userSchema.methods.updateLastLogin = function() {
   this.lastLogin = new Date();
   return this.save();
+};
+
+// Generate OTP for verification
+userSchema.methods.generateOTP = function(purpose = 'profile_update') {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+  this.otpCode = otp;
+  this.otpExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
+  this.otpPurpose = purpose;
+  return otp;
+};
+
+// Verify OTP
+userSchema.methods.verifyOTP = function(otp, purpose = 'profile_update') {
+  if (!this.otpCode || !this.otpExpire) {
+    return false;
+  }
+  
+  if (this.otpExpire < Date.now()) {
+    return false; // OTP expired
+  }
+  
+  if (this.otpCode !== otp) {
+    return false; // Invalid OTP
+  }
+  
+  if (this.otpPurpose !== purpose) {
+    return false; // Wrong purpose
+  }
+  
+  return true;
+};
+
+// Clear OTP
+userSchema.methods.clearOTP = function() {
+  this.otpCode = undefined;
+  this.otpExpire = undefined;
+  this.otpPurpose = undefined;
 };
 
 module.exports = mongoose.model('User', userSchema);

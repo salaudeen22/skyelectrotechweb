@@ -29,6 +29,10 @@ import Register from './Auth/Register';
 import AuthCallback from './Auth/AuthCallback';
 import ForgotPassword from './Auth/ForgotPassword';
 import ResetPassword from './Auth/ResetPassword';
+import ChangePassword from './Auth/ChangePassword';
+
+// User Pages
+import Wishlist from './User/Wishlist';
 
 // Admin Pages
 import AdminDashboard from './Admin/AdminDashboard';
@@ -96,6 +100,11 @@ const App = () => {
                   <Route path="callback" element={<AuthCallback />} />
                   <Route path="forgot-password" element={<ForgotPassword />} />
                   <Route path="reset-password" element={<ResetPassword />} />
+                  <Route path="change-password" element={
+                    <ProtectedRoute allowedRoles={['user', 'admin', 'employee']}>
+                      <ChangePassword />
+                    </ProtectedRoute>
+                  } />
                 </Route>
 
                 {/* Protected User Routes */}
@@ -109,6 +118,26 @@ const App = () => {
                   <Route path="orders" element={<OrderHistory />} />
                   <Route path="orders/:id" element={<OrderDetails />} />
                   <Route path="profile" element={<Profile />} />
+                  <Route path="wishlist" element={<Navigate to="/wishlist" replace />} />
+                </Route>
+
+                {/* Wishlist route (accessible to regular users only) */}
+                <Route path="/wishlist" element={
+                  <ProtectedRoute allowedRoles={['user']}>
+                    <MainLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Wishlist />} />
+                </Route>
+
+                {/* Orders route (accessible to all authenticated users) */}
+                <Route path="/orders" element={
+                  <ProtectedRoute allowedRoles={['user', 'admin', 'employee']}>
+                    <MainLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<OrderHistory />} />
+                  <Route path=":id" element={<OrderDetails />} />
                 </Route>
 
                 {/* Admin/Employee Routes */}
@@ -153,6 +182,7 @@ const App = () => {
                 <Route path="/admin/register" element={<Navigate to="/auth/register" replace />} />
                 <Route path="/cart" element={<Navigate to="/user/cart" replace />} />
                 <Route path="/checkout" element={<Navigate to="/user/checkout" replace />} />
+                <Route path="/profile" element={<Navigate to="/user/profile" replace />} />
 
                 {/* 404 Route */}
                 <Route path="*" element={<NotFound />} />

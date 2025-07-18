@@ -5,7 +5,13 @@ const {
   login, 
   logout, 
   getMe, 
+  requestProfileUpdateOTP,
   updateProfile, 
+  addAddress,
+  updateAddress,
+  deleteAddress,
+  getAddresses,
+  setDefaultAddress,
   changePassword,
   forgotPassword,
   resetPassword,
@@ -61,6 +67,10 @@ const loginValidation = [
 ];
 
 const updateProfileValidation = [
+  body('otp')
+    .notEmpty()
+    .isLength({ min: 6, max: 6 })
+    .withMessage('OTP must be 6 digits'),
   body('name')
     .optional()
     .trim()
@@ -80,6 +90,37 @@ const updateProfileValidation = [
     .trim()
     .isLength({ max: 50 })
     .withMessage('City cannot exceed 50 characters')
+];
+
+const addAddressValidation = [
+  body('name')
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Address name must be between 2 and 50 characters'),
+  body('street')
+    .trim()
+    .isLength({ min: 5, max: 100 })
+    .withMessage('Street address must be between 5 and 100 characters'),
+  body('city')
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('City must be between 2 and 50 characters'),
+  body('state')
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('State must be between 2 and 50 characters'),
+  body('country')
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Country must be between 2 and 50 characters'),
+  body('zipCode')
+    .trim()
+    .isLength({ min: 3, max: 10 })
+    .withMessage('ZIP code must be between 3 and 10 characters'),
+  body('isDefault')
+    .optional()
+    .isBoolean()
+    .withMessage('isDefault must be a boolean')
 ];
 
 const changePasswordValidation = [
@@ -103,7 +144,19 @@ router.post('/register', registerValidation, validate, register);
 router.post('/login', loginValidation, validate, logActivity('login', 'system'), login);
 router.post('/logout', auth, logActivity('logout', 'system'), logout);
 router.get('/me', auth, getMe);
+
+// Profile and address management
+router.post('/profile/request-otp', auth, requestProfileUpdateOTP);
 router.put('/profile', auth, updateProfileValidation, validate, updateProfile);
+
+// Address routes
+router.get('/addresses', auth, getAddresses);
+router.post('/addresses', auth, addAddressValidation, validate, addAddress);
+router.put('/addresses/:addressId', auth, addAddressValidation, validate, updateAddress);
+router.delete('/addresses/:addressId', auth, deleteAddress);
+router.put('/addresses/:addressId/default', auth, setDefaultAddress);
+
+// Password management
 router.put('/password', auth, changePasswordValidation, validate, changePassword);
 router.post('/forgot-password', [
   body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email')

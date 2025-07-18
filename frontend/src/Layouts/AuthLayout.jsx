@@ -3,8 +3,8 @@ import { Outlet } from 'react-router-dom';
 
 const AuthLayout = () => {
   return (
-    // This layout is minimal, perfect for login/register forms
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+    // This layout is minimal, just renders the auth components directly
+    <div className="w-full h-full">
       <Outlet />
     </div>
   );

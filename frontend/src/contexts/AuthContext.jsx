@@ -203,7 +203,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Update profile function
+  // Request OTP for profile update
+  const requestProfileUpdateOTP = async () => {
+    try {
+      const response = await authAPI.requestProfileUpdateOTP();
+      toast.success(response.message || 'OTP sent to your email');
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to send OTP';
+      toast.error(message);
+      return { success: false, error: message };
+    }
+  };
+
+  // Update profile function with OTP
   const updateProfile = async (userData) => {
     try {
       const response = await authAPI.updateProfile(userData);
@@ -221,6 +234,66 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Profile update failed';
+      toast.error(message);
+      return { success: false, error: message };
+    }
+  };
+
+  // Address management functions
+  const getAddresses = async () => {
+    try {
+      const response = await authAPI.getAddresses();
+      return { success: true, data: response.data.addresses };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to fetch addresses';
+      return { success: false, error: message };
+    }
+  };
+
+  const addAddress = async (addressData) => {
+    try {
+      const response = await authAPI.addAddress(addressData);
+      toast.success('Address added successfully!');
+      return { success: true, data: response.data.address };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to add address';
+      toast.error(message);
+      return { success: false, error: message };
+    }
+  };
+
+  const updateAddress = async (addressId, addressData) => {
+    try {
+      const response = await authAPI.updateAddress(addressId, addressData);
+      toast.success('Address updated successfully!');
+      return { success: true, data: response.data.address };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to update address';
+      toast.error(message);
+      return { success: false, error: message };
+    }
+  };
+
+  const deleteAddress = async (addressId) => {
+    try {
+      await authAPI.deleteAddress(addressId);
+      toast.success('Address deleted successfully!');
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to delete address';
+      toast.error(message);
+      return { success: false, error: message };
+    }
+  };
+
+  const setDefaultAddress = async (addressId) => {
+    try {
+      const response = await authAPI.setDefaultAddress(addressId);
+      toast.success('Default address updated successfully!');
+      return { success: true, data: response.data.address };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to set default address';
+      toast.error(message);
       return { success: false, error: message };
     }
   };
@@ -280,7 +353,13 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    requestProfileUpdateOTP,
     updateProfile,
+    getAddresses,
+    addAddress,
+    updateAddress,
+    deleteAddress,
+    setDefaultAddress,
     changePassword,
     clearError,
     setAuthData,
