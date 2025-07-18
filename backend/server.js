@@ -32,6 +32,7 @@ app.use('/api/', limiter);
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
+   'http://51.20.12.36',
   'https://sweet-hamster-f11198.netlify.app',
   'https://6877b765d91a4d4ccae4b296--sweet-hamster-f11198.netlify.app',
   process.env.FRONTEND_URL
