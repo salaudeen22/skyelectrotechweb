@@ -1,0 +1,430 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  FiShoppingCart, 
+  FiCreditCard, 
+  FiSmartphone, 
+  FiHome, 
+  FiPocket, 
+  FiTruck, 
+  FiCheck, 
+  FiLock,
+  FiArrowLeft,
+  FiMapPin
+} from 'react-icons/fi';
+import { useCart } from '../hooks/useCart';
+
+import { paymentAPI, ordersAPI } from '../services/apiServices';
+import { useAnalytics } from '../hooks/useAnalytics';
+import toast from 'react-hot-toast';
+
+const Payment = () => {
+  const navigate = useNavigate();
+  const { items: cart, totalPrice: cartTotal, clearCart } = useCart();
+
+  const { trackOrderPurchase, trackClick } = useAnalytics();
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [selectedMethod, setSelectedMethod] = useState('card');
+  const [shippingInfo, setShippingInfo] = useState(null);
+
+  const paymentSectionRef = useRef(null);
+
+  // --- Calculations ---
+  const totals = {
+    subtotal: cartTotal,
+    shipping: cartTotal > 0 ? 50 : 0,
+    tax: Math.round(cartTotal * 0.18), // 18% GST
+    get total() { return this.subtotal + this.shipping + this.tax }
+  };
+
+  // --- Effects ---
+  useEffect(() => {
+    if (!cart || cart.length === 0) {
+      toast.error("Your cart is empty. Redirecting...");
+      navigate('/user/cart');
+      return;
+    }
+
+    // Check if shipping info exists
+    const storedShippingInfo = localStorage.getItem('shippingInfo');
+    if (!storedShippingInfo) {
+      toast.error("Please complete shipping information first.");
+      navigate('/user/shipping');
+      return;
+    }
+
+    setShippingInfo(JSON.parse(storedShippingInfo));
+    loadPaymentMethods();
+  }, [cart, navigate]);
+
+  // Clear checkout data when component unmounts (after successful payment)
+  useEffect(() => {
+    return () => {
+      // Only clear if payment was successful (you can add a flag for this)
+      // For now, we'll keep the data until explicitly cleared
+    };
+  }, []);
+
+  // --- Payment Logic ---
+  const loadPaymentMethods = async () => {
+    try {
+      const response = await paymentAPI.getPaymentMethods();
+      setPaymentMethods(response.data.paymentMethods || []);
+    } catch (err) {
+      console.error('Error loading payment methods:', err);
+      // Fallback to basic methods
+      setPaymentMethods([
+        { id: 'card', name: 'Credit & Debit Cards', description: 'Visa, MasterCard, RuPay & more' },
+        { id: 'upi', name: 'UPI', description: 'Google Pay, PhonePe, Paytm & more' },
+        { id: 'netbanking', name: 'Netbanking', description: 'All major banks supported' },
+      ]);
+    }
+  };
+
+  const getMethodIcon = (methodId) => {
+    const iconProps = { className: "w-6 h-6" };
+    switch (methodId) {
+      case 'card': return <FiCreditCard {...iconProps} />;
+      case 'upi': return <FiSmartphone {...iconProps} />;
+      case 'netbanking': return <FiHome {...iconProps} />;
+      case 'wallet': return <FiPocket {...iconProps} />;
+      case 'cod': return <FiTruck {...iconProps} />;
+      default: return <FiCreditCard {...iconProps} />;
+    }
+  };
+
+  const formatAmount = (num) => new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+  }).format(num);
+
+  const handleSubmit = async () => {
+    trackClick(`pay_button_clicked_${selectedMethod}`, 'payment');
+    
+    setIsSubmitting(true);
+
+    const orderPayload = {
+      orderItems: cart.map(item => ({
+        product: item.product._id,
+        quantity: item.quantity,
+      })),
+      shippingInfo: shippingInfo,
+      itemsPrice: totals.subtotal,
+      taxPrice: totals.tax,
+      shippingPrice: totals.shipping,
+      totalPrice: totals.total,
+    };
+    
+    try {
+      if (selectedMethod === 'cod') {
+        await handleCOD(orderPayload);
+      } else {
+        await handleOnlinePayment(orderPayload);
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error('Payment failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleOnlinePayment = async (orderPayload) => {
+    try {
+      // Create order first
+      const orderResponse = await ordersAPI.createOrder(orderPayload);
+      const order = orderResponse.data.order;
+      
+      // Initialize payment
+      const paymentResponse = await paymentAPI.createPaymentOrder({
+        amount: order.totalPrice,
+        currency: 'INR',
+        orderId: order._id,
+        method: selectedMethod,
+        customerName: shippingInfo.name,
+        customerEmail: shippingInfo.email,
+        customerPhone: shippingInfo.phone,
+      });
+
+      const paymentData = paymentResponse.data;
+      
+      // Track payment initiation
+      trackClick('payment_initiated', 'payment');
+
+      // Handle Razorpay integration
+      const options = {
+        key: paymentData.key,
+        amount: paymentData.amount,
+        currency: paymentData.currency,
+        name: 'SkyElectroTech',
+        description: `Order #${order._id}`,
+        order_id: paymentData.orderId,
+        handler: (response) => handlePaymentSuccess(response, order._id),
+        prefill: {
+          name: shippingInfo.name,
+          email: shippingInfo.email,
+          contact: shippingInfo.phone,
+        },
+        notes: {
+          address: shippingInfo.address,
+        },
+        theme: {
+          color: '#3B82F6',
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+      
+    } catch (error) {
+      console.error('Online payment error:', error);
+      toast.error('Failed to initialize payment. Please try again.');
+      throw error;
+    }
+  };
+
+  const handlePaymentSuccess = async (response, localOrderId) => {
+    try {
+      // Verify payment
+      const verificationResponse = await paymentAPI.verifyPayment({
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_signature: response.razorpay_signature,
+      });
+
+      if (verificationResponse.data.success) {
+        // Update order status
+        await ordersAPI.updateOrderStatus(localOrderId, 'paid');
+        
+        // Track successful payment
+        trackOrderPurchase({
+          orderId: localOrderId,
+          amount: totals.total,
+          method: selectedMethod,
+          paymentId: response.razorpay_payment_id,
+        });
+
+        // Clear cart and redirect
+        clearCart();
+        clearAllCheckoutData();
+        
+        toast.success('Payment successful! Your order has been placed.');
+        navigate(`/user/orders/${localOrderId}`);
+      } else {
+        throw new Error('Payment verification failed');
+      }
+    } catch (error) {
+      console.error('Payment verification error:', error);
+      toast.error('Payment verification failed. Please contact support.');
+    }
+  };
+
+  const handleCOD = async (orderPayload) => {
+    try {
+      const response = await ordersAPI.createOrder({
+        ...orderPayload,
+        paymentMethod: 'cod',
+        paymentStatus: 'pending'
+      });
+      
+      const order = response.data.order;
+      
+      // Track COD order
+      trackOrderPurchase({
+        orderId: order._id,
+        amount: totals.total,
+        method: 'cod',
+      });
+
+      // Clear cart and redirect
+      clearCart();
+      clearAllCheckoutData();
+      
+      toast.success('Order placed successfully! You will pay on delivery.');
+      navigate(`/user/orders/${order._id}`);
+      
+    } catch (error) {
+      console.error('COD order error:', error);
+      toast.error('Failed to place order. Please try again.');
+      throw error;
+    }
+  };
+
+  const handleBackToShipping = () => {
+    navigate('/user/shipping');
+  };
+
+  // Clear all checkout data
+  const clearAllCheckoutData = () => {
+    localStorage.removeItem('checkout_shipping_info');
+    localStorage.removeItem('checkout_selected_address');
+    localStorage.removeItem('shippingInfo');
+    localStorage.removeItem('selectedAddress');
+  };
+
+  if (!cart || cart.length === 0 || !shippingInfo) return null;
+
+  return (
+    <div className="bg-slate-50 min-h-screen py-8 sm:py-12">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Progress Indicator */}
+        <div className="mb-8">
+          <div className="flex items-center justify-center space-x-4">
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <FiCheck className="w-4 h-4" />
+              </div>
+              <span className="ml-2 text-sm font-medium text-green-600">Shipping Information</span>
+            </div>
+            <div className="w-8 h-1 bg-green-600"></div>
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+              <span className="ml-2 text-sm font-medium text-blue-600">Payment</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight sm:text-5xl">Payment</h1>
+          <p className="mt-4 max-w-2xl mx-auto text-lg text-slate-600">
+            Choose your preferred payment method to complete your order.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 xl:gap-12 items-start">
+          
+          {/* Left Side: Payment Methods */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Shipping Info Summary */}
+            <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8">
+              <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center">
+                <FiMapPin className="w-6 h-6 mr-3 text-green-600" />
+                Shipping Information
+              </h2>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-green-800 font-medium">Name</p>
+                    <p className="text-slate-900">{shippingInfo.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-green-800 font-medium">Email</p>
+                    <p className="text-slate-900">{shippingInfo.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-green-800 font-medium">Phone</p>
+                    <p className="text-slate-900">{shippingInfo.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-green-800 font-medium">Address</p>
+                    <p className="text-slate-900">{shippingInfo.address}</p>
+                    <p className="text-slate-900">{shippingInfo.city}, {shippingInfo.state} {shippingInfo.zipCode}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleBackToShipping}
+                  className="mt-4 text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
+                >
+                  <FiArrowLeft className="w-4 h-4 mr-1" />
+                  Edit Shipping Information
+                </button>
+              </div>
+            </div>
+
+            {/* Payment Method Card */}
+            <div ref={paymentSectionRef} className="bg-white rounded-xl shadow-lg p-6 sm:p-8">
+              <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center">
+                <FiCreditCard className="w-6 h-6 mr-3 text-blue-600" />
+                Payment Method
+              </h2>
+              <div className="space-y-4">
+                {paymentMethods.map((method) => (
+                  <label key={method.id} className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all duration-300 transform hover:-translate-y-1 ${
+                    selectedMethod === method.id ? 'border-transparent ring-2 ring-blue-600 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                  }`} onClick={() => setSelectedMethod(method.id)}>
+                    <input type="radio" name="paymentMethod" value={method.id} checked={selectedMethod === method.id} onChange={(e) => setSelectedMethod(e.target.value)} className="sr-only"/>
+                    <div className={`flex items-center justify-center w-12 h-12 rounded-full mr-4 transition-colors ${
+                      selectedMethod === method.id ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {getMethodIcon(method.id)}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 text-lg">{method.name}</h3>
+                      <p className="text-sm text-gray-500">{method.description}</p>
+                    </div>
+                    {selectedMethod === method.id && <div className="w-6 h-6 flex items-center justify-center bg-blue-600 rounded-full text-white"><FiCheck className="w-4 h-4" /></div>}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side: Order Summary */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-lg lg:sticky lg:top-8">
+              <div className="p-6 border-b">
+                <h3 className="text-xl font-bold text-gray-800 flex items-center">
+                  <FiShoppingCart className="mr-3 text-gray-500"/>
+                  Order Summary
+                </h3>
+              </div>
+              <div className="p-6 space-y-4 max-h-80 overflow-y-auto">
+                {cart.map(item => (
+                  <div key={item.product._id} className="flex items-center space-x-4">
+                    <img 
+                      src={item.product.images?.[0]?.url || 'https://via.placeholder.com/64'} 
+                      alt={item.product.name} 
+                      className="w-16 h-16 rounded-md object-cover"
+                    />
+                    <div className="flex-1">
+                      <p className="font-semibold text-slate-800">{item.product.name}</p>
+                      <p className="text-sm text-slate-500">Qty: {item.quantity}</p>
+                    </div>
+                    <p className="font-medium text-slate-900">{formatAmount((item.product.price || 0) * item.quantity)}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="p-6 border-t space-y-3">
+                <div className="flex justify-between text-slate-600"><span>Subtotal</span><span>{formatAmount(totals.subtotal)}</span></div>
+                <div className="flex justify-between text-slate-600"><span>Shipping</span><span>{formatAmount(totals.shipping)}</span></div>
+                <div className="flex justify-between text-slate-600 mb-4"><span>Tax (18%)</span><span>{formatAmount(totals.tax)}</span></div>
+                <div className="border-t-2 border-dashed pt-4">
+                  <div className="flex justify-between font-bold text-xl text-slate-900">
+                    <span>Total</span>
+                    <span>{formatAmount(totals.total)}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6">
+                <button 
+                  onClick={handleSubmit} 
+                  disabled={isSubmitting} 
+                  className={`w-full py-4 px-6 rounded-lg font-bold text-lg text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 ${
+                    isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                      Processing...
+                    </div>
+                  ) : (
+                    `Pay Securely ${formatAmount(totals.total)}`
+                  )}
+                </button>
+                <div className="mt-4 text-center flex items-center justify-center text-xs text-gray-500">
+                  <FiLock className="w-4 h-4 mr-2"/>
+                  All transactions are secure and encrypted.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Payment; 

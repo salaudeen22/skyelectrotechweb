@@ -364,6 +364,39 @@ export const analyticsAPI = {
   }
 };
 
+// Payment API calls
+export const paymentAPI = {
+  // Create payment order
+  createPaymentOrder: async (orderData) => {
+    const response = await api.post('/payments/create-order', orderData);
+    return response.data;
+  },
+
+  // Verify payment
+  verifyPayment: async (paymentData) => {
+    const response = await api.post('/payments/verify', paymentData);
+    return response.data;
+  },
+
+  // Get payment methods
+  getPaymentMethods: async () => {
+    const response = await api.get('/payments/methods');
+    return response.data;
+  },
+
+  // Get payment details (Admin)
+  getPaymentDetails: async (paymentId) => {
+    const response = await api.get(`/payments/${paymentId}`);
+    return response.data;
+  },
+
+  // Process refund (Admin)
+  processRefund: async (refundData) => {
+    const response = await api.post('/payments/refund', refundData);
+    return response.data;
+  }
+};
+
 // Upload API calls
 export const uploadAPI = {
   // Upload single image

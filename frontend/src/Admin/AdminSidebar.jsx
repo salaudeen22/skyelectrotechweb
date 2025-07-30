@@ -11,7 +11,8 @@ import {
     FaUserCircle,
     FaTags, // Icon for categories
     FaTimes,
-    FaBars
+    FaBars,
+    FaTruck
 } from 'react-icons/fa';
 
 const AdminSidebar = ({ isOpen, onToggle }) => {
@@ -119,6 +120,14 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                 > 
                     <FaUsers className="mr-4 h-5 w-5" />
                     <span>Employees</span>
+                </NavLink>
+                <NavLink 
+                    to="/admin/shipping-fees" 
+                    onClick={handleLinkClick}
+                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
+                > 
+                    <FaTruck className="mr-4 h-5 w-5" />
+                    <span>Shipping Fees</span>
                 </NavLink>
             </nav>
 

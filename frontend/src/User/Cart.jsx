@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaMinus, FaTrash, FaShoppingCart } from 'react-icons/fa';
 import { CartContext } from '../contexts/CartContext';
@@ -6,10 +6,23 @@ import toast from 'react-hot-toast';
 
 const Cart = () => {
   const { items: cartItems, updateCartItem, removeFromCart, totalPrice, loading } = useContext(CartContext);
+  const [hasIncompleteCheckout, setHasIncompleteCheckout] = useState(false);
+  
+  console.log('Cart component rendered:', { cartItems, totalPrice, loading });
   
   const subtotal = totalPrice || 0;
   const shipping = subtotal > 1000 ? 0 : 50; // Free shipping over ₹1000
   const total = subtotal + shipping;
+
+  // Check for incomplete checkout data
+  useEffect(() => {
+    const shippingInfo = localStorage.getItem('shippingInfo');
+    const checkoutShippingInfo = localStorage.getItem('checkout_shipping_info');
+    
+    if (shippingInfo || checkoutShippingInfo) {
+      setHasIncompleteCheckout(true);
+    }
+  }, []);
 
   const handleQuantityChange = async (productId, newQuantity) => {
     if (newQuantity < 1) return;
@@ -26,6 +39,17 @@ const Cart = () => {
       toast.success('Item removed from cart');
     } catch {
       toast.error('Failed to remove item');
+    }
+  };
+
+  const clearIncompleteCheckout = () => {
+    if (window.confirm('Are you sure you want to clear your incomplete checkout data?')) {
+      localStorage.removeItem('checkout_shipping_info');
+      localStorage.removeItem('checkout_selected_address');
+      localStorage.removeItem('shippingInfo');
+      localStorage.removeItem('selectedAddress');
+      setHasIncompleteCheckout(false);
+      toast.success('Checkout data cleared!');
     }
   };
 
@@ -54,6 +78,32 @@ const Cart = () => {
     <div className="bg-slate-50 py-12">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             <h1 className="text-3xl font-bold text-slate-900 mb-8">Your Shopping Cart</h1>
+            
+            {/* Incomplete Checkout Notification */}
+            {hasIncompleteCheckout && (
+              <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-blue-800 font-medium">Continue Your Checkout</h3>
+                    <p className="text-blue-600 text-sm">You have incomplete checkout data. Would you like to continue where you left off?</p>
+                  </div>
+                  <div className="flex space-x-3">
+                    <Link 
+                      to="/user/shipping" 
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
+                    >
+                      Continue Checkout
+                    </Link>
+                    <button
+                      onClick={clearIncompleteCheckout}
+                      className="text-blue-600 hover:text-blue-700 text-sm underline"
+                    >
+                      Clear Data
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 
                 {/* Cart Items */}
@@ -128,7 +178,7 @@ const Cart = () => {
                         </div>
                     </div>
                     <Link 
-                        to="/user/checkout" 
+                        to="/user/shipping" 
                         className="mt-6 w-full block text-center bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition"
                     >
                         Proceed to Checkout

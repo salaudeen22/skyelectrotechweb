@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaDollarSign, FaShoppingCart, FaBoxOpen, FaUsers, FaArrowRight } from 'react-icons/fa';
+import { FaDollarSign, FaShoppingCart, FaBoxOpen, FaUsers, FaArrowRight, FaTruck, FaChartBar, FaWarehouse } from 'react-icons/fa';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { analyticsAPI, ordersAPI } from '../services/apiServices';
 import toast from 'react-hot-toast';
@@ -163,6 +163,57 @@ const AdminDashboard = () => {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Link to="/admin/products" className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-blue-100 rounded-full">
+              <FaBoxOpen className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-slate-800">Manage Products</h3>
+              <p className="text-sm text-slate-500">Add, edit, or remove products</p>
+            </div>
+          </div>
+        </Link>
+        
+        <Link to="/admin/shipping-fees" className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-green-100 rounded-full">
+              <FaTruck className="w-6 h-6 text-green-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-slate-800">Shipping Fees</h3>
+              <p className="text-sm text-slate-500">Configure delivery costs</p>
+            </div>
+          </div>
+        </Link>
+        
+        <Link to="/admin/sales" className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-purple-100 rounded-full">
+              <FaChartBar className="w-6 h-6 text-purple-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-slate-800">Sales Analytics</h3>
+              <p className="text-sm text-slate-500">View sales reports</p>
+            </div>
+          </div>
+        </Link>
+        
+        <Link to="/admin/inventory" className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-orange-100 rounded-full">
+              <FaWarehouse className="w-6 h-6 text-orange-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-slate-800">Inventory</h3>
+              <p className="text-sm text-slate-500">Manage stock levels</p>
+            </div>
+          </div>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

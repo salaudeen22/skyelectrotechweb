@@ -10,8 +10,10 @@ const getCart = asyncHandler(async (req, res) => {
     .populate('items.product', 'name price discount images stock isActive')
     .lean();
 
+  let processedCart = null;
+
   if (!cart) {
-    cart = {
+    processedCart = {
       user: req.user._id,
       items: [],
       totalItems: 0,
@@ -21,6 +23,7 @@ const getCart = asyncHandler(async (req, res) => {
     // Calculate total price with current product prices
     let totalPrice = 0;
     const validItems = [];
+    const originalItemsLength = cart.items.length;
 
     for (const item of cart.items) {
       if (item.product && item.product.isActive) {
@@ -39,7 +42,7 @@ const getCart = asyncHandler(async (req, res) => {
       }
     }
 
-    cart = {
+    processedCart = {
       ...cart,
       items: validItems,
       totalItems: validItems.reduce((sum, item) => sum + item.quantity, 0),
@@ -47,7 +50,7 @@ const getCart = asyncHandler(async (req, res) => {
     };
 
     // Update cart in database if items were removed
-    if (validItems.length !== cart.items.length) {
+    if (validItems.length !== originalItemsLength) {
       await Cart.findByIdAndUpdate(cart._id, {
         items: validItems.map(item => ({
           product: item.product._id,
@@ -58,7 +61,7 @@ const getCart = asyncHandler(async (req, res) => {
     }
   }
 
-  sendResponse(res, 200, { cart }, 'Cart retrieved successfully');
+  sendResponse(res, 200, { cart: processedCart }, 'Cart retrieved successfully');
 });
 
 // @desc    Add item to cart
@@ -116,12 +119,40 @@ const addToCart = asyncHandler(async (req, res) => {
 
   await cart.save();
 
-  // Populate and return updated cart
+  // Populate and return updated cart with calculated totals
   cart = await Cart.findById(cart._id)
-    .populate('items.product', 'name price discount images stock')
+    .populate('items.product', 'name price discount images stock isActive')
     .lean();
 
-  sendResponse(res, 200, { cart }, 'Item added to cart successfully');
+  // Calculate total price with current product prices
+  let totalPrice = 0;
+  const validItems = [];
+
+  for (const item of cart.items) {
+    if (item.product && item.product.isActive) {
+      const discountPrice = item.product.discount > 0 
+        ? Math.round(item.product.price * (1 - item.product.discount / 100))
+        : item.product.price;
+      
+      const itemTotal = discountPrice * item.quantity;
+      totalPrice += itemTotal;
+      
+      validItems.push({
+        ...item,
+        currentPrice: discountPrice,
+        itemTotal
+      });
+    }
+  }
+
+  const processedCart = {
+    ...cart,
+    items: validItems,
+    totalItems: validItems.reduce((sum, item) => sum + item.quantity, 0),
+    totalPrice
+  };
+
+  sendResponse(res, 200, { cart: processedCart }, 'Item added to cart successfully');
 });
 
 // @desc    Update cart item quantity
@@ -160,12 +191,40 @@ const updateCartItem = asyncHandler(async (req, res) => {
   cart.items[itemIndex].quantity = quantity;
   await cart.save();
 
-  // Return updated cart
+  // Return updated cart with calculated totals
   const updatedCart = await Cart.findById(cart._id)
-    .populate('items.product', 'name price discount images stock')
+    .populate('items.product', 'name price discount images stock isActive')
     .lean();
 
-  sendResponse(res, 200, { cart: updatedCart }, 'Cart item updated successfully');
+  // Calculate total price with current product prices
+  let totalPrice = 0;
+  const validItems = [];
+
+  for (const item of updatedCart.items) {
+    if (item.product && item.product.isActive) {
+      const discountPrice = item.product.discount > 0 
+        ? Math.round(item.product.price * (1 - item.product.discount / 100))
+        : item.product.price;
+      
+      const itemTotal = discountPrice * item.quantity;
+      totalPrice += itemTotal;
+      
+      validItems.push({
+        ...item,
+        currentPrice: discountPrice,
+        itemTotal
+      });
+    }
+  }
+
+  const processedCart = {
+    ...updatedCart,
+    items: validItems,
+    totalItems: validItems.reduce((sum, item) => sum + item.quantity, 0),
+    totalPrice
+  };
+
+  sendResponse(res, 200, { cart: processedCart }, 'Cart item updated successfully');
 });
 
 // @desc    Remove item from cart
@@ -187,12 +246,40 @@ const removeFromCart = asyncHandler(async (req, res) => {
 
   await cart.save();
 
-  // Return updated cart
+  // Return updated cart with calculated totals
   const updatedCart = await Cart.findById(cart._id)
-    .populate('items.product', 'name price discount images stock')
+    .populate('items.product', 'name price discount images stock isActive')
     .lean();
 
-  sendResponse(res, 200, { cart: updatedCart }, 'Item removed from cart successfully');
+  // Calculate total price with current product prices
+  let totalPrice = 0;
+  const validItems = [];
+
+  for (const item of updatedCart.items) {
+    if (item.product && item.product.isActive) {
+      const discountPrice = item.product.discount > 0 
+        ? Math.round(item.product.price * (1 - item.product.discount / 100))
+        : item.product.price;
+      
+      const itemTotal = discountPrice * item.quantity;
+      totalPrice += itemTotal;
+      
+      validItems.push({
+        ...item,
+        currentPrice: discountPrice,
+        itemTotal
+      });
+    }
+  }
+
+  const processedCart = {
+    ...updatedCart,
+    items: validItems,
+    totalItems: validItems.reduce((sum, item) => sum + item.quantity, 0),
+    totalPrice
+  };
+
+  sendResponse(res, 200, { cart: processedCart }, 'Item removed from cart successfully');
 });
 
 // @desc    Clear cart

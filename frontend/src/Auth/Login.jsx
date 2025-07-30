@@ -195,7 +195,16 @@ const InputField = ({ icon, name, type, placeholder, value, onChange, error, chi
     <div>
         <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">{icon}</div>
-            <input id={name} name={name} type={type} placeholder={placeholder} value={value} onChange={onChange} className={`w-full pl-12 pr-4 py-3 border rounded-lg bg-gray-50 placeholder-gray-500 focus:outline-none focus:ring-2 transition-all ${error ? 'border-red-500 ring-red-500/50' : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500/50'}`} />
+            <input 
+                id={name} 
+                name={name} 
+                type={type} 
+                placeholder={placeholder} 
+                value={value} 
+                onChange={onChange} 
+                autoComplete={type === 'password' ? 'current-password' : type === 'email' ? 'email' : 'off'}
+                className={`w-full pl-12 pr-4 py-3 border rounded-lg bg-gray-50 placeholder-gray-500 focus:outline-none focus:ring-2 transition-all ${error ? 'border-red-500 ring-red-500/50' : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500/50'}`} 
+            />
             {children}
         </div>
         {error && <p className="mt-1.5 flex items-center text-sm text-red-600"><FiAlertCircle className="mr-1.5" />{error}</p>}

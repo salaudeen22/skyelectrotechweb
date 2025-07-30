@@ -19,6 +19,8 @@ import Home from './Page/Home';
 import ProductList from './User/ProductList';
 import ProductDetails from './User/ProductDetails';
 import Cart from './User/Cart';
+import ShippingInfo from './User/ShippingInfo';
+import Payment from './User/Payment';
 import Checkout from './User/Checkout';
 import OrderHistory from './User/OrderHistory';
 import OrderDetails from './User/OrderDetails';
@@ -42,6 +44,7 @@ import CategoriesManagement from './Admin/CategoriesManagement';
 import Inventory from './Admin/Inventory';
 import Sales from './Admin/Sales';
 import Employees from './Admin/Employees';
+import ShippingFees from './Admin/ShippingFees';
 
 // Components
 import ProtectedRoute from './Components/ProtectedRoute';
@@ -121,6 +124,8 @@ const App = () => {
                   </ProtectedRoute>
                 }>
                   <Route path="cart" element={<Cart />} />
+                  <Route path="shipping" element={<ShippingInfo />} />
+                  <Route path="payment" element={<Payment />} />
                   <Route path="checkout" element={<Checkout />} />
                   <Route path="orders" element={<OrderHistory />} />
                   <Route path="orders/:id" element={<OrderDetails />} />
@@ -182,13 +187,18 @@ const App = () => {
                       <Employees />
                     </ProtectedRoute>
                   } />
+                  <Route path="shipping-fees" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <ShippingFees />
+                    </ProtectedRoute>
+                  } />
                 </Route>
 
                 {/* Redirect old routes */}
                 <Route path="/admin/login" element={<Navigate to="/auth/login" replace />} />
                 <Route path="/admin/register" element={<Navigate to="/auth/register" replace />} />
                 <Route path="/cart" element={<Navigate to="/user/cart" replace />} />
-                <Route path="/checkout" element={<Navigate to="/user/checkout" replace />} />
+                <Route path="/checkout" element={<Navigate to="/user/shipping" replace />} />
                 <Route path="/profile" element={<Navigate to="/user/profile" replace />} />
 
                 {/* 404 Route */}
