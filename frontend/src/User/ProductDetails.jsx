@@ -4,6 +4,7 @@ import { FiShoppingCart, FiHeart, FiMinus, FiPlus, FiStar, FiShare2, FiTruck, Fi
 import { productsAPI } from '../services/apiServices';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
+import { useAnalytics } from '../hooks/useAnalytics';
 import { toast } from 'react-hot-toast';
 
 const ProductDetails = () => {
@@ -11,6 +12,7 @@ const ProductDetails = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { addToCart, addingToCart } = useCart();
+  const { trackProduct, trackCartAdd, trackWishlistAdd, trackClick } = useAnalytics();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,7 +25,11 @@ const ProductDetails = () => {
       try {
         setLoading(true);
         const response = await productsAPI.getProduct(id);
-        setProduct(response.data.product);
+        const productData = response.data.product;
+        setProduct(productData);
+        
+        // Track product view
+        trackProduct(productData);
       } catch (error) {
         console.error('Error fetching product:', error);
         toast.error('Product not found');
@@ -34,7 +40,7 @@ const ProductDetails = () => {
     };
 
     fetchProduct();
-  }, [id, navigate]);
+  }, [id, navigate, trackProduct]);
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
@@ -44,6 +50,8 @@ const ProductDetails = () => {
 
     try {
       await addToCart(product._id, quantity);
+      trackCartAdd(product, quantity);
+      trackClick('add_to_cart_button', 'product_details');
       toast.success(`Added ${quantity} item(s) to cart!`);
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -73,6 +81,8 @@ const ProductDetails = () => {
     }
     
     // TODO: Implement wishlist functionality
+    trackWishlistAdd(product);
+    trackClick('add_to_wishlist_button', 'product_details');
     toast.success('Added to wishlist!');
   };
 

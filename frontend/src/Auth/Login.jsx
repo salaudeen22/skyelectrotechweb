@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import GoogleOAuthButton from '../Components/GoogleOAuthButton';
+import { useAnalytics } from '../hooks/useAnalytics';
 import toast from 'react-hot-toast';
 import { 
     FiEye, 
@@ -26,6 +27,7 @@ const Login = () => {
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
     const location = useLocation();
+    const { trackUserLogin, trackForm, trackClick } = useAnalytics();
     
     const from = location.state?.from?.pathname || '/';
 
@@ -50,10 +52,15 @@ const Login = () => {
             setErrors(validationErrors);
             return;
         }
+        
+        trackForm('login_form');
+        trackClick('login_submit_button', 'login_page');
         setIsLoading(true);
+        
         try {
             const result = await login(formData);
             if (result.success) {
+                trackUserLogin('email');
                 toast.success(`Welcome back!`);
                 // Role-based navigation
                 const user = result.user;

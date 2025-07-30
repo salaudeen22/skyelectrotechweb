@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { initializeAnalytics } from './utils/analytics';
 
 // Context Providers
 import { AuthProvider } from './contexts/AuthContext';
@@ -45,6 +46,7 @@ import Employees from './Admin/Employees';
 // Components
 import ProtectedRoute from './Components/ProtectedRoute';
 import NotFound from './Components/NotFound';
+import AnalyticsTracker from './Components/AnalyticsTracker';
 
 // Create a query client
 const queryClient = new QueryClient({
@@ -58,32 +60,37 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
+  useEffect(() => {
+    initializeAnalytics();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
           <CategoriesProvider>
             <Router>
-              <div className="App">
-                <Toaster
-                  position="top-right"
-                  toastOptions={{
-                    duration: 4000,
-                    style: {
-                      background: '#363636',
-                      color: '#fff',
+                          <div className="App">
+              <AnalyticsTracker />
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: '#363636',
+                    color: '#fff',
+                  },
+                  success: {
+                    duration: 3000,
+                    theme: {
+                      primary: 'green',
+                      secondary: 'black',
                     },
-                    success: {
-                      duration: 3000,
-                      theme: {
-                        primary: 'green',
-                        secondary: 'black',
-                      },
-                    },
-                  }}
-                />
-              
-              <Routes>
+                  },
+                }}
+              />
+            
+            <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<MainLayout />}>
                   <Route index element={<Home />} />
