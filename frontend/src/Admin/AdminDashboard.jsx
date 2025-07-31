@@ -12,14 +12,13 @@ import {
   FaEye,
   FaHeart,
   FaStar,
-  FaExclamationTriangle,
   FaArrowUp,
   FaArrowDown,
   FaPercentage,
   FaClock,
   FaShoppingBag,
   FaUserPlus,
-  FaBoxes
+  FaChartLine
 } from 'react-icons/fa';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { analyticsAPI, ordersAPI } from '../services/apiServices';
@@ -32,7 +31,6 @@ const AdminDashboard = () => {
     recentOrders: [],
     topProducts: [],
     customerMetrics: null,
-    inventoryAlerts: [],
     loading: true
   });
 
@@ -60,7 +58,6 @@ const AdminDashboard = () => {
 
       // Calculate additional metrics
       const customerMetrics = calculateCustomerMetrics(stats);
-      const inventoryAlerts = stats.lowStockProducts || [];
       const topSellingProducts = stats.topSellingProducts || [];
 
       setDashboardData({
@@ -68,7 +65,6 @@ const AdminDashboard = () => {
         salesData,
         recentOrders,
         customerMetrics,
-        inventoryAlerts,
         topSellingProducts,
         loading: false
       });
@@ -159,7 +155,7 @@ const AdminDashboard = () => {
     );
   }
 
-  const { stats, salesData, recentOrders, customerMetrics, inventoryAlerts, topSellingProducts } = dashboardData;
+  const { stats, salesData, recentOrders, customerMetrics, topSellingProducts } = dashboardData;
 
   // Prepare comprehensive stats cards data
   const statsCards = stats ? [
@@ -237,6 +233,42 @@ const AdminDashboard = () => {
     }
   ] : [];
 
+  // Performance metrics cards
+  const performanceCards = stats ? [
+    {
+      label: 'Monthly Growth',
+      value: `${((stats.thisMonth?.revenue || 0) / (stats.overview?.totalRevenue || 1) * 100).toFixed(1)}%`,
+      icon: FaChartLine,
+      iconBg: 'bg-indigo-100',
+      iconColor: 'text-indigo-600',
+      description: 'This month vs total'
+    },
+    {
+      label: 'Max Order Value',
+      value: formatCurrency(stats.overview?.maxOrderValue || 0),
+      icon: FaStar,
+      iconBg: 'bg-pink-100',
+      iconColor: 'text-pink-600',
+      description: 'Highest single order'
+    },
+    {
+      label: 'Today\'s Revenue',
+      value: formatCurrency(stats.today?.revenue || 0),
+      icon: FaDollarSign,
+      iconBg: 'bg-green-100',
+      iconColor: 'text-green-600',
+      description: 'Daily performance'
+    },
+    {
+      label: 'New Customers Today',
+      value: stats.today?.newCustomers || 0,
+      icon: FaUsers,
+      iconBg: 'bg-orange-100',
+      iconColor: 'text-orange-600',
+      description: 'Customer acquisition'
+    }
+  ] : [];
+
   // Order status distribution for pie chart
   const orderStatusData = stats?.orderStatusDistribution ? 
     Object.entries(stats.orderStatusDistribution).map(([status, count]) => ({
@@ -279,6 +311,24 @@ const AdminDashboard = () => {
       {/* Customer Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {customerCards.map((metric) => (
+          <div key={metric.label} className="bg-white p-6 rounded-xl shadow-lg transition-transform transform hover:-translate-y-1">
+            <div className="flex items-center space-x-4">
+              <div className={`p-3 rounded-full ${metric.iconBg}`}>
+                <metric.icon className={`w-6 h-6 ${metric.iconColor}`} />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500">{metric.label}</p>
+                <p className="text-xl font-bold text-slate-800">{metric.value}</p>
+                <p className="text-xs text-slate-400">{metric.description}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Performance Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {performanceCards.map((metric) => (
           <div key={metric.label} className="bg-white p-6 rounded-xl shadow-lg transition-transform transform hover:-translate-y-1">
             <div className="flex items-center space-x-4">
               <div className={`p-3 rounded-full ${metric.iconBg}`}>
@@ -421,44 +471,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Inventory Alerts */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-slate-800">Inventory Alerts</h2>
-            <Link to="/admin/products" className="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center">
-              Manage <FaArrowRight className="ml-1"/>
-            </Link>
-          </div>
-          <div className="space-y-3">
-            {inventoryAlerts.length > 0 ? (
-              inventoryAlerts.slice(0, 5).map((product) => (
-                <div key={product._id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                      <FaExclamationTriangle className="w-4 h-4 text-red-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-slate-800">{product.name}</p>
-                      <p className="text-sm text-red-600">
-                        Stock: {product.stock} (Threshold: {product.lowStockThreshold})
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
-                      Low Stock
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center text-gray-500 py-8">
-                <FaBoxes className="w-12 h-12 mx-auto text-gray-300 mb-2" />
-                <p>All products are well stocked</p>
-              </div>
-            )}
-          </div>
-        </div>
+
       </div>
 
              {/* Top Selling Products */}
