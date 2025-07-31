@@ -20,6 +20,7 @@ import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
 import { paymentAPI, ordersAPI } from '../services/apiServices'; // Assuming these are correctly set up
 import { useAnalytics } from '../hooks/useAnalytics'; // Assuming this is correctly set up
+import { useSettings } from '../contexts/SettingsContext';
 import toast from 'react-hot-toast';
 
 // Helper Component for Form Inputs
@@ -278,6 +279,7 @@ const Checkout = () => {
   const { items: cart, totalPrice: cartTotal, clearCart } = useCart();
   const { user, getAddresses, addAddress } = useAuth();
   const { trackCheckout, trackOrderPurchase, trackClick } = useAnalytics();
+  const { settings } = useSettings();
   
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -528,7 +530,7 @@ const Checkout = () => {
         key: paymentData.key,
         amount: paymentData.amount,
         currency: paymentData.currency,
-        name: 'SkyElectroTech',
+        name: settings.storeInfo.name,
         description: `Order #${createdOrder._id}`,
         order_id: paymentData.orderId,
         handler: async (response) => handlePaymentSuccess(response, createdOrder._id),

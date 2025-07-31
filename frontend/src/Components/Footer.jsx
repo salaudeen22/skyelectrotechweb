@@ -1,7 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useSettings } from '../contexts/SettingsContext';
 
 const Footer = () => {
+  const { settings } = useSettings();
+  
   return (
     <footer className="bg-white border-t">
       <div className="max-w-screen-xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -9,10 +12,10 @@ const Footer = () => {
         <div className="mb-8 pb-8 border-b border-gray-200">
           <div className="flex items-center justify-center space-x-3">
            
-            <span className="text-3xl font-bold text-blue-600">SkyElectroTech</span>
+            <span className="text-3xl font-bold text-blue-600">{settings.storeInfo.name}</span>
           </div>
           <p className="text-center text-gray-600 mt-4 max-w-md mx-auto">
-            Your trusted partner for all electrical and electronic needs.
+            {settings.storeInfo.description}
           </p>
         </div>
         
@@ -55,7 +58,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="mt-12 border-t border-gray-200 pt-8 text-center">
-          <p className="text-base text-gray-500">© {new Date().getFullYear()} SkyelectroTech. All Rights Reserved.</p>
+          <p className="text-base text-gray-500">© {new Date().getFullYear()} {settings.storeInfo.name}. All Rights Reserved.</p>
         </div>
       </div>
     </footer>

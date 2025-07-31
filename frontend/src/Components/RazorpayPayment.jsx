@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiCreditCard, FiSmartphone, FiHome, FiPocket, FiTruck, FiCheck, FiX } from 'react-icons/fi';
 import { paymentAPI, ordersAPI } from '../services/apiServices';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useSettings } from '../contexts/SettingsContext';
 import toast from 'react-hot-toast';
 
 const RazorpayPayment = ({ 
@@ -19,6 +20,7 @@ const RazorpayPayment = ({
   const [orderId, setOrderId] = useState(null);
   const navigate = useNavigate();
   const { trackCheckout, trackOrderPurchase, trackClick } = useAnalytics();
+  const { settings } = useSettings();
 
   useEffect(() => {
     loadPaymentMethods();
@@ -76,8 +78,8 @@ const RazorpayPayment = ({
         key: paymentData.key,
         amount: paymentData.amount,
         currency: paymentData.currency,
-        name: 'SkyElectroTech',
-        description: 'Electronics and Components',
+        name: settings.storeInfo.name,
+        description: settings.storeInfo.description,
         order_id: paymentData.orderId,
         handler: async (response) => {
           await handlePaymentSuccess(response);

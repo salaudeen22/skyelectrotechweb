@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import GoogleOAuthButton from '../Components/GoogleOAuthButton';
 import { useAnalytics } from '../hooks/useAnalytics';
 import toast from 'react-hot-toast';
@@ -28,6 +29,7 @@ const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { trackUserLogin, trackForm, trackClick } = useAnalytics();
+    const { settings } = useSettings();
     
     const from = location.state?.from?.pathname || '/';
 
@@ -94,7 +96,7 @@ const Login = () => {
                         <div>
                             <Link to="/" className="flex items-center gap-3 mb-8">
                              
-                                <span className="text-2xl font-bold tracking-wider">SkyElectroTech</span>
+                                <span className="text-2xl font-bold tracking-wider">{settings.storeInfo.name}</span>
                             </Link>
                             <h1 className="text-4xl font-extrabold leading-tight mb-4">
                                 Welcome to the Future of Electronics.
@@ -118,7 +120,7 @@ const Login = () => {
                         <div className="text-center lg:text-left mb-8">
                             <h2 className="text-3xl font-bold text-gray-800">Sign In</h2>
                             <p className="text-gray-600 mt-2">
-                                New to SkyElectroTech?{' '}
+                                New to {settings.storeInfo.name}?{' '}
                                 <Link to="/auth/register" className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
                                     Create an account
                                 </Link>

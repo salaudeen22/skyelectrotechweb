@@ -148,13 +148,14 @@ export const trackBeginCheckout = (cartItems, totalValue) => {
 // Track purchase
 export const trackPurchase = (order) => {
   if (typeof window !== 'undefined' && window.dataLayer) {
-    const items = order.orderItems.map(item => ({
-      item_id: item.product._id,
-      item_name: item.name,
+    // Handle cases where orderItems might not be available
+    const items = order.orderItems ? order.orderItems.map(item => ({
+      item_id: item.product?._id || item.product || 'unknown',
+      item_name: item.name || 'Unknown Product',
       item_category: item.category?.name || 'Uncategorized',
-      price: item.price,
-      quantity: item.quantity
-    }));
+      price: item.price || 0,
+      quantity: item.quantity || 1
+    })) : [];
 
     window.dataLayer.push({
       event: 'purchase',

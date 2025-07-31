@@ -8,6 +8,7 @@ import { initializeAnalytics } from './utils/analytics';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { CategoriesProvider } from './contexts/CategoriesContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 
 // Layouts
 import MainLayout from './Layouts/MainLayout';
@@ -43,6 +44,7 @@ import ProductManagement from './Admin/ProductManagement';
 import CategoriesManagement from './Admin/CategoriesManagement';
 import Sales from './Admin/Sales';
 import Employees from './Admin/Employees';
+import Settings from './Admin/Settings';
 
 // Components
 import ProtectedRoute from './Components/ProtectedRoute';
@@ -70,6 +72,7 @@ const App = () => {
       <AuthProvider>
         <CartProvider>
           <CategoriesProvider>
+            <SettingsProvider>
             <Router>
                           <div className="App">
               <AnalyticsTracker />
@@ -180,6 +183,11 @@ const App = () => {
                       <Employees />
                     </ProtectedRoute>
                   } />
+                  <Route path="settings" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <Settings />
+                    </ProtectedRoute>
+                  } />
                 </Route>
 
                 {/* Redirect old routes */}
@@ -193,10 +201,11 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
-          </Router>
-        </CategoriesProvider>
-      </CartProvider>
-    </AuthProvider>
+                      </Router>
+            </SettingsProvider>
+          </CategoriesProvider>
+        </CartProvider>
+      </AuthProvider>
   </QueryClientProvider>
   );
 };

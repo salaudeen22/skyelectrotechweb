@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
+import { useSettings } from '../contexts/SettingsContext';
 import { 
     FaTachometerAlt, 
     FaBoxOpen, 
@@ -10,10 +11,13 @@ import {
     FaUserCircle,
     FaTags, // Icon for categories
     FaTimes,
-    FaBars
+    FaBars,
+    FaCog
 } from 'react-icons/fa';
 
 const AdminSidebar = ({ isOpen, onToggle }) => {
+    const { settings } = useSettings();
+    
     // --- Style Definitions for NavLinks ---
     const commonLinkStyles = "flex items-center w-full px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 group";
     
@@ -62,7 +66,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                 <Link to="/" className="flex items-center justify-center">
                     <img 
                         src="https://i.postimg.cc/brZN4ngb/Sky-Logo-Only.png" 
-                        alt="SkyElectroTech" 
+                        alt={settings.storeInfo.name} 
                         className="h-32 w-32 object-contain"
                     />
                 </Link>
@@ -110,6 +114,14 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                 > 
                     <FaUsers className="mr-4 h-5 w-5" />
                     <span>Employees</span>
+                </NavLink>
+                <NavLink 
+                    to="/admin/settings" 
+                    onClick={handleLinkClick}
+                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
+                > 
+                    <FaCog className="mr-4 h-5 w-5" />
+                    <span>Settings</span>
                 </NavLink>
             </nav>
 

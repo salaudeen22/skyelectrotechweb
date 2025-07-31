@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import { CartContext } from '../contexts/CartContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { useCategories } from '../hooks/useCategories';
 import { IoCartOutline } from 'react-icons/io5';
 
@@ -14,6 +15,7 @@ const Navbar = () => {
   const [openMobileCategories, setOpenMobileCategories] = useState(new Set());
   const { user, logout } = useContext(AuthContext);
   const { items: cartItems, totalItems } = useContext(CartContext);
+  const { settings } = useSettings();
   const { categories } = useCategories();
   const navigate = useNavigate();
 
@@ -104,7 +106,7 @@ const Navbar = () => {
             <Link to="/" className="flex-shrink-0 flex items-center space-x-2">
               <img 
                 src="https://i.postimg.cc/brZN4ngb/Sky-Logo-Only.png" 
-                alt="SkyElectroTech" 
+                alt={settings.storeInfo.name} 
                 className="h-12 w-24 object-contain"
               />
             

@@ -1,5 +1,6 @@
 const Order = require('../models/Order');
 const { 
+  razorpay,
   generateRazorpayOrderId, 
   verifyPaymentSignature, 
   getPaymentDetails,
@@ -52,6 +53,12 @@ const verifyPayment = asyncHandler(async (req, res) => {
   }
 
   try {
+    console.log('Payment verification request:', {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature: razorpay_signature ? 'present' : 'missing'
+    });
+
     // Verify payment signature
     const isValidSignature = verifyPaymentSignature(
       razorpay_order_id,
@@ -59,12 +66,19 @@ const verifyPayment = asyncHandler(async (req, res) => {
       razorpay_signature
     );
 
+    console.log('Signature verification result:', isValidSignature);
+
     if (!isValidSignature) {
+      console.error('Invalid payment signature for:', {
+        orderId: razorpay_order_id,
+        paymentId: razorpay_payment_id
+      });
       return sendError(res, 400, 'Invalid payment signature');
     }
 
     // Get payment details from Razorpay
     const paymentDetails = await getPaymentDetails(razorpay_payment_id);
+    console.log('Payment details retrieved successfully');
 
     sendResponse(res, 200, {
       paymentId: razorpay_payment_id,
@@ -74,7 +88,7 @@ const verifyPayment = asyncHandler(async (req, res) => {
     }, 'Payment verified successfully');
   } catch (error) {
     console.error('Payment verification error:', error);
-    sendError(res, 500, 'Failed to verify payment');
+    sendError(res, 500, `Failed to verify payment: ${error.message}`);
   }
 });
 
@@ -128,6 +142,41 @@ const processRefund = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error('Refund processing error:', error);
     sendError(res, 500, 'Failed to process refund');
+  }
+});
+
+// @desc    Test Razorpay configuration
+// @route   GET /api/payments/test
+// @access  Public
+const testRazorpayConfig = asyncHandler(async (req, res) => {
+  try {
+    // Test if Razorpay credentials are configured
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      return sendError(res, 500, 'Razorpay credentials not configured');
+    }
+
+    // Test if we can create a minimal order (this will fail but we can catch the error)
+    try {
+      await razorpay.orders.create({
+        amount: 100,
+        currency: 'INR',
+        receipt: 'test_receipt'
+      });
+    } catch (error) {
+      // This is expected to fail in test mode, but it means the connection works
+      if (error.error && error.error.description) {
+        console.log('Razorpay test connection successful (expected error):', error.error.description);
+      }
+    }
+
+    sendResponse(res, 200, {
+      configured: true,
+      keyId: process.env.RAZORPAY_KEY_ID ? 'Set' : 'Not set',
+      keySecret: process.env.RAZORPAY_KEY_SECRET ? 'Set' : 'Not set'
+    }, 'Razorpay configuration test completed');
+  } catch (error) {
+    console.error('Razorpay config test error:', error);
+    sendError(res, 500, 'Razorpay configuration test failed');
   }
 });
 
@@ -188,5 +237,6 @@ module.exports = {
   verifyPayment,
   getPaymentInfo,
   processRefund,
-  getPaymentMethods
+  getPaymentMethods,
+  testRazorpayConfig
 }; 

@@ -5,7 +5,8 @@ const {
   verifyPayment,
   getPaymentInfo,
   processRefund,
-  getPaymentMethods
+  getPaymentMethods,
+  testRazorpayConfig
 } = require('../controllers/payments');
 const { auth, adminOnly, userAccess } = require('../middleware/auth');
 const validate = require('../middleware/validate');
@@ -65,6 +66,7 @@ const refundValidation = [
 
 // Public routes
 router.get('/methods', getPaymentMethods);
+router.get('/test', testRazorpayConfig);
 
 // User routes
 router.post('/create-order', 

@@ -65,12 +65,12 @@ const OrderDetails = () => {
   const getOrderTimeline = () => {
     const timeline = [
       { status: 'pending', label: 'Order Placed', completed: true },
-      { status: 'confirmed', label: 'Order Confirmed', completed: ['confirmed', 'shipped', 'delivered'].includes(order?.status) },
-      { status: 'shipped', label: 'Shipped', completed: ['shipped', 'delivered'].includes(order?.status) },
-      { status: 'delivered', label: 'Delivered', completed: order?.status === 'delivered' }
+      { status: 'confirmed', label: 'Order Confirmed', completed: ['confirmed', 'shipped', 'delivered'].includes(order?.orderStatus) },
+      { status: 'shipped', label: 'Shipped', completed: ['shipped', 'delivered'].includes(order?.orderStatus) },
+      { status: 'delivered', label: 'Delivered', completed: order?.orderStatus === 'delivered' }
     ];
 
-    if (order?.status === 'cancelled') {
+    if (order?.orderStatus === 'cancelled') {
       return [
         { status: 'pending', label: 'Order Placed', completed: true },
         { status: 'cancelled', label: 'Order Cancelled', completed: true, isLast: true }
@@ -126,11 +126,11 @@ const OrderDetails = () => {
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            {getStatusIcon(order.status)}
+            {getStatusIcon(order.orderStatus)}
             <span
-              className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}
+              className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusColor(order.orderStatus)}`}
             >
-              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+              {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
             </span>
           </div>
         </div>
@@ -164,7 +164,7 @@ const OrderDetails = () => {
                       <p className={`font-medium ${step.completed ? 'text-gray-900' : 'text-gray-500'}`}>
                         {step.label}
                       </p>
-                      {step.completed && step.status === order.status && (
+                      {step.completed && step.status === order.orderStatus && (
                         <p className="text-sm text-gray-600">
                           {new Date(order.updatedAt).toLocaleString()}
                         </p>
@@ -184,16 +184,16 @@ const OrderDetails = () => {
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Order Items</h2>
               <div className="space-y-4">
-                {order.items.map((item, index) => (
+                {order.orderItems.map((item, index) => (
                   <div key={index} className="flex items-center space-x-4 py-4 border-b border-gray-100 last:border-b-0">
                     <img
-                      src={item.product?.images?.[0] || '/placeholder-image.jpg'}
-                      alt={item.product?.name || 'Product'}
+                      src={item.image || '/placeholder-image.jpg'}
+                      alt={item.name || 'Product'}
                       className="w-16 h-16 object-cover rounded-lg bg-gray-100"
                     />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900 truncate">
-                        {item.product?.name || 'Product Name'}
+                        {item.name || 'Product Name'}
                       </h3>
                       <p className="text-sm text-gray-600">
                         Quantity: {item.quantity}
@@ -222,19 +222,19 @@ const OrderDetails = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
                   <span className="text-gray-900">
-                    ₹{(order.total - (order.shippingFee || 0)).toLocaleString()}
+                    ₹{order.itemsPrice.toLocaleString()}
                   </span>
                 </div>
-                {order.shippingFee > 0 && (
+                {order.shippingPrice > 0 && (
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping</span>
-                    <span className="text-gray-900">₹{order.shippingFee.toLocaleString()}</span>
+                    <span className="text-gray-900">₹{order.shippingPrice.toLocaleString()}</span>
                   </div>
                 )}
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between font-semibold">
                     <span className="text-gray-900">Total</span>
-                    <span className="text-gray-900">₹{order.total.toLocaleString()}</span>
+                    <span className="text-gray-900">₹{order.totalPrice.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -247,18 +247,18 @@ const OrderDetails = () => {
                 <div className="flex items-start space-x-3">
                   <FiMapPin className="w-5 h-5 text-gray-400 mt-0.5" />
                   <div>
-                    <p className="font-medium text-gray-900">{order.shippingAddress?.fullName}</p>
+                    <p className="font-medium text-gray-900">{order.shippingInfo?.name}</p>
                     <p className="text-gray-600 text-sm">
-                      {order.shippingAddress?.street}<br />
-                      {order.shippingAddress?.city}, {order.shippingAddress?.state} {order.shippingAddress?.zipCode}<br />
-                      {order.shippingAddress?.country}
+                      {order.shippingInfo?.address}<br />
+                      {order.shippingInfo?.city}, {order.shippingInfo?.state} {order.shippingInfo?.zipCode}<br />
+                      {order.shippingInfo?.country}
                     </p>
                   </div>
                 </div>
-                {order.shippingAddress?.phone && (
+                {order.shippingInfo?.phone && (
                   <div className="flex items-center space-x-3">
                     <FiPhone className="w-5 h-5 text-gray-400" />
-                    <span className="text-gray-600 text-sm">{order.shippingAddress.phone}</span>
+                    <span className="text-gray-600 text-sm">{order.shippingInfo.phone}</span>
                   </div>
                 )}
                 {order.user?.email && (
@@ -277,10 +277,10 @@ const OrderDetails = () => {
                 <FiCreditCard className="w-5 h-5 text-gray-400" />
                 <div>
                   <p className="font-medium text-gray-900 capitalize">
-                    {order.paymentMethod || 'Cash on Delivery'}
+                    {order.paymentInfo?.method || 'Cash on Delivery'}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {order.paymentStatus === 'paid' ? 'Payment Completed' : 'Payment Pending'}
+                    {order.paymentInfo?.status === 'completed' ? 'Payment Completed' : 'Payment Pending'}
                   </p>
                 </div>
               </div>

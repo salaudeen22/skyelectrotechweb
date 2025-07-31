@@ -364,6 +364,65 @@ export const analyticsAPI = {
   }
 };
 
+// Settings API calls
+export const settingsAPI = {
+  // Get all settings
+  getSettings: async () => {
+    const response = await api.get('/settings');
+    return response.data;
+  },
+
+  // Update settings
+  updateSettings: async (settingsData) => {
+    const response = await api.put('/settings', settingsData);
+    return response.data;
+  },
+
+  // Get public settings
+  getPublicSettings: async () => {
+    const response = await api.get('/settings/public');
+    return response.data;
+  },
+
+  // Calculate shipping cost
+  calculateShippingCost: async (shippingData) => {
+    const response = await api.post('/settings/calculate-shipping', shippingData);
+    return response.data;
+  },
+
+  // Shipping methods
+  addShippingMethod: async (methodData) => {
+    const response = await api.post('/settings/shipping-methods', methodData);
+    return response.data;
+  },
+
+  updateShippingMethod: async (methodId, methodData) => {
+    const response = await api.put(`/settings/shipping-methods/${methodId}`, methodData);
+    return response.data;
+  },
+
+  deleteShippingMethod: async (methodId) => {
+    const response = await api.delete(`/settings/shipping-methods/${methodId}`);
+    return response.data;
+  },
+
+  // Shipping zones
+  addShippingZone: async (zoneData) => {
+    const response = await api.post('/settings/shipping-zones', zoneData);
+    return response.data;
+  },
+
+  updateShippingZone: async (zoneId, zoneData) => {
+    const response = await api.put(`/settings/shipping-zones/${zoneId}`, zoneData);
+    return response.data;
+  },
+
+  deleteShippingZone: async (zoneId) => {
+    const response = await api.delete(`/settings/shipping-zones/${zoneId}`);
+    return response.data;
+  }
+};
+
 // Payment API calls
 export const paymentAPI = {
   // Create payment order

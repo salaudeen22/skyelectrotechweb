@@ -8,6 +8,8 @@ const { sendResponse, sendError, asyncHandler, paginate, getPaginationMeta } = r
 // @route   POST /api/orders
 // @access  Private (User)
 const createOrder = asyncHandler(async (req, res) => {
+  console.log('Creating order with payload:', req.body);
+  
   const {
     orderItems,
     shippingInfo,
@@ -57,13 +59,13 @@ const createOrder = asyncHandler(async (req, res) => {
   const totalPrice = calculatedItemsPrice + taxPrice + shippingPrice;
 
   // Create order
-  const order = await Order.create({
+  const orderData = {
     user: req.user._id,
     orderItems: processedItems,
     shippingInfo,
     paymentInfo: {
       method: paymentMethod || paymentInfo.method,
-      status: paymentStatus || paymentInfo.status,
+      status: paymentStatus === 'paid' ? 'completed' : (paymentStatus || paymentInfo.status),
       transactionId: razorpayPaymentId,
       paidAt: paymentStatus === 'paid' ? new Date() : undefined
     },
@@ -74,14 +76,28 @@ const createOrder = asyncHandler(async (req, res) => {
     shippingPrice,
     totalPrice,
     orderStatus: paymentStatus === 'paid' ? 'confirmed' : 'pending'
-  });
+  };
+  
+  console.log('Creating order with data:', orderData);
+  
+  try {
+    const order = await Order.create(orderData);
+    console.log('Order created successfully:', order._id);
 
-  // Clear user's cart
-  await Cart.findOneAndDelete({ user: req.user._id });
+    // Clear user's cart
+    await Cart.findOneAndDelete({ user: req.user._id });
 
-  await order.populate('user', 'name email');
+    await order.populate('user', 'name email');
 
-  sendResponse(res, 201, { order }, 'Order created successfully');
+    sendResponse(res, 201, { order }, 'Order created successfully');
+  } catch (error) {
+    console.error('Order creation error:', error);
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message);
+      return sendError(res, 400, `Validation failed: ${validationErrors.join(', ')}`);
+    }
+    throw error;
+  }
 });
 
 // @desc    Get user's orders

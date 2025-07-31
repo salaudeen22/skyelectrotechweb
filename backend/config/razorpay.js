@@ -1,6 +1,11 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 
+// Check if Razorpay credentials are configured
+if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+  console.error('Razorpay credentials not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables.');
+}
+
 // Initialize Razorpay instance
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -28,13 +33,32 @@ const generateRazorpayOrderId = async (amount, currency = 'INR', receipt = null)
 // Verify payment signature
 const verifyPaymentSignature = (orderId, paymentId, signature) => {
   try {
+    if (!orderId || !paymentId || !signature) {
+      console.error('Missing parameters for signature verification:', {
+        orderId: !!orderId,
+        paymentId: !!paymentId,
+        signature: !!signature
+      });
+      return false;
+    }
+
     const text = `${orderId}|${paymentId}`;
     const generatedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
       .update(text)
       .digest('hex');
 
-    return generatedSignature === signature;
+    const isValid = generatedSignature === signature;
+    
+    if (!isValid) {
+      console.error('Signature mismatch:', {
+        expected: generatedSignature,
+        received: signature,
+        text
+      });
+    }
+
+    return isValid;
   } catch (error) {
     console.error('Error verifying payment signature:', error);
     return false;

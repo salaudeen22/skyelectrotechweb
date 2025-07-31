@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import GoogleOAuthButton from '../Components/GoogleOAuthButton';
 import toast from 'react-hot-toast';
 import { 
@@ -31,6 +32,7 @@ const Register = () => {
 
     const { register } = useContext(AuthContext);
     const navigate = useNavigate();
+    const { settings } = useSettings();
 
     const validate = () => {
         const newErrors = {};
@@ -102,7 +104,7 @@ const Register = () => {
                     <div className="relative z-10 flex flex-col justify-center animate-fade-in-up">
                         <Link to="/" className="flex items-center gap-3 mb-8">
                          
-                            <span className="text-2xl font-bold tracking-wider">SkyElectroTech</span>
+                            <span className="text-2xl font-bold tracking-wider">{settings.storeInfo.name}</span>
                         </Link>
                         <h1 className="text-4xl font-extrabold leading-tight mb-4">
                             Start Your Next Project With Us.

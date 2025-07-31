@@ -16,6 +16,7 @@ import { useCart } from '../hooks/useCart';
 
 import { paymentAPI, ordersAPI } from '../services/apiServices';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useSettings } from '../contexts/SettingsContext';
 import toast from 'react-hot-toast';
 
 const Payment = () => {
@@ -23,6 +24,7 @@ const Payment = () => {
   const { items: cart, totalPrice: cartTotal, clearCart } = useCart();
 
   const { trackOrderPurchase, trackClick } = useAnalytics();
+  const { settings } = useSettings();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState([]);
@@ -154,7 +156,7 @@ const Payment = () => {
         key: paymentData.key,
         amount: paymentData.amount,
         currency: paymentData.currency,
-        name: 'SkyElectroTech',
+        name: settings.storeInfo.name,
         description: `Order Payment`,
         order_id: paymentData.orderId,
         handler: (response) => handlePaymentSuccess(response, orderPayload),
@@ -196,44 +198,66 @@ const Payment = () => {
 
   const handlePaymentSuccess = async (response, orderPayload) => {
     try {
+      console.log('Payment success response:', response);
+      
       // Verify payment
-      const verificationResponse = await paymentAPI.verifyPayment({
+      const verificationData = {
         razorpay_payment_id: response.razorpay_payment_id,
         razorpay_order_id: response.razorpay_order_id,
         razorpay_signature: response.razorpay_signature,
-      });
+      };
+      
+      console.log('Sending verification data:', verificationData);
+      
+      const verificationResponse = await paymentAPI.verifyPayment(verificationData);
+      console.log('Verification response:', verificationResponse);
+      console.log('Verification response success:', verificationResponse.success);
+      console.log('Verification response data:', verificationResponse.data);
+      console.log('Verification response type:', typeof verificationResponse.success);
+      console.log('Verification response keys:', Object.keys(verificationResponse));
 
-      if (verificationResponse.data.success) {
+      if (verificationResponse.success) {
+        console.log('✅ Payment verification successful, creating order...');
+        
         // Create order only after payment is verified
-        const orderResponse = await ordersAPI.createOrder({
+        const finalOrderPayload = {
           ...orderPayload,
           paymentMethod: selectedMethod,
           paymentStatus: 'paid',
           razorpayPaymentId: response.razorpay_payment_id,
           razorpayOrderId: response.razorpay_order_id,
-        });
+        };
+        
+        console.log('Creating order with payload:', finalOrderPayload);
+        
+        const orderResponse = await ordersAPI.createOrder(finalOrderPayload);
+        console.log('Order creation response:', orderResponse);
         
         const order = orderResponse.data.order;
         
         // Track successful payment
-        trackOrderPurchase({
-          orderId: order._id,
-          amount: totals.total,
-          method: selectedMethod,
-          paymentId: response.razorpay_payment_id,
-        });
+        trackOrderPurchase(order);
 
         // Clear cart and redirect
         clearCart();
         clearAllCheckoutData();
         
+        console.log('✅ Payment and order creation completed successfully!');
+        setIsSubmitting(false);
         toast.success('Payment successful! Your order has been placed.');
         navigate(`/user/orders/${order._id}`);
       } else {
+        console.log('❌ Payment verification failed:', verificationResponse);
         throw new Error('Payment verification failed');
       }
     } catch (error) {
       console.error('Payment verification error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data
+      });
+      setIsSubmitting(false);
       toast.error('Payment verification failed. Please contact support.');
     }
   };

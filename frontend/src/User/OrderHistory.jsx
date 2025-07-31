@@ -13,7 +13,7 @@ const OrderHistory = () => {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        const response = await ordersAPI.getUserOrders();
+        const response = await ordersAPI.getMyOrders();
         setOrders(response.data.orders || []);
       } catch (error) {
         console.error('Error fetching orders:', error);
@@ -62,7 +62,7 @@ const OrderHistory = () => {
 
   const filteredOrders = orders.filter(order => {
     if (filter === 'all') return true;
-    return order.status === filter;
+    return order.orderStatus === filter;
   });
 
   if (loading) {
@@ -139,11 +139,11 @@ const OrderHistory = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-2">
-                        {getStatusIcon(order.status)}
+                        {getStatusIcon(order.orderStatus)}
                         <span
-                          className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}
+                          className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.orderStatus)}`}
                         >
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
                         </span>
                       </div>
                       <div className="text-sm text-gray-600">
@@ -169,13 +169,13 @@ const OrderHistory = () => {
                     <div className="flex items-center space-x-2">
                       <FiCreditCard className="w-4 h-4 text-gray-400" />
                       <span className="text-sm text-gray-600">
-                        ₹{order.total.toLocaleString()}
+                        ₹{order.totalPrice.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <FiPackage className="w-4 h-4 text-gray-400" />
                       <span className="text-sm text-gray-600">
-                        {order.items.length} item{order.items.length > 1 ? 's' : ''}
+                        {order.orderItems.length} item{order.orderItems.length > 1 ? 's' : ''}
                       </span>
                     </div>
                   </div>
@@ -183,25 +183,25 @@ const OrderHistory = () => {
                   {/* Order Items Preview */}
                   <div className="border-t border-gray-200 pt-4">
                     <div className="flex items-center space-x-4">
-                      {order.items.slice(0, 3).map((item, index) => (
+                      {order.orderItems.slice(0, 3).map((item, index) => (
                         <div key={index} className="flex-shrink-0">
-                          <img
-                            src={item.product?.images?.[0] || '/placeholder-image.jpg'}
-                            alt={item.product?.name || 'Product'}
-                            className="w-12 h-12 object-cover rounded-lg bg-gray-100"
-                          />
+                                                      <img
+                              src={item.image || '/placeholder-image.jpg'}
+                              alt={item.name || 'Product'}
+                              className="w-12 h-12 object-cover rounded-lg bg-gray-100"
+                            />
                         </div>
                       ))}
-                      {order.items.length > 3 && (
+                      {order.orderItems.length > 3 && (
                         <div className="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                           <span className="text-sm text-gray-600">
-                            +{order.items.length - 3}
+                            +{order.orderItems.length - 3}
                           </span>
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-600 truncate">
-                          {order.items.map(item => item.product?.name).join(', ')}
+                          {order.orderItems.map(item => item.name).join(', ')}
                         </p>
                       </div>
                     </div>
