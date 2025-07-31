@@ -9,7 +9,7 @@ const GoogleOAuthButton = ({
     if (disabled) return;
     
     // Redirect to backend Google OAuth endpoint
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     // Remove any trailing slash and ensure we don't double up on /api
     const cleanUrl = backendUrl.replace(/\/+$/, '');
     const oauthUrl = cleanUrl.endsWith('/api') 

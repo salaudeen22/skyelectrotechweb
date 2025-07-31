@@ -546,6 +546,63 @@ export const bulkUploadAPI = {
   }
 };
 
+// Comments API calls
+export const commentsAPI = {
+  // Get all comments (Admin)
+  getAllComments: async (params = {}) => {
+    const response = await api.get('/comments', { params });
+    return response.data;
+  },
+
+  // Get comment statistics (Admin)
+  getCommentStats: async () => {
+    const response = await api.get('/comments/stats');
+    return response.data;
+  },
+
+  // Update comment status (Admin)
+  updateCommentStatus: async (commentId, status) => {
+    const response = await api.put(`/comments/${commentId}/status`, { status });
+    return response.data;
+  },
+
+  // Delete comment (Admin)
+  deleteComment: async (commentId) => {
+    const response = await api.delete(`/comments/${commentId}`);
+    return response.data;
+  },
+
+  // Get product comments (Public)
+  getProductComments: async (productId, params = {}) => {
+    const response = await api.get(`/comments/product/${productId}`, { params });
+    return response.data;
+  },
+
+  // Create comment (User)
+  createComment: async (commentData) => {
+    const response = await api.post('/comments', commentData);
+    return response.data;
+  },
+
+  // Update comment (User)
+  updateComment: async (commentId, commentData) => {
+    const response = await api.put(`/comments/${commentId}`, commentData);
+    return response.data;
+  },
+
+  // Add reply to comment
+  addReply: async (commentId, replyData) => {
+    const response = await api.post(`/comments/${commentId}/replies`, replyData);
+    return response.data;
+  },
+
+  // Vote on comment
+  voteComment: async (commentId, vote) => {
+    const response = await api.post(`/comments/${commentId}/vote`, { vote });
+    return response.data;
+  }
+};
+
 // Export aliases for backward compatibility
 export const authServices = authAPI;
 export const productServices = productsAPI;
@@ -557,3 +614,4 @@ export const userServices = usersAPI;
 export const analyticsServices = analyticsAPI;
 export const uploadServices = uploadAPI;
 export const bulkUploadServices = bulkUploadAPI;
+export const commentServices = commentsAPI;
