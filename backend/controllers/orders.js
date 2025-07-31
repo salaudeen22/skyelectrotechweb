@@ -14,7 +14,11 @@ const createOrder = asyncHandler(async (req, res) => {
     paymentInfo = { method: 'cod', status: 'pending' },
     itemsPrice,
     taxPrice = 0,
-    shippingPrice = 0
+    shippingPrice = 0,
+    paymentMethod,
+    paymentStatus,
+    razorpayPaymentId,
+    razorpayOrderId
   } = req.body;
 
   // Validate and process order items
@@ -57,11 +61,19 @@ const createOrder = asyncHandler(async (req, res) => {
     user: req.user._id,
     orderItems: processedItems,
     shippingInfo,
-    paymentInfo,
+    paymentInfo: {
+      method: paymentMethod || paymentInfo.method,
+      status: paymentStatus || paymentInfo.status,
+      transactionId: razorpayPaymentId,
+      paidAt: paymentStatus === 'paid' ? new Date() : undefined
+    },
+    razorpayPaymentId,
+    razorpayOrderId,
     itemsPrice: calculatedItemsPrice,
     taxPrice,
     shippingPrice,
-    totalPrice
+    totalPrice,
+    orderStatus: paymentStatus === 'paid' ? 'confirmed' : 'pending'
   });
 
   // Clear user's cart

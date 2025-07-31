@@ -74,6 +74,8 @@ const orderSchema = new mongoose.Schema({
     transactionId: String,
     paidAt: Date
   },
+  razorpayPaymentId: String,
+  razorpayOrderId: String,
   itemsPrice: {
     type: Number,
     required: true,

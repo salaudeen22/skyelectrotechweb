@@ -1,54 +1,66 @@
-// Google Analytics Test Utility
-export const testGA = () => {
-  console.log('=== Google Analytics Configuration Test ===');
+// GTM Test Utility
+export const testGTM = () => {
+  console.log('=== GTM Configuration Test ===');
   
-  // Check if gtag exists
-  if (typeof window !== 'undefined' && window.gtag) {
-    console.log('✅ gtag is available');
+  // Check if dataLayer exists
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    console.log('✅ dataLayer is available');
+    console.log('dataLayer:', window.dataLayer);
   } else {
-    console.log('❌ gtag is not available');
+    console.log('❌ dataLayer is not available');
   }
   
-  // Test sending an event
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'test_event', {
-      event_category: 'test',
-      event_label: 'GA is working correctly',
-      value: 100
+  // Test pushing an event
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'gtm_test',
+      test_message: 'GTM is working correctly',
+      timestamp: new Date().toISOString()
     });
-    console.log('✅ Test event sent to Google Analytics');
+    console.log('✅ Test event pushed to dataLayer');
   }
   
-  // Check if GA script is loaded
-  const gaScript = document.querySelector('script[src*="googletagmanager.com/gtag/js"]');
-  if (gaScript) {
-    console.log('✅ Google Analytics script is loaded');
+  // Check if GTM script is loaded
+  const gtmScript = document.querySelector('script[src*="googletagmanager.com/gtm.js"]');
+  if (gtmScript) {
+    console.log('✅ GTM script is loaded');
   } else {
-    console.log('❌ Google Analytics script is not loaded');
+    console.log('❌ GTM script is not loaded');
   }
   
-  console.log('=== End GA Test ===');
+  // Check noscript fallback
+  const gtmNoscript = document.querySelector('noscript iframe[src*="googletagmanager.com"]');
+  if (gtmNoscript) {
+    console.log('✅ GTM noscript fallback is present');
+  } else {
+    console.log('❌ GTM noscript fallback is missing');
+  }
+  
+  console.log('=== End GTM Test ===');
 };
 
 // Test specific events
-export const testGAEvents = () => {
-  console.log('=== Testing GA Events ===');
+export const testGTMEvents = () => {
+  console.log('=== Testing GTM Events ===');
   
   // Test page view
-  window.gtag('config', 'G-JTCY4K8TTL', {
+  window.dataLayer.push({
+    event: 'page_view',
     page_title: 'Test Page',
     page_path: '/test'
   });
   
   // Test custom event
-  window.gtag('event', 'test_event', {
+  window.dataLayer.push({
+    event: 'test_event',
     event_category: 'test',
     event_label: 'test_label',
     value: 100
   });
   
   // Test ecommerce event
-  window.gtag('event', 'add_to_cart', {
+  window.dataLayer.push({
+    event: 'add_to_cart',
     currency: 'INR',
     value: 500,
     items: [{
@@ -59,6 +71,6 @@ export const testGAEvents = () => {
     }]
   });
   
-  console.log('✅ Test events sent to Google Analytics');
+  console.log('✅ Test events pushed to dataLayer');
   console.log('=== End Event Test ===');
 }; 

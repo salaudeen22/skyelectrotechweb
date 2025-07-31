@@ -11,7 +11,7 @@ const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 // @route   POST /api/payments/create-order
 // @access  Private (User)
 const createPaymentOrder = asyncHandler(async (req, res) => {
-  const { amount, currency = 'INR', orderId } = req.body;
+  const { amount, currency = 'INR', orderData } = req.body;
 
   if (!amount || amount <= 0) {
     return sendError(res, 400, 'Invalid amount');
@@ -22,7 +22,7 @@ const createPaymentOrder = asyncHandler(async (req, res) => {
     const razorpayOrder = await generateRazorpayOrderId(
       amount, 
       currency, 
-      orderId || `order_${Date.now()}`
+      `order_${Date.now()}`
     );
 
     sendResponse(res, 200, {
@@ -44,8 +44,7 @@ const verifyPayment = asyncHandler(async (req, res) => {
   const { 
     razorpay_order_id, 
     razorpay_payment_id, 
-    razorpay_signature,
-    orderId 
+    razorpay_signature
   } = req.body;
 
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -66,39 +65,6 @@ const verifyPayment = asyncHandler(async (req, res) => {
 
     // Get payment details from Razorpay
     const paymentDetails = await getPaymentDetails(razorpay_payment_id);
-
-    // Update order payment status
-    if (orderId) {
-      const order = await Order.findById(orderId);
-      
-      if (!order) {
-        return sendError(res, 404, 'Order not found');
-      }
-
-      // Check if order belongs to user
-      if (order.user.toString() !== req.user._id.toString()) {
-        return sendError(res, 403, 'Access denied');
-      }
-
-      // Update payment information
-      order.paymentInfo = {
-        method: paymentDetails.method,
-        status: 'completed',
-        transactionId: razorpay_payment_id,
-        paidAt: new Date()
-      };
-
-      order.orderStatus = 'confirmed';
-      
-      // Add status history
-      order.statusHistory.push({
-        status: 'confirmed',
-        updatedBy: req.user._id,
-        note: 'Payment completed via Razorpay'
-      });
-
-      await order.save();
-    }
 
     sendResponse(res, 200, {
       paymentId: razorpay_payment_id,

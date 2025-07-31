@@ -41,10 +41,8 @@ import Wishlist from './User/Wishlist';
 import AdminDashboard from './Admin/AdminDashboard';
 import ProductManagement from './Admin/ProductManagement';
 import CategoriesManagement from './Admin/CategoriesManagement';
-import Inventory from './Admin/Inventory';
 import Sales from './Admin/Sales';
 import Employees from './Admin/Employees';
-import ShippingFees from './Admin/ShippingFees';
 
 // Components
 import ProtectedRoute from './Components/ProtectedRoute';
@@ -172,11 +170,6 @@ const App = () => {
                       <CategoriesManagement />
                     </ProtectedRoute>
                   } />
-                  <Route path="inventory" element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <Inventory />
-                    </ProtectedRoute>
-                  } />
                   <Route path="sales" element={
                     <ProtectedRoute allowedRoles={['admin']}>
                       <Sales />
@@ -185,11 +178,6 @@ const App = () => {
                   <Route path="employees" element={
                     <ProtectedRoute allowedRoles={['admin']}>
                       <Employees />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="shipping-fees" element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <ShippingFees />
                     </ProtectedRoute>
                   } />
                 </Route>

@@ -1,16 +1,17 @@
-// Google Analytics utility functions for tracking user interactions
+// Google Tag Manager (GTM) utility functions for tracking user interactions
 
-// Initialize Google Analytics
+// Initialize Google Tag Manager
 export const initGA = () => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    console.log('Google Analytics initialized');
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    console.log('Google Tag Manager initialized');
   }
 };
 
 // Track page views
 export const trackPageView = (pageTitle, pagePath) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('config', 'G-JTCY4K8TTL', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'page_view',
       page_title: pageTitle,
       page_location: window.location.href,
       page_path: pagePath
@@ -20,8 +21,9 @@ export const trackPageView = (pageTitle, pagePath) => {
 
 // Track user registration
 export const trackRegistration = (method = 'email') => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'sign_up', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'sign_up',
       method: method,
       event_category: 'engagement',
       event_label: 'user_registration'
@@ -31,8 +33,9 @@ export const trackRegistration = (method = 'email') => {
 
 // Track user login
 export const trackLogin = (method = 'email') => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'login', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'login',
       method: method,
       event_category: 'engagement',
       event_label: 'user_login'
@@ -42,8 +45,9 @@ export const trackLogin = (method = 'email') => {
 
 // Track product views
 export const trackProductView = (product) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'view_item', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'view_item',
       currency: 'INR',
       value: product.price,
       items: [{
@@ -61,8 +65,9 @@ export const trackProductView = (product) => {
 
 // Track add to cart
 export const trackAddToCart = (product, quantity = 1) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'add_to_cart', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'add_to_cart',
       currency: 'INR',
       value: product.price * quantity,
       items: [{
@@ -80,8 +85,9 @@ export const trackAddToCart = (product, quantity = 1) => {
 
 // Track remove from cart
 export const trackRemoveFromCart = (product, quantity = 1) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'remove_from_cart', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'remove_from_cart',
       currency: 'INR',
       value: product.price * quantity,
       items: [{
@@ -99,8 +105,9 @@ export const trackRemoveFromCart = (product, quantity = 1) => {
 
 // Track add to wishlist
 export const trackAddToWishlist = (product) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'add_to_wishlist', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'add_to_wishlist',
       currency: 'INR',
       value: product.price,
       items: [{
@@ -118,7 +125,7 @@ export const trackAddToWishlist = (product) => {
 
 // Track begin checkout
 export const trackBeginCheckout = (cartItems, totalValue) => {
-  if (typeof window !== 'undefined' && window.gtag) {
+  if (typeof window !== 'undefined' && window.dataLayer) {
     const items = cartItems.map(item => ({
       item_id: item.product._id,
       item_name: item.product.name,
@@ -127,7 +134,8 @@ export const trackBeginCheckout = (cartItems, totalValue) => {
       quantity: item.quantity
     }));
 
-    window.gtag('event', 'begin_checkout', {
+    window.dataLayer.push({
+      event: 'begin_checkout',
       currency: 'INR',
       value: totalValue,
       items: items,
@@ -139,7 +147,7 @@ export const trackBeginCheckout = (cartItems, totalValue) => {
 
 // Track purchase
 export const trackPurchase = (order) => {
-  if (typeof window !== 'undefined' && window.gtag) {
+  if (typeof window !== 'undefined' && window.dataLayer) {
     const items = order.orderItems.map(item => ({
       item_id: item.product._id,
       item_name: item.name,
@@ -148,7 +156,8 @@ export const trackPurchase = (order) => {
       quantity: item.quantity
     }));
 
-    window.gtag('event', 'purchase', {
+    window.dataLayer.push({
+      event: 'purchase',
       transaction_id: order._id,
       value: order.totalPrice,
       tax: order.tax || 0,
@@ -163,8 +172,9 @@ export const trackPurchase = (order) => {
 
 // Track search
 export const trackSearch = (searchTerm) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'search', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'search',
       search_term: searchTerm,
       event_category: 'engagement',
       event_label: 'product_search'
@@ -174,8 +184,9 @@ export const trackSearch = (searchTerm) => {
 
 // Track category view
 export const trackCategoryView = (categoryName) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'view_item_list', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'view_item_list',
       item_list_name: categoryName,
       event_category: 'ecommerce',
       event_label: 'category_view'
@@ -185,8 +196,9 @@ export const trackCategoryView = (categoryName) => {
 
 // Track form submissions
 export const trackFormSubmission = (formName) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'form_submit', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'form_submit',
       form_name: formName,
       event_category: 'engagement',
       event_label: 'form_submission'
@@ -196,8 +208,9 @@ export const trackFormSubmission = (formName) => {
 
 // Track button clicks
 export const trackButtonClick = (buttonName, location = 'unknown') => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'click', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'click',
       button_name: buttonName,
       location: location,
       event_category: 'engagement',
@@ -208,8 +221,9 @@ export const trackButtonClick = (buttonName, location = 'unknown') => {
 
 // Track error events
 export const trackError = (errorType, errorMessage) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'exception', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'exception',
       description: errorMessage,
       fatal: false,
       event_category: 'error',
@@ -220,8 +234,9 @@ export const trackError = (errorType, errorMessage) => {
 
 // Track user engagement (time on page, scroll depth, etc.)
 export const trackEngagement = (action, value = null) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'user_engagement', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'user_engagement',
       engagement_time_msec: value,
       event_category: 'engagement',
       event_label: action
@@ -231,8 +246,9 @@ export const trackEngagement = (action, value = null) => {
 
 // Track admin actions
 export const trackAdminAction = (action, resource) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'admin_action', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'admin_action',
       action: action,
       resource: resource,
       event_category: 'admin',
@@ -243,7 +259,7 @@ export const trackAdminAction = (action, resource) => {
 
 // Enhanced ecommerce tracking for product interactions
 export const trackProductInteraction = (action, product, additionalData = {}) => {
-  if (typeof window !== 'undefined' && window.gtag) {
+  if (typeof window !== 'undefined' && window.dataLayer) {
     const baseEvent = {
       currency: 'INR',
       value: product.price,
@@ -258,7 +274,8 @@ export const trackProductInteraction = (action, product, additionalData = {}) =>
       event_label: action
     };
 
-    window.gtag('event', action, {
+    window.dataLayer.push({
+      event: action,
       ...baseEvent,
       ...additionalData
     });
@@ -267,8 +284,9 @@ export const trackProductInteraction = (action, product, additionalData = {}) =>
 
 // Track user journey steps
 export const trackUserJourney = (step, stepNumber, totalSteps) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'user_journey_step', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'user_journey_step',
       step: step,
       step_number: stepNumber,
       total_steps: totalSteps,
@@ -280,8 +298,9 @@ export const trackUserJourney = (step, stepNumber, totalSteps) => {
 
 // Track performance metrics
 export const trackPerformance = (metricName, value) => {
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', 'performance', {
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({
+      event: 'performance',
       metric_name: metricName,
       metric_value: value,
       event_category: 'performance',

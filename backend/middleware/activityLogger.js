@@ -53,8 +53,7 @@ const generateDescription = (action, resource, userName) => {
     user_deleted: 'deleted a user',
     category_created: 'created a category',
     category_updated: 'updated a category',
-    category_deleted: 'deleted a category',
-    inventory_updated: 'updated inventory'
+    category_deleted: 'deleted a category'
   };
   
   return `${userName} ${actionMap[action] || action} ${resource}`;

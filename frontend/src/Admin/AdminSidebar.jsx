@@ -4,15 +4,13 @@ import {
     FaTachometerAlt, 
     FaBoxOpen, 
     FaChartBar, 
-    FaWarehouse, 
     FaUsers, 
     FaSignOutAlt,
     FaBolt, // A great icon for electronics
     FaUserCircle,
     FaTags, // Icon for categories
     FaTimes,
-    FaBars,
-    FaTruck
+    FaBars
 } from 'react-icons/fa';
 
 const AdminSidebar = ({ isOpen, onToggle }) => {
@@ -106,28 +104,12 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                     <span>Sales</span>
                 </NavLink>
                 <NavLink 
-                    to="/admin/inventory" 
-                    onClick={handleLinkClick}
-                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
-                > 
-                    <FaWarehouse className="mr-4 h-5 w-5" />
-                    <span>Inventory</span>
-                </NavLink>
-                <NavLink 
                     to="/admin/employees" 
                     onClick={handleLinkClick}
                     className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
                 > 
                     <FaUsers className="mr-4 h-5 w-5" />
                     <span>Employees</span>
-                </NavLink>
-                <NavLink 
-                    to="/admin/shipping-fees" 
-                    onClick={handleLinkClick}
-                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
-                > 
-                    <FaTruck className="mr-4 h-5 w-5" />
-                    <span>Shipping Fees</span>
                 </NavLink>
             </nav>
 

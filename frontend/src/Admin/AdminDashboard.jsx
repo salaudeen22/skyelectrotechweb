@@ -179,18 +179,6 @@ const AdminDashboard = () => {
           </div>
         </Link>
         
-        <Link to="/admin/shipping-fees" className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-green-100 rounded-full">
-              <FaTruck className="w-6 h-6 text-green-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-800">Shipping Fees</h3>
-              <p className="text-sm text-slate-500">Configure delivery costs</p>
-            </div>
-          </div>
-        </Link>
-        
         <Link to="/admin/sales" className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
           <div className="flex items-center space-x-4">
             <div className="p-3 bg-purple-100 rounded-full">
@@ -199,18 +187,6 @@ const AdminDashboard = () => {
             <div>
               <h3 className="font-semibold text-slate-800">Sales Analytics</h3>
               <p className="text-sm text-slate-500">View sales reports</p>
-            </div>
-          </div>
-        </Link>
-        
-        <Link to="/admin/inventory" className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-orange-100 rounded-full">
-              <FaWarehouse className="w-6 h-6 text-orange-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-800">Inventory</h3>
-              <p className="text-sm text-slate-500">Manage stock levels</p>
             </div>
           </div>
         </Link>

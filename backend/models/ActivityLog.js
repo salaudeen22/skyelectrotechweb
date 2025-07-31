@@ -21,8 +21,7 @@ const activityLogSchema = new mongoose.Schema({
       'user_deleted',
       'category_created',
       'category_updated',
-      'category_deleted',
-      'inventory_updated'
+      'category_deleted'
     ]
   },
   resource: {

@@ -133,19 +133,15 @@ const Payment = () => {
 
   const handleOnlinePayment = async (orderPayload) => {
     try {
-      // Create order first
-      const orderResponse = await ordersAPI.createOrder(orderPayload);
-      const order = orderResponse.data.order;
-      
-      // Initialize payment
+      // Initialize payment first (without creating order)
       const paymentResponse = await paymentAPI.createPaymentOrder({
-        amount: order.totalPrice,
+        amount: orderPayload.totalPrice,
         currency: 'INR',
-        orderId: order._id,
         method: selectedMethod,
         customerName: shippingInfo.name,
         customerEmail: shippingInfo.email,
         customerPhone: shippingInfo.phone,
+        orderData: orderPayload, // Pass order data to be created after payment success
       });
 
       const paymentData = paymentResponse.data;
@@ -159,9 +155,9 @@ const Payment = () => {
         amount: paymentData.amount,
         currency: paymentData.currency,
         name: 'SkyElectroTech',
-        description: `Order #${order._id}`,
+        description: `Order Payment`,
         order_id: paymentData.orderId,
-        handler: (response) => handlePaymentSuccess(response, order._id),
+        handler: (response) => handlePaymentSuccess(response, orderPayload),
         prefill: {
           name: shippingInfo.name,
           email: shippingInfo.email,
@@ -173,9 +169,22 @@ const Payment = () => {
         theme: {
           color: '#3B82F6',
         },
+        modal: {
+          ondismiss: () => {
+            setIsSubmitting(false);
+          }
+        }
       };
 
       const razorpay = new window.Razorpay(options);
+      
+      // Add payment failure handler
+      razorpay.on('payment.failed', (response) => {
+        console.error('Payment failed:', response.error);
+        toast.error(`Payment failed: ${response.error.description}`);
+        setIsSubmitting(false);
+      });
+      
       razorpay.open();
       
     } catch (error) {
@@ -185,7 +194,7 @@ const Payment = () => {
     }
   };
 
-  const handlePaymentSuccess = async (response, localOrderId) => {
+  const handlePaymentSuccess = async (response, orderPayload) => {
     try {
       // Verify payment
       const verificationResponse = await paymentAPI.verifyPayment({
@@ -195,12 +204,20 @@ const Payment = () => {
       });
 
       if (verificationResponse.data.success) {
-        // Update order status
-        await ordersAPI.updateOrderStatus(localOrderId, 'paid');
+        // Create order only after payment is verified
+        const orderResponse = await ordersAPI.createOrder({
+          ...orderPayload,
+          paymentMethod: selectedMethod,
+          paymentStatus: 'paid',
+          razorpayPaymentId: response.razorpay_payment_id,
+          razorpayOrderId: response.razorpay_order_id,
+        });
+        
+        const order = orderResponse.data.order;
         
         // Track successful payment
         trackOrderPurchase({
-          orderId: localOrderId,
+          orderId: order._id,
           amount: totals.total,
           method: selectedMethod,
           paymentId: response.razorpay_payment_id,
@@ -211,7 +228,7 @@ const Payment = () => {
         clearAllCheckoutData();
         
         toast.success('Payment successful! Your order has been placed.');
-        navigate(`/user/orders/${localOrderId}`);
+        navigate(`/user/orders/${order._id}`);
       } else {
         throw new Error('Payment verification failed');
       }
