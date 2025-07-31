@@ -10,6 +10,8 @@ const Navbar = () => {
   const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
   const [hoveredCategoryId, setHoveredCategoryId] = useState(null);
   const [dropdownTimeout, setDropdownTimeout] = useState(null);
+  const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(false);
+  const [openMobileCategories, setOpenMobileCategories] = useState(new Set());
   const { user, logout } = useContext(AuthContext);
   const { items: cartItems, totalItems } = useContext(CartContext);
   const { categories } = useCategories();
@@ -18,6 +20,12 @@ const Navbar = () => {
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const resetMobileStates = () => {
+    setIsMenuOpen(false);
+    setIsMobileProductsOpen(false);
+    setOpenMobileCategories(new Set());
   };
 
   // Helper functions for dropdown behavior
@@ -45,6 +53,18 @@ const Navbar = () => {
     // Don't immediately hide subcategory, let the main dropdown handle it
   };
 
+  const toggleMobileCategory = (categoryId) => {
+    setOpenMobileCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryId)) {
+        newSet.delete(categoryId);
+      } else {
+        newSet.add(categoryId);
+      }
+      return newSet;
+    });
+  };
+
   const cartItemCount = totalItems || cartItems?.length || 0;
 
   // Cleanup timeout on unmount
@@ -55,6 +75,25 @@ const Navbar = () => {
       }
     };
   }, [dropdownTimeout]);
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isMenuOpen && !event.target.closest('nav')) {
+        setIsMenuOpen(false);
+        setIsMobileProductsOpen(false);
+        setOpenMobileCategories(new Set()); // Reset expanded categories
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   return (
     <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
@@ -96,21 +135,21 @@ const Navbar = () => {
 
               {isProductsDropdownOpen && (
                 <div 
-                  className="absolute left-0 mt-1 w-72 bg-white rounded-md shadow-lg py-2 z-50 border border-gray-200"
+                  className="absolute left-0 mt-1 w-64 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200"
                   onMouseEnter={handleDropdownEnter}
                   onMouseLeave={handleDropdownLeave}
                 >
                   {/* All Products Link */}
                   <Link
                     to="/products"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 font-medium transition-colors"
+                    className="block px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 font-medium transition-colors"
                   >
                     All Products
                   </Link>
                   
                   {/* Divider */}
                   {categories.length > 0 && (
-                    <div className="border-t border-gray-200 my-2"></div>
+                    <div className="border-t border-gray-200 my-1"></div>
                   )}
                   
                   {/* Categories */}
@@ -123,11 +162,11 @@ const Navbar = () => {
                       >
                         <Link
                           to={`/products?category=${category.slug}`}
-                          className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                          className="flex items-center justify-between px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                         >
                           <span>{category.name}</span>
                           {category.subcategories && category.subcategories.length > 0 && (
-                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                           )}
@@ -138,7 +177,7 @@ const Navbar = () => {
                          category.subcategories.length > 0 && 
                          hoveredCategoryId === category._id && (
                           <div 
-                            className="absolute left-full top-0 w-56 bg-white rounded-md shadow-lg py-2 z-50 border border-gray-200"
+                            className="absolute left-full top-0 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200"
                             onMouseEnter={() => handleCategoryEnter(category._id)}
                             onMouseLeave={handleCategoryLeave}
                           >
@@ -146,7 +185,7 @@ const Navbar = () => {
                               <Link
                                 key={subcategory._id}
                                 to={`/products?category=${subcategory.slug}`}
-                                className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                                className="block px-3 py-1 text-xs text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
                               >
                                 {subcategory.name}
                               </Link>
@@ -261,10 +300,25 @@ const Navbar = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center space-x-2">
+            {/* Cart Icon for Mobile - Only show for regular users */}
+            {user && user.role === 'user' && (
+              <Link 
+                to="/user/cart" 
+                className="relative text-gray-700 hover:text-blue-600 p-2 rounded-md transition-colors"
+              >
+                <IoCartOutline className="w-6 h-6" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                    {cartItemCount > 99 ? '99+' : cartItemCount}
+                  </span>
+                )}
+              </Link>
+            )}
+            
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700 hover:text-blue-600 focus:outline-none focus:text-blue-600"
+              className="text-gray-700 hover:text-blue-600 focus:outline-none focus:text-blue-600 p-2 rounded-md transition-colors"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {isMenuOpen ? (
@@ -280,7 +334,20 @@ const Navbar = () => {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t max-h-[80vh] overflow-y-auto">
+              {/* Mobile Menu Header */}
+              <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900">Menu</h3>
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-gray-500 hover:text-gray-700 p-1 rounded-md"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
               <Link
                 to="/"
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
@@ -289,43 +356,109 @@ const Navbar = () => {
                 Home
               </Link>
               
-              {/* Products Link */}
-              <Link
-                to="/products"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                All Products
-              </Link>
-              
-              {/* Categories for Mobile */}
-              {categories.map((category) => (
-                <div key={category._id}>
-                  <Link
-                    to={`/products?category=${category.slug}`}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                    onClick={() => setIsMenuOpen(false)}
+              {/* Mobile Products Dropdown */}
+              <div className="border-b border-gray-200 pb-2 mb-2">
+                <button
+                  onClick={() => setIsMobileProductsOpen(!isMobileProductsOpen)}
+                  className="flex items-center justify-between w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                >
+                  <span>Products</span>
+                  <svg 
+                    className={`w-4 h-4 transition-transform ${isMobileProductsOpen ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
                   >
-                    {category.name}
-                  </Link>
-                  
-                  {/* Mobile Subcategories */}
-                  {category.subcategories && category.subcategories.length > 0 && (
-                    <div className="ml-4">
-                      {category.subcategories.map((subcategory) => (
-                        <Link
-                          key={subcategory._id}
-                          to={`/products?category=${subcategory.slug}`}
-                          className="block px-3 py-1.5 rounded-md text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          - {subcategory.name}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {isMobileProductsOpen && (
+                  <div className="ml-4 mt-2 space-y-1">
+                    {/* All Products Link */}
+                    <Link
+                      to="/products"
+                      className="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                      onClick={resetMobileStates}
+                    >
+                      All Products
+                    </Link>
+                    
+                    {/* Categories for Mobile */}
+                    {categories.length > 0 ? (
+                      categories.map((category) => (
+                        <div key={category._id} className="border-l-2 border-gray-200 ml-2">
+                          <div className="flex items-center justify-between">
+                            <Link
+                              to={`/products?category=${category.slug}`}
+                              className="flex-1 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                              onClick={resetMobileStates}
+                            >
+                              {category.name}
+                            </Link>
+                            
+                            {/* Toggle button for subcategories */}
+                            {category.subcategories && category.subcategories.length > 0 && (
+                              <button
+                                onClick={() => toggleMobileCategory(category._id)}
+                                className="px-2 py-2 text-gray-500 hover:text-gray-700"
+                              >
+                                <svg 
+                                  className={`w-4 h-4 transition-transform ${openMobileCategories.has(category._id) ? 'rotate-90' : ''}`} 
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                          
+                          {/* Mobile Subcategories - Only show when expanded */}
+                          {category.subcategories && 
+                           category.subcategories.length > 0 && 
+                           openMobileCategories.has(category._id) && (
+                            <div className="ml-4 mt-1 space-y-1">
+                              {category.subcategories.map((subcategory) => (
+                                <div key={subcategory._id}>
+                                  <Link
+                                    to={`/products?category=${subcategory.slug}`}
+                                    className="block px-3 py-1.5 rounded-md text-xs font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                                    onClick={resetMobileStates}
+                                  >
+                                    • {subcategory.name}
+                                  </Link>
+                                  
+                                  {/* Sub-subcategories (if they exist) */}
+                                  {subcategory.subcategories && subcategory.subcategories.length > 0 && (
+                                    <div className="ml-4 mt-1">
+                                      {subcategory.subcategories.map((subSubcategory) => (
+                                        <Link
+                                          key={subSubcategory._id}
+                                          to={`/products?category=${subSubcategory.slug}`}
+                                          className="block px-3 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-blue-600 hover:bg-gray-50"
+                                          onClick={resetMobileStates}
+                                        >
+                                          ◦ {subSubcategory.name}
+                                        </Link>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-3 py-2 text-sm text-gray-500">
+                        Loading categories...
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
               
               {user ? (
                 <>
@@ -335,21 +468,21 @@ const Navbar = () => {
                       <Link
                         to="/user/cart"
                         className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                        onClick={() => setIsMenuOpen(false)}
+                        onClick={resetMobileStates}
                       >
                         Cart ({cartItemCount})
                       </Link>
                       <Link
                         to="/user/profile"
                         className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                        onClick={() => setIsMenuOpen(false)}
+                        onClick={resetMobileStates}
                       >
                         Profile
                       </Link>
                       <Link
                         to="/user/orders"
                         className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                        onClick={() => setIsMenuOpen(false)}
+                        onClick={resetMobileStates}
                       >
                         Order History
                       </Link>
@@ -361,7 +494,7 @@ const Navbar = () => {
                     <Link
                       to="/admin"
                       className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={resetMobileStates}
                     >
                       Admin Dashboard
                     </Link>
@@ -369,7 +502,7 @@ const Navbar = () => {
                   <button
                     onClick={() => {
                       handleLogout();
-                      setIsMenuOpen(false);
+                      resetMobileStates();
                     }}
                     className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
                   >
@@ -381,14 +514,14 @@ const Navbar = () => {
                   <Link
                     to="/auth/login"
                     className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={resetMobileStates}
                   >
                     Login
                   </Link>
                   <Link
                     to="/auth/register"
                     className="block px-3 py-2 rounded-md text-base font-medium bg-blue-600 text-white hover:bg-blue-700"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={resetMobileStates}
                   >
                     Register
                   </Link>
