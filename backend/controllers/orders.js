@@ -3,6 +3,7 @@ const Product = require('../models/Product');
 const Cart = require('../models/Cart');
 const User = require('../models/User');
 const { sendResponse, sendError, asyncHandler, paginate, getPaginationMeta } = require('../utils/helpers');
+const { sendOrderConfirmationEmail, sendOrderNotificationEmail, sendOrderStatusUpdateEmail, sendLowStockAlertEmail } = require('../utils/email');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -50,9 +51,23 @@ const createOrder = asyncHandler(async (req, res) => {
       quantity: item.quantity
     });
 
+    // Store old stock for low stock alert
+    const oldStock = product.stock;
+    
     // Update product stock
     product.stock -= item.quantity;
     await product.save();
+    
+    // Check for low stock alert
+    const lowStockThreshold = product.lowStockThreshold || 10;
+    if (product.stock <= lowStockThreshold && oldStock > lowStockThreshold) {
+      try {
+        await sendLowStockAlertEmail(product);
+      } catch (emailError) {
+        console.error('Failed to send low stock alert email:', emailError);
+        // Don't fail the order creation if email fails
+      }
+    }
   }
 
   // Calculate total price
@@ -88,6 +103,18 @@ const createOrder = asyncHandler(async (req, res) => {
     await Cart.findOneAndDelete({ user: req.user._id });
 
     await order.populate('user', 'name email');
+
+    // Send email notifications
+    try {
+      // Send order confirmation email to customer
+      await sendOrderConfirmationEmail(order, req.user);
+      
+      // Send order notification email to admin/owner
+      await sendOrderNotificationEmail(order, req.user);
+    } catch (emailError) {
+      console.error('Failed to send order emails:', emailError);
+      // Don't fail the order creation if emails fail
+    }
 
     sendResponse(res, 201, { order }, 'Order created successfully');
   } catch (error) {
@@ -218,6 +245,14 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
 
   await order.populate('user', 'name email');
   await order.populate('assignedTo', 'name email');
+
+  // Send email notification for status update
+  try {
+    await sendOrderStatusUpdateEmail(order, order.user, status);
+  } catch (emailError) {
+    console.error('Failed to send order status update email:', emailError);
+    // Don't fail the status update if email fails
+  }
 
   sendResponse(res, 200, { order }, 'Order status updated successfully');
 });

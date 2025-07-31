@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const { generateToken } = require('../utils/jwt');
 const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
-const { sendWelcomeEmail, sendForgotPasswordEmail, sendOTPEmail } = require('../utils/email');
+const { sendWelcomeEmail, sendForgotPasswordEmail, sendOTPEmail, sendNewUserNotificationEmail } = require('../utils/email');
 const crypto = require('crypto');
 const passport = require('../config/passport');
 
@@ -53,6 +53,14 @@ const register = asyncHandler(async (req, res) => {
     await sendWelcomeEmail(user.email, user.name);
   } catch (emailError) {
     console.error('Failed to send welcome email:', emailError);
+    // Don't fail registration if email fails
+  }
+
+  // Send new user notification to admin (don't wait for it to complete)
+  try {
+    await sendNewUserNotificationEmail(user);
+  } catch (emailError) {
+    console.error('Failed to send new user notification email:', emailError);
     // Don't fail registration if email fails
   }
 

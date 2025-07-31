@@ -579,12 +579,974 @@ const sendForgotPasswordEmail = async (userEmail, userName, resetToken) => {
   }
 };
 
+
+
+// Order confirmation email template for customer
+const getOrderConfirmationEmailTemplate = (order, user) => {
+  const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  const orderId = order._id.toString().slice(-6).toUpperCase();
+  const orderDate = new Date(order.createdAt).toLocaleDateString('en-IN');
+  
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      'pending': '#f59e0b',
+      'confirmed': '#3b82f6',
+      'processing': '#8b5cf6',
+      'packed': '#6366f1',
+      'shipped': '#06b6d4',
+      'delivered': '#10b981',
+      'cancelled': '#ef4444'
+    };
+    return colors[status] || '#6b7280';
+  };
+
+  return {
+    subject: `Order Confirmation #${orderId} - SkyElectroTech`,
+    html: `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+        <title>Order Confirmation</title>
+        <style>
+          :root {
+            --primary-color: #10b981;
+            --background-color: #f4f7f9;
+            --text-color: #334155;
+            --card-background: #ffffff;
+            --footer-text: #94a3b8;
+          }
+          body {
+            font-family: 'Poppins', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+          }
+          .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: var(--card-background);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+          }
+          .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+          }
+          .logo {
+            max-width: 120px;
+            margin-bottom: 20px;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+          }
+          .content {
+            padding: 30px;
+          }
+          .order-summary {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+          }
+          .order-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+          }
+          .detail-item {
+            padding: 15px;
+            background: #f1f5f9;
+            border-radius: 8px;
+          }
+          .detail-item strong {
+            display: block;
+            color: #1e293b;
+            margin-bottom: 5px;
+          }
+          .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+          }
+          .items-table th,
+          .items-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+          }
+          .items-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #1e293b;
+          }
+          .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: white;
+          }
+          .total-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+          }
+          .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+          }
+          .total-row.final {
+            font-weight: 700;
+            font-size: 18px;
+            border-top: 2px solid #e2e8f0;
+            padding-top: 12px;
+            margin-top: 12px;
+          }
+          .cta-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            padding: 14px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 20px 0;
+            transition: background-color 0.2s;
+          }
+          .cta-button:hover {
+            background-color: #059669;
+          }
+          .footer {
+            text-align: center;
+            padding: 25px;
+            font-size: 14px;
+            color: var(--footer-text);
+            background: #f8fafc;
+          }
+          @media (max-width: 600px) {
+            .order-details {
+              grid-template-columns: 1fr;
+            }
+            .items-table {
+              font-size: 14px;
+            }
+          }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <img src="https://i.postimg.cc/brZN4ngb/Sky-Logo-Only.png" alt="SkyElectroTech Logo" class="logo">
+                <h1>Order Confirmed!</h1>
+                <p>Thank you for your order, ${user.name}!</p>
+            </div>
+            <div class="content">
+                <div class="order-summary">
+                    <h2>Order #${orderId}</h2>
+                    <p>Placed on ${orderDate}</p>
+                    <span class="status-badge" style="background-color: ${getStatusColor(order.orderStatus)};">
+                        ${order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
+                    </span>
+                </div>
+
+                <div class="order-details">
+                    <div class="detail-item">
+                        <strong>Order ID</strong>
+                        #${orderId}
+                    </div>
+                    <div class="detail-item">
+                        <strong>Payment Method</strong>
+                        ${order.paymentInfo?.method?.charAt(0).toUpperCase() + order.paymentInfo?.method?.slice(1) || 'Not specified'}
+                    </div>
+                    <div class="detail-item">
+                        <strong>Payment Status</strong>
+                        <span class="status-badge" style="background-color: ${order.paymentInfo?.status === 'completed' ? '#10b981' : '#f59e0b'};">
+                            ${order.paymentInfo?.status === 'completed' ? 'Paid' : 'Pending'}
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Expected Delivery</strong>
+                        3-5 business days
+                    </div>
+                </div>
+
+                <h3>Order Items</h3>
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${order.orderItems.map(item => `
+                            <tr>
+                                <td>${item.name}</td>
+                                <td>${item.quantity}</td>
+                                <td>${formatCurrency(item.price)}</td>
+                                <td>${formatCurrency(item.price * item.quantity)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+
+                <div class="total-section">
+                    <div class="total-row">
+                        <span>Subtotal:</span>
+                        <span>${formatCurrency(order.itemsPrice)}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Tax:</span>
+                        <span>${formatCurrency(order.taxPrice)}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Shipping:</span>
+                        <span>${formatCurrency(order.shippingPrice)}</span>
+                    </div>
+                    <div class="total-row final">
+                        <span>Total:</span>
+                        <span>${formatCurrency(order.totalPrice)}</span>
+                    </div>
+                </div>
+
+                <h3>Shipping Address</h3>
+                <div class="detail-item">
+                    <strong>${order.shippingInfo.name}</strong><br>
+                    ${order.shippingInfo.address}<br>
+                    ${order.shippingInfo.city}, ${order.shippingInfo.state} ${order.shippingInfo.zipCode}<br>
+                    ${order.shippingInfo.country}<br>
+                    Phone: ${order.shippingInfo.phone}
+                </div>
+
+                <p>We'll send you updates about your order status. You can also track your order in your account.</p>
+                <a href="${clientUrl}/user/orders/${order._id}" class="cta-button">Track My Order</a>
+            </div>
+            <div class="footer">
+                <p>Thank you for choosing SkyElectroTech!</p>
+                <p>If you have any questions, please contact our support team.</p>
+                <p>© ${new Date().getFullYear()} SkyElectroTech. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `,
+    text: `
+    Order Confirmation #${orderId} - SkyElectroTech
+
+    Hi ${user.name},
+
+    Thank you for your order! We're excited to process it for you.
+
+    Order Details:
+    - Order ID: #${orderId}
+    - Date: ${orderDate}
+    - Status: ${order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
+    - Total: ${formatCurrency(order.totalPrice)}
+
+    Order Items:
+    ${order.orderItems.map(item => `- ${item.name} (Qty: ${item.quantity}) - ${formatCurrency(item.price * item.quantity)}`).join('\n')}
+
+    Shipping Address:
+    ${order.shippingInfo.name}
+    ${order.shippingInfo.address}
+    ${order.shippingInfo.city}, ${order.shippingInfo.state} ${order.shippingInfo.zipCode}
+    ${order.shippingInfo.country}
+
+    Track your order: ${clientUrl}/user/orders/${order._id}
+
+    Thank you for choosing SkyElectroTech!
+    `
+  };
+};
+
+// Order notification email template for admin/owner
+const getOrderNotificationEmailTemplate = (order, user) => {
+  const orderId = order._id.toString().slice(-6).toUpperCase();
+  const orderDate = new Date(order.createdAt).toLocaleDateString('en-IN');
+  
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  return {
+    subject: `New Order #${orderId} - ${formatCurrency(order.totalPrice)}`,
+    html: `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+        <title>New Order Notification</title>
+        <style>
+          :root {
+            --primary-color: #3b82f6;
+            --background-color: #f4f7f9;
+            --text-color: #334155;
+            --card-background: #ffffff;
+            --footer-text: #94a3b8;
+          }
+          body {
+            font-family: 'Poppins', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+          }
+          .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: var(--card-background);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+          }
+          .header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+          }
+          .logo {
+            max-width: 120px;
+            margin-bottom: 20px;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+          }
+          .content {
+            padding: 30px;
+          }
+          .alert-box {
+            background: #dbeafe;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+          }
+          .order-summary {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+          }
+          .customer-info {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+          }
+          .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+          }
+          .items-table th,
+          .items-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+          }
+          .items-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #1e293b;
+          }
+          .total-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+          }
+          .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+          }
+          .total-row.final {
+            font-weight: 700;
+            font-size: 18px;
+            border-top: 2px solid #e2e8f0;
+            padding-top: 12px;
+            margin-top: 12px;
+          }
+          .cta-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            padding: 14px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 20px 0;
+            transition: background-color 0.2s;
+          }
+          .cta-button:hover {
+            background-color: #1d4ed8;
+          }
+          .footer {
+            text-align: center;
+            padding: 25px;
+            font-size: 14px;
+            color: var(--footer-text);
+            background: #f8fafc;
+          }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <img src="https://i.postimg.cc/brZN4ngb/Sky-Logo-Only.png" alt="SkyElectroTech Logo" class="logo">
+                <h1>New Order Received!</h1>
+                <p>Order #${orderId} - ${formatCurrency(order.totalPrice)}</p>
+            </div>
+            <div class="content">
+                <div class="alert-box">
+                    <h3>🛍️ New Order Alert</h3>
+                    <p>A new order has been placed and requires your attention.</p>
+                </div>
+
+                <div class="order-summary">
+                    <h3>Order Summary</h3>
+                    <p><strong>Order ID:</strong> #${orderId}</p>
+                    <p><strong>Date:</strong> ${orderDate}</p>
+                    <p><strong>Customer:</strong> ${user.name} (${user.email})</p>
+                    <p><strong>Payment Method:</strong> ${order.paymentInfo?.method?.charAt(0).toUpperCase() + order.paymentInfo?.method?.slice(1) || 'Not specified'}</p>
+                    <p><strong>Payment Status:</strong> ${order.paymentInfo?.status === 'completed' ? '✅ Paid' : '⏳ Pending'}</p>
+                </div>
+
+                <div class="customer-info">
+                    <h3>Customer Information</h3>
+                    <p><strong>Name:</strong> ${user.name}</p>
+                    <p><strong>Email:</strong> ${user.email}</p>
+                    <p><strong>Phone:</strong> ${order.shippingInfo.phone}</p>
+                    <p><strong>Address:</strong> ${order.shippingInfo.address}, ${order.shippingInfo.city}, ${order.shippingInfo.state} ${order.shippingInfo.zipCode}, ${order.shippingInfo.country}</p>
+                </div>
+
+                <h3>Order Items</h3>
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${order.orderItems.map(item => `
+                            <tr>
+                                <td>${item.name}</td>
+                                <td>${item.quantity}</td>
+                                <td>${formatCurrency(item.price)}</td>
+                                <td>${formatCurrency(item.price * item.quantity)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+
+                <div class="total-section">
+                    <div class="total-row">
+                        <span>Subtotal:</span>
+                        <span>${formatCurrency(order.itemsPrice)}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Tax:</span>
+                        <span>${formatCurrency(order.taxPrice)}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Shipping:</span>
+                        <span>${formatCurrency(order.shippingPrice)}</span>
+                    </div>
+                    <div class="total-row final">
+                        <span>Total:</span>
+                        <span>${formatCurrency(order.totalPrice)}</span>
+                    </div>
+                </div>
+
+                <p>Please process this order and update the status accordingly.</p>
+                <a href="${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/orders" class="cta-button">View Order Details</a>
+            </div>
+            <div class="footer">
+                <p>This is an automated notification from SkyElectroTech.</p>
+                <p>© ${new Date().getFullYear()} SkyElectroTech. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `,
+    text: `
+    New Order Notification - SkyElectroTech
+
+    A new order has been received!
+
+    Order Details:
+    - Order ID: #${orderId}
+    - Date: ${orderDate}
+    - Customer: ${user.name} (${user.email})
+    - Total: ${formatCurrency(order.totalPrice)}
+    - Payment Status: ${order.paymentInfo?.status === 'completed' ? 'Paid' : 'Pending'}
+
+    Customer Information:
+    - Name: ${user.name}
+    - Email: ${user.email}
+    - Phone: ${order.shippingInfo.phone}
+    - Address: ${order.shippingInfo.address}, ${order.shippingInfo.city}, ${order.shippingInfo.state} ${order.shippingInfo.zipCode}
+
+    Order Items:
+    ${order.orderItems.map(item => `- ${item.name} (Qty: ${item.quantity}) - ${formatCurrency(item.price * item.quantity)}`).join('\n')}
+
+    Total: ${formatCurrency(order.totalPrice)}
+
+    Please process this order and update the status accordingly.
+
+    View order details: ${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/orders
+    `
+  };
+};
+
+// Order status update email template
+const getOrderStatusUpdateEmailTemplate = (order, user, newStatus) => {
+  const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  const orderId = order._id.toString().slice(-6).toUpperCase();
+  
+  const getStatusMessage = (status) => {
+    const messages = {
+      'confirmed': 'Your order has been confirmed and is being processed.',
+      'processing': 'We are now processing your order and preparing it for shipment.',
+      'packed': 'Your order has been packed and is ready for shipment.',
+      'shipped': 'Your order has been shipped and is on its way to you!',
+      'delivered': 'Your order has been delivered successfully.',
+      'cancelled': 'Your order has been cancelled as requested.'
+    };
+    return messages[status] || 'Your order status has been updated.';
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      'confirmed': '#3b82f6',
+      'processing': '#8b5cf6',
+      'packed': '#6366f1',
+      'shipped': '#06b6d4',
+      'delivered': '#10b981',
+      'cancelled': '#ef4444'
+    };
+    return colors[status] || '#6b7280';
+  };
+
+  return {
+    subject: `Order #${orderId} Status Update - ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`,
+    html: `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+        <title>Order Status Update</title>
+        <style>
+          :root {
+            --primary-color: #3b82f6;
+            --background-color: #f4f7f9;
+            --text-color: #334155;
+            --card-background: #ffffff;
+            --footer-text: #94a3b8;
+          }
+          body {
+            font-family: 'Poppins', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--card-background);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+          }
+          .header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+          }
+          .logo {
+            max-width: 120px;
+            margin-bottom: 20px;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+          }
+          .content {
+            padding: 30px;
+          }
+          .status-box {
+            background: #f8fafc;
+            border-left: 4px solid ${getStatusColor(newStatus)};
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+          }
+          .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: white;
+            background-color: ${getStatusColor(newStatus)};
+          }
+          .cta-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            padding: 14px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 20px 0;
+            transition: background-color 0.2s;
+          }
+          .cta-button:hover {
+            background-color: #1d4ed8;
+          }
+          .footer {
+            text-align: center;
+            padding: 25px;
+            font-size: 14px;
+            color: var(--footer-text);
+            background: #f8fafc;
+          }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <img src="https://i.postimg.cc/brZN4ngb/Sky-Logo-Only.png" alt="SkyElectroTech Logo" class="logo">
+                <h1>Order Status Update</h1>
+                <p>Order #${orderId}</p>
+            </div>
+            <div class="content">
+                <p><strong>Hi ${user.name},</strong></p>
+                
+                <div class="status-box">
+                    <h3>Order Status Updated</h3>
+                    <span class="status-badge">${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}</span>
+                    <p>${getStatusMessage(newStatus)}</p>
+                </div>
+
+                <p><strong>Order Details:</strong></p>
+                <ul>
+                    <li><strong>Order ID:</strong> #${orderId}</li>
+                    <li><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleDateString('en-IN')}</li>
+                    <li><strong>Total Amount:</strong> ₹${order.totalPrice.toLocaleString()}</li>
+                </ul>
+
+                <p>You can track your order and view more details in your account.</p>
+                <a href="${clientUrl}/user/orders/${order._id}" class="cta-button">Track My Order</a>
+
+                <p>If you have any questions about your order, please don't hesitate to contact our support team.</p>
+            </div>
+            <div class="footer">
+                <p>Thank you for choosing SkyElectroTech!</p>
+                <p>© ${new Date().getFullYear()} SkyElectroTech. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `,
+    text: `
+    Order Status Update - SkyElectroTech
+
+    Hi ${user.name},
+
+    Your order status has been updated!
+
+    Order Details:
+    - Order ID: #${orderId}
+    - New Status: ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}
+    - Order Date: ${new Date(order.createdAt).toLocaleDateString('en-IN')}
+    - Total Amount: ₹${order.totalPrice.toLocaleString()}
+
+    ${getStatusMessage(newStatus)}
+
+    Track your order: ${clientUrl}/user/orders/${order._id}
+
+    Thank you for choosing SkyElectroTech!
+    `
+  };
+};
+
+// Send order confirmation email to customer
+const sendOrderConfirmationEmail = async (order, user) => {
+  try {
+    const emailTemplate = getOrderConfirmationEmailTemplate(order, user);
+    await sendEmail({
+      to: user.email,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
+    });
+    console.log(`Order confirmation email sent to ${user.email}`);
+  } catch (error) {
+    console.error(`Failed to send order confirmation email to ${user.email}:`, error);
+    // Don't re-throw as order creation shouldn't fail due to email issues
+  }
+};
+
+// Send order notification email to admin/owner
+const sendOrderNotificationEmail = async (order, user) => {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+    if (!adminEmail) {
+      console.warn('Admin email not configured, skipping order notification');
+      return;
+    }
+
+    const emailTemplate = getOrderNotificationEmailTemplate(order, user);
+    await sendEmail({
+      to: adminEmail,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
+    });
+    console.log(`Order notification email sent to admin: ${adminEmail}`);
+  } catch (error) {
+    console.error(`Failed to send order notification email to admin:`, error);
+    // Don't re-throw as order creation shouldn't fail due to email issues
+  }
+};
+
+// Send order status update email to customer
+const sendOrderStatusUpdateEmail = async (order, user, newStatus) => {
+  try {
+    const emailTemplate = getOrderStatusUpdateEmailTemplate(order, user, newStatus);
+    await sendEmail({
+      to: user.email,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
+    });
+    console.log(`Order status update email sent to ${user.email}`);
+  } catch (error) {
+    console.error(`Failed to send order status update email to ${user.email}:`, error);
+    // Don't re-throw as status update shouldn't fail due to email issues
+  }
+};
+
+// Send low stock alert email to admin
+const sendLowStockAlertEmail = async (product) => {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+    if (!adminEmail) {
+      console.warn('Admin email not configured, skipping low stock alert');
+      return;
+    }
+
+    const emailContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Low Stock Alert</title>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #ef4444; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+            .alert-box { background: #fef2f2; border: 1px solid #ef4444; border-radius: 8px; padding: 20px; margin: 20px 0; }
+            .product-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+            .button { background: #ef4444; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>⚠️ Low Stock Alert</h1>
+                <p>Product stock is running low</p>
+            </div>
+            <div class="content">
+                <div class="alert-box">
+                    <h3>Stock Alert</h3>
+                    <p>The following product is running low on stock and may need restocking soon.</p>
+                </div>
+
+                <div class="product-info">
+                    <h3>Product Details</h3>
+                    <p><strong>Product Name:</strong> ${product.name}</p>
+                    <p><strong>Current Stock:</strong> ${product.stock} units</p>
+                    <p><strong>Low Stock Threshold:</strong> ${product.lowStockThreshold || 10} units</p>
+                    <p><strong>Category:</strong> ${product.category?.name || 'N/A'}</p>
+                    <p><strong>Price:</strong> ₹${product.price?.toLocaleString() || 'N/A'}</p>
+                </div>
+
+                <p>Please consider restocking this product to avoid stockouts.</p>
+                <a href="${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/products/${product._id}" class="button">Update Stock</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+
+    await sendEmail({
+      to: adminEmail,
+      subject: `Low Stock Alert - ${product.name}`,
+      html: emailContent,
+      text: `
+        Low Stock Alert - SkyElectroTech
+
+        The following product is running low on stock:
+
+        Product Name: ${product.name}
+        Current Stock: ${product.stock} units
+        Low Stock Threshold: ${product.lowStockThreshold || 10} units
+        Category: ${product.category?.name || 'N/A'}
+        Price: ₹${product.price?.toLocaleString() || 'N/A'}
+
+        Please consider restocking this product to avoid stockouts.
+
+        Update stock: ${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/products/${product._id}
+      `
+    });
+    console.log(`Low stock alert email sent to admin: ${adminEmail}`);
+  } catch (error) {
+    console.error(`Failed to send low stock alert email to admin:`, error);
+  }
+};
+
+// Send new user registration notification to admin
+const sendNewUserNotificationEmail = async (user) => {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+    if (!adminEmail) {
+      console.warn('Admin email not configured, skipping new user notification');
+      return;
+    }
+
+    const emailContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>New User Registration</title>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #10b981; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+            .user-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+            .button { background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>👤 New User Registration</h1>
+                <p>A new user has joined SkyElectroTech</p>
+            </div>
+            <div class="content">
+                <div class="user-info">
+                    <h3>User Information</h3>
+                    <p><strong>Name:</strong> ${user.name}</p>
+                    <p><strong>Email:</strong> ${user.email}</p>
+                    <p><strong>Registration Date:</strong> ${new Date(user.createdAt).toLocaleDateString('en-IN')}</p>
+                    <p><strong>Registration Method:</strong> ${user.googleId ? 'Google OAuth' : 'Email/Password'}</p>
+                </div>
+
+                <p>Welcome the new user and monitor their activity.</p>
+                <a href="${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/users" class="button">View User Details</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+
+    await sendEmail({
+      to: adminEmail,
+      subject: `New User Registration - ${user.name}`,
+      html: emailContent,
+      text: `
+        New User Registration - SkyElectroTech
+
+        A new user has registered:
+
+        Name: ${user.name}
+        Email: ${user.email}
+        Registration Date: ${new Date(user.createdAt).toLocaleDateString('en-IN')}
+        Registration Method: ${user.googleId ? 'Google OAuth' : 'Email/Password'}
+
+        View user details: ${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/users
+      `
+    });
+    console.log(`New user notification email sent to admin: ${adminEmail}`);
+  } catch (error) {
+    console.error(`Failed to send new user notification email to admin:`, error);
+  }
+};
+
 module.exports = {
   sendEmail,
   sendWelcomeEmail,
   sendOTPEmail,
   sendForgotPasswordEmail,
+  sendOrderConfirmationEmail,
+  sendOrderNotificationEmail,
+  sendOrderStatusUpdateEmail,
+  sendLowStockAlertEmail,
+  sendNewUserNotificationEmail,
   getWelcomeEmailTemplate,
   getOTPEmailTemplate,
   getForgotPasswordEmailTemplate,
+  getOrderConfirmationEmailTemplate,
+  getOrderNotificationEmailTemplate,
+  getOrderStatusUpdateEmailTemplate,
 };

@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const { sendResponse, sendError, asyncHandler, paginate, getPaginationMeta, generateSKU } = require('../utils/helpers');
+const { sendLowStockAlertEmail } = require('../utils/email');
 
 // @desc    Get all products with filtering, sorting, and pagination
 // @route   GET /api/products
@@ -206,6 +207,10 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
   }
 
+  // Store old stock for comparison
+  const oldStock = product.stock;
+  const oldLowStockThreshold = product.lowStockThreshold;
+
   // Update product
   req.body.updatedBy = req.user._id;
   product = await Product.findByIdAndUpdate(
@@ -213,6 +218,21 @@ const updateProduct = asyncHandler(async (req, res) => {
     req.body,
     { new: true, runValidators: true }
   ).populate('category', 'name');
+
+  // Check for low stock alert
+  if (req.body.stock !== undefined && req.body.stock !== oldStock) {
+    const lowStockThreshold = req.body.lowStockThreshold || oldLowStockThreshold || 10;
+    
+    // Send low stock alert if stock is now below threshold and wasn't before
+    if (req.body.stock <= lowStockThreshold && oldStock > lowStockThreshold) {
+      try {
+        await sendLowStockAlertEmail(product);
+      } catch (emailError) {
+        console.error('Failed to send low stock alert email:', emailError);
+        // Don't fail the product update if email fails
+      }
+    }
+  }
 
   sendResponse(res, 200, { product }, 'Product updated successfully');
 });
