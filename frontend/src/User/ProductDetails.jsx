@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { toast } from 'react-hot-toast';
+import CommentSection from '../Components/CommentSection';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -368,39 +369,7 @@ const ProductDetails = () => {
             )}
 
             {activeTab === 'reviews' && (
-              <div className="space-y-6">
-                {product.reviews && product.reviews.length > 0 ? (
-                  product.reviews.map((review) => (
-                    <div key={review._id} className="border-b border-gray-100 pb-6">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center">
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <FiStar
-                                key={i}
-                                className={`w-4 h-4 ${
-                                  i < review.rating
-                                    ? 'text-yellow-400 fill-current'
-                                    : 'text-gray-300'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="ml-2 font-medium text-gray-900">
-                            {review.user?.name || 'Anonymous'}
-                          </span>
-                        </div>
-                        <span className="text-sm text-gray-500">
-                          {new Date(review.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <p className="text-gray-700">{review.comment}</p>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">No reviews yet for this product.</p>
-                )}
-              </div>
+              <CommentSection productId={product._id} />
             )}
           </div>
         </div>

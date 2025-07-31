@@ -10,6 +10,7 @@ import {
     FaBolt, // A great icon for electronics
     FaUserCircle,
     FaTags, // Icon for categories
+    FaComments, // Icon for comments
     FaTimes,
     FaBars,
     FaCog
@@ -98,6 +99,14 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                 > 
                     <FaTags className="mr-4 h-5 w-5" />
                     <span>Categories</span>
+                </NavLink>
+                <NavLink 
+                    to="/admin/comments" 
+                    onClick={handleLinkClick}
+                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
+                > 
+                    <FaComments className="mr-4 h-5 w-5" />
+                    <span>Comments</span>
                 </NavLink>
                 <NavLink 
                     to="/admin/sales" 

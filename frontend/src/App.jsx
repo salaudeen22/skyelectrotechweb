@@ -42,6 +42,7 @@ import Wishlist from './User/Wishlist';
 import AdminDashboard from './Admin/AdminDashboard';
 import ProductManagement from './Admin/ProductManagement';
 import CategoriesManagement from './Admin/CategoriesManagement';
+import CommentsManagement from './Admin/CommentsManagement';
 import Sales from './Admin/Sales';
 import Employees from './Admin/Employees';
 import Settings from './Admin/Settings';
@@ -171,6 +172,11 @@ const App = () => {
                   <Route path="categories" element={
                     <ProtectedRoute allowedRoles={['admin']}>
                       <CategoriesManagement />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="comments" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <CommentsManagement />
                     </ProtectedRoute>
                   } />
                   <Route path="sales" element={

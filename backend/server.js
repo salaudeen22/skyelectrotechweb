@@ -110,6 +110,7 @@ app.use('/api/upload', require('./routes/upload'));
 app.use('/api/bulk-upload', require('./routes/bulkUpload'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/settings', require('./routes/settings'));
+app.use('/api/comments', require('./routes/comments'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
