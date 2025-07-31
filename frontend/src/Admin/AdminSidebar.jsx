@@ -13,7 +13,8 @@ import {
     FaComments, // Icon for comments
     FaTimes,
     FaBars,
-    FaCog
+    FaCog,
+    FaClipboardList // Icon for order management
 } from 'react-icons/fa';
 
 const AdminSidebar = ({ isOpen, onToggle }) => {
@@ -115,6 +116,14 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                 > 
                     <FaChartBar className="mr-4 h-5 w-5" />
                     <span>Sales</span>
+                </NavLink>
+                <NavLink 
+                    to="/admin/orders" 
+                    onClick={handleLinkClick}
+                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
+                > 
+                    <FaClipboardList className="mr-4 h-5 w-5" />
+                    <span>Orders</span>
                 </NavLink>
                 <NavLink 
                     to="/admin/employees" 

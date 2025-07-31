@@ -46,6 +46,7 @@ import CommentsManagement from './Admin/CommentsManagement';
 import Sales from './Admin/Sales';
 import Employees from './Admin/Employees';
 import Settings from './Admin/Settings';
+import OrderManagement from './Admin/OrderManagement';
 
 // Components
 import ProtectedRoute from './Components/ProtectedRoute';
@@ -182,6 +183,11 @@ const App = () => {
                   <Route path="sales" element={
                     <ProtectedRoute allowedRoles={['admin']}>
                       <Sales />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="orders" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <OrderManagement />
                     </ProtectedRoute>
                   } />
                   <Route path="employees" element={
