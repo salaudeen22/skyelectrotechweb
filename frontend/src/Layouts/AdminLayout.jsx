@@ -24,7 +24,7 @@ const AdminLayout = () => {
 
       <AdminSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       
-      <main className="flex-1 p-6 lg:p-10 pt-16 lg:pt-6"> {/* Removed lg:ml-64 since flex handles the layout */}
+      <main className="flex-1 p-6 lg:p-10 pt-16 lg:pt-6 overflow-auto"> {/* Added overflow-auto for proper scrolling */}
         <Outlet />
       </main>
     </div>

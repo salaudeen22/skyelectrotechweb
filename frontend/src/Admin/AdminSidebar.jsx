@@ -49,7 +49,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                 fixed top-0 left-0 h-screen w-64 bg-white border-r border-gray-200 shadow-xl flex flex-col z-50 
                 transform transition-transform duration-300 ease-in-out
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
-                lg:translate-x-0 lg:relative lg:z-40
+                lg:translate-x-0 lg:relative lg:z-40 lg:h-auto lg:min-h-screen
             `}>
                 
                 {/* Mobile close button */}

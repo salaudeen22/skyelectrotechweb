@@ -13,6 +13,8 @@ const getDashboardStats = asyncHandler(async (req, res) => {
   const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
   const startOfYear = new Date(today.getFullYear(), 0, 1);
+  const startOfYesterday = new Date(startOfToday);
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1);
 
   // Basic counts
   const [
@@ -31,14 +33,16 @@ const getDashboardStats = asyncHandler(async (req, res) => {
   const revenueStats = await Order.aggregate([
     {
       $match: {
-        orderStatus: { $in: ['delivered', 'shipped'] }
+        orderStatus: { $in: ['delivered', 'shipped', 'confirmed'] }
       }
     },
     {
       $group: {
         _id: null,
         totalRevenue: { $sum: '$totalPrice' },
-        avgOrderValue: { $avg: '$totalPrice' }
+        avgOrderValue: { $avg: '$totalPrice' },
+        maxOrderValue: { $max: '$totalPrice' },
+        minOrderValue: { $min: '$totalPrice' }
       }
     }
   ]);
@@ -54,7 +58,24 @@ const getDashboardStats = asyncHandler(async (req, res) => {
       $group: {
         _id: null,
         todayOrders: { $sum: 1 },
-        todayRevenue: { $sum: '$totalPrice' }
+        todayRevenue: { $sum: '$totalPrice' },
+        todayAvgOrderValue: { $avg: '$totalPrice' }
+      }
+    }
+  ]);
+
+  // Yesterday's stats for comparison
+  const yesterdayStats = await Order.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: startOfYesterday, $lt: startOfToday }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        yesterdayOrders: { $sum: 1 },
+        yesterdayRevenue: { $sum: '$totalPrice' }
       }
     }
   ]);
@@ -70,10 +91,48 @@ const getDashboardStats = asyncHandler(async (req, res) => {
       $group: {
         _id: null,
         monthOrders: { $sum: 1 },
-        monthRevenue: { $sum: '$totalPrice' }
+        monthRevenue: { $sum: '$totalPrice' },
+        monthAvgOrderValue: { $avg: '$totalPrice' }
       }
     }
   ]);
+
+  // Customer metrics
+  const customerMetrics = await Order.aggregate([
+    {
+      $match: {
+        orderStatus: { $in: ['delivered', 'shipped', 'confirmed'] }
+      }
+    },
+    {
+      $group: {
+        _id: '$user',
+        orderCount: { $sum: 1 },
+        totalSpent: { $sum: '$totalPrice' }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalCustomers: { $sum: 1 },
+        repeatCustomers: { $sum: { $cond: [{ $gte: ['$orderCount', 2] }, 1, 0] } },
+        avgCustomerOrders: { $avg: '$orderCount' },
+        avgCustomerSpent: { $avg: '$totalSpent' }
+      }
+    }
+  ]);
+
+  // New customers today
+  const newCustomersToday = await User.countDocuments({
+    role: 'user',
+    createdAt: { $gte: startOfToday }
+  });
+
+  // New customers yesterday
+  const newCustomersYesterday = await User.countDocuments({
+    role: 'user',
+    createdAt: { $gte: startOfYesterday, $lt: startOfToday }
+  });
 
   // Order status distribution
   const orderStatusStats = await Order.aggregate([
@@ -85,11 +144,44 @@ const getDashboardStats = asyncHandler(async (req, res) => {
     }
   ]);
 
+  // Payment method distribution
+  const paymentMethodStats = await Order.aggregate([
+    {
+      $group: {
+        _id: '$paymentInfo.method',
+        count: { $sum: 1 },
+        revenue: { $sum: '$totalPrice' }
+      }
+    }
+  ]);
+
   // Low stock products
   const lowStockProducts = await Product.find({
     isActive: true,
     $expr: { $lte: ['$stock', '$lowStockThreshold'] }
-  }).select('name stock lowStockThreshold').limit(10);
+  }).select('name stock lowStockThreshold images').limit(10);
+
+  // Top selling products (last 30 days)
+  const topSellingProducts = await Order.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        orderStatus: { $in: ['delivered', 'shipped', 'confirmed'] }
+      }
+    },
+    { $unwind: '$orderItems' },
+    {
+      $group: {
+        _id: '$orderItems.product',
+        totalSold: { $sum: '$orderItems.quantity' },
+        revenue: { $sum: { $multiply: ['$orderItems.price', '$orderItems.quantity'] } },
+        productName: { $first: '$orderItems.name' },
+        productImage: { $first: '$orderItems.image' }
+      }
+    },
+    { $sort: { totalSold: -1 } },
+    { $limit: 5 }
+  ]);
 
   // Recent orders (for employees, only assigned orders)
   let recentOrdersQuery = {};
@@ -98,10 +190,17 @@ const getDashboardStats = asyncHandler(async (req, res) => {
   }
 
   const recentOrders = await Order.find(recentOrdersQuery)
-    .populate('user', 'name')
+    .populate('user', 'name email')
     .sort('-createdAt')
     .limit(10)
     .select('_id user totalPrice orderStatus createdAt');
+
+  // Calculate conversion rate (orders per customer)
+  const conversionRate = totalUsers > 0 ? ((totalOrders / totalUsers) * 100).toFixed(1) : 0;
+
+  // Calculate repeat customer rate
+  const repeatCustomerRate = customerMetrics[0]?.totalCustomers > 0 ? 
+    ((customerMetrics[0].repeatCustomers / customerMetrics[0].totalCustomers) * 100).toFixed(1) : 0;
 
   const stats = {
     overview: {
@@ -110,21 +209,43 @@ const getDashboardStats = asyncHandler(async (req, res) => {
       totalUsers,
       totalCategories,
       totalRevenue: revenueStats[0]?.totalRevenue || 0,
-      avgOrderValue: revenueStats[0]?.avgOrderValue || 0
+      avgOrderValue: revenueStats[0]?.avgOrderValue || 0,
+      maxOrderValue: revenueStats[0]?.maxOrderValue || 0,
+      minOrderValue: revenueStats[0]?.minOrderValue || 0
     },
     today: {
       orders: todayStats[0]?.todayOrders || 0,
-      revenue: todayStats[0]?.todayRevenue || 0
+      revenue: todayStats[0]?.todayRevenue || 0,
+      avgOrderValue: todayStats[0]?.todayAvgOrderValue || 0,
+      newCustomers: newCustomersToday
+    },
+    yesterday: {
+      orders: yesterdayStats[0]?.yesterdayOrders || 0,
+      revenue: yesterdayStats[0]?.yesterdayRevenue || 0,
+      newCustomers: newCustomersYesterday
     },
     thisMonth: {
       orders: monthStats[0]?.monthOrders || 0,
-      revenue: monthStats[0]?.monthRevenue || 0
+      revenue: monthStats[0]?.monthRevenue || 0,
+      avgOrderValue: monthStats[0]?.monthAvgOrderValue || 0
+    },
+    customerMetrics: {
+      conversionRate: parseFloat(conversionRate),
+      repeatCustomerRate: parseFloat(repeatCustomerRate),
+      avgCustomerOrders: customerMetrics[0]?.avgCustomerOrders || 0,
+      avgCustomerSpent: customerMetrics[0]?.avgCustomerSpent || 0,
+      totalCustomers: customerMetrics[0]?.totalCustomers || 0
     },
     orderStatusDistribution: orderStatusStats.reduce((acc, item) => {
       acc[item._id] = item.count;
       return acc;
     }, {}),
+    paymentMethodDistribution: paymentMethodStats.reduce((acc, item) => {
+      acc[item._id] = { count: item.count, revenue: item.revenue };
+      return acc;
+    }, {}),
     lowStockProducts,
+    topSellingProducts,
     recentOrders
   };
 

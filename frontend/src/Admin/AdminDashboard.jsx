@@ -1,7 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaDollarSign, FaShoppingCart, FaBoxOpen, FaUsers, FaArrowRight, FaTruck, FaChartBar, FaWarehouse } from 'react-icons/fa';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { 
+  FaDollarSign, 
+  FaShoppingCart, 
+  FaBoxOpen, 
+  FaUsers, 
+  FaArrowRight, 
+  FaTruck, 
+  FaChartBar, 
+  FaWarehouse,
+  FaEye,
+  FaHeart,
+  FaStar,
+  FaExclamationTriangle,
+  FaArrowUp,
+  FaArrowDown,
+  FaPercentage,
+  FaClock,
+  FaShoppingBag,
+  FaUserPlus,
+  FaBoxes
+} from 'react-icons/fa';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { analyticsAPI, ordersAPI } from '../services/apiServices';
 import toast from 'react-hot-toast';
 
@@ -10,6 +30,9 @@ const AdminDashboard = () => {
     stats: null,
     salesData: [],
     recentOrders: [],
+    topProducts: [],
+    customerMetrics: null,
+    inventoryAlerts: [],
     loading: true
   });
 
@@ -23,20 +46,30 @@ const AdminDashboard = () => {
 
       // Fetch dashboard stats
       const statsResponse = await analyticsAPI.getDashboardStats();
-      const stats = statsResponse.data;
+      const stats = statsResponse.data.stats;
 
       // Fetch sales analytics for chart
       const salesResponse = await analyticsAPI.getSalesAnalytics({ period: 'month' });
       const salesData = salesResponse.data.chartData || [];
 
       // Fetch recent orders
-      const ordersResponse = await ordersAPI.getAllOrders({ limit: 5, sort: '-createdAt' });
+      const ordersResponse = await ordersAPI.getAllOrders({ limit: 10, sort: '-createdAt' });
       const recentOrders = ordersResponse.data.orders || [];
+
+
+
+      // Calculate additional metrics
+      const customerMetrics = calculateCustomerMetrics(stats);
+      const inventoryAlerts = stats.lowStockProducts || [];
+      const topSellingProducts = stats.topSellingProducts || [];
 
       setDashboardData({
         stats,
         salesData,
         recentOrders,
+        customerMetrics,
+        inventoryAlerts,
+        topSellingProducts,
         loading: false
       });
     } catch (error) {
@@ -46,14 +79,31 @@ const AdminDashboard = () => {
     }
   };
 
+  const calculateCustomerMetrics = (stats) => {
+    if (!stats) return null;
+
+    const avgOrderValue = stats.overview?.avgOrderValue || 0;
+    const customerMetrics = stats.customerMetrics || {};
+
+    return {
+      conversionRate: customerMetrics.conversionRate || 0,
+      avgOrderValue: avgOrderValue,
+      customerLifetimeValue: customerMetrics.avgCustomerSpent || 0,
+      repeatCustomerRate: customerMetrics.repeatCustomerRate || 0,
+      customerSatisfaction: '4.6/5', // This would need to be calculated from reviews
+      avgCustomerOrders: customerMetrics.avgCustomerOrders || 0
+    };
+  };
+
   // Helper to get status badge colors
   const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
       case 'delivered': 
       case 'completed': return 'bg-green-100 text-green-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'shipped': 
-      case 'processing': return 'bg-blue-100 text-blue-800';
+      case 'processing': 
+      case 'confirmed': return 'bg-blue-100 text-blue-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
@@ -66,7 +116,7 @@ const AdminDashboard = () => {
       currency: 'INR',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
-    }).format(amount);
+    }).format(amount || 0);
   };
 
   // Format percentage change
@@ -74,6 +124,14 @@ const AdminDashboard = () => {
     if (!previous || previous === 0) return '+0%';
     const change = ((current - previous) / previous) * 100;
     return `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`;
+  };
+
+  // Get trend icon
+  const getTrendIcon = (change) => {
+    const isPositive = change.startsWith('+') || parseFloat(change) > 0;
+    return isPositive ? 
+      <FaArrowUp className="w-4 h-4 text-green-500" /> : 
+      <FaArrowDown className="w-4 h-4 text-red-500" />;
   };
 
   if (dashboardData.loading) {
@@ -101,166 +159,354 @@ const AdminDashboard = () => {
     );
   }
 
-  const { stats, salesData, recentOrders } = dashboardData;
+  const { stats, salesData, recentOrders, customerMetrics, inventoryAlerts, topSellingProducts } = dashboardData;
 
-  // Prepare stats cards data
+  // Prepare comprehensive stats cards data
   const statsCards = stats ? [
     {
       label: 'Total Revenue',
-      value: formatCurrency(stats.totalRevenue || 0),
-      change: formatChange(stats.todayRevenue, stats.yesterdayRevenue),
+      value: formatCurrency(stats.overview?.totalRevenue || 0),
+      change: formatChange(stats.today?.revenue || 0, stats.yesterday?.revenue || 0),
       icon: FaDollarSign,
       iconBg: 'bg-green-100',
-      iconColor: 'text-green-600'
+      iconColor: 'text-green-600',
+      description: 'Lifetime revenue'
     },
     {
-      label: 'New Orders',
-      value: stats.totalOrders || 0,
-      change: formatChange(stats.todayOrders, stats.yesterdayOrders),
+      label: 'Total Orders',
+      value: stats.overview?.totalOrders || 0,
+      change: formatChange(stats.today?.orders || 0, stats.yesterday?.orders || 0),
       icon: FaShoppingCart,
       iconBg: 'bg-blue-100',
-      iconColor: 'text-blue-600'
+      iconColor: 'text-blue-600',
+      description: 'Orders placed'
     },
     {
-      label: 'Total Products',
-      value: stats.totalProducts || 0,
-      change: '+0%', // Products don't change daily typically
+      label: 'Active Products',
+      value: stats.overview?.totalProducts || 0,
+      change: '+0%',
       icon: FaBoxOpen,
       iconBg: 'bg-indigo-100',
-      iconColor: 'text-indigo-600'
+      iconColor: 'text-indigo-600',
+      description: 'In stock products'
     },
     {
-      label: 'Total Users',
-      value: stats.totalUsers || 0,
-      change: formatChange(stats.todayUsers, stats.yesterdayUsers),
+      label: 'Total Customers',
+      value: stats.overview?.totalUsers || 0,
+      change: formatChange(stats.today?.newCustomers || 0, stats.yesterday?.newCustomers || 0),
       icon: FaUsers,
       iconBg: 'bg-orange-100',
-      iconColor: 'text-orange-600'
+      iconColor: 'text-orange-600',
+      description: 'Registered users'
     }
   ] : [];
+
+  // Customer metrics cards
+  const customerCards = customerMetrics ? [
+    {
+      label: 'Conversion Rate',
+      value: `${customerMetrics.conversionRate}%`,
+      icon: FaPercentage,
+      iconBg: 'bg-purple-100',
+      iconColor: 'text-purple-600',
+      description: 'Orders per customer'
+    },
+    {
+      label: 'Avg Order Value',
+      value: formatCurrency(customerMetrics.avgOrderValue),
+      icon: FaShoppingBag,
+      iconBg: 'bg-teal-100',
+      iconColor: 'text-teal-600',
+      description: 'Per order average'
+    },
+    {
+      label: 'Repeat Customer Rate',
+      value: `${customerMetrics.repeatCustomerRate}%`,
+      icon: FaUserPlus,
+      iconBg: 'bg-emerald-100',
+      iconColor: 'text-emerald-600',
+      description: 'Returning customers'
+    },
+    {
+      label: 'Avg Orders/Customer',
+      value: customerMetrics.avgCustomerOrders.toFixed(1),
+      icon: FaShoppingCart,
+      iconBg: 'bg-yellow-100',
+      iconColor: 'text-yellow-600',
+      description: 'Customer loyalty'
+    }
+  ] : [];
+
+  // Order status distribution for pie chart
+  const orderStatusData = stats?.orderStatusDistribution ? 
+    Object.entries(stats.orderStatusDistribution).map(([status, count]) => ({
+      name: status.charAt(0).toUpperCase() + status.slice(1),
+      value: count
+    })) : [];
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-slate-800">Admin Dashboard</h1>
-        <p className="text-slate-500 mt-1">Welcome back! Here's what's happening today.</p>
+        <p className="text-slate-500 mt-1">Welcome back! Here's what's happening with your e-commerce business.</p>
       </div>
 
-      {/* Stats Cards */}
+      {/* Main Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsCards.map((stat) => (
-          <div key={stat.label} className="bg-white p-6 rounded-xl shadow-lg flex items-center space-x-4 transition-transform transform hover:-translate-y-1">
-            <div className={`p-3 rounded-full ${stat.iconBg}`}>
-              <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
+          <div key={stat.label} className="bg-white p-6 rounded-xl shadow-lg transition-transform transform hover:-translate-y-1">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-3 rounded-full ${stat.iconBg}`}>
+                <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
+              </div>
+              {getTrendIcon(stat.change)}
             </div>
             <div>
               <p className="text-sm text-slate-500">{stat.label}</p>
               <p className="text-2xl font-bold text-slate-800">{stat.value}</p>
               <p className={`text-xs mt-1 font-semibold ${stat.change.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
-                {stat.change}
+                {stat.change} from yesterday
               </p>
+              <p className="text-xs text-slate-400 mt-1">{stat.description}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Link to="/admin/products" className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-blue-100 rounded-full">
-              <FaBoxOpen className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-800">Manage Products</h3>
-              <p className="text-sm text-slate-500">Add, edit, or remove products</p>
-            </div>
-          </div>
-        </Link>
-        
-        <Link to="/admin/sales" className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-purple-100 rounded-full">
-              <FaChartBar className="w-6 h-6 text-purple-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-800">Sales Analytics</h3>
-              <p className="text-sm text-slate-500">View sales reports</p>
+      {/* Customer Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {customerCards.map((metric) => (
+          <div key={metric.label} className="bg-white p-6 rounded-xl shadow-lg transition-transform transform hover:-translate-y-1">
+            <div className="flex items-center space-x-4">
+              <div className={`p-3 rounded-full ${metric.iconBg}`}>
+                <metric.icon className={`w-6 h-6 ${metric.iconColor}`} />
+              </div>
+              <div>
+                <p className="text-sm text-slate-500">{metric.label}</p>
+                <p className="text-xl font-bold text-slate-800">{metric.value}</p>
+                <p className="text-xs text-slate-400">{metric.description}</p>
+              </div>
             </div>
           </div>
-        </Link>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
         {/* Sales Chart */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-bold text-slate-800 mb-4">Sales Overview</h2>
+        <div className="xl:col-span-2 bg-white p-4 sm:p-6 rounded-xl shadow-lg">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-4">Sales Overview (Last 30 Days)</h2>
           {salesData.length > 0 ? (
-            <div style={{ width: '100%', height: 300 }}>
-              <ResponsiveContainer>
-                <BarChart data={salesData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+            <div className="w-full h-64 sm:h-72 lg:h-80 xl:h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={salesData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                  <XAxis dataKey="name" stroke="#94a3b8" />
-                  <YAxis stroke="#94a3b8" />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="#94a3b8" 
+                    fontSize={12}
+                    tick={{ fontSize: 10 }}
+                  />
+                  <YAxis 
+                    stroke="#94a3b8" 
+                    fontSize={12}
+                    tick={{ fontSize: 10 }}
+                    tickFormatter={(value) => formatCurrency(value).replace('₹', '')}
+                  />
                   <Tooltip 
                     wrapperClassName="!bg-white !border-slate-300 !rounded-lg !shadow-xl"
                     formatter={(value) => [formatCurrency(value), 'Sales']}
+                    labelStyle={{ fontSize: 12 }}
+                    contentStyle={{ fontSize: 11 }}
                   />
-                  <Legend />
-                  <Bar dataKey="sales" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                </BarChart>
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="sales" 
+                    stroke="#3b82f6" 
+                    strokeWidth={2} 
+                    dot={{ fill: '#3b82f6', strokeWidth: 2, r: 3 }}
+                    activeDot={{ r: 5, stroke: '#3b82f6', strokeWidth: 2 }}
+                  />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-300 flex items-center justify-center text-gray-500">
+            <div className="h-64 sm:h-72 lg:h-80 xl:h-96 flex items-center justify-center text-gray-500">
               No sales data available
             </div>
           )}
         </div>
 
-        {/* Recent Orders Table */}
-        <div className="bg-white p-6 rounded-xl shadow-lg flex flex-col">
-          <h2 className="text-xl font-bold text-slate-800 mb-4">Recent Orders</h2>
-          <div className="flex-grow overflow-y-auto">
+        {/* Order Status Distribution */}
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-4">Order Status</h2>
+          {orderStatusData.length > 0 ? (
+            <div className="w-full h-64 sm:h-72 lg:h-80 xl:h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={orderStatusData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={60}
+                    innerRadius={20}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {orderStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value) => [value, 'Orders']}
+                    contentStyle={{ fontSize: 11 }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-64 sm:h-72 lg:h-80 xl:h-96 flex items-center justify-center text-gray-500">
+              No order data available
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Recent Orders */}
+        <div className="bg-white p-6 rounded-xl shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-slate-800">Recent Orders</h2>
+            <Link to="/admin/orders" className="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center">
+              View all <FaArrowRight className="ml-1"/>
+            </Link>
+          </div>
+          <div className="space-y-3">
             {recentOrders.length > 0 ? (
-              <table className="w-full text-sm text-left text-slate-500">
-                <thead className="text-xs text-slate-700 uppercase bg-slate-50">
-                  <tr>
-                    <th scope="col" className="px-4 py-3">Order ID</th>
-                    <th scope="col" className="px-4 py-3">Total</th>
-                    <th scope="col" className="px-4 py-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentOrders.map((order) => (
-                    <tr key={order._id} className="bg-white border-b hover:bg-slate-50">
-                      <td className="px-4 py-3 font-medium text-slate-900">
-                        #{order._id.slice(-6).toUpperCase()}
-                      </td>
-                      <td className="px-4 py-3">
-                        {formatCurrency(order.totalPrice || order.totalAmount)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.orderStatus || order.status)}`}>
-                          {(order.orderStatus || order.status || 'pending').charAt(0).toUpperCase() + (order.orderStatus || order.status || 'pending').slice(1)}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              recentOrders.slice(0, 5).map((order) => (
+                <div key={order._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <FaShoppingCart className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-800">#{order._id.slice(-6).toUpperCase()}</p>
+                      <p className="text-sm text-slate-500">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium text-slate-800">
+                      {formatCurrency(order.totalPrice || order.totalAmount)}
+                    </p>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.orderStatus || order.status)}`}>
+                      {(order.orderStatus || order.status || 'pending').charAt(0).toUpperCase() + (order.orderStatus || order.status || 'pending').slice(1)}
+                    </span>
+                  </div>
+                </div>
+              ))
             ) : (
               <div className="text-center text-gray-500 py-8">
                 No recent orders
               </div>
             )}
           </div>
-          <Link to="/admin/sales" className="mt-4 text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center">
-            View all orders <FaArrowRight className="ml-2"/>
-          </Link>
+        </div>
+
+        {/* Inventory Alerts */}
+        <div className="bg-white p-6 rounded-xl shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-slate-800">Inventory Alerts</h2>
+            <Link to="/admin/products" className="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center">
+              Manage <FaArrowRight className="ml-1"/>
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {inventoryAlerts.length > 0 ? (
+              inventoryAlerts.slice(0, 5).map((product) => (
+                <div key={product._id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                      <FaExclamationTriangle className="w-4 h-4 text-red-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-800">{product.name}</p>
+                      <p className="text-sm text-red-600">
+                        Stock: {product.stock} (Threshold: {product.lowStockThreshold})
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
+                      Low Stock
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-gray-500 py-8">
+                <FaBoxes className="w-12 h-12 mx-auto text-gray-300 mb-2" />
+                <p>All products are well stocked</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+             {/* Top Selling Products */}
+       <div className="bg-white p-6 rounded-xl shadow-lg">
+         <div className="flex items-center justify-between mb-4">
+           <h2 className="text-xl font-bold text-slate-800">Top Selling Products (Last 30 Days)</h2>
+           <Link to="/admin/products" className="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center">
+             View all products <FaArrowRight className="ml-1"/>
+           </Link>
+         </div>
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+           {topSellingProducts.length > 0 ? (
+             topSellingProducts.slice(0, 6).map((product) => (
+               <div key={product._id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                 <div className="flex items-center space-x-3">
+                   <img 
+                     src={product.productImage || '/placeholder-image.jpg'} 
+                     alt={product.productName}
+                     className="w-12 h-12 object-cover rounded-lg"
+                   />
+                   <div className="flex-1 min-w-0">
+                     <p className="font-medium text-slate-800 truncate">{product.productName}</p>
+                     <p className="text-sm text-slate-500">Sold: {product.totalSold} units</p>
+                     <div className="flex items-center space-x-2 mt-1">
+                       <div className="flex items-center">
+                         <FaShoppingCart className="w-3 h-3 text-green-400" />
+                         <span className="text-xs text-slate-600 ml-1">
+                           {formatCurrency(product.revenue)}
+                         </span>
+                       </div>
+                                               <div className="flex items-center">
+                          <FaArrowUp className="w-3 h-3 text-blue-400" />
+                          <span className="text-xs text-slate-600 ml-1">
+                            {product.totalSold} sold
+                          </span>
+                        </div>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             ))
+           ) : (
+             <div className="col-span-full text-center text-gray-500 py-8">
+               No sales data available
+             </div>
+           )}
+         </div>
+       </div>
     </div>
   );
 };

@@ -5,12 +5,19 @@ import toast from 'react-hot-toast';
 
 const OrderStatus = ({ status }) => {
     const styles = {
-        Completed: 'bg-green-100 text-green-800',
-        Shipped: 'bg-blue-100 text-blue-800',
-        Pending: 'bg-yellow-100 text-yellow-800',
-        Cancelled: 'bg-red-100 text-red-800',
+        completed: 'bg-green-100 text-green-800',
+        delivered: 'bg-green-100 text-green-800',
+        shipped: 'bg-blue-100 text-blue-800',
+        confirmed: 'bg-blue-100 text-blue-800',
+        pending: 'bg-yellow-100 text-yellow-800',
+        cancelled: 'bg-red-100 text-red-800',
+        processing: 'bg-purple-100 text-purple-800',
+        packed: 'bg-indigo-100 text-indigo-800',
+        returned: 'bg-orange-100 text-orange-800'
     };
-    return <span className={`px-3 py-1 text-xs font-semibold rounded-full ${styles[status] || 'bg-gray-100 text-gray-800'}`}>{status}</span>;
+    
+    const displayStatus = status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Unknown';
+    return <span className={`px-3 py-1 text-xs font-semibold rounded-full ${styles[status?.toLowerCase()] || 'bg-gray-100 text-gray-800'}`}>{displayStatus}</span>;
 };
 
 const Sales = () => {
@@ -176,15 +183,15 @@ const Sales = () => {
                             {formatDate(order.createdAt || order.date)}
                         </div>
                         <div className="lg:hidden mt-1">
-                            <OrderStatus status={order.status} />
+                            <OrderStatus status={order.orderStatus || order.status} />
                         </div>
                     </td>
                     <td className="px-3 sm:px-6 py-4 font-medium text-slate-900 hidden sm:table-cell">
                         {order.user?.name || order.user?.email || 'Unknown Customer'}
                     </td>
-                    <td className="px-3 sm:px-6 py-4 text-slate-700 font-medium">{formatCurrency(order.totalAmount || order.total || 0)}</td>
+                    <td className="px-3 sm:px-6 py-4 text-slate-700 font-medium">{formatCurrency(order.totalPrice || order.totalAmount || order.total || 0)}</td>
                     <td className="px-3 sm:px-6 py-4 text-slate-500 hidden md:table-cell">{formatDate(order.createdAt || order.date)}</td>
-                    <td className="px-3 sm:px-6 py-4 hidden lg:table-cell"><OrderStatus status={order.status} /></td>
+                    <td className="px-3 sm:px-6 py-4 hidden lg:table-cell"><OrderStatus status={order.orderStatus || order.status} /></td>
                     <td className="px-3 sm:px-6 py-4 text-center">
                         <button 
                             className="text-blue-600 hover:text-blue-900 p-1 sm:p-2" 
