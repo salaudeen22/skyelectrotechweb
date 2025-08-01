@@ -13,19 +13,28 @@ import {
     FaCheckCircle,
     FaUndo,
     FaBan,
-    FaClock
+    FaClock,
+    FaChartBar,
+    FaDollarSign,
+    FaShoppingCart,
+    FaUsers,
+    FaCalendarAlt,
+    FaDownload,
+    FaFileAlt,
+    FaChartLine,
+    FaChartPie,
+    FaArrowUp,
+    FaArrowDown
 } from 'react-icons/fa';
-import { ordersAPI } from '../services/apiServices';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
+import { ordersAPI, analyticsAPI } from '../services/apiServices';
 import toast from 'react-hot-toast';
 import OrderStatusManagement from './OrderStatusManagement';
 import OrderDetailsModal from './OrderDetailsModal';
 import OrderStatus from '../Components/OrderStatus';
 
-
-
-
-
-const OrderManagement = () => {
+const OrdersAndSales = () => {
+    const [activeTab, setActiveTab] = useState('orders');
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -35,10 +44,24 @@ const OrderManagement = () => {
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
+    
+    // Sales Analytics State
+    const [salesData, setSalesData] = useState({
+        overview: {},
+        chartData: [],
+        topProducts: [],
+        customerMetrics: {}
+    });
+    const [dateRange, setDateRange] = useState('month');
+    const [analyticsLoading, setAnalyticsLoading] = useState(false);
+    const [exporting, setExporting] = useState(false);
 
     useEffect(() => {
         fetchOrders();
-    }, []);
+        if (activeTab === 'sales' || activeTab === 'reports') {
+            fetchSalesData();
+        }
+    }, [activeTab, dateRange]);
 
     const fetchOrders = async () => {
         try {
@@ -46,9 +69,12 @@ const OrderManagement = () => {
             setError(null);
             
             const response = await ordersAPI.getAllOrders();
+            console.log('Orders API response:', response);
             
             if (response.success) {
-                setOrders(response.data.orders || []);
+                const orders = response.data.orders || response.orders || [];
+                console.log('Processed orders:', orders);
+                setOrders(orders);
             } else {
                 throw new Error(response.message || 'Failed to fetch orders');
             }
@@ -58,6 +84,96 @@ const OrderManagement = () => {
             toast.error(`Failed to load orders: ${error.message}`);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchSalesData = async () => {
+        try {
+            setAnalyticsLoading(true);
+            
+            const [statsResponse, salesResponse] = await Promise.all([
+                analyticsAPI.getDashboardStats(),
+                analyticsAPI.getSalesAnalytics({ period: dateRange })
+            ]);
+
+            if (statsResponse.success) {
+                const stats = statsResponse.data.stats;
+                setSalesData({
+                    overview: stats.overview || {},
+                    chartData: salesResponse.data.chartData || [],
+                    topProducts: stats.topSellingProducts || [],
+                    customerMetrics: stats.customerMetrics || {}
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching sales data:', error);
+            toast.error('Failed to load sales analytics');
+        } finally {
+            setAnalyticsLoading(false);
+        }
+    };
+
+    // Export today's sales invoice
+    const exportTodaySalesInvoice = async () => {
+        try {
+            setExporting(true);
+            
+            const response = await ordersAPI.exportTodaySalesInvoice();
+            
+            // Check content type to determine if it's PDF or HTML
+            const contentType = response.headers['content-type'] || '';
+            const isPDF = contentType.includes('application/pdf');
+            
+            // Create blob with appropriate type
+            const blob = new Blob([response.data], { 
+                type: isPDF ? 'application/pdf' : 'text/html' 
+            });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Today_Sales_Invoice_${new Date().toISOString().split('T')[0]}.${isPDF ? 'pdf' : 'html'}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            const fileType = isPDF ? 'PDF' : 'HTML';
+            toast.success(`Today's sales invoice exported successfully as ${fileType}!`);
+        } catch (error) {
+            console.error('Error exporting invoice:', error);
+            toast.error('Failed to export sales invoice');
+        } finally {
+            setExporting(false);
+        }
+    };
+
+    // Export individual order invoice
+    const exportOrderInvoice = async (orderId) => {
+        try {
+            const response = await ordersAPI.exportOrderInvoice(orderId);
+            
+            // Check content type to determine if it's PDF or HTML
+            const contentType = response.headers['content-type'] || '';
+            const isPDF = contentType.includes('application/pdf');
+            
+            // Create blob with appropriate type
+            const blob = new Blob([response.data], { 
+                type: isPDF ? 'application/pdf' : 'text/html' 
+            });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Order_Invoice_${orderId.slice(-8)}.${isPDF ? 'pdf' : 'html'}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            const fileType = isPDF ? 'PDF' : 'HTML';
+            toast.success(`Order invoice exported successfully as ${fileType}!`);
+        } catch (error) {
+            console.error('Error exporting order invoice:', error);
+            toast.error('Failed to export order invoice');
         }
     };
 
@@ -104,217 +220,506 @@ const OrderManagement = () => {
             cancelled: FaBan,
             returned: FaUndo
         };
-        return icons[status] || FaClock;
+        return icons[status?.toLowerCase()] || FaClock;
     };
 
-    const statusOptions = [
-        { value: '', label: 'All Statuses' },
-        { value: 'pending', label: 'Pending' },
-        { value: 'confirmed', label: 'Confirmed' },
-        { value: 'processing', label: 'Processing' },
-        { value: 'packed', label: 'Packed' },
-        { value: 'shipped', label: 'Shipped' },
-        { value: 'delivered', label: 'Delivered' },
-        { value: 'cancelled', label: 'Cancelled' },
-        { value: 'returned', label: 'Returned' }
-    ];
+    const getStatusColor = (status) => {
+        const colors = {
+            pending: 'text-yellow-600',
+            confirmed: 'text-blue-600',
+            processing: 'text-purple-600',
+            packed: 'text-indigo-600',
+            shipped: 'text-blue-600',
+            delivered: 'text-green-600',
+            cancelled: 'text-red-600',
+            returned: 'text-orange-600'
+        };
+        return colors[status?.toLowerCase()] || 'text-gray-600';
+    };
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <FaSpinner className="animate-spin text-4xl text-blue-600" />
-                <span className="ml-2 text-lg">Loading orders...</span>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-                <h2 className="text-lg font-semibold text-red-800 mb-2">Error Loading Orders</h2>
-                <p className="text-red-600">{error}</p>
+    // Tab Navigation Component
+    const TabNavigation = () => (
+        <div className="border-b border-gray-200 mb-6">
+            <nav className="-mb-px flex space-x-8">
+                {[
+                    { id: 'orders', label: 'Orders', icon: FaShoppingCart },
+                    { id: 'sales', label: 'Sales Analytics', icon: FaChartBar },
+                    { id: 'reports', label: 'Reports', icon: FaFileAlt }
+                ].map((tab) => (
                 <button 
-                    onClick={fetchOrders}
-                    className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-                >
-                    Retry
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
+                            activeTab === tab.id
+                                ? 'border-indigo-500 text-indigo-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                    >
+                        <tab.icon className="mr-2 h-4 w-4" />
+                        {tab.label}
                 </button>
+                ))}
+            </nav>
             </div>
         );
-    }
 
-    return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">Order Management</h1>
-                <p className="text-slate-500 mt-1 text-sm sm:text-base">Manage and update order statuses.</p>
-            </div>
-
-            {/* Search and Filters */}
-            <div className="bg-white rounded-lg shadow-lg p-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1 relative">
-                        <FaSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400" />
-                        <input 
-                            type="text" 
-                            placeholder="Search by Order ID, Customer Name or Email..." 
+        // Orders Tab Component
+    const OrdersTab = () => (
+        <div>
+            {/* Header with Search and Filters */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div className="flex-1 max-w-md">
+                    <div className="relative">
+                        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search orders by customer or ID..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         />
                     </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    >
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="processing">Processing</option>
+                        <option value="packed">Packed</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="returned">Returned</option>
+                    </select>
                     
                     <button
                         onClick={() => setShowFilters(!showFilters)}
-                        className="flex items-center px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                        className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg"
                     >
-                        <FaFilter className="mr-2" />
-                        Filters
+                        <FaFilter className="h-4 w-4" />
+                    </button>
+                    
+                    <button
+                        onClick={exportTodaySalesInvoice}
+                        disabled={exporting}
+                        className="flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                        title="Export Today's Sales Invoice"
+                    >
+                        {exporting ? (
+                            <FaSpinner className="animate-spin mr-1 h-3 w-3" />
+                        ) : (
+                            <FaDownload className="mr-1 h-3 w-3" />
+                        )}
+                        Export Invoice
                     </button>
                 </div>
-
-                {showFilters && (
-                    <div className="mt-4 pt-4 border-t border-slate-200">
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <div className="sm:w-48">
-                                <label className="block text-sm font-medium text-slate-700 mb-2">Status Filter</label>
-                                <select
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    {statusOptions.map(option => (
-                                        <option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            
-                            {(searchTerm || statusFilter) && (
-                                <div className="flex items-end">
-                                    <button
-                                        onClick={() => {
-                                            setSearchTerm('');
-                                            setStatusFilter('');
-                                        }}
-                                        className="px-4 py-2 text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
-                                    >
-                                        Clear Filters
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
             </div>
 
             {/* Orders Table */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            {loading ? (
+                <div className="flex items-center justify-center h-64">
+                    <FaSpinner className="animate-spin text-4xl text-blue-600" />
+                    <span className="ml-2 text-lg">Loading orders...</span>
+                </div>
+            ) : error ? (
+                <div className="text-center py-8">
+                    <p className="text-red-600">{error}</p>
+                    <button onClick={fetchOrders} className="mt-2 text-blue-600 hover:underline">
+                        Try again
+                    </button>
+                </div>
+            ) : (
+                <div className="bg-white rounded-lg shadow overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-slate-50">
-                            <tr>
-                                <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Order</th>
-                                <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Customer</th>
-                                <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Total</th>
-                                <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Date</th>
-                                <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Status</th>
-                                <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Order ID
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Customer
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Amount
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Date
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-200">
-                            {filteredOrders.length > 0 ? filteredOrders.map((order) => {
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {filteredOrders.map((order) => {
                                 const StatusIcon = getStatusIcon(order.orderStatus);
                                 return (
-                                    <tr key={order._id} className="hover:bg-slate-50">
-                                        <td className="px-4 py-4">
-                                            <div className="font-mono text-sm text-slate-700">#{order._id?.slice(-6)}</div>
-                                            <div className="text-xs text-slate-500 mt-1">
-                                                {order.orderItems?.length || 0} items
+                                        <tr key={order._id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                #{order._id.slice(-8)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div>
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        {order.user?.name || 'Unknown'}
+                                            </div>
+                                                    <div className="text-sm text-gray-500">
+                                                        {order.user?.email}
+                                            </div>
                                             </div>
                                         </td>
-                                        <td className="px-4 py-4">
-                                            <div className="font-medium text-slate-900">
-                                                {order.user?.name || 'N/A'}
-                                            </div>
-                                            <div className="text-sm text-slate-500">
-                                                {order.user?.email || 'N/A'}
-                                            </div>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {formatCurrency(order.totalPrice || order.totalAmount || 0)}
                                         </td>
-                                        <td className="px-4 py-4 text-slate-700 font-medium">
-                                            {formatCurrency(order.totalPrice || 0)}
-                                        </td>
-                                        <td className="px-4 py-4 text-slate-500">
-                                            {formatDate(order.createdAt)}
-                                        </td>
-                                        <td className="px-4 py-4">
-                                            <div className="flex items-center space-x-2">
-                                                <StatusIcon className="w-4 h-4 text-slate-400" />
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center">
+                                                    <StatusIcon className={`mr-2 h-4 w-4 ${getStatusColor(order.orderStatus)}`} />
                                                 <OrderStatus status={order.orderStatus} />
                                             </div>
                                         </td>
-                                        <td className="px-4 py-4 text-center">
-                                            <div className="flex items-center justify-center space-x-2">
-                                                <button 
-                                                    className="text-blue-600 hover:text-blue-900 p-2" 
-                                                    title="View Details"
-                                                    onClick={() => {
-                                                        setSelectedOrder(order);
-                                                        setShowDetailsModal(true);
-                                                    }}
-                                                >
-                                                    <FaEye className="w-4 h-4" />
-                                                </button>
-                                                <button 
-                                                    className="text-green-600 hover:text-green-900 p-2" 
-                                                    title="Update Status"
-                                                    onClick={() => openStatusModal(order)}
-                                                >
-                                                    <FaEdit className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {formatDate(order.createdAt)}
+                                            </td>
+                                                                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <div className="flex items-center space-x-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedOrder(order);
+                                                            setShowDetailsModal(true);
+                                                        }}
+                                                        className="text-indigo-600 hover:text-indigo-900"
+                                                        title="View Details"
+                                                    >
+                                                        <FaEye className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => openStatusModal(order)}
+                                                        className="text-blue-600 hover:text-blue-900"
+                                                        title="Update Status"
+                                                    >
+                                                        <FaEdit className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => exportOrderInvoice(order._id)}
+                                                        className="text-green-600 hover:text-green-900"
+                                                        title="Export Invoice"
+                                                    >
+                                                        <FaDownload className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
                                     </tr>
                                 );
-                            }) : (
-                                <tr>
-                                    <td colSpan="6" className="px-6 py-12 text-center text-slate-500">
-                                        <div className="flex flex-col items-center">
-                                            <FaBox className="text-4xl mb-4 text-slate-300" />
-                                            <p className="text-lg font-semibold">No orders found</p>
-                                            <p className="text-sm">Try adjusting your search criteria</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {filteredOrders.length === 0 && (
+                        <div className="text-center py-8">
+                            <p className="text-gray-500">No orders found</p>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+
+    // Sales Analytics Tab Component
+    const SalesAnalyticsTab = () => (
+        <div>
+            {/* Header with Export Button */}
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h2 className="text-xl font-semibold text-gray-900">Sales Analytics</h2>
+                    <p className="text-sm text-gray-600 mt-1">Export today's sales as PDF invoice</p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <select
+                        value={dateRange}
+                        onChange={(e) => setDateRange(e.target.value)}
+                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    >
+                        <option value="week">Last Week</option>
+                        <option value="month">Last Month</option>
+                        <option value="quarter">Last Quarter</option>
+                        <option value="year">Last Year</option>
+                    </select>
+                    
+                    <button
+                        onClick={exportTodaySalesInvoice}
+                        disabled={exporting}
+                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        {exporting ? (
+                            <FaSpinner className="animate-spin mr-2 h-4 w-4" />
+                        ) : (
+                            <FaDownload className="mr-2 h-4 w-4" />
+                        )}
+                        Export Today's Invoice
+                    </button>
                 </div>
             </div>
 
-            {/* Status Update Modal */}
+            {analyticsLoading ? (
+                <div className="flex items-center justify-center h-64">
+                    <FaSpinner className="animate-spin text-4xl text-blue-600" />
+                    <span className="ml-2 text-lg">Loading analytics...</span>
+                </div>
+            ) : (
+                <div className="space-y-6">
+                    {/* Overview Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <div className="flex items-center">
+                                <div className="p-2 bg-green-100 rounded-lg">
+                                    <FaDollarSign className="h-6 w-6 text-green-600" />
+                                </div>
+                                <div className="ml-4">
+                                    <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                                    <p className="text-2xl font-semibold text-gray-900">
+                                        {formatCurrency(salesData.overview.totalRevenue || 0)}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <div className="flex items-center">
+                                <div className="p-2 bg-blue-100 rounded-lg">
+                                    <FaShoppingCart className="h-6 w-6 text-blue-600" />
+                                </div>
+                                <div className="ml-4">
+                                    <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                                    <p className="text-2xl font-semibold text-gray-900">
+                                        {salesData.overview.totalOrders || 0}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <div className="flex items-center">
+                                <div className="p-2 bg-purple-100 rounded-lg">
+                                    <FaUsers className="h-6 w-6 text-purple-600" />
+                                </div>
+                                <div className="ml-4">
+                                    <p className="text-sm font-medium text-gray-600">Avg Order Value</p>
+                                    <p className="text-2xl font-semibold text-gray-900">
+                                        {formatCurrency(salesData.overview.avgOrderValue || 0)}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <div className="flex items-center">
+                                <div className="p-2 bg-orange-100 rounded-lg">
+                                    <FaChartLine className="h-6 w-6 text-orange-600" />
+                                </div>
+                                <div className="ml-4">
+                                    <p className="text-sm font-medium text-gray-600">Conversion Rate</p>
+                                    <p className="text-2xl font-semibold text-gray-900">
+                                        {((salesData.customerMetrics.conversionRate || 0) * 100).toFixed(1)}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Charts */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Sales Trend Chart */}
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Sales Trend</h3>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <LineChart data={salesData.chartData}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="date" />
+                                    <YAxis />
+                                    <Tooltip formatter={(value) => formatCurrency(value)} />
+                                    <Legend />
+                                    <Line type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={2} />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+
+                        {/* Order Status Distribution */}
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Status Distribution</h3>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <PieChart>
+                                    <Pie
+                                        data={[
+                                            { name: 'Delivered', value: 45, color: '#10B981' },
+                                            { name: 'Shipped', value: 25, color: '#3B82F6' },
+                                            { name: 'Processing', value: 20, color: '#8B5CF6' },
+                                            { name: 'Pending', value: 10, color: '#F59E0B' }
+                                        ]}
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={80}
+                                        dataKey="value"
+                                    >
+                                        {salesData.chartData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                    <Legend />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* Top Products */}
+                    <div className="bg-white p-6 rounded-lg shadow">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Selling Products</h3>
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Units Sold</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {salesData.topProducts.slice(0, 5).map((product, index) => (
+                                        <tr key={index}>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center">
+                                                    <div className="h-10 w-10 flex-shrink-0">
+                                                        <img className="h-10 w-10 rounded-lg object-cover" src={product.image} alt={product.name} />
+                                                    </div>
+                                                    <div className="ml-4">
+                                                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                                                    </div>
+                                        </div>
+                                    </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.unitsSold}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(product.revenue)}</td>
+                                </tr>
+                                    ))}
+                        </tbody>
+                    </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
+    // Reports Tab Component
+    const ReportsTab = () => (
+        <div>
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h2 className="text-xl font-semibold text-gray-900">Reports & Analytics</h2>
+                    <p className="text-sm text-gray-600 mt-1">Generate and export detailed reports</p>
+                </div>
+                <div className="flex space-x-2">
+                    <button 
+                        onClick={exportTodaySalesInvoice}
+                        disabled={exporting}
+                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        {exporting ? (
+                            <FaSpinner className="animate-spin mr-2 h-4 w-4" />
+                        ) : (
+                            <FaDownload className="mr-2 h-4 w-4" />
+                        )}
+                        Export Today's Invoice
+                    </button>
+                    <button className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                        <FaFileAlt className="mr-2 h-4 w-4" />
+                        Export Report
+                    </button>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Customer Analytics */}
+                <div className="bg-white p-6 rounded-lg shadow">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Analytics</h3>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">New Customers</span>
+                            <span className="font-semibold">+12%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Repeat Customers</span>
+                            <span className="font-semibold">68%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Customer Lifetime Value</span>
+                            <span className="font-semibold">{formatCurrency(2500)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Performance Metrics */}
+                <div className="bg-white p-6 rounded-lg shadow">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Metrics</h3>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Order Fulfillment Rate</span>
+                            <span className="font-semibold text-green-600">98.5%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Average Delivery Time</span>
+                            <span className="font-semibold">2.3 days</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Return Rate</span>
+                            <span className="font-semibold text-red-600">2.1%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="p-6">
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">Orders & Sales</h1>
+                <p className="text-gray-600">Manage orders and analyze sales performance</p>
+            </div>
+
+            <TabNavigation />
+
+            {activeTab === 'orders' && <OrdersTab />}
+            {activeTab === 'sales' && <SalesAnalyticsTab />}
+            {activeTab === 'reports' && <ReportsTab />}
+
+            {/* Modals */}
+            {showStatusModal && selectedOrder && (
             <OrderStatusManagement
                 order={selectedOrder}
-                isOpen={showStatusModal}
-                onClose={() => {
-                    setShowStatusModal(false);
-                    setSelectedOrder(null);
-                }}
-                onStatusUpdate={handleStatusUpdate}
-            />
+                    onClose={() => setShowStatusModal(false)}
+                    onUpdate={handleStatusUpdate}
+                />
+            )}
 
-            {/* Order Details Modal */}
+            {showDetailsModal && selectedOrder && (
             <OrderDetailsModal
                 order={selectedOrder}
-                isOpen={showDetailsModal}
-                onClose={() => {
-                    setShowDetailsModal(false);
-                    setSelectedOrder(null);
-                }}
-            />
+                    onClose={() => setShowDetailsModal(false)}
+                />
+            )}
         </div>
     );
 };
 
-export default OrderManagement; 
+export default OrdersAndSales; 

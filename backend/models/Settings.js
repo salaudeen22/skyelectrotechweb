@@ -5,23 +5,39 @@ const settingsSchema = new mongoose.Schema({
   storeInfo: {
     name: {
       type: String,
-      default: 'SkyElectroTech'
+      default: 'Sky Electro Tech'
     },
     description: {
       type: String,
-      default: 'Your trusted electronics store'
+      default: 'Electronics & Components Store'
     },
     email: {
       type: String,
-      default: 'admin@skyelectro.tech'
+      default: 'info@skyelectro.tech'
     },
     phone: {
       type: String,
-      default: '+91 1234567890'
+      default: '+91 98765 43210'
     },
     address: {
       type: String,
-      default: 'Your store address'
+      default: 'No. 123, Electronics Street, Bangalore, Karnataka - 560000'
+    },
+    gstin: {
+      type: String,
+      default: '27AABCS1234Z1Z5'
+    },
+    city: {
+      type: String,
+      default: 'Bangalore'
+    },
+    state: {
+      type: String,
+      default: 'Karnataka'
+    },
+    pincode: {
+      type: String,
+      default: '560000'
     },
     logo: {
       type: String,
@@ -46,6 +62,14 @@ const settingsSchema = new mongoose.Schema({
     defaultShippingCost: {
       type: Number,
       default: 50
+    },
+    estimatedDeliveryDays: {
+      type: Number,
+      default: 3
+    },
+    shippingFees: {
+      type: Array,
+      default: []
     },
     shippingMethods: [{
       name: {
@@ -146,6 +170,22 @@ const settingsSchema = new mongoose.Schema({
     orderPrefix: {
       type: String,
       default: 'SKY'
+    },
+    autoCancelMinutes: {
+      type: Number,
+      default: 30
+    },
+    allowGuestCheckout: {
+      type: Boolean,
+      default: true
+    },
+    requirePhoneNumber: {
+      type: Boolean,
+      default: true
+    },
+    requireAddress: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -180,6 +220,22 @@ const settingsSchema = new mongoose.Schema({
         type: String,
         default: 'Welcome to {storeName}'
       }
+    },
+    fromName: {
+      type: String,
+      default: 'SkyElectroTech'
+    },
+    fromEmail: {
+      type: String,
+      default: 'noreply@skyelectro.tech'
+    },
+    shippingUpdates: {
+      type: Boolean,
+      default: true
+    },
+    marketingEmails: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -202,6 +258,14 @@ const settingsSchema = new mongoose.Schema({
       default: ''
     },
     facebookPixel: {
+      type: String,
+      default: ''
+    },
+    googleAnalyticsId: {
+      type: String,
+      default: ''
+    },
+    facebookPixelId: {
       type: String,
       default: ''
     }

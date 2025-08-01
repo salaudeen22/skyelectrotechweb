@@ -53,6 +53,12 @@ const shippingZoneValidation = [
 const settingsValidation = [
   body('storeInfo.name').optional().trim().notEmpty().withMessage('Store name cannot be empty'),
   body('storeInfo.email').optional().isEmail().withMessage('Invalid email format'),
+  body('storeInfo.phone').optional().trim().notEmpty().withMessage('Phone cannot be empty'),
+  body('storeInfo.address').optional().trim().notEmpty().withMessage('Address cannot be empty'),
+  body('storeInfo.gstin').optional().trim().notEmpty().withMessage('GSTIN cannot be empty'),
+  body('storeInfo.city').optional().trim().notEmpty().withMessage('City cannot be empty'),
+  body('storeInfo.state').optional().trim().notEmpty().withMessage('State cannot be empty'),
+  body('storeInfo.pincode').optional().trim().notEmpty().withMessage('Pincode cannot be empty'),
   body('shipping.freeShippingThreshold').optional().isNumeric().withMessage('Free shipping threshold must be a number'),
   body('shipping.defaultShippingCost').optional().isNumeric().withMessage('Default shipping cost must be a number'),
   body('payment.taxRate').optional().isNumeric().withMessage('Tax rate must be a number'),

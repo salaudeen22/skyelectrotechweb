@@ -21,44 +21,81 @@ const getSettings = asyncHandler(async (req, res) => {
 // @route   PUT /api/settings
 // @access  Private (Admin)
 const updateSettings = asyncHandler(async (req, res) => {
-  const {
-    storeInfo,
-    shipping,
-    payment,
-    order,
-    email,
-    seo,
-    socialMedia,
-    maintenance,
-    cache
-  } = req.body;
+  try {
+    console.log('Updating settings with data:', JSON.stringify(req.body, null, 2));
+    
+    const {
+      storeInfo,
+      shipping,
+      payment,
+      order,
+      email,
+      seo,
+      socialMedia,
+      maintenance,
+      cache
+    } = req.body;
 
-  let settings = await Settings.findOne().sort('-createdAt');
-  
-  if (!settings) {
-    // Create new settings if none exist
-    settings = new Settings({
-      updatedBy: req.user._id
-    });
+    let settings = await Settings.findOne().sort('-createdAt');
+    
+    if (!settings) {
+      // Create new settings if none exist
+      settings = new Settings({
+        updatedBy: req.user._id
+      });
+    }
+
+    // Update only provided fields with better error handling
+    if (storeInfo) {
+      console.log('Updating storeInfo:', storeInfo);
+      settings.storeInfo = { ...settings.storeInfo, ...storeInfo };
+    }
+    if (shipping) {
+      console.log('Updating shipping:', shipping);
+      settings.shipping = { ...settings.shipping, ...shipping };
+    }
+    if (payment) {
+      console.log('Updating payment:', payment);
+      settings.payment = { ...settings.payment, ...payment };
+    }
+    if (order) {
+      console.log('Updating order:', order);
+      settings.order = { ...settings.order, ...order };
+    }
+    if (email) {
+      console.log('Updating email:', email);
+      settings.email = { ...settings.email, ...email };
+    }
+    if (seo) {
+      console.log('Updating seo:', seo);
+      settings.seo = { ...settings.seo, ...seo };
+    }
+    if (socialMedia) {
+      console.log('Updating socialMedia:', socialMedia);
+      settings.socialMedia = { ...settings.socialMedia, ...socialMedia };
+    }
+    if (maintenance) {
+      console.log('Updating maintenance:', maintenance);
+      settings.maintenance = { ...settings.maintenance, ...maintenance };
+    }
+    if (cache) {
+      console.log('Updating cache:', cache);
+      settings.cache = { ...settings.cache, ...cache };
+    }
+
+    settings.updatedBy = req.user._id;
+    settings.updatedAt = new Date();
+
+    console.log('Saving settings...');
+    await settings.save();
+    console.log('Settings saved successfully');
+
+    sendResponse(res, 200, { settings }, 'Settings updated successfully');
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    console.error('Error stack:', error.stack);
+    sendError(res, 500, `Failed to update settings: ${error.message}`);
   }
-
-  // Update only provided fields
-  if (storeInfo) settings.storeInfo = { ...settings.storeInfo, ...storeInfo };
-  if (shipping) settings.shipping = { ...settings.shipping, ...shipping };
-  if (payment) settings.payment = { ...settings.payment, ...payment };
-  if (order) settings.order = { ...settings.order, ...order };
-  if (email) settings.email = { ...settings.email, ...email };
-  if (seo) settings.seo = { ...settings.seo, ...seo };
-  if (socialMedia) settings.socialMedia = { ...settings.socialMedia, ...socialMedia };
-  if (maintenance) settings.maintenance = { ...settings.maintenance, ...maintenance };
-  if (cache) settings.cache = { ...settings.cache, ...cache };
-
-  settings.updatedBy = req.user._id;
-  settings.updatedAt = new Date();
-
-  await settings.save();
-
-  sendResponse(res, 200, { settings }, 'Settings updated successfully');
 });
 
 // @desc    Get public settings (for frontend)

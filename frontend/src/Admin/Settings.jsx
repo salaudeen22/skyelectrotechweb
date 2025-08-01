@@ -13,18 +13,26 @@ const Settings = () => {
 
   const [formData, setFormData] = useState({
     storeInfo: {
-      name: 'SkyElectroTech',
-      description: 'Your trusted electronics store',
-      email: 'admin@skyelectro.tech',
-      phone: '+91 1234567890',
-      address: 'Your store address',
+      name: 'Sky Electro Tech',
+      description: 'Electronics & Components Store',
+      email: 'info@skyelectro.tech',
+      phone: '+91 98765 43210',
+      address: '123 Electronics Street, Mumbai, Maharashtra - 400001',
+      gstin: '27AABCS1234Z1Z5',
+      city: 'Mumbai',
+      state: 'Maharashtra',
+      pincode: '400001',
       logo: '',
       favicon: ''
     },
     shipping: {
       enabled: true,
       freeShippingThreshold: 1000,
-      defaultShippingCost: 50
+      defaultShippingCost: 50,
+      estimatedDeliveryDays: 3,
+      shippingFees: [],
+      shippingMethods: [],
+      zones: []
     },
     payment: {
       currency: 'INR',
@@ -39,19 +47,30 @@ const Settings = () => {
       autoConfirm: false,
       requireApproval: false,
       maxOrderQuantity: 10,
-      orderPrefix: 'SKY'
+      orderPrefix: 'SKY',
+      lowStockThreshold: 5,
+      autoCancelMinutes: 30,
+      allowGuestCheckout: true,
+      requirePhoneNumber: true,
+      requireAddress: true
     },
     email: {
       orderConfirmation: { enabled: true, subject: 'Order Confirmation - {orderId}' },
       orderStatusUpdate: { enabled: true, subject: 'Order Status Update - {orderId}' },
-      welcomeEmail: { enabled: true, subject: 'Welcome to {storeName}' }
+      welcomeEmail: { enabled: true, subject: 'Welcome to {storeName}' },
+      fromName: 'SkyElectroTech',
+      fromEmail: 'noreply@skyelectro.tech',
+      shippingUpdates: true,
+      marketingEmails: false
     },
     seo: {
       metaTitle: 'SkyElectroTech - Your Electronics Store',
       metaDescription: 'Find the best electronics at great prices',
       metaKeywords: 'electronics, gadgets, tech, online store',
       googleAnalytics: '',
-      facebookPixel: ''
+      facebookPixel: '',
+      googleAnalyticsId: '',
+      facebookPixelId: ''
     },
     socialMedia: {
       facebook: '',
@@ -81,12 +100,34 @@ const Settings = () => {
       const response = await settingsAPI.getSettings();
       const fetchedSettings = response.data.settings;
       setSettings(fetchedSettings);
+      
+      // Ensure email settings have proper structure
+      const emailSettings = fetchedSettings.email || {};
+      const safeEmailSettings = {
+        orderConfirmation: {
+          enabled: emailSettings.orderConfirmation?.enabled ?? true,
+          subject: emailSettings.orderConfirmation?.subject ?? 'Order Confirmation - {orderId}'
+        },
+        orderStatusUpdate: {
+          enabled: emailSettings.orderStatusUpdate?.enabled ?? true,
+          subject: emailSettings.orderStatusUpdate?.subject ?? 'Order Status Update - {orderId}'
+        },
+        welcomeEmail: {
+          enabled: emailSettings.welcomeEmail?.enabled ?? true,
+          subject: emailSettings.welcomeEmail?.subject ?? 'Welcome to {storeName}'
+        },
+        fromName: emailSettings.fromName ?? 'SkyElectroTech',
+        fromEmail: emailSettings.fromEmail ?? 'noreply@skyelectro.tech',
+        shippingUpdates: emailSettings.shippingUpdates ?? true,
+        marketingEmails: emailSettings.marketingEmails ?? false
+      };
+      
       setFormData(prev => ({
         storeInfo: { ...prev.storeInfo, ...fetchedSettings.storeInfo },
         shipping: { ...prev.shipping, ...fetchedSettings.shipping },
         payment: { ...prev.payment, ...fetchedSettings.payment },
         order: { ...prev.order, ...fetchedSettings.order },
-        email: { ...prev.email, ...fetchedSettings.email },
+        email: safeEmailSettings,
         seo: { ...prev.seo, ...fetchedSettings.seo },
         socialMedia: { ...prev.socialMedia, ...fetchedSettings.socialMedia },
         maintenance: { ...prev.maintenance, ...fetchedSettings.maintenance },
@@ -126,13 +167,39 @@ const Settings = () => {
   const handleSaveSettings = async () => {
     try {
       setSaving(true);
-      await settingsAPI.updateSettings(formData);
+      
+      // Sanitize the data before sending
+      const sanitizedData = {
+        ...formData,
+        email: {
+          orderConfirmation: {
+            enabled: formData.email.orderConfirmation?.enabled ?? true,
+            subject: formData.email.orderConfirmation?.subject ?? 'Order Confirmation - {orderId}'
+          },
+          orderStatusUpdate: {
+            enabled: formData.email.orderStatusUpdate?.enabled ?? true,
+            subject: formData.email.orderStatusUpdate?.subject ?? 'Order Status Update - {orderId}'
+          },
+          welcomeEmail: {
+            enabled: formData.email.welcomeEmail?.enabled ?? true,
+            subject: formData.email.welcomeEmail?.subject ?? 'Welcome to {storeName}'
+          },
+          fromName: formData.email.fromName ?? 'SkyElectroTech',
+          fromEmail: formData.email.fromEmail ?? 'noreply@skyelectro.tech',
+          shippingUpdates: formData.email.shippingUpdates ?? true,
+          marketingEmails: formData.email.marketingEmails ?? false
+        }
+      };
+      
+      console.log('Sending sanitized settings data:', JSON.stringify(sanitizedData, null, 2));
+      await settingsAPI.updateSettings(sanitizedData);
       toast.success('Settings saved successfully!');
       await fetchSettings();
       // Refresh global settings to reflect changes immediately
       await refreshSettings();
     } catch (error) {
       console.error('Error saving settings:', error);
+      console.error('Error response:', error.response?.data);
       toast.error('Failed to save settings');
     } finally {
       setSaving(false);
@@ -258,6 +325,43 @@ const Settings = () => {
                     value={formData.storeInfo.address}
                     onChange={(e) => handleInputChange('storeInfo', 'address', e.target.value)}
                     rows="2"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">GSTIN</label>
+                  <input
+                    type="text"
+                    value={formData.storeInfo.gstin}
+                    onChange={(e) => handleInputChange('storeInfo', 'gstin', e.target.value)}
+                    placeholder="e.g., 27AABCS1234Z1Z5"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                  <input
+                    type="text"
+                    value={formData.storeInfo.city}
+                    onChange={(e) => handleInputChange('storeInfo', 'city', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+                  <input
+                    type="text"
+                    value={formData.storeInfo.state}
+                    onChange={(e) => handleInputChange('storeInfo', 'state', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Pincode</label>
+                  <input
+                    type="text"
+                    value={formData.storeInfo.pincode}
+                    onChange={(e) => handleInputChange('storeInfo', 'pincode', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>

@@ -120,20 +120,12 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                     <span>Comments</span>
                 </NavLink>
                 <NavLink 
-                    to="/admin/sales" 
-                    onClick={handleLinkClick}
-                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
-                > 
-                    <FaChartBar className="mr-4 h-5 w-5" />
-                    <span>Sales</span>
-                </NavLink>
-                <NavLink 
                     to="/admin/orders" 
                     onClick={handleLinkClick}
                     className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
                 > 
                     <FaClipboardList className="mr-4 h-5 w-5" />
-                    <span>Orders</span>
+                    <span>Orders & Sales</span>
                 </NavLink>
                 <NavLink 
                     to="/admin/employees" 

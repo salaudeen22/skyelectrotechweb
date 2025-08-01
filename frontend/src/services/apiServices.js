@@ -229,6 +229,22 @@ export const ordersAPI = {
   assignOrder: async (id, employeeId) => {
     const response = await api.put(`/orders/${id}/assign`, { employeeId });
     return response.data;
+  },
+
+  // Export today's sales invoice (Admin)
+  exportTodaySalesInvoice: async () => {
+    const response = await api.get('/orders/today-sales-invoice', {
+      responseType: 'blob'
+    });
+    return response;
+  },
+
+  // Export individual order invoice
+  exportOrderInvoice: async (orderId) => {
+    const response = await api.get(`/orders/${orderId}/invoice`, {
+      responseType: 'blob'
+    });
+    return response;
   }
 };
 
