@@ -97,7 +97,7 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
         <img 
           src={product.images?.[0]?.url || product.images?.[0] || '/api/placeholder/400/300'} 
           alt={product.name}
-          className="w-full h-52 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
+          className="w-full h-40 sm:h-52 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
           onError={(e) => {
             e.target.src = '/api/placeholder/400/300';
           }}
@@ -105,25 +105,25 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
       </Link>
       
       {/* Product Details Section */}
-      <div className="p-5 flex-grow flex flex-col">
+      <div className="p-3 sm:p-5 flex-grow flex flex-col">
         <div className="flex-grow">
           <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
             {product.category?.name || 'Electronics'}
           </p>
           <Link to={`/products/${product._id}`}>
-            <h3 className="text-lg font-bold text-gray-900 mt-1 hover:text-blue-600 transition-colors" title={product.name}>
+            <h3 className="text-sm sm:text-lg font-bold text-gray-900 mt-1 hover:text-blue-600 transition-colors" title={product.name}>
               {product.name}
             </h3>
           </Link>
           
           {/* Rating */}
           {product.averageRating > 0 && (
-            <div className="flex items-center mt-2">
+            <div className="flex items-center mt-1 sm:mt-2">
               <div className="flex items-center">
                 {[...Array(5)].map((_, i) => (
                   <svg
                     key={i}
-                    className={`w-4 h-4 ${
+                    className={`w-3 h-3 sm:w-4 sm:h-4 ${
                       i < Math.floor(product.averageRating)
                         ? 'text-yellow-400'
                         : 'text-gray-300'
@@ -135,24 +135,24 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
                   </svg>
                 ))}
               </div>
-              <span className="text-sm text-gray-500 ml-2">
+              <span className="text-xs sm:text-sm text-gray-500 ml-1 sm:ml-2">
                 ({product.reviewCount || 0})
               </span>
             </div>
           )}
 
           {/* Price */}
-          <div className="mt-3">
+          <div className="mt-2 sm:mt-3">
             {product.originalPrice && product.originalPrice > product.price && (
-              <span className="text-sm text-gray-500 line-through mr-2">
+              <span className="text-xs sm:text-sm text-gray-500 line-through mr-1 sm:mr-2">
                 ₹{product.originalPrice.toLocaleString()}
               </span>
             )}
-            <span className="text-2xl font-extrabold text-gray-800">
+            <span className="text-lg sm:text-2xl font-extrabold text-gray-800">
               ₹{product.price.toLocaleString()}
             </span>
             {product.originalPrice && product.originalPrice > product.price && (
-              <span className="text-sm text-green-600 ml-2 font-semibold">
+              <span className="text-xs sm:text-sm text-green-600 ml-1 sm:ml-2 font-semibold">
                 {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% off
               </span>
             )}
@@ -161,14 +161,14 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
         
         {/* Add to Cart Button - Only show for regular users */}
         {isAuthenticated && user?.role === 'user' && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
             <button 
               onClick={handleAddToCart}
               disabled={addingToCart}
-              className="w-full flex items-center justify-center py-3 sm:py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300 sm:opacity-0 sm:group-hover:opacity-100 sm:transform sm:translate-y-2 sm:group-hover:translate-y-0 touch-manipulation cursor-pointer"
+              className="w-full flex items-center justify-center py-2.5 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300 sm:opacity-0 sm:group-hover:opacity-100 sm:transform sm:translate-y-2 sm:group-hover:translate-y-0 touch-manipulation cursor-pointer"
               type="button"
             >
-              <FiShoppingCart className="mr-2 h-5 w-5" />
+              <FiShoppingCart className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               {addingToCart ? 'Adding...' : 'Add to Cart'}
             </button>
           </div>
@@ -176,10 +176,10 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
         
         {/* For non-authenticated users, show login prompt */}
         {!isAuthenticated && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
             <Link 
               to="/auth/login"
-              className="w-full flex items-center justify-center py-3 sm:py-2.5 rounded-lg text-sm font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all duration-300 ease-in-out sm:opacity-0 sm:group-hover:opacity-100 sm:transform sm:translate-y-2 sm:group-hover:translate-y-0 touch-manipulation cursor-pointer"
+              className="w-full flex items-center justify-center py-2.5 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all duration-300 ease-in-out sm:opacity-0 sm:group-hover:opacity-100 sm:transform sm:translate-y-2 sm:group-hover:translate-y-0 touch-manipulation cursor-pointer"
             >
               Login to Purchase
             </Link>
@@ -188,8 +188,8 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
         
         {/* For admin/employee users, show view-only message */}
         {isAuthenticated && (user?.role === 'admin' || user?.role === 'employee') && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <div className="w-full flex items-center justify-center py-2.5 rounded-lg text-sm font-medium bg-blue-50 text-blue-600 border border-blue-200">
+          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
+            <div className="w-full flex items-center justify-center py-2.5 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium bg-blue-50 text-blue-600 border border-blue-200">
               Admin/Employee View
             </div>
           </div>
