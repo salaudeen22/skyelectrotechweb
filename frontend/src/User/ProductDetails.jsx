@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FiShoppingCart, FiHeart, FiMinus, FiPlus, FiStar, FiShare2, FiTruck, FiShield, FiRefreshCw } from 'react-icons/fi';
 import { productsAPI } from '../services/apiServices';
@@ -25,12 +25,17 @@ const ProductDetails = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
+        // Scroll to top when component mounts
+        window.scrollTo(0, 0);
+        
         const response = await productsAPI.getProduct(id);
         const productData = response.data.product;
         setProduct(productData);
         
-        // Track product view
-        trackProduct(productData);
+        // Track product view after a small delay to prevent scroll interference
+        setTimeout(() => {
+          trackProduct(productData);
+        }, 100);
       } catch (error) {
         console.error('Error fetching product:', error);
         toast.error('Product not found');
@@ -42,6 +47,35 @@ const ProductDetails = () => {
 
     fetchProduct();
   }, [id, navigate, trackProduct]);
+
+  // Use useLayoutEffect to prevent autoscroll before render
+  useLayoutEffect(() => {
+    // Force scroll to top immediately
+    window.scrollTo(0, 0);
+    
+    // Prevent scroll restoration
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
+  // Ensure scroll position is maintained and prevent unwanted scrolling
+  useEffect(() => {
+    // Force scroll to top on mount
+    window.scrollTo(0, 0);
+    
+    // Prevent scroll restoration
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    
+    return () => {
+      // Reset scroll restoration when component unmounts
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'auto';
+      }
+    };
+  }, []);
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
@@ -112,7 +146,7 @@ const ProductDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" style={{ scrollBehavior: 'auto' }}>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Breadcrumb */}
         <nav className="flex mb-4 sm:mb-8" aria-label="Breadcrumb">
