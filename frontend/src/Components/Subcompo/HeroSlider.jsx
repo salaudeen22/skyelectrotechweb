@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 const slides = [
@@ -8,7 +9,8 @@ const slides = [
     title: 'Arduino Boards & Accessories',
     subtitle: 'Build IoT & embedded projects with ease',
     cta: 'Shop Arduino',
-    color: 'from-blue-900/80 to-blue-700/60'
+    color: 'from-blue-900/80 to-blue-700/60',
+    link: '/products?category=arduino'
   },
   {
     id: 2,
@@ -16,7 +18,8 @@ const slides = [
     title: 'Top Quality Sensors',
     subtitle: 'Wide range of sensors for all applications',
     cta: 'Explore Sensors',
-    color: 'from-emerald-900/80 to-emerald-700/60'
+    color: 'from-emerald-900/80 to-emerald-700/60',
+    link: '/products?category=sensors'
   },
   {
     id: 3,
@@ -24,13 +27,15 @@ const slides = [
     title: 'Raspberry Pi & Kits',
     subtitle: 'Perfect boards for prototyping & learning',
     cta: 'View Pi Boards',
-    color: 'from-purple-900/80 to-purple-700/60'
+    color: 'from-purple-900/80 to-purple-700/60',
+    link: '/products?category=raspberry-pi'
   },
 ];
 
 const HeroSlider = () => {
   const [current, setCurrent] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
 
   const prevSlide = () => {
     const isFirstSlide = current === 0;
@@ -43,6 +48,12 @@ const HeroSlider = () => {
     const newIndex = isLastSlide ? 0 : current + 1;
     setCurrent(newIndex);
   }, [current]);
+
+  const handleSlideClick = (slide) => {
+    if (slide.link) {
+      navigate(slide.link);
+    }
+  };
 
   useEffect(() => {
     // Only auto-slide when not hovered
@@ -66,7 +77,8 @@ const HeroSlider = () => {
         {slides.map((slide, index) => (
           <div
             key={slide.id}
-            className="w-full h-full flex-shrink-0 relative"
+            className="w-full h-full flex-shrink-0 relative cursor-pointer"
+            onClick={() => handleSlideClick(slide)}
           >
             {/* Background Image with Ken Burns Effect */}
             <img
@@ -110,7 +122,13 @@ const HeroSlider = () => {
                     current === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
                 >
-                  <button className="bg-white text-blue-800 font-bold px-8 py-3 rounded-full hover:bg-blue-50 hover:scale-105 transition-all duration-300 shadow-lg flex items-center gap-2">
+                  <button 
+                    className="bg-white text-blue-800 font-bold px-8 py-3 rounded-full hover:bg-blue-50 hover:scale-105 transition-all duration-300 shadow-lg flex items-center gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSlideClick(slide);
+                    }}
+                  >
                     {slide.cta}
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
