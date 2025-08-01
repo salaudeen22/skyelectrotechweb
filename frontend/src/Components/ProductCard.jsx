@@ -82,11 +82,12 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
         <button
           onClick={handleAddToWishlist}
           disabled={isAddingToWishlist}
-          className="absolute top-3 right-3 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50"
+          className="absolute top-3 right-3 z-20 p-2.5 sm:p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 touch-manipulation cursor-pointer"
           title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+          type="button"
         >
           <FiHeart 
-            className={`w-5 h-5 ${isAddingToWishlist ? 'text-red-500 animate-pulse' : isInWishlist ? 'text-red-500 fill-current' : 'text-gray-600'}`} 
+            className={`w-6 h-6 sm:w-5 sm:h-5 ${isAddingToWishlist ? 'text-red-500 animate-pulse' : isInWishlist ? 'text-red-500 fill-current' : 'text-gray-600'}`} 
           />
         </button>
       )}
@@ -164,7 +165,8 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
             <button 
               onClick={handleAddToCart}
               disabled={addingToCart}
-              className="w-full flex items-center justify-center py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0"
+              className="w-full flex items-center justify-center py-3 sm:py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300 sm:opacity-0 sm:group-hover:opacity-100 sm:transform sm:translate-y-2 sm:group-hover:translate-y-0 touch-manipulation cursor-pointer"
+              type="button"
             >
               <FiShoppingCart className="mr-2 h-5 w-5" />
               {addingToCart ? 'Adding...' : 'Add to Cart'}
@@ -177,7 +179,7 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
           <div className="mt-4 pt-4 border-t border-gray-100">
             <Link 
               to="/auth/login"
-              className="w-full flex items-center justify-center py-2.5 rounded-lg text-sm font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all duration-300 ease-in-out opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0"
+              className="w-full flex items-center justify-center py-3 sm:py-2.5 rounded-lg text-sm font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all duration-300 ease-in-out sm:opacity-0 sm:group-hover:opacity-100 sm:transform sm:translate-y-2 sm:group-hover:translate-y-0 touch-manipulation cursor-pointer"
             >
               Login to Purchase
             </Link>
