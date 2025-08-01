@@ -1,6 +1,7 @@
 import React from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useSettings } from '../contexts/SettingsContext';
+import { useAuth } from '../hooks/useAuth';
 import { 
     FaTachometerAlt, 
     FaBoxOpen, 
@@ -16,9 +17,12 @@ import {
     FaCog,
     FaClipboardList // Icon for order management
 } from 'react-icons/fa';
+import { toast } from 'react-hot-toast';
 
 const AdminSidebar = ({ isOpen, onToggle }) => {
     const { settings } = useSettings();
+    const navigate = useNavigate();
+    const { logout } = useAuth();
     
     // --- Style Definitions for NavLinks ---
     const commonLinkStyles = "flex items-center w-full px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 group";
@@ -34,6 +38,12 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
         if (window.innerWidth < 1024) { // lg breakpoint
             onToggle();
         }
+    };
+
+    const handleLogout = () => {
+        logout();
+        toast.success("Logged out successfully!");
+        navigate('/admin/login');
     };
 
     return (
@@ -153,13 +163,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                     </div>
                 </div>
                 <button
-                    onClick={() => {
-                        // A better practice is to have a dedicated auth context/function for this
-                        // For now, this works.
-                        console.log("Logging out...");
-                        // localStorage.removeItem('isAdmin'); 
-                        window.location.href = '/admin/login'; // Redirect to login
-                    }}
+                    onClick={handleLogout}
                     className="flex items-center w-full px-4 py-3 text-base font-medium rounded-lg text-red-600 hover:bg-red-500 hover:text-white transition-all duration-200 group"
                 >
                     <FaSignOutAlt className="mr-4 h-5 w-5"/>
