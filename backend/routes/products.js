@@ -34,9 +34,6 @@ const productValidation = [
   body('category')
     .isMongoId()
     .withMessage('Invalid category ID'),
-  body('stock')
-    .isInt({ min: 0 })
-    .withMessage('Stock must be a non-negative integer'),
   body('sku')
     .optional()
     .trim()

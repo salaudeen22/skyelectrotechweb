@@ -230,75 +230,56 @@ const ProductDetails = () => {
               <p className="text-sm text-gray-600">Inclusive of all taxes</p>
             </div>
 
-            {/* Stock Status */}
-            <div>
-              {product.stock > 0 ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-green-700 font-medium">
-                    In Stock ({product.stock} available)
-                  </span>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <span className="text-red-700 font-medium">Out of Stock</span>
-                </div>
-              )}
-            </div>
-
             {/* Quantity Selector */}
-            {product.stock > 0 && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Quantity
-                  </label>
-                  <div className="flex items-center space-x-3">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                    >
-                      <FiMinus className="w-4 h-4" />
-                    </button>
-                    <span className="text-lg font-medium w-12 text-center">{quantity}</span>
-                    <button
-                      onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                      className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                    >
-                      <FiPlus className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="space-y-3">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Quantity
+                </label>
+                <div className="flex items-center space-x-3">
                   <button
-                    onClick={handleBuyNow}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                   >
-                    Buy Now
+                    <FiMinus className="w-4 h-4" />
                   </button>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={handleAddToCart}
-                      disabled={addingToCart}
-                      className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-900 py-3 px-6 rounded-lg font-medium transition-colors disabled:opacity-50"
-                    >
-                      <FiShoppingCart className="w-5 h-5 mr-2" />
-                      {addingToCart ? 'Adding...' : 'Add to Cart'}
-                    </button>
-                    <button
-                      onClick={handleAddToWishlist}
-                      className="flex items-center justify-center border border-gray-300 hover:bg-gray-50 text-gray-900 py-3 px-6 rounded-lg font-medium transition-colors"
-                    >
-                      <FiHeart className="w-5 h-5 mr-2" />
-                      Wishlist
-                    </button>
-                  </div>
+                  <span className="text-lg font-medium w-12 text-center">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    <FiPlus className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-            )}
+
+              {/* Action Buttons */}
+              <div className="space-y-3">
+                <button
+                  onClick={handleBuyNow}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+                >
+                  Buy Now
+                </button>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={addingToCart}
+                    className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-900 py-3 px-6 rounded-lg font-medium transition-colors disabled:opacity-50"
+                  >
+                    <FiShoppingCart className="w-5 h-5 mr-2" />
+                    {addingToCart ? 'Adding...' : 'Add to Cart'}
+                  </button>
+                  <button
+                    onClick={handleAddToWishlist}
+                    className="flex items-center justify-center border border-gray-300 hover:bg-gray-50 text-gray-900 py-3 px-6 rounded-lg font-medium transition-colors"
+                  >
+                    <FiHeart className="w-5 h-5 mr-2" />
+                    Wishlist
+                  </button>
+                </div>
+              </div>
+            </div>
 
             {/* Features */}
             <div className="grid grid-cols-3 gap-4 py-6 border-t border-gray-200">

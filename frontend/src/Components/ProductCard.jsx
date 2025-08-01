@@ -10,6 +10,7 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
   const { addToCart, addingToCart } = useCart();
   const { isAuthenticated, user } = useAuth();
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
+  const [isInWishlist, setIsInWishlist] = useState(false);
 
   const handleAddToCart = async (e) => {
     e.preventDefault();
@@ -52,14 +53,21 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
     
     try {
       setIsAddingToWishlist(true);
-      await wishlistAPI.addToWishlist(product._id);
-      toast.success('Added to wishlist!');
+      if (isInWishlist) {
+        await wishlistAPI.removeFromWishlist(product._id);
+        setIsInWishlist(false);
+        toast.success('Removed from wishlist!');
+      } else {
+        await wishlistAPI.addToWishlist(product._id);
+        setIsInWishlist(true);
+        toast.success('Added to wishlist!');
+      }
     } catch (error) {
       console.error('Wishlist error:', error);
       if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else {
-        toast.error('Failed to add to wishlist');
+        toast.error('Failed to update wishlist');
       }
     } finally {
       setIsAddingToWishlist(false);
@@ -69,28 +77,18 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
   return (
     <div className="group relative bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 flex flex-col">
       
-      {/* Wishlist Button - Only show for regular users */}
-      {isAuthenticated && user?.role === 'user' && showWishlistButton && (
+      {/* Wishlist Button */}
+      {showWishlistButton && isAuthenticated && user?.role === 'user' && (
         <button
           onClick={handleAddToWishlist}
           disabled={isAddingToWishlist}
-          className="absolute top-3 right-3 z-10 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-50 disabled:opacity-50"
+          className="absolute top-3 right-3 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50"
+          title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
         >
-          <FiHeart className={`h-4 w-4 ${isAddingToWishlist ? 'text-red-500 animate-pulse' : 'text-gray-600 hover:text-red-500'}`} />
+          <FiHeart 
+            className={`w-5 h-5 ${isAddingToWishlist ? 'text-red-500 animate-pulse' : isInWishlist ? 'text-red-500 fill-current' : 'text-gray-600'}`} 
+          />
         </button>
-      )}
-
-      {/* Stock Badge */}
-      {product.stock <= 5 && product.stock > 0 && (
-        <div className="absolute top-3 left-3 z-10 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
-          Only {product.stock} left
-        </div>
-      )}
-      
-      {product.stock === 0 && (
-        <div className="absolute top-3 left-3 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-          Out of Stock
-        </div>
       )}
 
       {/* Product Image Section */}
@@ -165,15 +163,11 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
           <div className="mt-4 pt-4 border-t border-gray-100">
             <button 
               onClick={handleAddToCart}
-              disabled={product.stock === 0 || addingToCart}
-              className={`w-full flex items-center justify-center py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 ${
-                product.stock === 0
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0'
-              }`}
+              disabled={addingToCart}
+              className="w-full flex items-center justify-center py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0"
             >
               <FiShoppingCart className="mr-2 h-5 w-5" />
-              {addingToCart ? 'Adding...' : product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+              {addingToCart ? 'Adding...' : 'Add to Cart'}
             </button>
           </div>
         )}

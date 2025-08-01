@@ -276,24 +276,12 @@ const Wishlist = () => {
                         </div>
                       </div>
 
-                      {/* Stock Status */}
-                      <div className="mt-2">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          item.product.inStock !== false
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {item.product.inStock !== false ? 'In Stock' : 'Out of Stock'}
-                        </span>
-                      </div>
-
                       {/* Actions */}
                       <div className="flex items-center justify-between mt-4">
                         <div className="flex items-center space-x-3">
                           <button
                             onClick={() => handleAddToCart(item.product)}
-                            disabled={item.product.inStock === false}
-                            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
                           >
                             <FiShoppingCart className="w-4 h-4 mr-2" />
                             Add to Cart

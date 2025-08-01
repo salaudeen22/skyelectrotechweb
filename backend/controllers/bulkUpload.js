@@ -57,10 +57,6 @@ const validateProductData = (product, categories) => {
     }
   }
   
-  if (!product.stock || isNaN(parseInt(product.stock)) || parseInt(product.stock) < 0) {
-    errors.push('Valid stock quantity is required');
-  }
-  
   return errors;
 };
 
@@ -68,10 +64,10 @@ const validateProductData = (product, categories) => {
 // @route   GET /api/bulk-upload/template
 // @access  Private (Admin)
 const downloadTemplate = asyncHandler(async (req, res) => {
-  const csvTemplate = `name,description,price,originalPrice,discount,category,brand,stock,lowStockThreshold,specifications,features,tags,warranty,isFeatured,isActive,imageUrls,dimensions_length,dimensions_width,dimensions_height,dimensions_weight,sku
-1.3 Inch OLED I2C Display Module – 128x64 – Blue,"This 1.3-inch OLED display module is a compact screen with a resolution of 128x64 pixels, ideal for DIY electronics, Arduino projects, and embedded systems. It uses I2C communication protocol, making it easy to interface with microcontrollers like Arduino, Raspberry Pi, or ESP32. Featuring crisp blue visuals and low power consumption, it's perfect for battery-powered applications.",168.99,249,32,Displays & Interfaces,Generic,120,12,"Display Type:OLED|Interface:I2C|Resolution:128x64|Operating Voltage:3.3V - 5V|Color:Blue|Dimensions:35mm x 35mm x 5mm","1.3-inch crisp OLED screen|128x64 pixel resolution|I2C interface (easy wiring)|Low power usage|High contrast & wide viewing angles","oled,display,i2c,arduino,electronics","1 Month Replacement Warranty",false,true,"https://example.com/image1.jpg,https://example.com/image2.jpg,https://example.com/image3.jpg",35,35,5,15,
-Nitecore Intellicharger i2 Dual Slot Smart Battery Charger,"The Nitecore i2 is a universal, automatic smart-charger compatible with almost all cylindrical rechargeable batteries, including Li-ion, Ni-MH, and Ni-Cd. The i2 can independently charge 2 batteries at the same time, with intelligent circuitry that identifies battery type and applies the appropriate charging mode.",3392,9999,66,Batteries & Chargers,Nitecore,50,10,"Input Voltage:AC 100-240V / DC 12V|Output Voltage:4.2V / 3.7V / 1.48V|Battery Compatibility:Li-ion, NiMH, NiCd|Number of Slots:2","Compatible with multiple battery chemistries|Independent dual-slot charging|LED indicators for charging status|Overcharge protection|Fire-retardant and durable ABS shell","charger,battery,nitecore,li-ion,nimh","6 Months Manufacturer Warranty",true,true,"https://example.com/charger1.jpg,https://example.com/charger2.jpg",145,75,30,120,
-ESP32 Development Board,"The ESP32 Dev Board is a powerful microcontroller board based on the ESP-WROOM-32 chip. It comes with integrated Wi-Fi and Bluetooth capabilities, making it ideal for IoT, smart home, wearable, and automation projects. With dual-core processing, rich peripherals, and deep sleep support.",300,1200,75,IoT & Wireless,Espressif,100,15,"Microcontroller:ESP32 (ESP-WROOM-32)|Clock Speed:Up to 240 MHz|Flash Memory:4MB|USB Interface:Micro USB|Wireless:Wi-Fi + Bluetooth","Dual-core 32-bit processor|Built-in Wi-Fi (802.11 b/g/n)|Bluetooth 4.2 (Classic + BLE)|520 KB SRAM, 4MB Flash|Low power consumption with deep sleep|Multiple GPIOs with UART, SPI, I2C, PWM support","esp32,wifi,bluetooth,iot,microcontroller,arduino","3 Months Replacement Warranty",true,true,"https://example.com/esp32_1.jpg,https://example.com/esp32_2.jpg,https://example.com/esp32_3.jpg",55,28,12,25,`;
+  const csvTemplate = `name,description,price,originalPrice,discount,category,brand,specifications,features,tags,warranty,isFeatured,isActive,imageUrls,dimensions_length,dimensions_width,dimensions_height,dimensions_weight,sku
+1.3 Inch OLED I2C Display Module – 128x64 – Blue,"This 1.3-inch OLED display module is a compact screen with a resolution of 128x64 pixels, ideal for DIY electronics, Arduino projects, and embedded systems. It uses I2C communication protocol, making it easy to interface with microcontrollers like Arduino, Raspberry Pi, or ESP32. Featuring crisp blue visuals and low power consumption, it's perfect for battery-powered applications.",168.99,249,32,Displays & Interfaces,Generic,"Display Type:OLED|Interface:I2C|Resolution:128x64|Operating Voltage:3.3V - 5V|Color:Blue|Dimensions:35mm x 35mm x 5mm","1.3-inch crisp OLED screen|128x64 pixel resolution|I2C interface (easy wiring)|Low power usage|High contrast & wide viewing angles","oled,display,i2c,arduino,electronics","1 Month Replacement Warranty",false,true,"https://example.com/image1.jpg,https://example.com/image2.jpg,https://example.com/image3.jpg",35,35,5,15,
+Nitecore Intellicharger i2 Dual Slot Smart Battery Charger,"The Nitecore i2 is a universal, automatic smart-charger compatible with almost all cylindrical rechargeable batteries, including Li-ion, Ni-MH, and Ni-Cd. The i2 can independently charge 2 batteries at the same time, with intelligent circuitry that identifies battery type and applies the appropriate charging mode.",3392,9999,66,Batteries & Chargers,Nitecore,"Input Voltage:AC 100-240V / DC 12V|Output Voltage:4.2V / 3.7V / 1.48V|Battery Compatibility:Li-ion, NiMH, NiCd|Number of Slots:2","Compatible with multiple battery chemistries|Independent dual-slot charging|LED indicators for charging status|Overcharge protection|Fire-retardant and durable ABS shell","charger,battery,nitecore,li-ion,nimh","6 Months Manufacturer Warranty",true,true,"https://example.com/charger1.jpg,https://example.com/charger2.jpg",145,75,30,120,
+ESP32 Development Board,"The ESP32 Dev Board is a powerful microcontroller board based on the ESP-WROOM-32 chip. It comes with integrated Wi-Fi and Bluetooth capabilities, making it ideal for IoT, smart home, wearable, and automation projects. With dual-core processing, rich peripherals, and deep sleep support.",300,1200,75,IoT & Wireless,Espressif,"Microcontroller:ESP32 (ESP-WROOM-32)|Clock Speed:Up to 240 MHz|Flash Memory:4MB|USB Interface:Micro USB|Wireless:Wi-Fi + Bluetooth","Dual-core 32-bit processor|Built-in Wi-Fi (802.11 b/g/n)|Bluetooth 4.2 (Classic + BLE)|520 KB SRAM, 4MB Flash|Low power consumption with deep sleep|Multiple GPIOs with UART, SPI, I2C, PWM support","esp32,wifi,bluetooth,iot,microcontroller,arduino","3 Months Replacement Warranty",true,true,"https://example.com/esp32_1.jpg,https://example.com/esp32_2.jpg,https://example.com/esp32_3.jpg",55,28,12,25,`;
 
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename=bulk-product-upload-template.csv');
@@ -204,8 +200,6 @@ const bulkUploadProducts = asyncHandler(async (req, res) => {
           category: category._id,
           brand: productData.brand?.trim() || '',
           sku,
-          stock: parseInt(productData.stock),
-          lowStockThreshold: productData.lowStockThreshold ? parseInt(productData.lowStockThreshold) : 10,
           specifications,
           features,
           tags,

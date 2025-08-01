@@ -6,13 +6,6 @@ import ProductForm from './ProductForm';
 import BulkUpload from './BulkUpload';
 import BulkActions from './BulkActions';
 
-
-const StockStatusBadge = ({ stock }) => {
-    if (stock > 10) return <span className="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">In Stock</span>;
-    if (stock > 0) return <span className="px-2 py-1 text-xs font-semibold text-orange-800 bg-orange-100 rounded-full">Low Stock</span>;
-    return <span className="px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Out of Stock</span>;
-};
-
 const ProductManagement = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [showProductForm, setShowProductForm] = useState(false);
@@ -235,7 +228,6 @@ const ProductManagement = () => {
                                 <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Product</th>
                                 <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider hidden sm:table-cell">Category</th>
                                 <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Price</th>
-                                <th className="px-3 sm:px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider hidden md:table-cell">Stock</th>
                                 <th className="px-3 sm:px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -285,14 +277,6 @@ const ProductManagement = () => {
                                                 {formatCurrency(product.originalPrice)}
                                             </div>
                                         )}
-                                        <div className="sm:hidden mt-1">
-                                            <StockStatusBadge stock={product.stock} />
-                                            <div className="text-xs text-slate-500 mt-1">{product.stock} units</div>
-                                        </div>
-                                    </td>
-                                    <td className="px-3 sm:px-6 py-4 text-center hidden md:table-cell">
-                                        <StockStatusBadge stock={product.stock} />
-                                        <div className="text-xs text-slate-500 mt-1">{product.stock} units</div>
                                     </td>
                                     <td className="px-3 sm:px-6 py-4">
                                         <div className="flex items-center justify-center space-x-1 sm:space-x-2">

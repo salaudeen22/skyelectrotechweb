@@ -57,8 +57,6 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
         discount: 0,
         category: '',
         brand: '',
-        stock: '',
-        lowStockThreshold: 10,
         sku: '',
         specifications: [{ name: '', value: '' }],
         features: [''],
@@ -103,8 +101,6 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
                     discount: product.discount || 0,
                     category: product.category?._id || '',
                     brand: product.brand || '',
-                    stock: product.stock || '',
-                    lowStockThreshold: product.lowStockThreshold || 10,
                     sku: product.sku || '',
                     specifications: product.specifications?.length ? product.specifications : [{ name: '', value: '' }],
                     features: product.features?.length ? product.features : [''],
@@ -219,7 +215,6 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
         if (!formData.description.trim()) newErrors.description = 'Description is required';
         if (!formData.price || formData.price <= 0) newErrors.price = 'Valid price is required';
         if (!formData.category) newErrors.category = 'Category is required';
-        if (!formData.stock || formData.stock < 0) newErrors.stock = 'Valid stock quantity is required';
         if (images.length === 0) newErrors.images = 'At least one image is required';
 
         setErrors(newErrors);
@@ -249,8 +244,6 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
                 images: allImages,
                 price: parseFloat(formData.price),
                 originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : undefined,
-                stock: parseInt(formData.stock),
-                lowStockThreshold: parseInt(formData.lowStockThreshold),
                 discount: parseFloat(formData.discount) || 0
             };
 
@@ -402,14 +395,11 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
                                     </div>
                                 </div>
                                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-6">Pricing & Inventory</h3>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-6">Pricing</h3>
                                     <div className="space-y-6">
                                         <FormInput label="Price *" name="price" type="number" value={formData.price} onChange={handleInputChange} error={errors.price} step="0.01" min="0" placeholder="0.00" icon={<FaRupeeSign  className="text-gray-400" />} />
                                         <FormInput label="Original Price" name="originalPrice" type="number" value={formData.originalPrice} onChange={handleInputChange} step="0.01" min="0" placeholder="0.00" icon={<FaRupeeSign className="text-gray-400" />} />
                                         <FormInput label="Discount (%)" name="discount" type="number" value={formData.discount} onChange={handleInputChange} min="0" max="100" placeholder="0" />
-                                        <hr className="my-6"/>
-                                        <FormInput label="Stock Quantity *" name="stock" type="number" value={formData.stock} onChange={handleInputChange} error={errors.stock} min="0" placeholder="0" icon={<FaBoxOpen className="text-gray-400" />} />
-                                        <FormInput label="Low Stock Threshold" name="lowStockThreshold" type="number" value={formData.lowStockThreshold} onChange={handleInputChange} min="0" placeholder="10" />
                                     </div>
                                 </div>
                             </div>

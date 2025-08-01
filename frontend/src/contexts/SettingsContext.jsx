@@ -47,7 +47,6 @@ export const SettingsProvider = ({ children }) => {
       autoConfirm: false,
       requireApproval: false,
       maxOrderQuantity: 10,
-      lowStockThreshold: 5,
       orderPrefix: 'SKY'
     },
     seo: {

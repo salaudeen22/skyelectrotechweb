@@ -39,7 +39,6 @@ const Settings = () => {
       autoConfirm: false,
       requireApproval: false,
       maxOrderQuantity: 10,
-      lowStockThreshold: 5,
       orderPrefix: 'SKY'
     },
     email: {
@@ -430,15 +429,6 @@ const Settings = () => {
                     type="number"
                     value={formData.order.maxOrderQuantity}
                     onChange={(e) => handleInputChange('order', 'maxOrderQuantity', Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Low Stock Threshold</label>
-                  <input
-                    type="number"
-                    value={formData.order.lowStockThreshold}
-                    onChange={(e) => handleInputChange('order', 'lowStockThreshold', Number(e.target.value))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>

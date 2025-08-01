@@ -3,7 +3,7 @@ const Product = require('../models/Product');
 const Cart = require('../models/Cart');
 const User = require('../models/User');
 const { sendResponse, sendError, asyncHandler, paginate, getPaginationMeta } = require('../utils/helpers');
-const { sendOrderConfirmationEmail, sendOrderNotificationEmail, sendOrderStatusUpdateEmail, sendLowStockAlertEmail } = require('../utils/email');
+const { sendOrderConfirmationEmail, sendOrderNotificationEmail, sendOrderStatusUpdateEmail } = require('../utils/email');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -35,10 +35,6 @@ const createOrder = asyncHandler(async (req, res) => {
       return sendError(res, 400, `Product ${item.product} not found or inactive`);
     }
 
-    if (product.stock < item.quantity) {
-      return sendError(res, 400, `Insufficient stock for ${product.name}. Available: ${product.stock}`);
-    }
-
     const itemPrice = product.discountPrice || product.price;
     const itemTotal = itemPrice * item.quantity;
     calculatedItemsPrice += itemTotal;
@@ -50,24 +46,6 @@ const createOrder = asyncHandler(async (req, res) => {
       price: itemPrice,
       quantity: item.quantity
     });
-
-    // Store old stock for low stock alert
-    const oldStock = product.stock;
-    
-    // Update product stock
-    product.stock -= item.quantity;
-    await product.save();
-    
-    // Check for low stock alert
-    const lowStockThreshold = product.lowStockThreshold || 10;
-    if (product.stock <= lowStockThreshold && oldStock > lowStockThreshold) {
-      try {
-        await sendLowStockAlertEmail(product);
-      } catch (emailError) {
-        console.error('Failed to send low stock alert email:', emailError);
-        // Don't fail the order creation if email fails
-      }
-    }
   }
 
   // Calculate total price

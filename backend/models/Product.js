@@ -51,16 +51,6 @@ const productSchema = new mongoose.Schema({
       required: true
     }
   }],
-  stock: {
-    type: Number,
-    required: [true, 'Stock quantity is required'],
-    min: [0, 'Stock cannot be negative'],
-    default: 0
-  },
-  lowStockThreshold: {
-    type: Number,
-    default: 10
-  },
   specifications: [{
     name: String,
     value: String
@@ -149,16 +139,6 @@ productSchema.virtual('discountPrice').get(function() {
     return Math.round(this.price * (1 - this.discount / 100));
   }
   return this.price;
-});
-
-// Check if product is low in stock
-productSchema.virtual('isLowStock').get(function() {
-  return this.stock <= this.lowStockThreshold;
-});
-
-// Alias for stockQuantity to maintain compatibility with frontend
-productSchema.virtual('stockQuantity').get(function() {
-  return this.stock;
 });
 
 // Ensure virtual fields are serialized

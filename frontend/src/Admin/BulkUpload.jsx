@@ -217,14 +217,12 @@ const BulkUpload = ({ onClose, onSuccess }) => {
                   <div><strong>description:</strong> Product description (max 2000 chars)</div>
                   <div><strong>price:</strong> Current selling price</div>
                   <div><strong>category:</strong> Must match existing category name</div>
-                  <div><strong>stock:</strong> Available quantity</div>
                 </div>
                 <h3 className="font-semibold text-yellow-900 mb-2 mt-3">Optional Fields:</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-yellow-800">
                   <div><strong>originalPrice:</strong> Original price before discount</div>
                   <div><strong>discount:</strong> Discount percentage (0-100)</div>
                   <div><strong>brand:</strong> Product brand name</div>
-                  <div><strong>lowStockThreshold:</strong> Low stock alert level</div>
                   <div><strong>warranty:</strong> Warranty information</div>
                   <div><strong>dimensions_*:</strong> Product dimensions in cm/grams</div>
                 </div>

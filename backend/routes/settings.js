@@ -56,8 +56,7 @@ const settingsValidation = [
   body('shipping.freeShippingThreshold').optional().isNumeric().withMessage('Free shipping threshold must be a number'),
   body('shipping.defaultShippingCost').optional().isNumeric().withMessage('Default shipping cost must be a number'),
   body('payment.taxRate').optional().isNumeric().withMessage('Tax rate must be a number'),
-  body('order.maxOrderQuantity').optional().isInt({ min: 1 }).withMessage('Max order quantity must be a positive integer'),
-  body('order.lowStockThreshold').optional().isInt({ min: 0 }).withMessage('Low stock threshold must be a non-negative integer')
+  body('order.maxOrderQuantity').optional().isInt({ min: 1 }).withMessage('Max order quantity must be a positive integer')
 ];
 
 // Public routes
