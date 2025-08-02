@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaStar, FaThumbsUp, FaThumbsDown, FaReply, FaEdit, FaTrash, FaCheckCircle, FaFlag, FaUser, FaCalendarAlt, FaImage } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
+import Cookies from 'js-cookie';
 
 const CommentItem = ({ comment, currentUser, onCommentUpdated, onCommentDeleted, onVote, onEditComment }) => {
   const [showReplyForm, setShowReplyForm] = useState(false);
@@ -32,7 +33,7 @@ const CommentItem = ({ comment, currentUser, onCommentUpdated, onCommentDeleted,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${Cookies.get('token')}`
         },
         body: JSON.stringify({ comment: replyText })
       });
@@ -64,7 +65,7 @@ const CommentItem = ({ comment, currentUser, onCommentUpdated, onCommentDeleted,
       const response = await fetch(`/api/comments/${comment._id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${Cookies.get('token')}`
         }
       });
 

@@ -40,17 +40,17 @@ const handleMulterError = (err, req, res, next) => {
   next();
 };
 
-// All upload routes require admin authentication
+// Image upload for comments - requires user authentication
+router.post('/image', auth, upload.single('image'), handleMulterError, uploadSingle);
+
+// Admin-only routes
 router.use(auth);
 router.use(adminOnly);
 
-// Upload single image
-router.post('/single', upload.single('image'), handleMulterError, uploadSingle);
-
-// Upload multiple images
+// Upload multiple images (admin only)
 router.post('/multiple', upload.array('images', 10), handleMulterError, uploadMultiple);
 
-// Delete image
+// Delete image (admin only)
 router.delete('/image/:publicId', deleteImage);
 
 module.exports = router;

@@ -29,8 +29,8 @@ const CommentSection = ({ productId }) => {
   }, [productId, filters]);
 
   const fetchComments = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const params = new URLSearchParams({
         page: filters.page,
         limit: 10,
@@ -39,9 +39,32 @@ const CommentSection = ({ productId }) => {
       });
 
       const response = await fetch(`/api/comments/product/${productId}?${params}`);
-      const data = await response.json();
+      
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        if (response.status === 403) {
+          toast.error('Access denied. Please login to view comments.');
+        } else if (response.status === 404) {
+          toast.error('Product not found.');
+        } else {
+          toast.error('Failed to load comments. Please try again.');
+        }
+        return;
+      }
 
-      if (response.ok) {
+      // Check if response has content before parsing JSON
+      const text = await response.text();
+      if (!text) {
+        console.warn('Empty response from server');
+        setComments([]);
+        setPagination({ page: 1, totalPages: 1, totalItems: 0 });
+        setRatingStats({ ratingDistribution: {}, totalReviews: 0 });
+        return;
+      }
+
+      const data = JSON.parse(text);
+
+      if (data.success) {
         setComments(data.data.comments);
         setPagination(data.data.pagination);
         setRatingStats({
@@ -131,6 +154,9 @@ const CommentSection = ({ productId }) => {
     return acc + (parseInt(rating) * count);
   }, 0) / Math.max(ratingStats.totalReviews, 1);
 
+  // Check if user has already reviewed this product
+  const userComment = comments.find(comment => comment.user._id === user?._id);
+
   return (
     <>
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
@@ -177,13 +203,34 @@ const CommentSection = ({ productId }) => {
             </div>
             
             {user && (
-              <button
-                onClick={() => setShowCommentModal(true)}
-                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-              >
-                <FaPen className="w-4 h-4" />
-                <span className="font-medium">Write a Review</span>
-              </button>
+              <div className="flex flex-col gap-3">
+                {userComment && (
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      You have already reviewed this product. You can edit your review below.
+                    </p>
+                  </div>
+                )}
+                <button
+                  onClick={() => {
+                    if (userComment) {
+                      // If user has already reviewed, open edit mode
+                      setEditingComment(userComment);
+                      setShowCommentModal(true);
+                    } else {
+                      // If user hasn't reviewed, open new review mode
+                      setEditingComment(null);
+                      setShowCommentModal(true);
+                    }
+                  }}
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                >
+                  <FaPen className="w-4 h-4" />
+                  <span className="font-medium">
+                    {userComment ? 'Edit Your Review' : 'Write a Review'}
+                  </span>
+                </button>
+              </div>
             )}
           </div>
 

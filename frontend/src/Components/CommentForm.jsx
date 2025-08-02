@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaStar, FaUpload, FaTimes, FaCamera, FaEdit, FaCheck } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
+import Cookies from 'js-cookie';
 
 const CommentForm = ({ productId, onCommentCreated, onCancel, editComment = null }) => {
   const [formData, setFormData] = useState({
@@ -26,26 +27,6 @@ const CommentForm = ({ productId, onCommentCreated, onCancel, editComment = null
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    // Validate file types and sizes
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    for (const file of files) {
-      if (!validTypes.includes(file.type)) {
-        toast.error(`${file.name} is not a valid image type`);
-        return;
-      }
-      if (file.size > maxSize) {
-        toast.error(`${file.name} is too large. Maximum size is 5MB`);
-        return;
-      }
-    }
-
-    if (formData.images.length + files.length > 5) {
-      toast.error('Maximum 5 images allowed');
-      return;
-    }
-
     setUploadingImages(true);
     try {
       const uploadedImages = [];
@@ -57,20 +38,42 @@ const CommentForm = ({ productId, onCommentCreated, onCancel, editComment = null
         const response = await fetch('/api/upload/image', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${Cookies.get('token')}`
           },
           body: formData
         });
 
-        const data = await response.json();
+        // Check if response is ok before trying to parse JSON
+        if (!response.ok) {
+          if (response.status === 401) {
+            toast.error('Please login to upload images');
+            return;
+          } else if (response.status === 403) {
+            toast.error('Access denied. Please login to upload images');
+            return;
+          } else {
+            toast.error(`Failed to upload ${file.name}. Please try again.`);
+            continue;
+          }
+        }
 
-        if (response.ok) {
+        // Check if response has content before parsing JSON
+        const text = await response.text();
+        if (!text) {
+          console.warn('Empty response from server for image upload');
+          toast.error(`Failed to upload ${file.name}. Empty response from server.`);
+          continue;
+        }
+
+        const data = JSON.parse(text);
+
+        if (data.success) {
           uploadedImages.push({
             url: data.data.url,
             publicId: data.data.publicId
           });
         } else {
-          toast.error(`Failed to upload ${file.name}`);
+          toast.error(`Failed to upload ${file.name}: ${data.message || 'Unknown error'}`);
         }
       }
 
@@ -130,18 +133,45 @@ const CommentForm = ({ productId, onCommentCreated, onCancel, editComment = null
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${Cookies.get('token')}`
         },
         body: JSON.stringify(body)
       });
 
-      const data = await response.json();
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        if (response.status === 401) {
+          toast.error('Please login to submit a review');
+          return;
+        } else if (response.status === 403) {
+          toast.error('Access denied. Please login to submit a review');
+          return;
+        } else {
+          toast.error('Failed to submit review. Please try again.');
+          return;
+        }
+      }
 
-      if (response.ok) {
+      // Check if response has content before parsing JSON
+      const text = await response.text();
+      if (!text) {
+        console.warn('Empty response from server for comment submission');
+        toast.error('Failed to submit review. Empty response from server.');
+        return;
+      }
+
+      const data = JSON.parse(text);
+
+      if (data.success) {
         toast.success(editComment ? 'Review updated successfully' : 'Review submitted successfully');
         onCommentCreated(data.data.comment);
       } else {
-        toast.error(data.message || 'Failed to submit review');
+        // Handle specific error cases
+        if (data.message && data.message.includes('already reviewed')) {
+          toast.error('You have already reviewed this product. You can edit your existing review instead.');
+        } else {
+          toast.error(data.message || 'Failed to submit review');
+        }
       }
     } catch (error) {
       console.error('Error submitting comment:', error);

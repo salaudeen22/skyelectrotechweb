@@ -32,6 +32,12 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Handle empty responses
+    if (error.response?.status === 204 || error.response?.data === '') {
+      console.warn('Empty response received');
+      return Promise.resolve({ data: null });
+    }
+
     const message = error.response?.data?.message || 'Something went wrong';
     
     // Handle unauthorized access
@@ -39,12 +45,15 @@ api.interceptors.response.use(
       Cookies.remove('token');
       Cookies.remove('user');
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/auth/login';
       toast.error('Session expired. Please login again.');
     } else if (error.response?.status === 403) {
-      toast.error('Access denied');
+      toast.error('Access denied. Please login to continue.');
     } else if (error.response?.status >= 500) {
       toast.error('Server error. Please try again later.');
+    } else if (error.response?.status === 404) {
+      toast.error('Resource not found.');
     } else {
       toast.error(message);
     }

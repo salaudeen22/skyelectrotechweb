@@ -75,7 +75,6 @@ export const CartProvider = ({ children }) => {
 
   // Load cart when user is authenticated and is a regular user
   useEffect(() => {
-    console.log('CartContext useEffect:', { isAuthenticated, userRole: user?.role });
     if (isAuthenticated && user?.role === 'user') {
       fetchCart();
     } else {

@@ -105,7 +105,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center space-x-2">
               <img 
-                src="https://i.postimg.cc/brZN4ngb/Sky-Logo-Only.png" 
+                src="/logo.svg" 
                 alt={settings.storeInfo.name} 
                 className="h-12 w-24 object-contain"
               />

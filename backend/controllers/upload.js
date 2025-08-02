@@ -2,8 +2,8 @@ const { uploadImage, uploadMultipleImages, deleteImage } = require('../utils/clo
 const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 
 // @desc    Upload single image
-// @route   POST /api/upload/single
-// @access  Private (Admin)
+// @route   POST /api/upload/image
+// @access  Private
 const uploadSingle = asyncHandler(async (req, res) => {
   if (!req.file) {
     return sendError(res, 400, 'No image file provided');
@@ -17,7 +17,8 @@ const uploadSingle = asyncHandler(async (req, res) => {
     const result = await uploadImage(fileStr, req.body.folder || 'skyelectrotech');
 
     sendResponse(res, 200, {
-      image: result
+      url: result.secure_url,
+      publicId: result.public_id
     }, 'Image uploaded successfully');
   } catch (error) {
     console.error('Upload error:', error);
