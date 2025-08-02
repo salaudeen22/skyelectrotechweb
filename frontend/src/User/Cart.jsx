@@ -111,7 +111,7 @@ const Cart = () => {
                     {cartItems.map((item) => (
                         <div key={item.product._id} className="flex items-center space-x-4 border-b border-slate-200 pb-6 last:border-b-0">
                             <img 
-                                src={item.product.images?.[0]?.url || 'https://via.placeholder.com/150'} 
+                                src={item.product.images?.[0]?.url || item.product.images?.[0] || 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png'} 
                                 alt={item.product.name} 
                                 className="w-24 h-24 rounded-lg object-cover"
                             />

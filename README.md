@@ -89,10 +89,11 @@ A full-stack e-commerce platform built with React, Node.js, Express, and MongoDB
    RAZORPAY_KEY_ID=your-razorpay-key-id
    RAZORPAY_KEY_SECRET=your-razorpay-key-secret
    
-   # Optional: Cloudinary
-   CLOUDINARY_CLOUD_NAME=your-cloud-name
-   CLOUDINARY_API_KEY=your-api-key
-   CLOUDINARY_API_SECRET=your-api-secret
+   # Optional: AWS S3 (for image storage)
+   AWS_ACCESS_KEY_ID=your-aws-access-key-id
+   AWS_SECRET_ACCESS_KEY=your-aws-secret-access-key
+   AWS_REGION=your-aws-region
+   AWS_S3_BUCKET_NAME=your-s3-bucket-name
    ```
 
 4. **Start MongoDB**

@@ -212,11 +212,11 @@ const ProductDetails = () => {
           <div className="space-y-3 sm:space-y-4">
             <div className="aspect-square bg-white rounded-lg shadow-sm overflow-hidden">
               <img
-                src={product.images?.[selectedImage]?.url || product.images?.[selectedImage] || '/api/placeholder/600/600'}
+                src={product.images?.[selectedImage]?.url || product.images?.[selectedImage] || 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png'}
                 alt={product.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  e.target.src = '/api/placeholder/600/600';
+                  e.target.src = 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png';
                 }}
               />
             </div>
@@ -231,11 +231,11 @@ const ProductDetails = () => {
                     }`}
                   >
                     <img
-                      src={image.url || image || '/api/placeholder/150/150'}
+                      src={image.url || image || 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png'}
                       alt={`${product.name} ${index + 1}`}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.target.src = '/api/placeholder/150/150';
+                        e.target.src = 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png';
                       }}
                     />
                   </button>

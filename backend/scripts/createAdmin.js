@@ -13,8 +13,8 @@ const createAdmin = async () => {
     // Admin user data
     const adminData = {
       name: 'Super Admin',
-      email: 'superadmin@skyelectrotech.com',
-      password: 'superadmin123',
+      email: 'admin@gmail.com',
+      password: 'admin123',
       role: 'admin',
       isActive: true,
       emailVerified: true,
@@ -28,9 +28,7 @@ const createAdmin = async () => {
       }
     };
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    adminData.password = await bcrypt.hash(adminData.password, salt);
+    // Password will be hashed by the User model's pre-save hook
 
     // Check if admin already exists
     const existingAdmin = await User.findOne({ email: adminData.email });
@@ -39,14 +37,14 @@ const createAdmin = async () => {
       process.exit(1);
     }
 
-    // Create admin user
+    // Create admin user (password will be hashed by pre-save hook)
     const admin = new User(adminData);
     await admin.save();
 
     console.log('✅ Admin user created successfully!');
     console.log('Login credentials:');
     console.log('Email:', adminData.email);
-    console.log('Password: superadmin123');
+    console.log('Password: admin123');
 
     process.exit(0);
   } catch (error) {

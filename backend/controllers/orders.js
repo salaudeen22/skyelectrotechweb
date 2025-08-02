@@ -5,14 +5,7 @@ const User = require('../models/User');
 const ReturnRequest = require('../models/ReturnRequest');
 const { sendResponse, sendError, asyncHandler, paginate, getPaginationMeta } = require('../utils/helpers');
 const { sendOrderConfirmationEmail, sendOrderNotificationEmail, sendOrderStatusUpdateEmail, sendReturnRequestEmail, sendReturnApprovedEmail, sendReturnRejectedEmail } = require('../utils/email');
-const cloudinary = require('cloudinary').v2;
-
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
+const { uploadImage } = require('../utils/s3');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -450,27 +443,12 @@ const returnOrder = asyncHandler(async (req, res) => {
   let imageUrls = [];
   if (req.files && req.files.length > 0) {
     try {
-      const uploadPromises = req.files.map(file => {
-        return new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            {
-              folder: 'return-requests',
-              resource_type: 'image',
-              transformation: [
-                { width: 800, height: 800, crop: 'limit' },
-                { quality: 'auto' }
-              ]
-            },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result.secure_url);
-            }
-          );
-          stream.end(file.buffer);
-        });
-      });
+      const uploadPromises = req.files.map(file => 
+        uploadImage(file, 'return-requests')
+      );
 
-      imageUrls = await Promise.all(uploadPromises);
+      const uploadResults = await Promise.all(uploadPromises);
+      imageUrls = uploadResults.map(result => result.url);
     } catch (uploadError) {
       console.error('Image upload error:', uploadError);
       return sendError(res, 500, 'Failed to upload images');

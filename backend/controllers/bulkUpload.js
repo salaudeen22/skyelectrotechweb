@@ -4,7 +4,7 @@ const { Readable } = require('stream');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
-const { uploadMultipleImages } = require('../utils/cloudinary');
+const { uploadMultipleImages } = require('../utils/s3');
 const { exportProducts, getDatabaseStats } = require('./databaseExport');
 
 // Helper function to generate SKU

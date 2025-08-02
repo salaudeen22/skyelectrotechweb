@@ -659,7 +659,7 @@ const ShippingInfo = () => {
                 {cart.map(item => (
                   <div key={item.product._id} className="flex items-center space-x-4">
                     <img 
-                      src={item.product.images?.[0]?.url || 'https://via.placeholder.com/64'} 
+                      src={item.product.images?.[0]?.url || item.product.images?.[0] || 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png'} 
                       alt={item.product.name} 
                       className="w-16 h-16 rounded-md object-cover"
                     />

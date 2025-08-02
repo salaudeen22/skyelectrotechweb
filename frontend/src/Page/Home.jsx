@@ -80,12 +80,12 @@ const Home = () => {
                 <Link key={category._id} to={`/category/${category._id}`} className="group block text-center">
                   <div className="relative rounded-lg overflow-hidden aspect-w-3 aspect-h-2">
                     <img 
-                      src={category.image?.url || category.image || '/api/placeholder/300/200'} 
+                      src={category.image?.url || category.image || 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png'} 
                       alt={category.name} 
                       className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-105"
-                      onError={(e) => {
-                        e.target.src = '/api/placeholder/300/200';
-                      }}
+                                              onError={(e) => {
+                          e.target.src = 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png';
+                        }}
                     />
                   </div>
                   <h3 className="mt-4 text-md font-semibold text-gray-800 group-hover:text-blue-600">{category.name}</h3>

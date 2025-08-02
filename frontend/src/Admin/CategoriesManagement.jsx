@@ -165,7 +165,7 @@ const CategoriesManagement = () => {
                         alt={category.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.target.src = '/api/placeholder/400/300';
+                          e.target.src = 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png';
                         }}
                       />
                     ) : (
@@ -362,7 +362,7 @@ const CategoryModal = ({ category, parentCategory, allCategories, onClose, onSav
         setUploadingImage(true);
         const uploadResponse = await uploadAPI.uploadSingle(imageFile, 'categories');
         if (uploadResponse.success) {
-          imageData = uploadResponse.data.image;
+          imageData = uploadResponse.data;
         }
         setUploadingImage(false);
       }

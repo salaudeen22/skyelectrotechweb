@@ -102,10 +102,11 @@ const updateSettings = asyncHandler(async (req, res) => {
 // @route   GET /api/settings/public
 // @access  Public
 const getPublicSettings = asyncHandler(async (req, res) => {
-  const settings = await Settings.findOne().sort('-createdAt');
+  let settings = await Settings.findOne().sort('-createdAt');
   
+  // If no settings exist, create default settings
   if (!settings) {
-    return sendError(res, 404, 'Settings not found');
+    settings = await Settings.create({});
   }
 
   // Only return public settings

@@ -1,4 +1,4 @@
-const { uploadImage, uploadMultipleImages, deleteImage } = require('../utils/cloudinary');
+const { uploadImage, uploadMultipleImages, deleteImage } = require('../utils/s3');
 const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 
 // @desc    Upload single image
@@ -10,15 +10,13 @@ const uploadSingle = asyncHandler(async (req, res) => {
   }
 
   try {
-    // Convert buffer to base64
-    const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-    
-    // Upload to Cloudinary
-    const result = await uploadImage(fileStr, req.body.folder || 'skyelectrotech');
+    // Upload to S3
+    const result = await uploadImage(req.file, req.body.folder || 'skyelectrotech');
 
     sendResponse(res, 200, {
-      url: result.secure_url,
-      publicId: result.public_id
+      url: result.url,
+      public_id: result.public_id,
+      key: result.key
     }, 'Image uploaded successfully');
   } catch (error) {
     console.error('Upload error:', error);
@@ -35,13 +33,8 @@ const uploadMultiple = asyncHandler(async (req, res) => {
   }
 
   try {
-    // Convert all files to base64
-    const fileStrs = req.files.map(file => 
-      `data:${file.mimetype};base64,${file.buffer.toString('base64')}`
-    );
-    
-    // Upload all to Cloudinary
-    const results = await uploadMultipleImages(fileStrs, req.body.folder || 'skyelectrotech');
+    // Upload all to S3
+    const results = await uploadMultipleImages(req.files, req.body.folder || 'skyelectrotech');
 
     sendResponse(res, 200, {
       images: results
@@ -52,21 +45,21 @@ const uploadMultiple = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Delete image from Cloudinary
-// @route   DELETE /api/upload/image/:publicId
+// @desc    Delete image from S3
+// @route   DELETE /api/upload/image/:key
 // @access  Private (Admin)
-const deleteImageFromCloud = asyncHandler(async (req, res) => {
-  const { publicId } = req.params;
+const deleteImageFromS3 = asyncHandler(async (req, res) => {
+  const { key } = req.params;
 
-  if (!publicId) {
-    return sendError(res, 400, 'Public ID is required');
+  if (!key) {
+    return sendError(res, 400, 'Image key is required');
   }
 
   try {
-    // Decode the public ID (it might be URL encoded)
-    const decodedPublicId = decodeURIComponent(publicId);
+    // Decode the key (it might be URL encoded)
+    const decodedKey = decodeURIComponent(key);
     
-    const success = await deleteImage(decodedPublicId);
+    const success = await deleteImage(decodedKey);
 
     if (success) {
       sendResponse(res, 200, null, 'Image deleted successfully');
@@ -82,5 +75,5 @@ const deleteImageFromCloud = asyncHandler(async (req, res) => {
 module.exports = {
   uploadSingle,
   uploadMultiple,
-  deleteImage: deleteImageFromCloud
+  deleteImage: deleteImageFromS3
 };

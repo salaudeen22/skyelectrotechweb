@@ -220,7 +220,7 @@ const Wishlist = () => {
                     {/* Product Image */}
                     <div className="flex-shrink-0">
                       <img
-                        src={item.product.images?.[0] || '/api/placeholder/300/300'}
+                        src={item.product.images?.[0]?.url || item.product.images?.[0] || 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png'}
                         alt={item.product.name}
                         className="w-20 h-20 object-cover rounded-lg cursor-pointer"
                         onClick={() => navigate(`/products/${item.product._id}`)}

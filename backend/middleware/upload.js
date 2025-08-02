@@ -1,6 +1,6 @@
 const multer = require('multer');
 
-// Configure multer for memory storage (for Cloudinary upload)
+// Configure multer for memory storage (for S3 upload)
 const storage = multer.memoryStorage();
 
 // File filter function

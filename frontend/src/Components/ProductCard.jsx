@@ -5,6 +5,7 @@ import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
 import { wishlistAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
+import { getPrimaryImage } from '../utils/imageUtils';
 
 const ProductCard = ({ product, showWishlistButton = true }) => {
   const { addToCart, addingToCart } = useCart();
@@ -95,11 +96,11 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
       {/* Product Image Section */}
       <Link to={`/products/${product._id}`} className="block overflow-hidden">
         <img 
-          src={product.images?.[0]?.url || product.images?.[0] || '/api/placeholder/400/300'} 
+          src={getPrimaryImage(product.images)} 
           alt={product.name}
           className="w-full h-40 sm:h-52 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
           onError={(e) => {
-            e.target.src = '/api/placeholder/400/300';
+            e.target.src = 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png';
           }}
         />
       </Link>

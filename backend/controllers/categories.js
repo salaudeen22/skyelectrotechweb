@@ -294,8 +294,8 @@ const deleteCategory = asyncHandler(async (req, res) => {
     );
   }
 
-  // Soft delete - set isActive to false
-  await Category.findByIdAndUpdate(req.params.id, { isActive: false });
+  // Hard delete - permanently remove from database
+  await Category.findByIdAndDelete(req.params.id);
 
   const message = force 
     ? `Category and all associated products/subcategories deleted successfully`

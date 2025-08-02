@@ -33,7 +33,8 @@ app.use('/api/', limiter);
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-   'http://51.20.12.36',
+  'http://localhost:5001',
+  'http://51.20.12.36',
   'https://sweet-hamster-f11198.netlify.app',
   'https://6877b765d91a4d4ccae4b296--sweet-hamster-f11198.netlify.app',
   process.env.FRONTEND_URL
@@ -43,6 +44,11 @@ app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
+    
+    // In development, allow all localhost origins
+    if (process.env.NODE_ENV !== 'production' && origin.includes('localhost')) {
+      return callback(null, true);
+    }
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       return callback(null, true);
