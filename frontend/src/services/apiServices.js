@@ -207,6 +207,17 @@ export const ordersAPI = {
     return response.data;
   },
 
+  // Return order
+  returnOrder: async (id, formData) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    const response = await api.put(`/orders/${id}/return`, formData, config);
+    return response.data;
+  },
+
   // Update order status (Admin/Employee)
   updateOrderStatus: async (id, statusData) => {
     const response = await api.put(`/orders/${id}/status`, statusData);
@@ -245,6 +256,24 @@ export const ordersAPI = {
       responseType: 'blob'
     });
     return response;
+  },
+
+  // Get all return requests (Admin)
+  getReturnRequests: async (params = {}) => {
+    const response = await api.get('/orders/return-requests', { params });
+    return response.data;
+  },
+
+  // Get return requests for a specific order
+  getOrderReturnRequests: async (orderId) => {
+    const response = await api.get(`/orders/${orderId}/return-requests`);
+    return response.data;
+  },
+
+  // Process return request (Approve/Reject)
+  processReturnRequest: async (requestId, data) => {
+    const response = await api.put(`/orders/return-requests/${requestId}/process`, data);
+    return response.data;
   }
 };
 

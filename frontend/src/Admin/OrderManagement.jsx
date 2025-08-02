@@ -45,6 +45,11 @@ const OrdersAndSales = () => {
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
     
+    // Date filtering state
+    const [dateFrom, setDateFrom] = useState('');
+    const [dateTo, setDateTo] = useState('');
+    const [dateFilterType, setDateFilterType] = useState('custom'); // 'custom', 'today', 'week', 'month'
+    
     // Sales Analytics State
     const [salesData, setSalesData] = useState({
         overview: {},
@@ -63,12 +68,30 @@ const OrdersAndSales = () => {
         }
     }, [activeTab, dateRange]);
 
+    // Auto-fetch orders when filters change (debounced)
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (activeTab === 'orders') {
+                fetchOrders();
+            }
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm, statusFilter, dateFrom, dateTo]);
+
     const fetchOrders = async () => {
         try {
             setLoading(true);
             setError(null);
             
-            const response = await ordersAPI.getAllOrders();
+            // Build query parameters for date filtering
+            const queryParams = {};
+            if (dateFrom) queryParams.dateFrom = dateFrom;
+            if (dateTo) queryParams.dateTo = dateTo;
+            if (statusFilter) queryParams.status = statusFilter;
+            if (searchTerm) queryParams.search = searchTerm;
+            
+            const response = await ordersAPI.getAllOrders(queryParams);
             console.log('Orders API response:', response);
             
             if (response.success) {
@@ -202,7 +225,23 @@ const OrdersAndSales = () => {
     };
 
     const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString('en-IN');
+        if (!dateString) return { date: 'N/A', time: 'N/A' };
+        
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return { date: 'Invalid Date', time: 'Invalid Time' };
+        
+        return {
+            date: date.toLocaleDateString('en-IN', { 
+                day: '2-digit', 
+                month: 'short', 
+                year: 'numeric' 
+            }),
+            time: date.toLocaleTimeString('en-IN', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true
+            })
+        };
     };
 
     const formatCurrency = (amount) => {
@@ -213,10 +252,8 @@ const OrdersAndSales = () => {
         const icons = {
             pending: FaClock,
             confirmed: FaCheck,
-            processing: FaBox,
             packed: FaBox,
             shipped: FaTruck,
-            delivered: FaCheckCircle,
             cancelled: FaBan,
             returned: FaUndo
         };
@@ -227,14 +264,57 @@ const OrdersAndSales = () => {
         const colors = {
             pending: 'text-yellow-600',
             confirmed: 'text-blue-600',
-            processing: 'text-purple-600',
             packed: 'text-indigo-600',
-            shipped: 'text-blue-600',
-            delivered: 'text-green-600',
+            shipped: 'text-green-600',
             cancelled: 'text-red-600',
             returned: 'text-orange-600'
         };
         return colors[status?.toLowerCase()] || 'text-gray-600';
+    };
+
+    // Apply date filter presets
+    const applyDateFilter = (filterType) => {
+        const today = new Date();
+        const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+        
+        switch (filterType) {
+            case 'today': {
+                setDateFrom(startOfDay.toISOString().split('T')[0]);
+                setDateTo(endOfDay.toISOString().split('T')[0]);
+                break;
+            }
+            case 'week': {
+                const startOfWeek = new Date(today);
+                startOfWeek.setDate(today.getDate() - today.getDay());
+                setDateFrom(startOfWeek.toISOString().split('T')[0]);
+                setDateTo(today.toISOString().split('T')[0]);
+                break;
+            }
+            case 'month': {
+                const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                setDateFrom(startOfMonth.toISOString().split('T')[0]);
+                setDateTo(today.toISOString().split('T')[0]);
+                break;
+            }
+            case 'custom':
+                // Keep existing custom dates
+                break;
+            default:
+                setDateFrom('');
+                setDateTo('');
+        }
+        setDateFilterType(filterType);
+    };
+
+    // Clear all filters
+    const clearFilters = () => {
+        setSearchTerm('');
+        setStatusFilter('');
+        setDateFrom('');
+        setDateTo('');
+        setDateFilterType('custom');
+        // Fetch orders will be triggered by useEffect
     };
 
     // Tab Navigation Component
@@ -290,10 +370,8 @@ const OrdersAndSales = () => {
                         <option value="">All Status</option>
                         <option value="pending">Pending</option>
                         <option value="confirmed">Confirmed</option>
-                        <option value="processing">Processing</option>
                         <option value="packed">Packed</option>
                         <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
                         <option value="cancelled">Cancelled</option>
                         <option value="returned">Returned</option>
                     </select>
@@ -303,6 +381,15 @@ const OrdersAndSales = () => {
                         className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg"
                     >
                         <FaFilter className="h-4 w-4" />
+                    </button>
+                    
+                    <button
+                        onClick={clearFilters}
+                        className="flex items-center px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
+                        title="Clear All Filters"
+                    >
+                        <FaTimes className="mr-1 h-3 w-3" />
+                        Clear
                     </button>
                     
                     <button
@@ -320,6 +407,77 @@ const OrdersAndSales = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Date Filters */}
+            {showFilters && (
+                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+                    <div className="flex flex-col lg:flex-row gap-4">
+                        <div className="flex flex-wrap gap-2">
+                            <button
+                                onClick={() => applyDateFilter('today')}
+                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                                    dateFilterType === 'today' 
+                                        ? 'bg-blue-100 text-blue-700' 
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                            >
+                                Today
+                            </button>
+                            <button
+                                onClick={() => applyDateFilter('week')}
+                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                                    dateFilterType === 'week' 
+                                        ? 'bg-blue-100 text-blue-700' 
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                            >
+                                This Week
+                            </button>
+                            <button
+                                onClick={() => applyDateFilter('month')}
+                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                                    dateFilterType === 'month' 
+                                        ? 'bg-blue-100 text-blue-700' 
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                            >
+                                This Month
+                            </button>
+                            <button
+                                onClick={() => applyDateFilter('custom')}
+                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                                    dateFilterType === 'custom' 
+                                        ? 'bg-blue-100 text-blue-700' 
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                            >
+                                Custom Range
+                            </button>
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row gap-2">
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">From Date</label>
+                                <input
+                                    type="date"
+                                    value={dateFrom}
+                                    onChange={(e) => setDateFrom(e.target.value)}
+                                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">To Date</label>
+                                <input
+                                    type="date"
+                                    value={dateTo}
+                                    onChange={(e) => setDateTo(e.target.value)}
+                                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Orders Table */}
             {loading ? (
@@ -387,8 +545,13 @@ const OrdersAndSales = () => {
                                                 <OrderStatus status={order.orderStatus} />
                                             </div>
                                         </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {formatDate(order.createdAt)}
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-gray-900">
+                                                    {formatDate(order.createdAt).date}
+                                                </div>
+                                                <div className="text-xs text-gray-500">
+                                                    {formatDate(order.createdAt).time}
+                                                </div>
                                             </td>
                                                                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div className="flex items-center space-x-2">
@@ -705,10 +868,11 @@ const OrdersAndSales = () => {
 
             {/* Modals */}
             {showStatusModal && selectedOrder && (
-            <OrderStatusManagement
-                order={selectedOrder}
+                <OrderStatusManagement
+                    order={selectedOrder}
+                    isOpen={showStatusModal}
                     onClose={() => setShowStatusModal(false)}
-                    onUpdate={handleStatusUpdate}
+                    onStatusUpdate={handleStatusUpdate}
                 />
             )}
 

@@ -2,8 +2,17 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Cart = require('../models/Cart');
 const User = require('../models/User');
+const ReturnRequest = require('../models/ReturnRequest');
 const { sendResponse, sendError, asyncHandler, paginate, getPaginationMeta } = require('../utils/helpers');
-const { sendOrderConfirmationEmail, sendOrderNotificationEmail, sendOrderStatusUpdateEmail } = require('../utils/email');
+const { sendOrderConfirmationEmail, sendOrderNotificationEmail, sendOrderStatusUpdateEmail, sendReturnRequestEmail, sendReturnApprovedEmail, sendReturnRejectedEmail } = require('../utils/email');
+const cloudinary = require('cloudinary').v2;
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -181,20 +190,23 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     }
   }
 
-  // Validate status transitions
+  // Validate status transitions - standardized workflow
   const validTransitions = {
     pending: ['confirmed', 'cancelled'],
-    confirmed: ['processing', 'cancelled'],
-    processing: ['packed', 'cancelled'],
+    confirmed: ['packed', 'cancelled'],
     packed: ['shipped', 'cancelled'],
-    shipped: ['delivered', 'returned'],
-    delivered: ['returned'],
+    shipped: ['returned'],
     cancelled: [],
     returned: []
   };
 
   if (!validTransitions[order.orderStatus].includes(status)) {
     return sendError(res, 400, `Cannot change status from ${order.orderStatus} to ${status}`);
+  }
+
+  // Validate tracking number for shipped status
+  if (status === 'shipped' && !trackingNumber) {
+    return sendError(res, 400, 'Tracking number is required when shipping an order');
   }
 
   // Update order
@@ -208,9 +220,7 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     order.estimatedDelivery = new Date(estimatedDelivery);
   }
 
-  if (status === 'delivered') {
-    order.deliveredAt = new Date();
-  }
+  // Note: delivered status removed from standardized workflow
 
   // Add to status history
   order.statusHistory.push({
@@ -224,12 +234,14 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   await order.populate('user', 'name email');
   await order.populate('assignedTo', 'name email');
 
-  // Send email notification for status update
-  try {
-    await sendOrderStatusUpdateEmail(order, order.user, status);
-  } catch (emailError) {
-    console.error('Failed to send order status update email:', emailError);
-    // Don't fail the status update if email fails
+  // Send email notification only when order is shipped
+  if (status === 'shipped') {
+    try {
+      await sendOrderStatusUpdateEmail(order, order.user, status);
+    } catch (emailError) {
+      console.error('Failed to send shipping notification email:', emailError);
+      // Don't fail the status update if email fails
+    }
   }
 
   sendResponse(res, 200, { order }, 'Order status updated successfully');
@@ -396,6 +408,233 @@ const cancelOrder = asyncHandler(async (req, res) => {
   sendResponse(res, 200, { order }, 'Order cancelled successfully');
 });
 
+// @desc    Return order
+// @route   PUT /api/orders/:id/return
+// @access  Private (User)
+const returnOrder = asyncHandler(async (req, res) => {
+  try {
+  const order = await Order.findById(req.params.id).populate('user', 'name email');
+
+  if (!order) {
+    return sendError(res, 404, 'Order not found');
+  }
+
+  // Check if user owns the order
+  if (order.user._id.toString() !== req.user._id.toString()) {
+    return sendError(res, 403, 'Access denied');
+  }
+
+  // Check if order can be returned (must be shipped and within 2 days)
+  if (order.orderStatus !== 'shipped' && order.orderStatus !== 'delivered') {
+    return sendError(res, 400, `Order must be shipped or delivered to be returned. Current status: ${order.orderStatus}`);
+  }
+
+  // Check if order was shipped/delivered within 2 days
+  const shippedDate = order.statusHistory.find(h => h.status === 'shipped')?.updatedAt || 
+                     order.statusHistory.find(h => h.status === 'delivered')?.updatedAt || 
+                     order.updatedAt;
+  const daysSinceShipped = (new Date() - new Date(shippedDate)) / (1000 * 60 * 60 * 24);
+  
+  if (daysSinceShipped > 2) {
+    return sendError(res, 400, `Order can only be returned within 2 days of shipping/delivery. Days since shipped: ${Math.round(daysSinceShipped)}`);
+  }
+
+  const { reason, description, condition } = req.body;
+  
+  // Validate required fields
+  if (!reason || !description || !condition) {
+    return sendError(res, 400, 'Please provide reason, description, and condition');
+  }
+
+  // Handle image uploads
+  let imageUrls = [];
+  if (req.files && req.files.length > 0) {
+    try {
+      const uploadPromises = req.files.map(file => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              folder: 'return-requests',
+              resource_type: 'image',
+              transformation: [
+                { width: 800, height: 800, crop: 'limit' },
+                { quality: 'auto' }
+              ]
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result.secure_url);
+            }
+          );
+          stream.end(file.buffer);
+        });
+      });
+
+      imageUrls = await Promise.all(uploadPromises);
+    } catch (uploadError) {
+      console.error('Image upload error:', uploadError);
+      return sendError(res, 500, 'Failed to upload images');
+    }
+  }
+
+  // Get the count of existing return requests for this order
+  const existingCount = await ReturnRequest.countDocuments({ order: order._id });
+  
+  // Create return request
+  const returnRequest = await ReturnRequest.create({
+    order: order._id,
+    user: req.user._id,
+    requestNumber: existingCount + 1,
+    reason,
+    description,
+    condition,
+    images: imageUrls,
+    status: 'pending'
+  });
+
+  // Add return request to order status history
+  order.statusHistory.push({
+    status: 'return_requested',
+    updatedBy: req.user._id,
+    note: `Return request #${returnRequest.requestNumber} submitted: ${reason}`
+  });
+
+  await order.save();
+
+  // Populate return request with order and user details
+  await returnRequest.populate('order user', 'orderId name email');
+
+  // Send email notification to admin
+  try {
+    await sendReturnRequestEmail(order, req.user, returnRequest);
+  } catch (emailError) {
+    console.error('Failed to send return request email:', emailError);
+  }
+
+  sendResponse(res, 200, { returnRequest }, 'Return request submitted successfully');
+  } catch (error) {
+    console.error('Error in returnOrder:', error);
+    return sendError(res, 500, 'Failed to submit return request');
+  }
+});
+
+// @desc    Get all return requests (Admin)
+// @route   GET /api/orders/return-requests
+// @access  Private (Admin)
+const getReturnRequests = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 10, status } = req.query;
+
+  const query = {};
+  if (status) {
+    query.status = status;
+  }
+
+  const { skip, limit: pageLimit } = paginate(page, limit);
+
+  const returnRequests = await ReturnRequest.find(query)
+    .populate({
+      path: 'order',
+      select: 'orderId totalPrice orderStatus',
+      model: 'Order'
+    })
+    .populate({
+      path: 'user',
+      select: 'name email',
+      model: 'User'
+    })
+    .populate({
+      path: 'processedBy',
+      select: 'name',
+      model: 'User'
+    })
+    .sort('-requestedAt')
+    .skip(skip)
+    .limit(pageLimit);
+
+  const total = await ReturnRequest.countDocuments(query);
+  const meta = getPaginationMeta(page, limit, total);
+
+  sendResponse(res, 200, { returnRequests, meta }, 'Return requests retrieved successfully');
+});
+
+// @desc    Get return requests for a specific order
+// @route   GET /api/orders/:id/return-requests
+// @access  Private (User/Admin)
+const getOrderReturnRequests = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+  
+  if (!order) {
+    return sendError(res, 404, 'Order not found');
+  }
+
+  // Check if user owns the order or is admin
+  if (order.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+    return sendError(res, 403, 'Access denied');
+  }
+
+  const returnRequests = await ReturnRequest.find({ order: req.params.id })
+    .populate('processedBy', 'name')
+    .sort('-requestedAt');
+
+  sendResponse(res, 200, { returnRequests }, 'Return requests retrieved successfully');
+});
+
+// @desc    Process return request (Approve/Reject)
+// @route   PUT /api/orders/return-requests/:id/process
+// @access  Private (Admin)
+const processReturnRequest = asyncHandler(async (req, res) => {
+  const { status, adminNotes } = req.body;
+
+  if (!status || !['approved', 'rejected'].includes(status)) {
+    return sendError(res, 400, 'Status must be either approved or rejected');
+  }
+
+  const returnRequest = await ReturnRequest.findById(req.params.id)
+    .populate('order', 'orderId totalPrice orderStatus user')
+    .populate('user', 'name email');
+
+  if (!returnRequest) {
+    return sendError(res, 404, 'Return request not found');
+  }
+
+  if (returnRequest.status !== 'pending') {
+    return sendError(res, 400, 'Return request has already been processed');
+  }
+
+  // Update return request
+  returnRequest.status = status;
+  returnRequest.adminNotes = adminNotes;
+  returnRequest.processedBy = req.user._id;
+  returnRequest.processedAt = new Date();
+
+  await returnRequest.save();
+
+  // Update order status if approved
+  if (status === 'approved') {
+    const order = await Order.findById(returnRequest.order._id);
+    order.orderStatus = 'returned';
+    order.statusHistory.push({
+      status: 'returned',
+      updatedBy: req.user._id,
+      note: `Return approved: ${adminNotes || 'No additional notes'}`
+    });
+    await order.save();
+  }
+
+  // Send email notification to user
+  try {
+    if (status === 'approved') {
+      await sendReturnApprovedEmail(returnRequest.order, returnRequest.user, returnRequest);
+    } else {
+      await sendReturnRejectedEmail(returnRequest.order, returnRequest.user, returnRequest);
+    }
+  } catch (emailError) {
+    console.error('Failed to send return status email:', emailError);
+  }
+
+  sendResponse(res, 200, { returnRequest }, `Return request ${status} successfully`);
+});
+
 module.exports = {
   createOrder,
   getMyOrders,
@@ -404,5 +643,9 @@ module.exports = {
   getAllOrders,
   getOrdersByEmployee,
   assignOrderToEmployee,
-  cancelOrder
+  cancelOrder,
+  returnOrder,
+  getReturnRequests,
+  getOrderReturnRequests,
+  processReturnRequest
 };

@@ -16,10 +16,7 @@ import { ordersAPI } from '../services/apiServices';
 import toast from 'react-hot-toast';
 import OrderStatus from '../Components/OrderStatus';
 
-
-
 const OrderStatusManagement = ({ order, isOpen, onClose, onStatusUpdate }) => {
-    const [status, setStatus] = useState(order?.orderStatus || '');
     const [note, setNote] = useState('');
     const [trackingNumber, setTrackingNumber] = useState(order?.trackingNumber || '');
     const [estimatedDelivery, setEstimatedDelivery] = useState('');
@@ -27,58 +24,90 @@ const OrderStatusManagement = ({ order, isOpen, onClose, onStatusUpdate }) => {
 
     useEffect(() => {
         if (order) {
-            setStatus(order.orderStatus || '');
             setTrackingNumber(order.trackingNumber || '');
             setNote('');
             setEstimatedDelivery('');
         }
     }, [order]);
 
-    const validTransitions = {
-        pending: ['confirmed', 'cancelled'],
-        confirmed: ['processing', 'cancelled'],
-        processing: ['packed', 'cancelled'],
-        packed: ['shipped', 'cancelled'],
-        shipped: ['delivered', 'returned'],
-        delivered: ['returned'],
-        cancelled: [],
-        returned: []
+    // Standardized status transitions - only show next logical step
+    const getNextStatus = (currentStatus) => {
+        const transitions = {
+            pending: 'confirmed',
+            confirmed: 'packed',
+            packed: 'shipped',
+            shipped: null, // No next status (can only return)
+            cancelled: null,
+            returned: null
+        };
+        return transitions[currentStatus];
     };
 
-    const currentValidStatuses = validTransitions[order?.orderStatus] || [];
+    const nextStatus = getNextStatus(order?.orderStatus);
 
     const getStatusIcon = (status) => {
         const icons = {
             pending: FaClock,
             confirmed: FaCheck,
-            processing: FaBox,
             packed: FaBox,
             shipped: FaTruck,
-            delivered: FaCheckCircle,
             cancelled: FaBan,
             returned: FaUndo
         };
         return icons[status] || FaClock;
     };
 
+    const getStatusDescription = (status) => {
+        const descriptions = {
+            pending: 'Order is waiting for confirmation',
+            confirmed: 'Order has been confirmed and is ready for packing',
+            packed: 'Order has been packed and is ready for shipping',
+            shipped: 'Order has been shipped with tracking information',
+            cancelled: 'Order has been cancelled',
+            returned: 'Order has been returned'
+        };
+        return descriptions[status] || '';
+    };
+
+    const getNextStatusDescription = (nextStatus) => {
+        const descriptions = {
+            confirmed: 'Confirm the order and mark it as ready for packing',
+            packed: 'Mark order as packed and ready for shipping',
+            shipped: 'Mark order as shipped and add tracking information'
+        };
+        return descriptions[nextStatus] || '';
+    };
+
+    // Check if tracking number should be shown (only for shipped status)
+    const shouldShowTrackingNumber = nextStatus === 'shipped';
+
+    // Check if notes should be shown (for shipped and delivered statuses)
+    const shouldShowNotes = nextStatus === 'shipped' || nextStatus === 'delivered';
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!status || status === order?.orderStatus) {
-            toast.error('Please select a different status');
+        if (!nextStatus) {
+            toast.error('No valid status transition available');
+            return;
+        }
+
+        // Validate tracking number for shipped status
+        if (nextStatus === 'shipped' && !trackingNumber.trim()) {
+            toast.error('Tracking number is required when marking order as shipped');
             return;
         }
 
         setLoading(true);
         try {
             const statusData = {
-                status,
-                note: note.trim() || undefined,
-                trackingNumber: trackingNumber.trim() || undefined,
+                status: nextStatus,
+                note: shouldShowNotes ? note.trim() || undefined : undefined,
+                trackingNumber: shouldShowTrackingNumber ? trackingNumber.trim() : undefined,
                 estimatedDelivery: estimatedDelivery || undefined
             };
 
             await ordersAPI.updateOrderStatus(order._id, statusData);
-            toast.success('Order status updated successfully');
+            toast.success(`Order status updated to ${nextStatus} successfully`);
             onStatusUpdate();
             onClose();
         } catch (error) {
@@ -92,6 +121,7 @@ const OrderStatusManagement = ({ order, isOpen, onClose, onStatusUpdate }) => {
     if (!isOpen || !order) return null;
 
     const StatusIcon = getStatusIcon(order.orderStatus);
+    const NextStatusIcon = getStatusIcon(nextStatus);
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -115,89 +145,93 @@ const OrderStatusManagement = ({ order, isOpen, onClose, onStatusUpdate }) => {
                             <span className="text-sm text-gray-600">Current Status:</span>
                             <OrderStatus status={order.orderStatus} />
                         </div>
+                        <p className="text-xs text-gray-500 mt-2">{getStatusDescription(order.orderStatus)}</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                New Status *
-                            </label>
-                            <select
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required
-                            >
-                                <option value="">Select Status</option>
-                                {currentValidStatuses.map((validStatus) => {
-                                    const Icon = getStatusIcon(validStatus);
-                                    return (
-                                        <option key={validStatus} value={validStatus}>
-                                            {validStatus.charAt(0).toUpperCase() + validStatus.slice(1)}
-                                        </option>
-                                    );
-                                })}
-                            </select>
-                            {currentValidStatuses.length === 0 && (
-                                <p className="text-xs text-red-500 mt-1">No valid status transitions available</p>
+                    {!nextStatus ? (
+                        <div className="text-center py-6">
+                            <p className="text-gray-500">This order cannot be updated further.</p>
+                            <p className="text-sm text-gray-400 mt-1">Status: {order.orderStatus}</p>
+                        </div>
+                    ) : (
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <div className="flex items-center space-x-2 mb-2">
+                                    <NextStatusIcon className="w-5 h-5 text-blue-600" />
+                                    <span className="font-medium text-blue-900">
+                                        Update to: {nextStatus.charAt(0).toUpperCase() + nextStatus.slice(1)}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-blue-700">{getNextStatusDescription(nextStatus)}</p>
+                            </div>
+
+                            {/* Tracking Number - Only show when next status is "shipped" */}
+                            {shouldShowTrackingNumber && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Tracking Number *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={trackingNumber}
+                                        onChange={(e) => setTrackingNumber(e.target.value)}
+                                        placeholder="Enter tracking number"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        required
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Required when marking order as shipped</p>
+                                </div>
                             )}
-                        </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Tracking Number
-                            </label>
-                            <input
-                                type="text"
-                                value={trackingNumber}
-                                onChange={(e) => setTrackingNumber(e.target.value)}
-                                placeholder="Enter tracking number"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
+                            {/* Estimated Delivery - Only show for shipped status */}
+                            {shouldShowTrackingNumber && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Estimated Delivery
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={estimatedDelivery}
+                                        onChange={(e) => setEstimatedDelivery(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                            )}
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Estimated Delivery
-                            </label>
-                            <input
-                                type="date"
-                                value={estimatedDelivery}
-                                onChange={(e) => setEstimatedDelivery(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
+                            {/* Notes - Only show for shipped and delivered statuses */}
+                            {shouldShowNotes && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Note (Optional)
+                                    </label>
+                                    <textarea
+                                        value={note}
+                                        onChange={(e) => setNote(e.target.value)}
+                                        placeholder="Add a note about this status change"
+                                        rows="3"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+                            )}
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Note (Optional)
-                            </label>
-                            <textarea
-                                value={note}
-                                onChange={(e) => setNote(e.target.value)}
-                                placeholder="Add a note about this status change"
-                                rows="3"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
-
-                        <div className="flex space-x-3 pt-4">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={loading || !status || status === order.orderStatus}
-                                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            >
-                                {loading ? <FaSpinner className="animate-spin mx-auto" /> : 'Update Status'}
-                            </button>
-                        </div>
-                    </form>
+                            <div className="flex space-x-3 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={loading || (nextStatus === 'shipped' && !trackingNumber.trim())}
+                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    {loading ? <FaSpinner className="animate-spin mx-auto" /> : `Update to ${nextStatus.charAt(0).toUpperCase() + nextStatus.slice(1)}`}
+                                </button>
+                            </div>
+                        </form>
+                    )}
                 </div>
             </div>
         </div>

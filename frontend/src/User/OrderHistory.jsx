@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiPackage, FiTruck, FiCheck, FiX, FiEye, FiCalendar, FiCreditCard } from 'react-icons/fi';
+import { FiPackage, FiTruck, FiCheck, FiX, FiEye, FiCalendar, FiCreditCard, FiRotateCcw, FiClock, FiAlertCircle } from 'react-icons/fi';
 import { ordersAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
+import ReturnOrderModal from './ReturnOrderModal';
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [returnModalOpen, setReturnModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [returnRequests, setReturnRequests] = useState({});
+  const [expandedOrders, setExpandedOrders] = useState({});
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -32,12 +37,14 @@ const OrderHistory = () => {
         return <FiPackage className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />;
       case 'confirmed':
         return <FiPackage className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />;
+      case 'packed':
+        return <FiPackage className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-500" />;
       case 'shipped':
-        return <FiTruck className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />;
-      case 'delivered':
-        return <FiCheck className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
+        return <FiTruck className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />;
       case 'cancelled':
         return <FiX className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />;
+      case 'returned':
+        return <FiX className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />;
       default:
         return <FiPackage className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />;
     }
@@ -49,21 +56,108 @@ const OrderHistory = () => {
         return 'bg-yellow-100 text-yellow-800';
       case 'confirmed':
         return 'bg-blue-100 text-blue-800';
+      case 'packed':
+        return 'bg-indigo-100 text-indigo-800';
       case 'shipped':
-        return 'bg-orange-100 text-orange-800';
-      case 'delivered':
         return 'bg-green-100 text-green-800';
       case 'cancelled':
         return 'bg-red-100 text-red-800';
+      case 'returned':
+        return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  // Check if order can be returned (shipped/delivered within 2 days)
+  const canReturnOrder = (order) => {
+    if (order.orderStatus !== 'shipped' && order.orderStatus !== 'delivered') return false;
+    
+    const shippedDate = new Date(order.updatedAt || order.createdAt);
+    const currentDate = new Date();
+    const daysDifference = (currentDate - shippedDate) / (1000 * 60 * 60 * 24);
+    
+    return daysDifference <= 2;
+  };
+
+  // Check if order is within contact period (2-7 days)
+  const showContactInfo = (order) => {
+    if (order.orderStatus !== 'shipped' && order.orderStatus !== 'delivered') return false;
+    
+    const shippedDate = new Date(order.updatedAt || order.createdAt);
+    const currentDate = new Date();
+    const daysDifference = (currentDate - shippedDate) / (1000 * 60 * 60 * 24);
+    
+    return daysDifference > 2 && daysDifference <= 7;
   };
 
   const filteredOrders = orders.filter(order => {
     if (filter === 'all') return true;
     return order.orderStatus === filter;
   });
+
+  const handleReturnOrder = async (orderId, formData) => {
+    try {
+      await ordersAPI.returnOrder(orderId, formData);
+      toast.success('Return request submitted successfully');
+      // Refresh orders
+      const response = await ordersAPI.getMyOrders();
+      setOrders(response.data.orders || []);
+      // Refresh return requests for this order
+      await fetchReturnRequests(orderId);
+    } catch (error) {
+      console.error('Error returning order:', error);
+      toast.error(error.response?.data?.message || 'Failed to submit return request');
+      throw error; // Re-throw to let modal handle the error
+    }
+  };
+
+  const openReturnModal = (order) => {
+    setSelectedOrder(order);
+    setReturnModalOpen(true);
+  };
+
+  const closeReturnModal = () => {
+    setReturnModalOpen(false);
+    setSelectedOrder(null);
+  };
+
+  const fetchReturnRequests = async (orderId) => {
+    try {
+      const response = await ordersAPI.getOrderReturnRequests(orderId);
+      setReturnRequests(prev => ({
+        ...prev,
+        [orderId]: response.data.returnRequests
+      }));
+    } catch (error) {
+      console.error('Error fetching return requests:', error);
+    }
+  };
+
+  const toggleOrderExpansion = (orderId) => {
+    setExpandedOrders(prev => ({
+      ...prev,
+      [orderId]: !prev[orderId]
+    }));
+    
+    // Fetch return requests if not already loaded
+    if (!returnRequests[orderId]) {
+      fetchReturnRequests(orderId);
+    }
+  };
+
+  const getReturnStatusColor = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'approved':
+        return 'bg-green-100 text-green-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   if (loading) {
     return (
@@ -90,9 +184,10 @@ const OrderHistory = () => {
                   { id: 'all', name: 'All Orders' },
                   { id: 'pending', name: 'Pending' },
                   { id: 'confirmed', name: 'Confirmed' },
+                  { id: 'packed', name: 'Packed' },
                   { id: 'shipped', name: 'Shipped' },
-                  { id: 'delivered', name: 'Delivered' },
-                  { id: 'cancelled', name: 'Cancelled' }
+                  { id: 'cancelled', name: 'Cancelled' },
+                  { id: 'returned', name: 'Returned' }
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -184,6 +279,21 @@ const OrderHistory = () => {
                     </div>
                   </div>
 
+                  {/* Tracking Information for Shipped Orders */}
+                  {order.orderStatus === 'shipped' && order.trackingNumber && (
+                    <div className="border-t border-gray-200 pt-3 sm:pt-4">
+                      <div className="flex items-center space-x-2">
+                        <FiTruck className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-xs sm:text-sm text-gray-600">Tracking Number</p>
+                          <p className="text-xs sm:text-sm font-mono font-semibold text-blue-600">
+                            {order.trackingNumber}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Order Items Preview */}
                   <div className="border-t border-gray-200 pt-3 sm:pt-4">
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
@@ -212,12 +322,118 @@ const OrderHistory = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Return Requests Section */}
+                  <div className="border-t border-gray-200 pt-3 sm:pt-4">
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={() => toggleOrderExpansion(order._id)}
+                        className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800"
+                      >
+                        <FiClock className="w-4 h-4" />
+                        <span>Return Requests</span>
+                        {returnRequests[order._id] && returnRequests[order._id].length > 0 && (
+                          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                            {returnRequests[order._id].length}
+                          </span>
+                        )}
+                        {returnRequests[order._id] === undefined && (
+                          <span className="text-xs text-gray-500">(Click to load)</span>
+                        )}
+                      </button>
+                      
+                      {/* Return Button - Only show for shipped/delivered orders within 2 days */}
+                      {canReturnOrder(order) && (
+                        <button
+                          onClick={() => openReturnModal(order)}
+                          className="flex items-center space-x-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors text-xs sm:text-sm font-medium"
+                        >
+                          <FiRotateCcw className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span>Request Return</span>
+                        </button>
+                      )}
+                      
+                      {/* Contact Info - Show when return period has passed */}
+                      {showContactInfo(order) && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
+                          <div className="flex items-center space-x-2">
+                            <FiAlertCircle className="w-4 h-4 text-yellow-600" />
+                            <div className="text-xs">
+                              <p className="text-yellow-800 font-medium">Return period expired</p>
+                              <p className="text-yellow-700">
+                                Contact support for assistance: 
+                                <a href="mailto:support@skyelectrotech.com" className="text-blue-600 hover:text-blue-800 ml-1">
+                                  support@skyelectrotech.com
+                                </a>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Expanded Return Requests */}
+                    {expandedOrders[order._id] && (
+                      <div className="mt-3 space-y-2">
+                        {returnRequests[order._id] ? (
+                          returnRequests[order._id].length > 0 ? (
+                            returnRequests[order._id].map((request) => (
+                              <div key={request._id} className="bg-gray-50 rounded-lg p-3">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center space-x-2">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getReturnStatusColor(request.status)}`}>
+                                      {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                    </span>
+                                    <span className="text-xs text-gray-600">
+                                      Request #{request.requestNumber}
+                                    </span>
+                                  </div>
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(request.requestedAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-gray-700 mb-1">
+                                  <strong>Reason:</strong> {request.reason.replace('_', ' ')}
+                                </p>
+                                <p className="text-xs text-gray-600 line-clamp-2">
+                                  {request.description}
+                                </p>
+                                {request.adminNotes && (
+                                  <p className="text-xs text-gray-600 mt-1">
+                                    <strong>Admin Notes:</strong> {request.adminNotes}
+                                  </p>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-xs text-gray-500 text-center py-2">
+                              No return requests for this order
+                            </p>
+                          )
+                        ) : (
+                          <div className="flex items-center justify-center py-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Return Order Modal */}
+      {selectedOrder && (
+        <ReturnOrderModal
+          order={selectedOrder}
+          isOpen={returnModalOpen}
+          onClose={closeReturnModal}
+          onReturnSubmit={handleReturnOrder}
+        />
+      )}
     </div>
   );
 };

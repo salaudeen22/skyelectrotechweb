@@ -98,7 +98,7 @@ const orderSchema = new mongoose.Schema({
   },
   orderStatus: {
     type: String,
-    enum: ['pending', 'confirmed', 'processing', 'packed', 'shipped', 'delivered', 'cancelled', 'returned'],
+    enum: ['pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled', 'returned'],
     default: 'pending'
   },
   statusHistory: [{
@@ -127,6 +127,10 @@ const orderSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
   }
 });
 
@@ -137,6 +141,9 @@ orderSchema.virtual('orderId').get(function() {
 
 // Update status history when order status changes
 orderSchema.pre('save', function(next) {
+  // Update the updatedAt field
+  this.updatedAt = new Date();
+  
   if (this.isModified('orderStatus')) {
     this.statusHistory.push({
       status: this.orderStatus,

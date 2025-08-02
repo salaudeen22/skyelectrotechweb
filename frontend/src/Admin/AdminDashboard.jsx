@@ -34,21 +34,44 @@ const AdminDashboard = () => {
     loading: true
   });
 
+  const [chartLoading, setChartLoading] = useState(false);
+
+  // Date filtering state
+  const [dateFilter, setDateFilter] = useState({
+    period: 'month',
+    customStartDate: '',
+    customEndDate: '',
+    year: new Date().getFullYear()
+  });
+
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [dateFilter]);
 
   const fetchDashboardData = async () => {
     try {
       setDashboardData(prev => ({ ...prev, loading: true }));
+      setChartLoading(true);
 
       // Fetch dashboard stats
       const statsResponse = await analyticsAPI.getDashboardStats();
       const stats = statsResponse.data.stats;
 
-      // Fetch sales analytics for chart
-      const salesResponse = await analyticsAPI.getSalesAnalytics({ period: 'month' });
-      const salesData = salesResponse.data.chartData || [];
+      // Fetch sales analytics for chart with date filter
+      const salesParams = {
+        period: dateFilter.period,
+        year: dateFilter.year
+      };
+      
+      if (dateFilter.period === 'custom' && dateFilter.customStartDate && dateFilter.customEndDate) {
+        salesParams.startDate = dateFilter.customStartDate;
+        salesParams.endDate = dateFilter.customEndDate;
+      }
+      
+      const salesResponse = await analyticsAPI.getSalesAnalytics(salesParams);
+      console.log('Sales response:', salesResponse);
+      const salesData = salesResponse.data?.analytics?.chartData || salesResponse.data?.chartData || [];
+      console.log('Sales data:', salesData);
 
       // Fetch recent orders
       const ordersResponse = await ordersAPI.getAllOrders({ limit: 10, sort: '-createdAt' });
@@ -68,10 +91,12 @@ const AdminDashboard = () => {
         topSellingProducts,
         loading: false
       });
+      setChartLoading(false);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       toast.error('Failed to load dashboard data');
       setDashboardData(prev => ({ ...prev, loading: false }));
+      setChartLoading(false);
     }
   };
 
@@ -349,29 +374,93 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
         {/* Sales Chart */}
         <div className="xl:col-span-2 bg-white p-4 sm:p-6 rounded-xl shadow-lg">
-          <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-4">Sales Overview (Last 30 Days)</h2>
-          {salesData.length > 0 ? (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-800">Sales Overview</h2>
+            
+            {/* Date Filter Controls */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Period Selector */}
+              <select
+                value={dateFilter.period}
+                onChange={(e) => setDateFilter(prev => ({ ...prev, period: e.target.value }))}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="day">Daily</option>
+                <option value="week">Weekly</option>
+                <option value="month">Monthly</option>
+                <option value="custom">Custom Range</option>
+              </select>
+
+              {/* Year Selector */}
+              <select
+                value={dateFilter.year}
+                onChange={(e) => setDateFilter(prev => ({ ...prev, year: parseInt(e.target.value) }))}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+
+              {/* Custom Date Range */}
+              {dateFilter.period === 'custom' && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={dateFilter.customStartDate}
+                    onChange={(e) => setDateFilter(prev => ({ ...prev, customStartDate: e.target.value }))}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <span className="text-gray-500">to</span>
+                  <input
+                    type="date"
+                    value={dateFilter.customEndDate}
+                    onChange={(e) => setDateFilter(prev => ({ ...prev, customEndDate: e.target.value }))}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+          {chartLoading ? (
+            <div className="h-64 sm:h-72 lg:h-80 xl:h-96 flex items-center justify-center">
+              <div className="flex flex-col items-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                <p className="text-sm text-gray-500">Loading chart data...</p>
+              </div>
+            </div>
+          ) : salesData.length > 0 ? (
             <div className="w-full h-64 sm:h-72 lg:h-80 xl:h-96">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={salesData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
+                <LineChart 
+                  data={salesData} 
+                  margin={{ top: 10, right: 30, left: 10, bottom: 10 }}
+                  style={{ fontSize: '12px' }}
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                   <XAxis 
                     dataKey="name" 
                     stroke="#94a3b8" 
-                    fontSize={12}
+                    fontSize={10}
                     tick={{ fontSize: 10 }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                    interval={0}
                   />
                   <YAxis 
                     stroke="#94a3b8" 
-                    fontSize={12}
+                    fontSize={10}
                     tick={{ fontSize: 10 }}
                     tickFormatter={(value) => formatCurrency(value).replace('₹', '')}
+                    width={80}
                   />
                   <Tooltip 
                     wrapperClassName="!bg-white !border-slate-300 !rounded-lg !shadow-xl"
                     formatter={(value) => [formatCurrency(value), 'Sales']}
                     labelStyle={{ fontSize: 12 }}
                     contentStyle={{ fontSize: 11 }}
+                    cursor={{ stroke: '#3b82f6', strokeWidth: 1 }}
                   />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Line 
@@ -381,13 +470,16 @@ const AdminDashboard = () => {
                     strokeWidth={2} 
                     dot={{ fill: '#3b82f6', strokeWidth: 2, r: 3 }}
                     activeDot={{ r: 5, stroke: '#3b82f6', strokeWidth: 2 }}
+                    connectNulls={true}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-64 sm:h-72 lg:h-80 xl:h-96 flex items-center justify-center text-gray-500">
-              No sales data available
+            <div className="h-64 sm:h-72 lg:h-80 xl:h-96 flex flex-col items-center justify-center text-gray-500">
+              <FaChartLine className="w-12 h-12 mb-4 text-gray-300" />
+              <p className="text-lg font-medium">No sales data available</p>
+              <p className="text-sm text-gray-400 mt-2">Sales will appear here once orders are shipped</p>
             </div>
           )}
         </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiArrowLeft, FiPackage, FiTruck, FiCheck, FiX, FiCalendar, FiCreditCard, FiMapPin, FiPhone, FiMail } from 'react-icons/fi';
+import { FiArrowLeft, FiPackage, FiTruck, FiCheck, FiX, FiCalendar, FiCreditCard, FiMapPin, FiPhone, FiMail, FiTruck as FiTruckIcon } from 'react-icons/fi';
 import { ordersAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
 
@@ -65,15 +65,25 @@ const OrderDetails = () => {
   const getOrderTimeline = () => {
     const timeline = [
       { status: 'pending', label: 'Order Placed', completed: true },
-      { status: 'confirmed', label: 'Order Confirmed', completed: ['confirmed', 'shipped', 'delivered'].includes(order?.orderStatus) },
-      { status: 'shipped', label: 'Shipped', completed: ['shipped', 'delivered'].includes(order?.orderStatus) },
-      { status: 'delivered', label: 'Delivered', completed: order?.orderStatus === 'delivered' }
+      { status: 'confirmed', label: 'Order Confirmed', completed: ['confirmed', 'packed', 'shipped'].includes(order?.orderStatus) },
+      { status: 'packed', label: 'Packed', completed: ['packed', 'shipped'].includes(order?.orderStatus) },
+      { status: 'shipped', label: 'Shipped', completed: order?.orderStatus === 'shipped' }
     ];
 
     if (order?.orderStatus === 'cancelled') {
       return [
         { status: 'pending', label: 'Order Placed', completed: true },
         { status: 'cancelled', label: 'Order Cancelled', completed: true, isLast: true }
+      ];
+    }
+
+    if (order?.orderStatus === 'returned') {
+      return [
+        { status: 'pending', label: 'Order Placed', completed: true },
+        { status: 'confirmed', label: 'Order Confirmed', completed: true },
+        { status: 'packed', label: 'Packed', completed: true },
+        { status: 'shipped', label: 'Shipped', completed: true },
+        { status: 'returned', label: 'Returned', completed: true, isLast: true }
       ];
     }
 
@@ -166,8 +176,23 @@ const OrderDetails = () => {
                       </p>
                       {step.completed && step.status === order.orderStatus && (
                         <p className="text-sm text-gray-600">
-                          {new Date(order.updatedAt).toLocaleString()}
+                          {(() => {
+                            // Find the status history entry for this status
+                            const statusEntry = order.statusHistory?.find(h => h.status === step.status);
+                            if (statusEntry && statusEntry.updatedAt) {
+                              return new Date(statusEntry.updatedAt).toLocaleString();
+                            }
+                            // Fallback to order creation date
+                            return new Date(order.createdAt).toLocaleString();
+                          })()}
                         </p>
+                      )}
+                      {step.completed && step.status === 'shipped' && order.trackingNumber && (
+                        <div className="mt-1">
+                          <p className="text-sm text-blue-600 font-mono">
+                            Tracking: {order.trackingNumber}
+                          </p>
+                        </div>
                       )}
                     </div>
                     {!step.isLast && index < getOrderTimeline().length - 1 && (
@@ -269,6 +294,60 @@ const OrderDetails = () => {
                 )}
               </div>
             </div>
+
+            {/* Tracking Information */}
+            {(order.trackingNumber || order.estimatedDelivery) && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <FiTruckIcon className="w-5 h-5 mr-2 text-blue-500" />
+                  Tracking Information
+                </h2>
+                <div className="space-y-3">
+                  {order.trackingNumber && (
+                    <div className="flex items-center space-x-3">
+                      <FiTruck className="w-5 h-5 text-gray-400" />
+                      <div>
+                        <p className="text-sm text-gray-600">Tracking Number</p>
+                        <p className="font-mono font-semibold text-gray-900">{order.trackingNumber}</p>
+                      </div>
+                    </div>
+                  )}
+                  {order.estimatedDelivery && (
+                    <div className="flex items-center space-x-3">
+                      <FiCalendar className="w-5 h-5 text-gray-400" />
+                      <div>
+                        <p className="text-sm text-gray-600">Estimated Delivery</p>
+                        <p className="font-semibold text-gray-900">
+                          {(() => {
+                            try {
+                              const date = new Date(order.estimatedDelivery);
+                              if (isNaN(date.getTime())) {
+                                return 'Date not available';
+                              }
+                              return date.toLocaleDateString('en-IN', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              });
+                            } catch {
+                              return 'Date not available';
+                            }
+                          })()}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {order.orderStatus === 'shipped' && (
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-800">
+                        Your order is on its way! You can track your package using the tracking number above.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Payment Information */}
             <div className="bg-white rounded-lg shadow-sm p-6">

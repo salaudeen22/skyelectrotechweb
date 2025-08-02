@@ -8,11 +8,16 @@ const {
   getAllOrders,
   getOrdersByEmployee,
   assignOrderToEmployee,
-  cancelOrder
+  cancelOrder,
+  returnOrder,
+  getReturnRequests,
+  getOrderReturnRequests,
+  processReturnRequest
 } = require('../controllers/orders');
 const { auth, adminOnly, adminOrEmployee, userAccess } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 const logActivity = require('../middleware/activityLogger');
+const upload = require('../middleware/upload');
 const Order = require('../models/Order');
 const Settings = require('../models/Settings');
 
@@ -72,7 +77,7 @@ const createOrderValidation = [
 
 const updateOrderStatusValidation = [
   body('status')
-    .isIn(['pending', 'confirmed', 'processing', 'packed', 'shipped', 'delivered', 'cancelled', 'returned'])
+    .isIn(['pending', 'confirmed', 'packed', 'shipped', 'cancelled', 'returned'])
     .withMessage('Invalid order status'),
   body('note')
     .optional()
@@ -89,11 +94,22 @@ const updateOrderStatusValidation = [
 // User routes
 router.post('/', auth, userAccess, createOrderValidation, validate, createOrder);
 router.get('/my-orders', auth, userAccess, getMyOrders);
-router.get('/:id', auth, userAccess, getOrder);
-router.put('/:id/cancel', auth, userAccess, cancelOrder);
 
 // Employee routes (can view assigned orders and update status)
 router.get('/employee/assigned', auth, adminOrEmployee, getOrdersByEmployee);
+
+// Admin routes
+router.get('/', auth, adminOnly, getAllOrders);
+
+// Return request routes
+router.get('/return-requests', auth, adminOnly, getReturnRequests);
+router.put('/return-requests/:id/process', auth, adminOnly, processReturnRequest);
+
+// Order-specific routes (must come after specific routes)
+router.get('/:id', auth, userAccess, getOrder);
+router.put('/:id/cancel', auth, userAccess, cancelOrder);
+router.put('/:id/return', auth, userAccess, upload.array('images', 5), returnOrder);
+router.get('/:id/return-requests', auth, userAccess, getOrderReturnRequests);
 
 // Admin/Employee routes (can update order status)
 router.put('/:id/status', 
@@ -105,10 +121,9 @@ router.put('/:id/status',
 );
 
 // Admin routes
-router.get('/', auth, adminOnly, getAllOrders);
 router.put('/:id/assign', auth, adminOnly, assignOrderToEmployee);
 
-// Test route to check order data
+// Test routes (must come after specific routes)
 router.get('/test-order/:id', auth, async (req, res) => {
     try {
         // Check if user is admin

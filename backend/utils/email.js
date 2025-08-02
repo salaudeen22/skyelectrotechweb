@@ -600,11 +600,10 @@ const getOrderConfirmationEmailTemplate = (order, user) => {
     const colors = {
       'pending': '#f59e0b',
       'confirmed': '#3b82f6',
-      'processing': '#8b5cf6',
       'packed': '#6366f1',
-      'shipped': '#06b6d4',
-      'delivered': '#10b981',
-      'cancelled': '#ef4444'
+      'shipped': '#10b981',
+      'cancelled': '#ef4444',
+      'returned': '#f97316'
     };
     return colors[status] || '#6b7280';
   };
@@ -1153,7 +1152,7 @@ const getOrderStatusUpdateEmailTemplate = (order, user, newStatus) => {
       'confirmed': 'Your order has been confirmed and is being processed.',
       'processing': 'We are now processing your order and preparing it for shipment.',
       'packed': 'Your order has been packed and is ready for shipment.',
-      'shipped': 'Your order has been shipped and is on its way to you!',
+      'shipped': 'Your order has been shipped and is on its way to you! This completes your purchase.',
       'delivered': 'Your order has been delivered successfully.',
       'cancelled': 'Your order has been cancelled as requested.'
     };
@@ -1165,7 +1164,7 @@ const getOrderStatusUpdateEmailTemplate = (order, user, newStatus) => {
       'confirmed': '#3b82f6',
       'processing': '#8b5cf6',
       'packed': '#6366f1',
-      'shipped': '#06b6d4',
+      'shipped': '#10b981', // Green color for completion
       'delivered': '#10b981',
       'cancelled': '#ef4444'
     };
@@ -1533,6 +1532,357 @@ const sendNewUserNotificationEmail = async (user) => {
   }
 };
 
+// Send return request notification to admin
+const sendReturnRequestEmail = async (order, user, returnRequest) => {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+    if (!adminEmail) {
+      console.warn('Admin email not configured, skipping return request notification');
+      return;
+    }
+
+    const formatCurrency = (amount) => {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount || 0);
+    };
+
+    const getReasonLabel = (reason) => {
+      const reasons = {
+        defective: 'Product is defective/damaged',
+        wrong_item: 'Wrong item received',
+        not_as_described: 'Product not as described',
+        size_issue: 'Size doesn\'t fit',
+        quality_issue: 'Quality not satisfactory',
+        changed_mind: 'Changed my mind',
+        duplicate_order: 'Duplicate order',
+        other: 'Other reason'
+      };
+      return reasons[reason] || reason;
+    };
+
+    const getConditionLabel = (condition) => {
+      const conditions = {
+        good: 'Good - Like new condition',
+        fair: 'Fair - Minor wear/tear',
+        poor: 'Poor - Significant damage'
+      };
+      return conditions[condition] || condition;
+    };
+
+    const emailContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Return Request - Order ${order.orderId}</title>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #dc2626; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+            .order-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626; }
+            .return-details { background: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #fecaca; }
+            .button { background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; }
+            .image-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 15px 0; }
+            .image-item { border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb; }
+            .image-item img { width: 100%; height: 120px; object-fit: cover; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🔄 Return Request</h1>
+                <p>Order ${order.orderId} - ${user.name}</p>
+            </div>
+            <div class="content">
+                <div class="order-info">
+                    <h3>Order Information</h3>
+                    <p><strong>Order ID:</strong> ${order.orderId}</p>
+                    <p><strong>Customer:</strong> ${user.name} (${user.email})</p>
+                    <p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleDateString('en-IN')}</p>
+                    <p><strong>Total Amount:</strong> ${formatCurrency(order.totalPrice)}</p>
+                    <p><strong>Items:</strong> ${order.orderItems.length} item(s)</p>
+                </div>
+
+                <div class="return-details">
+                    <h3>Return Request Details</h3>
+                    <p><strong>Request #:</strong> ${returnRequest.requestNumber}</p>
+                    <p><strong>Reason:</strong> ${getReasonLabel(returnRequest.reason)}</p>
+                    <p><strong>Product Condition:</strong> ${getConditionLabel(returnRequest.condition)}</p>
+                    <p><strong>Description:</strong></p>
+                    <p style="background: white; padding: 15px; border-radius: 6px; margin: 10px 0;">${returnRequest.description}</p>
+                    
+                    ${returnRequest.images && returnRequest.images.length > 0 ? `
+                    <p><strong>Images:</strong></p>
+                    <div class="image-grid">
+                        ${returnRequest.images.map(img => `
+                            <div class="image-item">
+                                <img src="${img}" alt="Return evidence" />
+                            </div>
+                        `).join('')}
+                    </div>
+                    ` : '<p><strong>Images:</strong> No images provided</p>'}
+                </div>
+
+                <p><strong>Action Required:</strong> Please review this return request and take appropriate action.</p>
+                <a href="${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/orders/${order._id}" class="button">Review Return Request</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+
+    await sendEmail({
+      to: adminEmail,
+      subject: `Return Request - Order ${order.orderId} - ${user.name}`,
+      html: emailContent,
+      text: `
+        Return Request - SkyElectroTech
+
+        Order ID: ${order.orderId}
+        Customer: ${user.name} (${user.email})
+        Order Date: ${new Date(order.createdAt).toLocaleDateString('en-IN')}
+        Total Amount: ${formatCurrency(order.totalPrice)}
+
+        Return Details:
+        Request #: ${returnRequest.requestNumber}
+        Reason: ${getReasonLabel(returnRequest.reason)}
+        Product Condition: ${getConditionLabel(returnRequest.condition)}
+        Description: ${returnRequest.description}
+        Images: ${returnRequest.images && returnRequest.images.length > 0 ? `${returnRequest.images.length} image(s)` : 'No images provided'}
+
+        Review return request: ${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/orders/${order._id}
+      `
+    });
+    console.log(`Return request email sent to admin: ${adminEmail}`);
+  } catch (error) {
+    console.error(`Failed to send return request email to admin:`, error);
+  }
+};
+
+// Send return approved email to customer
+const sendReturnApprovedEmail = async (order, user, returnRequest) => {
+  try {
+    const formatCurrency = (amount) => {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR'
+      }).format(amount);
+    };
+
+    const getReasonLabel = (reason) => {
+      const reasons = {
+        defective: 'Defective Product',
+        wrong_item: 'Wrong Item Received',
+        not_as_described: 'Not as Described',
+        size_issue: 'Size Issue',
+        quality_issue: 'Quality Issue',
+        changed_mind: 'Changed Mind',
+        duplicate_order: 'Duplicate Order',
+        other: 'Other'
+      };
+      return reasons[reason] || reason;
+    };
+
+    const emailContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Return Request Approved</title>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #059669; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+            .order-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #059669; }
+            .return-details { background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #bbf7d0; }
+            .button { background: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>✅ Return Request Approved</h1>
+                <p>Order ${order.orderId} - Return Request #${returnRequest.requestNumber}</p>
+            </div>
+            <div class="content">
+                <p>Dear ${user.name},</p>
+                
+                <p>Great news! Your return request for <strong>Order ${order.orderId}</strong> has been approved.</p>
+
+                <div class="order-info">
+                    <h3>Order Information</h3>
+                    <p><strong>Order ID:</strong> ${order.orderId}</p>
+                    <p><strong>Return Request #:</strong> ${returnRequest.requestNumber}</p>
+                    <p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleDateString('en-IN')}</p>
+                    <p><strong>Total Amount:</strong> ${formatCurrency(order.totalPrice)}</p>
+                </div>
+
+                <div class="return-details">
+                    <h3>Return Details</h3>
+                    <p><strong>Reason:</strong> ${getReasonLabel(returnRequest.reason)}</p>
+                    <p><strong>Description:</strong> ${returnRequest.description}</p>
+                    ${returnRequest.adminNotes ? `<p><strong>Admin Notes:</strong> ${returnRequest.adminNotes}</p>` : ''}
+                </div>
+
+                <h3>Next Steps:</h3>
+                <ol>
+                    <li>Please package the items securely</li>
+                    <li>Include all original packaging and accessories</li>
+                    <li>We will arrange pickup or provide return shipping details</li>
+                    <li>Refund will be processed once we receive and inspect the items</li>
+                </ol>
+
+                <p>If you have any questions, please contact our customer support team.</p>
+                
+                <a href="${process.env.CLIENT_URL || 'http://localhost:3000'}/orders/${order._id}" class="button">View Order Details</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+
+    await sendEmail({
+      to: user.email,
+      subject: `Return Request Approved - Order ${order.orderId}`,
+      html: emailContent,
+      text: `
+        Return Request Approved - SkyElectroTech
+
+        Dear ${user.name},
+
+        Great news! Your return request for Order ${order.orderId} has been approved.
+
+        Order ID: ${order.orderId}
+        Return Request #: ${returnRequest.requestNumber}
+        Reason: ${getReasonLabel(returnRequest.reason)}
+        ${returnRequest.adminNotes ? `Admin Notes: ${returnRequest.adminNotes}` : ''}
+
+        Next Steps:
+        1. Package the items securely
+        2. Include all original packaging and accessories
+        3. We will arrange pickup or provide return shipping details
+        4. Refund will be processed once we receive and inspect the items
+
+        View order details: ${process.env.CLIENT_URL || 'http://localhost:3000'}/orders/${order._id}
+      `
+    });
+    console.log(`Return approved email sent to customer: ${user.email}`);
+  } catch (error) {
+    console.error(`Failed to send return approved email to customer:`, error);
+  }
+};
+
+// Send return rejected email to customer
+const sendReturnRejectedEmail = async (order, user, returnRequest) => {
+  try {
+    const formatCurrency = (amount) => {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR'
+      }).format(amount);
+    };
+
+    const getReasonLabel = (reason) => {
+      const reasons = {
+        defective: 'Defective Product',
+        wrong_item: 'Wrong Item Received',
+        not_as_described: 'Not as Described',
+        size_issue: 'Size Issue',
+        quality_issue: 'Quality Issue',
+        changed_mind: 'Changed Mind',
+        duplicate_order: 'Duplicate Order',
+        other: 'Other'
+      };
+      return reasons[reason] || reason;
+    };
+
+    const emailContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Return Request Status</title>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #dc2626; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+            .order-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626; }
+            .return-details { background: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #fecaca; }
+            .button { background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>❌ Return Request Status</h1>
+                <p>Order ${order.orderId} - Return Request #${returnRequest.requestNumber}</p>
+            </div>
+            <div class="content">
+                <p>Dear ${user.name},</p>
+                
+                <p>We regret to inform you that your return request for <strong>Order ${order.orderId}</strong> could not be approved at this time.</p>
+
+                <div class="order-info">
+                    <h3>Order Information</h3>
+                    <p><strong>Order ID:</strong> ${order.orderId}</p>
+                    <p><strong>Return Request #:</strong> ${returnRequest.requestNumber}</p>
+                    <p><strong>Order Date:</strong> ${new Date(order.createdAt).toLocaleDateString('en-IN')}</p>
+                    <p><strong>Total Amount:</strong> ${formatCurrency(order.totalPrice)}</p>
+                </div>
+
+                <div class="return-details">
+                    <h3>Return Details</h3>
+                    <p><strong>Reason:</strong> ${getReasonLabel(returnRequest.reason)}</p>
+                    <p><strong>Description:</strong> ${returnRequest.description}</p>
+                    ${returnRequest.adminNotes ? `<p><strong>Admin Notes:</strong> ${returnRequest.adminNotes}</p>` : ''}
+                </div>
+
+                <p>If you have any questions about this decision or would like to discuss further, please contact our customer support team.</p>
+                
+                <a href="${process.env.CLIENT_URL || 'http://localhost:3000'}/orders/${order._id}" class="button">View Order Details</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+
+    await sendEmail({
+      to: user.email,
+      subject: `Return Request Status - Order ${order.orderId}`,
+      html: emailContent,
+      text: `
+        Return Request Status - SkyElectroTech
+
+        Dear ${user.name},
+
+        We regret to inform you that your return request for Order ${order.orderId} could not be approved at this time.
+
+        Order ID: ${order.orderId}
+        Return Request #: ${returnRequest.requestNumber}
+        Reason: ${getReasonLabel(returnRequest.reason)}
+        ${returnRequest.adminNotes ? `Admin Notes: ${returnRequest.adminNotes}` : ''}
+
+        If you have any questions about this decision or would like to discuss further, please contact our customer support team.
+
+        View order details: ${process.env.CLIENT_URL || 'http://localhost:3000'}/orders/${order._id}
+      `
+    });
+    console.log(`Return rejected email sent to customer: ${user.email}`);
+  } catch (error) {
+    console.error(`Failed to send return rejected email to customer:`, error);
+  }
+};
+
 module.exports = {
   sendEmail,
   sendWelcomeEmail,
@@ -1541,6 +1891,9 @@ module.exports = {
   sendOrderConfirmationEmail,
   sendOrderNotificationEmail,
   sendOrderStatusUpdateEmail,
+  sendReturnRequestEmail,
+  sendReturnApprovedEmail,
+  sendReturnRejectedEmail,
   sendLowStockAlertEmail,
   sendNewUserNotificationEmail,
   getWelcomeEmailTemplate,

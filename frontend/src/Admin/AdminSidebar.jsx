@@ -15,7 +15,8 @@ import {
     FaTimes,
     FaBars,
     FaCog,
-    FaClipboardList // Icon for order management
+    FaClipboardList, // Icon for order management
+    FaUndo // Icon for return requests
 } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 
@@ -126,6 +127,14 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                 > 
                     <FaClipboardList className="mr-4 h-5 w-5" />
                     <span>Orders & Sales</span>
+                </NavLink>
+                <NavLink 
+                    to="/admin/return-requests" 
+                    onClick={handleLinkClick}
+                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
+                > 
+                    <FaUndo className="mr-4 h-5 w-5" />
+                    <span>Return Requests</span>
                 </NavLink>
                 <NavLink 
                     to="/admin/employees" 
