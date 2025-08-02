@@ -121,6 +121,34 @@ const ProductDetails = () => {
     toast.success('Added to wishlist!');
   };
 
+  // Safe text rendering function
+  const renderSafeText = (text) => {
+    if (!text) return 'No information available.';
+    
+    // Clean and sanitize the text
+    const cleanText = text
+      .replace(/[<>]/g, '') // Remove potential HTML tags
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;');
+    
+    return cleanText;
+  };
+
+  // Convert specifications array to object for easier rendering
+  const getSpecificationsObject = (specs) => {
+    if (!specs || !Array.isArray(specs)) return {};
+    
+    const specsObj = {};
+    specs.forEach(spec => {
+      if (spec.name && spec.value) {
+        specsObj[spec.name] = spec.value;
+      }
+    });
+    return specsObj;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -360,31 +388,45 @@ const ProductDetails = () => {
           <div className="p-4 sm:p-6">
             {activeTab === 'description' && (
               <div className="prose max-w-none">
-                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                  {product.description || 'No description available for this product.'}
-                </p>
+                <div 
+                  className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{ 
+                    __html: renderSafeText(product.description || 'No description available for this product.') 
+                  }}
+                />
               </div>
             )}
 
             {activeTab === 'specifications' && (
               <div className="space-y-3 sm:space-y-4">
-                {product.specifications && Object.keys(product.specifications).length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                    {Object.entries(product.specifications).map(([key, value]) => (
-                      <div key={key} className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-xs sm:text-sm font-medium text-gray-700 capitalize">{key}</span>
-                        <span className="text-xs sm:text-sm text-gray-600">{value}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs sm:text-sm text-gray-500">No specifications available for this product.</p>
-                )}
+                {(() => {
+                  const specsObj = getSpecificationsObject(product.specifications);
+                  const hasSpecs = Object.keys(specsObj).length > 0;
+                  
+                  return hasSpecs ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                      {Object.entries(specsObj).map(([key, value]) => (
+                        <div key={key} className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-xs sm:text-sm font-medium text-gray-700 capitalize">
+                            {renderSafeText(key)}
+                          </span>
+                          <span className="text-xs sm:text-sm text-gray-600">
+                            {renderSafeText(value)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs sm:text-sm text-gray-500">No specifications available for this product.</p>
+                  );
+                })()}
               </div>
             )}
 
             {activeTab === 'reviews' && (
-              <CommentSection productId={product._id} />
+              <div className="min-h-screen">
+                <CommentSection productId={product._id} />
+              </div>
             )}
           </div>
         </div>

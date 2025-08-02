@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { FaStar, FaThumbsUp, FaThumbsDown, FaReply, FaEdit, FaTrash, FaCheckCircle, FaPen, FaUsers, FaChartBar } from 'react-icons/fa';
+import { FaStar, FaThumbsUp, FaThumbsDown, FaReply, FaEdit, FaTrash, FaCheckCircle, FaPen, FaUsers, FaChartBar, FaFilter, FaSort } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import CommentModal from './CommentModal';
 import CommentItem from './CommentItem';
