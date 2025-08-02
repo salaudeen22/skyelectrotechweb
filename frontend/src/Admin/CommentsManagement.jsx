@@ -80,11 +80,19 @@ const CommentsManagement = () => {
         sort: `${filters.sortOrder === 'desc' ? '-' : ''}${filters.sortBy}`
       };
 
+      console.log('Fetching comments with params:', params);
       const response = await commentsAPI.getAllComments(params);
+      console.log('Comments API response:', response);
 
       if (response.success) {
-        setComments(response.data.comments);
-        setPagination(response.data.pagination);
+        setComments(response.data.comments || []);
+        setPagination(response.data.pagination || {
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 0,
+          itemsPerPage: 20
+        });
+        console.log('Set pagination:', response.data.pagination);
       } else {
         toast.error(response.message || 'Failed to load comments');
       }
@@ -660,18 +668,18 @@ const CommentsManagement = () => {
       </div>
 
       {/* Enhanced Pagination */}
-      {pagination.totalPages > 1 && (
+      {(pagination.totalPages || 1) > 1 && (
         <div className="mt-8 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="text-xs text-gray-600 text-center sm:text-left">
-              Showing <span className="font-semibold">{((pagination.currentPage - 1) * pagination.limit) + 1}</span> to{' '}
-              <span className="font-semibold">{Math.min(pagination.currentPage * pagination.limit, pagination.totalItems)}</span> of{' '}
+              Showing <span className="font-semibold">{((pagination.currentPage || 1) - 1) * (pagination.itemsPerPage || 20) + 1}</span> to{' '}
+              <span className="font-semibold">{Math.min((pagination.currentPage || 1) * (pagination.itemsPerPage || 20), pagination.totalItems || 0)}</span> of{' '}
               <span className="font-semibold">{pagination.totalItems || 0}</span> comments
             </div>
             <div className="flex items-center justify-center gap-2">
               <button
-                onClick={() => setFilters(prev => ({ ...prev, page: pagination.currentPage - 1 }))}
-                disabled={pagination.currentPage === 1}
+                onClick={() => setFilters(prev => ({ ...prev, page: (pagination.currentPage || 1) - 1 }))}
+                disabled={(pagination.currentPage || 1) === 1}
                 className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
               >
                 <span>←</span>
@@ -679,14 +687,14 @@ const CommentsManagement = () => {
               </button>
               
               <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                {Array.from({ length: Math.min(5, pagination.totalPages || 1) }, (_, i) => {
                   const page = i + 1;
                   return (
                     <button
                       key={page}
                       onClick={() => setFilters(prev => ({ ...prev, page }))}
                       className={`px-2 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
-                        page === pagination.currentPage
+                        page === (pagination.currentPage || 1)
                           ? 'bg-blue-600 text-white'
                           : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
                       }`}
@@ -698,8 +706,8 @@ const CommentsManagement = () => {
               </div>
               
               <button
-                onClick={() => setFilters(prev => ({ ...prev, page: pagination.currentPage + 1 }))}
-                disabled={pagination.currentPage === pagination.totalPages}
+                onClick={() => setFilters(prev => ({ ...prev, page: (pagination.currentPage || 1) + 1 }))}
+                disabled={(pagination.currentPage || 1) === (pagination.totalPages || 1)}
                 className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
               >
                 <span className="hidden sm:inline">Next</span>

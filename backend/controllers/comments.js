@@ -67,7 +67,7 @@ const getProductComments = asyncHandler(async (req, res) => {
   });
 
   // Generate pagination metadata
-  const pagination = getPaginationMeta(total, page, pageLimit);
+  const pagination = getPaginationMeta(page, pageLimit, total);
 
   sendResponse(res, 200, {
     comments,
@@ -286,7 +286,7 @@ const getAllComments = asyncHandler(async (req, res) => {
   const total = await Comment.countDocuments(query);
 
   // Generate pagination metadata
-  const pagination = getPaginationMeta(total, page, pageLimit);
+  const pagination = getPaginationMeta(page, pageLimit, total);
 
   sendResponse(res, 200, {
     comments,
