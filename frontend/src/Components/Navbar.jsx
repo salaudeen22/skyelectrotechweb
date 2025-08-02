@@ -105,9 +105,9 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center space-x-2">
               <img 
-                src="/logo.svg" 
+                src="/favicon_io (1)/android-chrome-512x512.png" 
                 alt={settings.storeInfo.name} 
-                className="h-12 w-24 object-contain"
+                className="h-16 w-16 object-contain"
               />
             
             </Link>
