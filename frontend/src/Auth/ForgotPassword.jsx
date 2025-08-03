@@ -39,10 +39,20 @@ const ForgotPassword = () => {
             <div className="flex justify-center mb-6">
               <div className="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center">
                 <img 
-                  src="https://i.postimg.cc/brZN4ngb/Sky-Logo-Only.png" 
+                  src="/favicon_io (1)/android-chrome-512x512.png" 
                   alt="SkyElectroTech" 
-                  className="h-10 w-auto"
+                  className="h-10 w-auto object-contain"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
                 />
+                <div 
+                  className="hidden items-center justify-center h-10 w-10 bg-blue-600 rounded-lg text-white font-bold text-xs"
+                  style={{ display: 'none' }}
+                >
+                  SET
+                </div>
               </div>
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Forgot Password?</h2>

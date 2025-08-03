@@ -78,10 +78,21 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
             <div className="flex items-center justify-center px-4 h-32 border-b border-gray-200">
                 <Link to="/" className="flex items-center justify-center">
                     <img 
-                        src="https://i.postimg.cc/brZN4ngb/Sky-Logo-Only.png" 
-                        alt={settings.storeInfo.name} 
-                        className="h-32 w-32 object-contain"
+                        src="/favicon_io (1)/android-chrome-512x512.png" 
+                        alt={settings.storeInfo.name || "SkyElectroTech"} 
+                        className="h-24 w-24 object-contain"
+                        onError={(e) => {
+                            // Fallback to a text logo if image fails to load
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                        }}
                     />
+                    <div 
+                        className="hidden items-center justify-center h-24 w-24 bg-blue-600 rounded-lg text-white font-bold text-lg"
+                        style={{ display: 'none' }}
+                    >
+                        SET
+                    </div>
                 </Link>
             </div>
 
