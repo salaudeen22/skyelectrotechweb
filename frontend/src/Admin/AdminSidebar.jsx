@@ -52,7 +52,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
             {/* Mobile overlay */}
             {isOpen && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                    className="fixed inset-0 backdrop-blur-sm bg-black/30 z-40 lg:hidden"
                     onClick={onToggle}
                 />
             )}

@@ -721,7 +721,7 @@ const CommentsManagement = () => {
       {/* Comment Detail Modal */}
       {showCommentModal && selectedComment && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300"></div>
+          <div className="fixed inset-0 backdrop-blur-sm bg-black/30 transition-opacity duration-300"></div>
           <div className="flex min-h-full items-center justify-center p-4">
             <div className="relative w-full max-w-2xl max-h-[90vh] overflow-hidden">
               <div className="relative bg-white rounded-xl shadow-2xl overflow-hidden">

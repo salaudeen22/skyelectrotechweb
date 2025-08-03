@@ -35,7 +35,7 @@ const CommentModal = ({ isOpen, onClose, productId, onCommentCreated, editCommen
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
+        className="fixed inset-0 backdrop-blur-sm bg-black/30 transition-opacity duration-300"
         onClick={handleBackdropClick}
       ></div>
 

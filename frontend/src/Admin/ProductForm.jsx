@@ -280,7 +280,7 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
     return (
         // Modal Overlay: Covers the entire screen
         <div 
-            className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4 transition-opacity duration-300"
+            className="fixed inset-0 z-50 backdrop-blur-sm bg-black/30 flex items-center justify-center p-4 transition-opacity duration-300"
             onClick={onClose} // Close modal on overlay click
         >
             {/* Modal Panel: The main content box */}
