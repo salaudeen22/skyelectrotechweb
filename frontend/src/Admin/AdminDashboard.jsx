@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  FaDollarSign, 
+  FaRupeeSign, 
   FaShoppingCart, 
   FaBoxOpen, 
   FaUsers, 
@@ -73,8 +73,12 @@ const AdminDashboard = () => {
       const salesData = salesResponse.data?.analytics?.chartData || salesResponse.data?.chartData || [];
       console.log('Sales data:', salesData);
 
-      // Fetch recent orders
-      const ordersResponse = await ordersAPI.getAllOrders({ limit: 10, sort: '-createdAt' });
+      // Fetch recent orders (only confirmed status)
+      const ordersResponse = await ordersAPI.getAllOrders({ 
+        limit: 10, 
+        sort: '-createdAt',
+        status: 'confirmed'
+      });
       const recentOrders = ordersResponse.data.orders || [];
 
 
@@ -188,7 +192,7 @@ const AdminDashboard = () => {
       label: 'Total Revenue',
       value: formatCurrency(stats.overview?.totalRevenue || 0),
       change: formatChange(stats.today?.revenue || 0, stats.yesterday?.revenue || 0),
-      icon: FaDollarSign,
+      icon: FaRupeeSign,
       iconBg: 'bg-green-100',
       iconColor: 'text-green-600',
       description: 'Lifetime revenue'
@@ -279,7 +283,7 @@ const AdminDashboard = () => {
     {
       label: 'Today\'s Revenue',
       value: formatCurrency(stats.today?.revenue || 0),
-      icon: FaDollarSign,
+      icon: FaRupeeSign,
       iconBg: 'bg-green-100',
       iconColor: 'text-green-600',
       description: 'Daily performance'
@@ -525,7 +529,7 @@ const AdminDashboard = () => {
         {/* Recent Orders */}
         <div className="bg-white p-6 rounded-xl shadow-lg">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-slate-800">Recent Orders</h2>
+            <h2 className="text-xl font-bold text-slate-800">Recent Confirmed Orders</h2>
             <Link to="/admin/orders" className="text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center">
               View all <FaArrowRight className="ml-1"/>
             </Link>
