@@ -43,6 +43,29 @@ const sendEmail = async (options) => {
 };
 // --- END OF UNCHANGED SECTION ---
 
+// Helper function to get logo URL
+const getLogoUrl = () => {
+  const baseUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  return `${baseUrl}/favicon_io%20(1)/android-chrome-512x512.png`;
+};
+
+// Helper function to get favicon URL
+const getFaviconUrl = () => {
+  const baseUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  return `${baseUrl}/favicon_io%20(1)/favicon-32x32.png`;
+};
+
+// Helper function to get logo URL for emails (using local images)
+const getEmailLogoUrl = () => {
+  const baseUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  return `${baseUrl}/favicon_io%20(1)/android-chrome-512x512.png`;
+};
+
+// Helper function to get favicon URL for emails
+const getEmailFaviconUrl = () => {
+  const baseUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  return `${baseUrl}/favicon_io%20(1)/favicon-32x32.png`;
+};
 
 // -------------------------------------------------------------------
 // START OF REDESIGNED EMAIL TEMPLATES
@@ -51,6 +74,8 @@ const sendEmail = async (options) => {
 // REDESIGNED Welcome email template
 const getWelcomeEmailTemplate = (userName) => {
   const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  const logoUrl = getEmailLogoUrl();
+  
   return {
     subject: 'Welcome to SkyElectroTech!',
     html: `
@@ -61,143 +86,392 @@ const getWelcomeEmailTemplate = (userName) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
         <title>Welcome to SkyElectroTech</title>
         <style>
           :root {
             --primary-color: #4f46e5;
-            --background-color: #f4f7f9;
+            --primary-dark: #4338ca;
+            --secondary-color: #10b981;
+            --background-color: #f8fafc;
             --text-color: #334155;
+            --text-light: #64748b;
             --card-background: #ffffff;
+            --border-color: #e2e8f0;
             --footer-text: #94a3b8;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
           }
+          
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
           body {
-            font-family: 'Poppins', Arial, sans-serif;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             color: var(--text-color);
             background-color: var(--background-color);
             margin: 0;
             padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
           }
+          
           .container {
             max-width: 600px;
             margin: 0 auto;
             background-color: var(--card-background);
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
           }
+          
           .header {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #8b5cf6 100%);
             color: white;
-            padding: 40px 20px;
+            padding: 50px 30px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(79, 70, 229, 0.3);
           }
+          
+          .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+          }
+          
           .logo {
-            max-width: 150px;
-            margin-bottom: 20px;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
           }
+          
           .header h1 {
             margin: 0;
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
+          
+          .header p {
+            margin: 10px 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+          }
+          
           .content {
-            padding: 30px;
+            padding: 40px 30px;
           }
+          
           .content h2 {
-            font-size: 22px;
+            font-size: 24px;
             color: #1e293b;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            font-weight: 600;
           }
+          
+          .content p {
+            margin-bottom: 20px;
+            color: var(--text-light);
+            font-size: 16px;
+          }
+          
           .features {
-            margin: 25px 0;
+            margin: 30px 0;
             padding: 0;
             list-style: none;
           }
+          
           .feature-item {
             display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #e2e8f0;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
           }
+          
+          .feature-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+          }
+          
           .feature-item:last-child {
-            border-bottom: none;
             margin-bottom: 0;
           }
-          .feature-item svg {
+          
+          .feature-icon {
+            width: 56px;
+            height: 56px;
+            margin-right: 25px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+          }
+          
+          .feature-icon svg {
             width: 24px;
             height: 24px;
-            margin-right: 15px;
-            flex-shrink: 0;
-            color: var(--primary-color);
           }
+          
+          .feature-content h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+          }
+          
+          .feature-content p {
+            color: var(--text-light);
+            margin: 0;
+            font-size: 14px;
+          }
+          
+          .cta-section {
+            text-align: center;
+            margin: 50px 0 30px;
+            padding: 40px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+          }
+          
           .cta-button {
             display: inline-block;
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
             color: #ffffff;
-            padding: 14px 30px;
+            padding: 18px 36px;
             text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            margin: 20px 0;
-            transition: background-color 0.2s;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 18px;
+            margin: 25px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px 0 rgba(79, 70, 229, 0.4);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
           }
+          
+          .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+          }
+          
+          .cta-button:hover::before {
+            left: 100%;
+          }
+          
           .cta-button:hover {
-            background-color: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px 0 rgba(79, 70, 229, 0.4);
           }
+          
           .footer {
             text-align: center;
-            padding: 25px;
+            padding: 30px;
             font-size: 14px;
             color: var(--footer-text);
+            background: #f8fafc;
+            border-top: 1px solid var(--border-color);
           }
-          /* Dark Mode Styles */
+          
+          .footer p {
+            margin: 5px 0;
+          }
+          
+          .social-links {
+            margin: 20px 0;
+          }
+          
+          .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: color 0.3s ease;
+          }
+          
+          .social-links a:hover {
+            color: var(--primary-color);
+          }
+          
+          /* Responsive Design */
+          @media (max-width: 600px) {
+            body {
+              padding: 10px;
+            }
+            
+            .container {
+              border-radius: 12px;
+            }
+            
+            .header {
+              padding: 30px 20px;
+            }
+            
+            .header h1 {
+              font-size: 28px;
+            }
+            
+            .content {
+              padding: 30px 20px;
+            }
+            
+            .feature-item {
+              padding: 15px;
+            }
+            
+            .feature-icon {
+              width: 40px;
+              height: 40px;
+              margin-right: 15px;
+            }
+            
+            .cta-section {
+              padding: 20px;
+            }
+          }
+          
+          /* Dark Mode Support */
           @media (prefers-color-scheme: dark) {
             :root {
-              --background-color: #111827;
-              --text-color: #d1d5db;
-              --card-background: #1f2937;
-              --footer-text: #6b7280;
+              --background-color: #0f172a;
+              --text-color: #e2e8f0;
+              --text-light: #94a3b8;
+              --card-background: #1e293b;
+              --border-color: #334155;
+              --footer-text: #64748b;
             }
-            .content h2 { color: #f9fafb; }
-            .feature-item { border-bottom-color: #374151; }
-            .cta-button { color: #ffffff !important; } /* Important to override link color */
+            
+            .content h2 { 
+              color: #f1f5f9; 
+            }
+            
+            .feature-item {
+              background: #334155;
+              border-color: #475569;
+            }
+            
+            .feature-content h3 { 
+              color: #f1f5f9; 
+            }
+            
+            .cta-section {
+              background: linear-gradient(135deg, #334155 0%, #475569 100%);
+              border-color: #475569;
+            }
+            
+            .footer {
+              background: #334155;
+              border-color: #475569;
+            }
           }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
-            <img src="https://i.postimg.cc/brZN4ngb/Sky-Logo-Only.png" alt="SkyElectroTech Logo" class="logo">
-            <h1>Welcome Aboard, ${userName}!</h1>
+            <img src="${logoUrl}" alt="SkyElectroTech Logo" class="logo">
+            <h1>Welcome Aboard, ${userName}! 🚀</h1>
+            <p>Your journey into the world of electronics starts now</p>
           </div>
           <div class="content">
-            <h2>Your journey into electronics starts now.</h2>
-            <p>Thank you for joining SkyElectroTech! We're thrilled to have you in our community. Here's a glimpse of what you can do with your new account:</p>
+            <h2>Welcome to the Future of Electronics Shopping</h2>
+            <p>Thank you for joining SkyElectroTech! We're thrilled to have you in our community. Get ready to discover amazing electronics at unbeatable prices.</p>
+            
             <ul class="features">
               <li class="feature-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                <span><strong>Browse & Shop:</strong> Discover our vast catalog of top-tier electronics.</span>
+                <div class="feature-icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  </svg>
+                </div>
+                <div class="feature-content">
+                  <h3>Vast Product Catalog</h3>
+                  <p>Browse through thousands of high-quality electronics and components</p>
+                </div>
               </li>
               <li class="feature-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <span><strong>Secure Checkout:</strong> Experience seamless and safe payments.</span>
+                <div class="feature-icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <div class="feature-content">
+                  <h3>Secure Shopping</h3>
+                  <p>Shop with confidence with our secure payment and data protection</p>
+                </div>
               </li>
               <li class="feature-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                <span><strong>Track Your Orders:</strong> Follow your package from our warehouse to your door.</span>
+                <div class="feature-icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                </div>
+                <div class="feature-content">
+                  <h3>Fast Delivery</h3>
+                  <p>Get your orders delivered quickly with real-time tracking</p>
+                </div>
               </li>
             </ul>
-            <p>Ready to get started? Explore our latest products now.</p>
-            <a href="${clientUrl}/products" class="cta-button">Start Shopping</a>
-            <p>If you have any questions, feel free to contact our support team. We're here to help!</p>
+            
+            <div class="cta-section">
+              <p>Ready to start your shopping journey?</p>
+              <a href="${clientUrl}/products" class="cta-button">Start Shopping Now</a>
+              <p style="font-size: 14px; margin-top: 15px; color: var(--text-light);">
+                If you have any questions, our support team is here to help!
+              </p>
+            </div>
           </div>
-        </div>
-        <div class="footer">
-          <p>You received this email because you signed up at SkyElectroTech.</p>
-          <p>© ${new Date().getFullYear()} SkyElectroTech. All rights reserved.</p>
+          <div class="footer">
+            <p>You received this email because you signed up at SkyElectroTech.</p>
+            <div class="social-links">
+              <a href="#">Facebook</a> • <a href="#">Twitter</a> • <a href="#">Instagram</a>
+            </div>
+            <p>© ${new Date().getFullYear()} SkyElectroTech. All rights reserved.</p>
+          </div>
         </div>
       </body>
       </html>
@@ -205,10 +479,15 @@ const getWelcomeEmailTemplate = (userName) => {
     text: `
       Welcome to SkyElectroTech, ${userName}!
 
-      Thank you for joining our community. With your new account, you can shop our electronics catalog, enjoy secure checkout, and track your orders.
-
+      Thank you for joining our community. With your new account, you can:
+      
+      • Browse our vast catalog of electronics and components
+      • Shop securely with multiple payment options
+      • Track your orders with real-time updates
+      • Enjoy fast and reliable delivery
+      
       Start shopping now: ${clientUrl}/products
-
+      
       Happy exploring!
       The SkyElectroTech Team
     `
@@ -217,6 +496,8 @@ const getWelcomeEmailTemplate = (userName) => {
 
 // REDESIGNED Forgot password email template
 const getForgotPasswordEmailTemplate = (userName, resetUrl) => {
+  const logoUrl = getEmailLogoUrl();
+  
   return {
     subject: 'Reset Your SkyElectroTech Password',
     html: `
@@ -227,124 +508,304 @@ const getForgotPasswordEmailTemplate = (userName, resetUrl) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
         <title>Reset Your Password</title>
         <style>
           :root {
-            --primary-color: #f59e0b; /* Amber for warning */
-            --background-color: #f4f7f9;
+            --primary-color: #f59e0b;
+            --primary-dark: #d97706;
+            --warning-color: #fbbf24;
+            --background-color: #f8fafc;
             --text-color: #334155;
+            --text-light: #64748b;
             --card-background: #ffffff;
+            --border-color: #e2e8f0;
             --footer-text: #94a3b8;
+            --warning-bg: #fefce8;
+            --warning-border: #fde68a;
           }
+          
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
           body {
-            font-family: 'Poppins', Arial, sans-serif;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             color: var(--text-color);
             background-color: var(--background-color);
             margin: 0;
             padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
           }
+          
           .container {
             max-width: 600px;
             margin: 0 auto;
             background-color: var(--card-background);
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
           }
+          
           .header {
-            background-color: #1f2937;
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
             color: white;
-            padding: 40px 20px;
+            padding: 40px 30px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
           }
+          
+          .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.2;
+          }
+          
+          .logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+          }
+          
           .header h1 {
             margin: 0;
             font-size: 28px;
             font-weight: 700;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
+          
+          .header p {
+            margin: 10px 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+          }
+          
           .content {
-            padding: 30px;
+            padding: 40px 30px;
           }
+          
+          .content p {
+            margin-bottom: 20px;
+            color: var(--text-light);
+            font-size: 16px;
+          }
+          
           .notice-box {
             display: flex;
             align-items: flex-start;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 4px solid var(--primary-color);
-            background-color: #fefce8;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            border: 1px solid var(--warning-border);
+            background: var(--warning-bg);
+            position: relative;
+            overflow: hidden;
           }
-          .notice-box svg {
+          
+          .notice-box::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+          }
+          
+          .notice-icon {
+            width: 48px;
+            height: 48px;
+            margin-right: 20px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+          }
+          
+          .notice-icon svg {
             width: 24px;
             height: 24px;
-            margin-right: 15px;
-            flex-shrink: 0;
-            color: var(--primary-color);
           }
+          
+          .notice-content h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 8px;
+          }
+          
+          .notice-content p {
+            color: #a16207;
+            margin: 0;
+            font-size: 14px;
+          }
+          
           .reset-button {
             display: inline-block;
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
             color: #ffffff;
-            padding: 14px 30px;
+            padding: 16px 32px;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-weight: 600;
-            margin: 20px auto;
+            font-size: 16px;
+            margin: 25px auto;
             text-align: center;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px 0 rgba(245, 158, 11, 0.3);
+            position: relative;
+            overflow: hidden;
           }
+          
+          .reset-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+          }
+          
+          .reset-button:hover::before {
+            left: 100%;
+          }
+          
           .reset-button:hover {
-            background-color: #d97706;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px 0 rgba(245, 158, 11, 0.4);
           }
+          
           .link-box {
-            background-color: #f1f5f9;
-            padding: 15px;
-            border-radius: 8px;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
             font-family: 'Courier New', monospace;
             word-break: break-all;
             text-align: center;
             font-size: 14px;
-            margin-top: 15px;
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
           }
+          
           .footer {
             text-align: center;
-            padding: 25px;
+            padding: 30px;
             font-size: 14px;
             color: var(--footer-text);
+            background: #f8fafc;
+            border-top: 1px solid var(--border-color);
           }
-          /* Dark Mode Styles */
+          
+          .footer p {
+            margin: 5px 0;
+          }
+          
+          /* Responsive Design */
+          @media (max-width: 600px) {
+            body {
+              padding: 10px;
+            }
+            
+            .container {
+              border-radius: 12px;
+            }
+            
+            .header {
+              padding: 30px 20px;
+            }
+            
+            .header h1 {
+              font-size: 24px;
+            }
+            
+            .content {
+              padding: 30px 20px;
+            }
+            
+            .notice-box {
+              padding: 15px;
+            }
+            
+            .notice-icon {
+              width: 40px;
+              height: 40px;
+              margin-right: 15px;
+            }
+          }
+          
+          /* Dark Mode Support */
           @media (prefers-color-scheme: dark) {
             :root {
-              --background-color: #111827;
-              --text-color: #d1d5db;
-              --card-background: #1f2937;
-              --footer-text: #6b7280;
+              --background-color: #0f172a;
+              --text-color: #e2e8f0;
+              --text-light: #94a3b8;
+              --card-background: #1e293b;
+              --border-color: #334155;
+              --footer-text: #64748b;
+              --warning-bg: #2c271a;
+              --warning-border: #92400e;
             }
-            .notice-box {
-              background-color: #2c271a;
-              border-left-color: #f59e0b;
+            
+            .link-box {
+              background: #334155;
+              border-color: #475569;
             }
-            .link-box { background-color: #374151; }
-            .reset-button { color: #ffffff !important; }
+            
+            .footer {
+              background: #334155;
+              border-color: #475569;
+            }
           }
         </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
+          <img src="${logoUrl}" alt="SkyElectroTech Logo" class="logo">
           <h1>Password Reset Request</h1>
+          <p>Secure your account with a new password</p>
         </div>
         <div class="content">
           <p><strong>Hi ${userName},</strong></p>
           <p>We received a request to reset the password for your SkyElectroTech account. If you did not make this request, you can safely ignore this email.</p>
           
           <div class="notice-box">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <div>
-              <strong>This link is time-sensitive.</strong><br>
-              For your security, it will expire in 10 minutes.
+            <div class="notice-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="notice-content">
+              <h3>⏰ Time-Sensitive Link</h3>
+              <p>For your security, this link will expire in 10 minutes.</p>
             </div>
           </div>
           
@@ -354,12 +815,14 @@ const getForgotPasswordEmailTemplate = (userName, resetUrl) => {
           <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
           <div class="link-box">${resetUrl}</div>
           
-          <p>Thank you,<br>The SkyElectroTech Security Team</p>
+          <p style="margin-top: 30px; padding: 20px; background: #f8fafc; border-radius: 12px; border-left: 4px solid #10b981;">
+            <strong>🔒 Security Note:</strong> Never share this link with anyone. Our team will never ask for your password via email.
+          </p>
         </div>
-      </div>
-      <div class="footer">
-        <p>If you didn't request a password reset, please contact our support team immediately.</p>
-        <p>© ${new Date().getFullYear()} SkyElectroTech. All rights reserved.</p>
+        <div class="footer">
+          <p>If you didn't request a password reset, please contact our support team immediately.</p>
+          <p>© ${new Date().getFullYear()} SkyElectroTech. All rights reserved.</p>
+        </div>
       </div>
     </body>
     </html>
@@ -388,6 +851,8 @@ const getOTPEmailTemplate = (userName, otpCode, purpose = 'profile update') => {
     'phone_verification': 'verify your phone number',
     'email_verification': 'verify your email address'
   };
+  
+  const logoUrl = getEmailLogoUrl();
 
   return {
     subject: `OTP Verification - SkyElectroTech`,
@@ -399,106 +864,295 @@ const getOTPEmailTemplate = (userName, otpCode, purpose = 'profile update') => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
         <title>OTP Verification</title>
         <style>
           :root {
             --primary-color: #3b82f6;
-            --background-color: #f4f7f9;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #10b981;
+            --background-color: #f8fafc;
             --text-color: #334155;
+            --text-light: #64748b;
             --card-background: #ffffff;
+            --border-color: #e2e8f0;
             --footer-text: #94a3b8;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
           }
+          
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
           body {
-            font-family: 'Poppins', Arial, sans-serif;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             color: var(--text-color);
             background-color: var(--background-color);
             margin: 0;
             padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
           }
+          
           .container {
             max-width: 600px;
             margin: 0 auto;
             background-color: var(--card-background);
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
           }
+          
           .header {
-            background-color: #1f2937;
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
             color: white;
-            padding: 40px 20px;
+            padding: 40px 30px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
           }
+          
+          .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.2;
+          }
+          
+          .logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+          }
+          
           .header h1 {
             margin: 0;
             font-size: 28px;
             font-weight: 700;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
+          
+          .header p {
+            margin: 10px 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+          }
+          
           .content {
-            padding: 30px;
+            padding: 40px 30px;
           }
+          
+          .content h2 {
+            font-size: 24px;
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-weight: 600;
+          }
+          
+          .content p {
+            margin-bottom: 20px;
+            color: var(--text-light);
+            font-size: 16px;
+          }
+          
           .otp-box {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
             color: white;
-            padding: 30px;
+            padding: 40px 30px;
             text-align: center;
-            border-radius: 12px;
-            margin: 20px 0;
+            border-radius: 16px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3);
           }
+          
+          .otp-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.1;
+          }
+          
+          .otp-label {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+          }
+          
           .otp-code {
-            font-size: 36px;
+            font-size: 48px;
             font-weight: 700;
-            letter-spacing: 8px;
-            margin: 15px 0;
-            padding: 20px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 8px;
-            display: inline-block;
-          }
-          .notice {
-            background: #fef3c7;
-            border: 1px solid #f59e0b;
-            border-radius: 8px;
-            padding: 15px;
+            letter-spacing: 12px;
             margin: 20px 0;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
-          .footer {
-            background-color: #f8fafc;
+          
+          .otp-expiry {
+            font-size: 14px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+          }
+          
+          .notice {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid var(--warning-color);
+            border-radius: 12px;
             padding: 20px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .notice::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+          }
+          
+          .notice strong {
+            color: #92400e;
+            font-weight: 600;
+          }
+          
+          .footer {
             text-align: center;
-            border-top: 1px solid #e2e8f0;
+            padding: 30px;
+            font-size: 14px;
+            color: var(--footer-text);
+            background: #f8fafc;
+            border-top: 1px solid var(--border-color);
+          }
+          
+          .footer p {
+            margin: 5px 0;
+          }
+          
+          /* Responsive Design */
+          @media (max-width: 600px) {
+            body {
+              padding: 10px;
+            }
+            
+            .container {
+              border-radius: 12px;
+            }
+            
+            .header {
+              padding: 30px 20px;
+            }
+            
+            .header h1 {
+              font-size: 24px;
+            }
+            
+            .content {
+              padding: 30px 20px;
+            }
+            
+            .otp-box {
+              padding: 30px 20px;
+            }
+            
+            .otp-code {
+              font-size: 36px;
+              letter-spacing: 8px;
+              padding: 20px;
+            }
+          }
+          
+          /* Dark Mode Support */
+          @media (prefers-color-scheme: dark) {
+            :root {
+              --background-color: #0f172a;
+              --text-color: #e2e8f0;
+              --text-light: #94a3b8;
+              --card-background: #1e293b;
+              --border-color: #334155;
+              --footer-text: #64748b;
+            }
+            
+            .content h2 { 
+              color: #f1f5f9; 
+            }
+            
+            .notice {
+              background: linear-gradient(135deg, #2c271a 0%, #92400e 100%);
+              border-color: #f59e0b;
+            }
+            
+            .footer {
+              background: #334155;
+              border-color: #475569;
+            }
           }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
+                <img src="${logoUrl}" alt="SkyElectroTech Logo" class="logo">
                 <h1>SkyElectroTech</h1>
                 <p>OTP Verification</p>
             </div>
             <div class="content">
-                <h2>Hello ${userName}!</h2>
+                <h2>Hello ${userName}! 👋</h2>
                 <p>We received a request to ${purposeText[purpose] || purpose}. Please use the OTP code below to complete the verification:</p>
                 
                 <div class="otp-box">
-                    <p style="margin: 0; font-size: 18px;">Your OTP Code:</p>
+                    <p class="otp-label">Your OTP Code:</p>
                     <div class="otp-code">${otpCode}</div>
-                    <p style="margin: 0; font-size: 14px; opacity: 0.9;">This code expires in 10 minutes</p>
+                    <p class="otp-expiry">⏰ This code expires in 10 minutes</p>
                 </div>
 
                 <div class="notice">
-                    <strong>Security Notice:</strong> Never share this OTP with anyone. Our team will never ask for your OTP via email or phone.
+                    <strong>🔒 Security Notice:</strong> Never share this OTP with anyone. Our team will never ask for your OTP via email or phone.
                 </div>
 
                 <p>If you didn't request this verification, please ignore this email or contact our support team.</p>
             </div>
             <div class="footer">
-                <p style="color: var(--footer-text); margin: 0;">
-                    © 2024 SkyElectroTech. All rights reserved.<br>
-                    This is an automated message, please do not reply.
-                </p>
+                <p>© ${new Date().getFullYear()} SkyElectroTech. All rights reserved.</p>
+                <p>This is an automated message, please do not reply.</p>
             </div>
         </div>
     </body>
@@ -586,6 +1240,7 @@ const getOrderConfirmationEmailTemplate = (order, user) => {
   const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
   const orderId = order._id.toString().slice(-6).toUpperCase();
   const orderDate = new Date(order.createdAt).toLocaleDateString('en-IN');
+  const logoUrl = getEmailLogoUrl();
   
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
@@ -647,12 +1302,18 @@ const getOrderConfirmationEmailTemplate = (order, user) => {
           .header {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            padding: 40px 20px;
+            padding: 50px 30px;
             text-align: center;
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
           }
           .logo {
             max-width: 120px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
           }
           .header h1 {
             margin: 0;
@@ -663,10 +1324,12 @@ const getOrderConfirmationEmailTemplate = (order, user) => {
             padding: 30px;
           }
           .order-summary {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
           }
           .order-details {
             display: grid;
@@ -675,9 +1338,11 @@ const getOrderConfirmationEmailTemplate = (order, user) => {
             margin: 20px 0;
           }
           .detail-item {
-            padding: 15px;
-            background: #f1f5f9;
-            border-radius: 8px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
           }
           .detail-item strong {
             display: block;
@@ -710,10 +1375,12 @@ const getOrderConfirmationEmailTemplate = (order, user) => {
             color: white;
           }
           .total-section {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
           }
           .total-row {
             display: flex;
@@ -729,17 +1396,23 @@ const getOrderConfirmationEmailTemplate = (order, user) => {
           }
           .cta-button {
             display: inline-block;
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, #059669 100%);
             color: #ffffff;
-            padding: 14px 30px;
+            padding: 16px 32px;
             text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            margin: 20px 0;
-            transition: background-color 0.2s;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            margin: 25px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
           }
           .cta-button:hover {
-            background-color: #059669;
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
           }
           .footer {
             text-align: center;
@@ -761,7 +1434,7 @@ const getOrderConfirmationEmailTemplate = (order, user) => {
     <body>
         <div class="container">
             <div class="header">
-                <img src="https://i.postimg.cc/brZN4ngb/Sky-Logo-Only.png" alt="SkyElectroTech Logo" class="logo">
+                <img src="${logoUrl}" alt="SkyElectroTech Logo" class="logo">
                 <h1>Order Confirmed!</h1>
                 <p>Thank you for your order, ${user.name}!</p>
             </div>
@@ -890,6 +1563,7 @@ const getOrderConfirmationEmailTemplate = (order, user) => {
 const getOrderNotificationEmailTemplate = (order, user) => {
   const orderId = order._id.toString().slice(-6).toUpperCase();
   const orderDate = new Date(order.createdAt).toLocaleDateString('en-IN');
+  const logoUrl = getEmailLogoUrl();
   
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
@@ -1033,7 +1707,7 @@ const getOrderNotificationEmailTemplate = (order, user) => {
     <body>
         <div class="container">
             <div class="header">
-                <img src="https://i.postimg.cc/brZN4ngb/Sky-Logo-Only.png" alt="SkyElectroTech Logo" class="logo">
+                <img src="${logoUrl}" alt="SkyElectroTech Logo" class="logo">
                 <h1>New Order Received!</h1>
                 <p>Order #${orderId} - ${formatCurrency(order.totalPrice)}</p>
             </div>
@@ -1268,7 +1942,7 @@ const getOrderStatusUpdateEmailTemplate = (order, user, newStatus) => {
     <body>
         <div class="container">
             <div class="header">
-                <img src="https://i.postimg.cc/brZN4ngb/Sky-Logo-Only.png" alt="SkyElectroTech Logo" class="logo">
+                <img src="${logoUrl}" alt="SkyElectroTech Logo" class="logo">
                 <h1>Order Status Update</h1>
                 <p>Order #${orderId}</p>
             </div>
