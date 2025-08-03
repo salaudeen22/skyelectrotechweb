@@ -262,7 +262,8 @@ export const ordersAPI = {
   // Export today's sales invoice (Admin)
   exportTodaySalesInvoice: async () => {
     const response = await api.get('/orders/today-sales-invoice', {
-      responseType: 'blob'
+      responseType: 'blob',
+      timeout: 60000 // Increase timeout to 60 seconds for PDF generation
     });
     return response;
   },
@@ -270,7 +271,8 @@ export const ordersAPI = {
   // Export individual order invoice
   exportOrderInvoice: async (orderId) => {
     const response = await api.get(`/orders/${orderId}/invoice`, {
-      responseType: 'blob'
+      responseType: 'blob',
+      timeout: 60000 // Increase timeout to 60 seconds for PDF generation
     });
     return response;
   },
@@ -422,6 +424,18 @@ export const analyticsAPI = {
   // Get activity logs
   getActivityLogs: async (params = {}) => {
     const response = await api.get('/analytics/activity-logs', { params });
+    return response.data;
+  },
+
+  // Get customer analytics
+  getCustomerAnalytics: async (params = {}) => {
+    const response = await api.get('/analytics/customers', { params });
+    return response.data;
+  },
+
+  // Get performance metrics
+  getPerformanceMetrics: async (params = {}) => {
+    const response = await api.get('/analytics/performance', { params });
     return response.data;
   }
 };

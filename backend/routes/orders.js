@@ -105,6 +105,155 @@ router.get('/', auth, adminOnly, getAllOrders);
 router.get('/return-requests', auth, adminOnly, getReturnRequests);
 router.put('/return-requests/:id/process', auth, adminOnly, processReturnRequest);
 
+// Test route to check if orders routes are working
+router.get('/test', auth, (req, res) => {
+    console.log('Test route called');
+    res.json({ message: 'Orders routes are working', user: req.user.name });
+});
+
+// Generate today's sales invoice PDF (must come before /:id routes)
+router.get('/today-sales-invoice', auth, async (req, res) => {
+    console.log('=== TODAY SALES INVOICE ROUTE CALLED ===');
+    console.log('User:', req.user.name, 'Role:', req.user.role);
+    
+    try {
+        console.log('Step 1: Checking admin role...');
+        
+        // Check if user is admin
+        if (req.user.role !== 'admin') {
+            console.log('Access denied - user is not admin');
+            return res.status(403).json({ message: 'Access denied. Admin only.' });
+        }
+
+        console.log('Step 2: Calculating date range...');
+        
+        // Get today's date (start and end)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        console.log('Fetching orders from:', today, 'to:', tomorrow);
+
+        console.log('Step 3: Fetching orders from database...');
+        
+        // Fetch today's orders
+        const orders = await Order.find({
+            createdAt: {
+                $gte: today,
+                $lt: tomorrow
+            }
+        }).populate('user', 'name email phone')
+          .populate('orderItems.product', 'name price image')
+          .sort({ createdAt: 1 });
+
+        console.log('Today\'s orders found:', orders.length);
+        
+        if (orders.length > 0) {
+            console.log('Sample order:', {
+                id: orders[0]._id,
+                user: orders[0].user?.name,
+                totalPrice: orders[0].totalPrice,
+                items: orders[0].orderItems?.length || 0
+            });
+        }
+
+        if (orders.length === 0) {
+            console.log('No orders found for today');
+            return res.status(404).json({ 
+                message: 'No orders found for today',
+                date: today.toISOString().split('T')[0]
+            });
+        }
+
+        console.log('Step 4: Calculating summary...');
+        
+        // Calculate summary
+        const totalRevenue = orders.reduce((sum, order) => {
+            const orderTotal = order.totalPrice || order.totalAmount || 0;
+            console.log(`Order ${order._id}: totalPrice=${order.totalPrice}, totalAmount=${order.totalAmount}, calculated=${orderTotal}`);
+            return sum + orderTotal;
+        }, 0);
+        const totalOrders = orders.length;
+        const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+        console.log('Total revenue calculated:', totalRevenue);
+        console.log('Total orders:', totalOrders);
+        console.log('Average order value:', avgOrderValue);
+
+        console.log('Step 5: Getting company settings...');
+        
+        // Get company settings
+        const settings = await Settings.findOne().sort('-createdAt');
+        console.log('Settings found:', settings ? 'Yes' : 'No');
+        const companyInfo = settings?.storeInfo || {
+            name: 'Sky Electro Tech',
+            description: 'Electronics & Components Store',
+            email: 'info@skyelectro.tech',
+            phone: '+91 98765 43210',
+            address: '123 Electronics Street, Mumbai, Maharashtra - 400001',
+            gstin: '27AABCS1234Z1Z5'
+        };
+        console.log('Company info:', companyInfo);
+
+        console.log('Step 6: Generating HTML content...');
+        
+        // Generate HTML content
+        const htmlContent = generateInvoiceHTML({
+            orders,
+            totalRevenue,
+            totalOrders,
+            avgOrderValue,
+            date: today.toLocaleDateString('en-IN'),
+            companyInfo
+        });
+
+        console.log('HTML content generated, length:', htmlContent.length);
+
+        console.log('Step 7: Attempting PDF generation...');
+        
+        try {
+            // Generate PDF with proper invoice format
+            console.log('Attempting PDF generation...');
+            const pdfBuffer = await generatePDF(htmlContent);
+
+            console.log('PDF generated successfully, size:', pdfBuffer.length, 'bytes');
+
+            // Set response headers
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `attachment; filename="Today_Sales_Invoice_${today.toISOString().split('T')[0]}.pdf"`);
+            
+            console.log('Step 8: Sending PDF response...');
+            res.send(pdfBuffer);
+            console.log('=== PDF SENT SUCCESSFULLY ===');
+            
+        } catch (pdfError) {
+            console.error('PDF generation failed, falling back to HTML:', pdfError);
+            console.error('PDF Error stack:', pdfError.stack);
+            
+            // Fallback to HTML
+            console.log('Sending HTML fallback...');
+            res.setHeader('Content-Type', 'text/html');
+            res.setHeader('Content-Disposition', `attachment; filename="Today_Sales_Invoice_${today.toISOString().split('T')[0]}.html"`);
+            
+            res.send(htmlContent);
+            console.log('=== HTML FALLBACK SENT ===');
+        }
+
+    } catch (error) {
+        console.error('=== ERROR IN TODAY SALES INVOICE ROUTE ===');
+        console.error('Error generating sales invoice:', error);
+        console.error('Error stack:', error.stack);
+        
+        // Send proper error response
+        res.status(500).json({
+            message: 'Failed to generate sales invoice',
+            error: error.message || 'Unknown error occurred',
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+});
+
 // Order-specific routes (must come after specific routes)
 router.get('/:id', auth, userAccess, getOrder);
 router.put('/:id/cancel', auth, userAccess, cancelOrder);
@@ -122,40 +271,6 @@ router.put('/:id/status',
 
 // Admin routes
 router.put('/:id/assign', auth, adminOnly, assignOrderToEmployee);
-
-// Test routes (must come after specific routes)
-router.get('/test-order/:id', auth, async (req, res) => {
-    try {
-        // Check if user is admin
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied. Admin only.' });
-        }
-
-        const { id } = req.params;
-        const order = await Order.findById(id)
-            .populate('user', 'name email phone')
-            .populate('orderItems.product', 'name price image description');
-
-        if (!order) {
-            return res.status(404).json({ message: 'Order not found' });
-        }
-
-        res.json({
-            orderId: order._id,
-            totalPrice: order.totalPrice,
-            totalAmount: order.totalAmount,
-            orderItems: order.orderItems,
-            user: order.user
-        });
-
-    } catch (error) {
-        console.error('Error in test order route:', error);
-        res.status(500).json({ 
-            message: 'Test failed',
-            error: error.message
-        });
-    }
-});
 
 // Test route to check PDF generation
 router.get('/test-pdf', auth, async (req, res) => {
@@ -259,110 +374,6 @@ router.get('/test-invoice', auth, async (req, res) => {
     }
 });
 
-// Generate today's sales invoice PDF
-router.get('/today-sales-invoice', auth, async (req, res) => {
-    try {
-        console.log('Today sales invoice endpoint called');
-        
-        // Check if user is admin
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Access denied. Admin only.' });
-        }
-
-        // Get today's date (start and end)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-
-        // Fetch today's orders
-        const orders = await Order.find({
-            createdAt: {
-                $gte: today,
-                $lt: tomorrow
-            }
-        }).populate('user', 'name email phone')
-          .populate('orderItems.product', 'name price image')
-          .sort({ createdAt: 1 });
-
-        console.log('Today\'s orders found:', orders.length);
-        console.log('Sample order:', orders[0]);
-
-        if (orders.length === 0) {
-            return res.status(404).json({ message: 'No orders found for today' });
-        }
-
-        // Calculate summary
-        const totalRevenue = orders.reduce((sum, order) => sum + (order.totalPrice || order.totalAmount || 0), 0);
-        const totalOrders = orders.length;
-        const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-
-        console.log('Total revenue calculated:', totalRevenue);
-        console.log('Total orders:', totalOrders);
-        console.log('Average order value:', avgOrderValue);
-
-        // Get company settings
-        const settings = await Settings.findOne().sort('-createdAt');
-        console.log('Settings found:', settings ? 'Yes' : 'No');
-        const companyInfo = settings?.storeInfo || {
-            name: 'Sky Electro Tech',
-            description: 'Electronics & Components Store',
-            email: 'info@skyelectro.tech',
-            phone: '+91 98765 43210',
-            address: '123 Electronics Street, Mumbai, Maharashtra - 400001',
-            gstin: '27AABCS1234Z1Z5'
-        };
-        console.log('Company info:', companyInfo);
-
-        // Generate HTML content
-        const htmlContent = generateInvoiceHTML({
-            orders,
-            totalRevenue,
-            totalOrders,
-            avgOrderValue,
-            date: today.toLocaleDateString('en-IN'),
-            companyInfo
-        });
-
-        try {
-            // Generate PDF with proper invoice format
-            const pdfBuffer = await generatePDF(htmlContent);
-
-            // Set response headers
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename="Today_Sales_Invoice_${today.toISOString().split('T')[0]}.pdf"`);
-            
-            res.send(pdfBuffer);
-        } catch (pdfError) {
-            console.error('PDF generation failed, falling back to HTML:', pdfError);
-            console.error('PDF Error stack:', pdfError.stack);
-            
-            // Fallback to HTML
-            res.setHeader('Content-Type', 'text/html');
-            res.setHeader('Content-Disposition', `attachment; filename="Today_Sales_Invoice_${today.toISOString().split('T')[0]}.html"`);
-            
-            res.send(htmlContent);
-        }
-
-    } catch (error) {
-        console.error('Error generating sales invoice:', error);
-        console.error('Error stack:', error.stack);
-        
-        // Ensure we only send serializable error information
-        const errorResponse = {
-            message: 'Failed to generate sales invoice',
-            error: error.message || 'Unknown error occurred'
-        };
-        
-        // Only include stack trace in development
-        if (process.env.NODE_ENV === 'development' && error.stack) {
-            errorResponse.stack = error.stack;
-        }
-        
-        res.status(500).json(errorResponse);
-    }
-});
-
 // Generate individual order invoice PDF
 router.get('/:id/invoice', auth, async (req, res) => {
     try {
@@ -399,6 +410,19 @@ router.get('/:id/invoice', auth, async (req, res) => {
             gstin: '27AABCS1234Z1Z5'
         };
 
+        // Calculate GST (assuming 18% GST)
+        const gstRate = 0.18;
+        const totalAmount = order.totalPrice || order.totalAmount || 0;
+        const totalWithoutGST = totalAmount / (1 + gstRate);
+        const totalGST = totalAmount - totalWithoutGST;
+        
+        console.log('Invoice calculations:', {
+            totalAmount,
+            totalWithoutGST,
+            totalGST,
+            orderItems: order.orderItems?.length || 0
+        });
+        
         // Generate HTML content for individual order
         const htmlContent = generateOrderInvoiceHTML(order, companyInfo);
 
@@ -603,25 +627,6 @@ function generateOrderInvoiceHTML(order, companyInfo) {
                     color: #0277BD;
                     font-weight: 500;
                 }
-                .qr-section {
-                    text-align: center;
-                    margin: 20px 0;
-                    padding: 20px;
-                    background: #F9FAFB;
-                    border-radius: 8px;
-                }
-                .qr-code {
-                    width: 100px;
-                    height: 100px;
-                    background: #E5E7EB;
-                    margin: 0 auto 10px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 10px;
-                    color: #6B7280;
-                    border: 2px dashed #D1D5DB;
-                }
             </style>
         </head>
         <body>
@@ -724,14 +729,6 @@ function generateOrderInvoiceHTML(order, companyInfo) {
                         <span>Total Amount (Including GST):</span>
                         <span>₹${totalAmount.toLocaleString('en-IN')}</span>
                     </div>
-                </div>
-                
-                <div class="qr-section">
-                    <div class="qr-code">
-                        QR Code<br>for Order<br>#${order._id.toString().slice(-8)}
-                    </div>
-                    <p><strong>Scan QR Code for Order Tracking</strong></p>
-                    <p>Order ID: #${order._id.toString().slice(-8)}</p>
                 </div>
                 
                 <div class="footer">
@@ -915,25 +912,6 @@ function generateInvoiceHTML(data) {
                     color: #059669;
                     font-weight: 500;
                 }
-                .qr-section {
-                    text-align: center;
-                    margin: 20px 0;
-                    padding: 20px;
-                    background: #F9FAFB;
-                    border-radius: 8px;
-                }
-                .qr-code {
-                    width: 100px;
-                    height: 100px;
-                    background: #E5E7EB;
-                    margin: 0 auto 10px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 10px;
-                    color: #6B7280;
-                    border: 2px dashed #D1D5DB;
-                }
             </style>
         </head>
         <body>
@@ -1022,14 +1000,6 @@ function generateInvoiceHTML(data) {
                     </tbody>
                 </table>
                 
-                <div class="qr-section">
-                    <div class="qr-code">
-                        QR Code<br>for Shipping
-                    </div>
-                    <p><strong>Scan QR Code for Order Tracking</strong></p>
-                    <p>Generated on: ${new Date().toLocaleString('en-IN')}</p>
-                </div>
-                
                 <div class="footer">
                     <p><strong>Generated on:</strong> ${new Date().toLocaleString('en-IN')}</p>
                     <p>${companyInfo.name} - Your Trusted Electronics Partner</p>
@@ -1044,30 +1014,66 @@ function generateInvoiceHTML(data) {
 // Helper function to generate PDF with better error handling
 async function generatePDF(htmlContent) {
     try {
-        const puppeteer = require('puppeteer');
+        console.log('Starting PDF generation...');
+        console.log('HTML content length:', htmlContent.length);
+        
+        // Check if puppeteer is available
+        let puppeteer;
+        try {
+            puppeteer = require('puppeteer');
+            console.log('Puppeteer loaded successfully');
+        } catch (error) {
+            console.error('Puppeteer not available:', error.message);
+            throw new Error('PDF generation not available - puppeteer not installed. Please run: npm install puppeteer');
+        }
         
         console.log('Launching Puppeteer browser...');
-        const browser = await puppeteer.launch({
-            headless: true,
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-web-security',
-                '--disable-features=VizDisplayCompositor'
-            ],
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
-        });
+        
+        // Try different launch configurations
+        let browser;
+        try {
+            // Try with new headless mode first
+            browser = await puppeteer.launch({
+                headless: 'new',
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage'
+                ],
+                timeout: 60000 // Increase timeout to 60 seconds
+            });
+        } catch (launchError) {
+            console.error('Failed to launch with new headless, trying old headless:', launchError.message);
+            
+            // Try with old headless mode
+            browser = await puppeteer.launch({
+                headless: true,
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage'
+                ],
+                timeout: 60000 // Increase timeout to 60 seconds
+            });
+        }
         
         console.log('Creating new page...');
         const page = await browser.newPage();
         
+        // Set viewport for consistent rendering
+        await page.setViewport({
+            width: 1200,
+            height: 800
+        });
+        
         console.log('Setting content...');
         await page.setContent(htmlContent, { 
-            waitUntil: 'networkidle0',
-            timeout: 30000 
+            waitUntil: 'domcontentloaded', // Changed from networkidle0 for faster loading
+            timeout: 15000 // Reduced timeout
         });
+        
+        // Wait less time for rendering
+        await page.waitForTimeout(1000); // Reduced from 2000ms
         
         console.log('Generating PDF...');
         const pdfBuffer = await page.pdf({
@@ -1079,21 +1085,39 @@ async function generatePDF(htmlContent) {
                 bottom: '20px',
                 left: '20px'
             },
-            timeout: 30000
+            timeout: 15000 // Reduced timeout
         });
         
         console.log('Closing browser...');
         await browser.close();
         
-        console.log('PDF generated successfully');
+        console.log('PDF generated successfully, size:', pdfBuffer.length, 'bytes');
+        
+        if (pdfBuffer.length === 0) {
+            throw new Error('PDF buffer is empty');
+        }
+        
         return pdfBuffer;
     } catch (error) {
         console.error('PDF generation error:', error);
         console.error('Error stack:', error.stack);
         
-        // Fallback: return HTML content as text
-        console.log('Falling back to HTML response...');
-        throw new Error(`PDF generation failed: ${error.message}. Please check server logs.`);
+        // Provide more specific error information
+        let errorMessage = 'PDF generation failed';
+        if (error.message.includes('puppeteer')) {
+            errorMessage = 'PDF generation not available - puppeteer not installed. Please run: npm install puppeteer';
+        } else if (error.message.includes('timeout')) {
+            errorMessage = 'PDF generation timed out - browser launch failed';
+        } else if (error.message.includes('browser')) {
+            errorMessage = 'Failed to launch browser for PDF generation';
+        } else if (error.message.includes('empty')) {
+            errorMessage = 'PDF generation produced empty file';
+        } else {
+            errorMessage = `PDF generation failed: ${error.message}`;
+        }
+        
+        console.log('Throwing error:', errorMessage);
+        throw new Error(errorMessage);
     }
 }
 

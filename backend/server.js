@@ -139,7 +139,12 @@ app.get('/', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('=== GLOBAL ERROR HANDLER ===');
+  console.error('Error:', err.message);
+  console.error('Stack:', err.stack);
+  console.error('URL:', req.originalUrl);
+  console.error('Method:', req.method);
+  console.error('User:', req.user?.name || 'Not authenticated');
   
   // Handle multer errors
   if (err instanceof multer.MulterError) {
@@ -170,9 +175,10 @@ app.use((err, req, res, next) => {
   // Handle other errors
   res.status(500).json({ 
     message: 'Something went wrong!',
-    error: process.env.NODE_ENV === 'development' ? err.message : {},
-    path: process.env.NODE_ENV === 'development' ? req.originalUrl : undefined,
-    method: process.env.NODE_ENV === 'development' ? req.method : undefined
+    error: err.message || 'Unknown error',
+    path: req.originalUrl,
+    method: req.method,
+    details: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 });
 

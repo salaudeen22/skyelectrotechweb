@@ -4,7 +4,9 @@ const {
   getSalesAnalytics,
   getProductAnalytics,
   getOrderAnalytics,
-  getActivityLogs
+  getActivityLogs,
+  getCustomerAnalytics,
+  getPerformanceMetrics
 } = require('../controllers/analytics');
 const { auth, adminOnly, adminOrEmployee } = require('../middleware/auth');
 
@@ -27,5 +29,11 @@ router.get('/orders', adminOrEmployee, getOrderAnalytics);
 
 // Activity logs (admin only)
 router.get('/activity-logs', adminOnly, getActivityLogs);
+
+// Customer analytics (admin only)
+router.get('/customers', adminOnly, getCustomerAnalytics);
+
+// Performance metrics (admin only)
+router.get('/performance', adminOnly, getPerformanceMetrics);
 
 module.exports = router;
