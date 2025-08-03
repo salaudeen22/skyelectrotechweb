@@ -68,16 +68,16 @@ const getEmailFaviconUrl = () => {
 };
 
 // -------------------------------------------------------------------
-// START OF REDESIGNED EMAIL TEMPLATES
+// START OF ENHANCED EMAIL TEMPLATES
 // -------------------------------------------------------------------
 
-// REDESIGNED Welcome email template
+// ENHANCED Welcome email template
 const getWelcomeEmailTemplate = (userName) => {
   const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
   const logoUrl = getEmailLogoUrl();
   
   return {
-    subject: 'Welcome to SkyElectroTech!',
+    subject: 'Welcome to SkyElectroTech! 🚀',
     html: `
       <!DOCTYPE html>
       <html lang="en">
@@ -86,22 +86,34 @@ const getWelcomeEmailTemplate = (userName) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
         <title>Welcome to SkyElectroTech</title>
         <style>
           :root {
-            --primary-color: #4f46e5;
-            --primary-dark: #4338ca;
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
             --secondary-color: #10b981;
+            --accent-color: #f59e0b;
             --background-color: #f8fafc;
-            --text-color: #334155;
+            --text-color: #1e293b;
             --text-light: #64748b;
+            --text-muted: #94a3b8;
             --card-background: #ffffff;
             --border-color: #e2e8f0;
-            --footer-text: #94a3b8;
+            --border-light: #f1f5f9;
+            --footer-text: #64748b;
             --success-color: #10b981;
             --warning-color: #f59e0b;
             --error-color: #ef4444;
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            --gradient-secondary: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
           }
           
           * {
@@ -111,10 +123,10 @@ const getWelcomeEmailTemplate = (userName) => {
           }
           
           body {
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
             color: var(--text-color);
-            background-color: var(--background-color);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             margin: 0;
             padding: 20px;
             -webkit-font-smoothing: antialiased;
@@ -122,23 +134,34 @@ const getWelcomeEmailTemplate = (userName) => {
           }
           
           .container {
-            max-width: 600px;
+            max-width: 650px;
             margin: 0 auto;
             background-color: var(--card-background);
-            border-radius: 16px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: var(--shadow-2xl);
             border: 1px solid var(--border-color);
+            position: relative;
+          }
+          
+          .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
           }
           
           .header {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #8b5cf6 100%);
+            background: var(--gradient-primary);
             color: white;
-            padding: 50px 30px;
+            padding: 60px 40px;
             text-align: center;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 40px rgba(79, 70, 229, 0.3);
+            box-shadow: var(--shadow-xl);
           }
           
           .header::before {
@@ -149,59 +172,68 @@ const getWelcomeEmailTemplate = (userName) => {
             right: 0;
             bottom: 0;
             background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-            opacity: 0.3;
+            opacity: 0.2;
           }
           
           .logo {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 20px;
-            border-radius: 20px;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            border-radius: 24px;
             background: rgba(255, 255, 255, 0.15);
-            padding: 15px;
-            backdrop-filter: blur(15px);
+            padding: 20px;
+            backdrop-filter: blur(20px);
             border: 2px solid rgba(255, 255, 255, 0.3);
             position: relative;
             z-index: 1;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.3s ease;
+          }
+          
+          .logo:hover {
+            transform: scale(1.05);
           }
           
           .header h1 {
             margin: 0;
-            font-size: 32px;
-            font-weight: 700;
+            font-size: 36px;
+            font-weight: 800;
             position: relative;
             z-index: 1;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            letter-spacing: -0.025em;
           }
           
           .header p {
-            margin: 10px 0 0;
-            font-size: 16px;
-            opacity: 0.9;
+            margin: 15px 0 0;
+            font-size: 18px;
+            opacity: 0.95;
             position: relative;
             z-index: 1;
+            font-weight: 400;
           }
           
           .content {
-            padding: 40px 30px;
+            padding: 50px 40px;
           }
           
           .content h2 {
-            font-size: 24px;
-            color: #1e293b;
-            margin-bottom: 20px;
-            font-weight: 600;
+            font-size: 28px;
+            color: var(--text-color);
+            margin-bottom: 25px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
           }
           
           .content p {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             color: var(--text-light);
             font-size: 16px;
+            line-height: 1.8;
           }
           
           .features {
-            margin: 30px 0;
+            margin: 40px 0;
             padding: 0;
             list-style: none;
           }
@@ -209,18 +241,37 @@ const getWelcomeEmailTemplate = (userName) => {
           .feature-item {
             display: flex;
             align-items: flex-start;
-            margin-bottom: 25px;
-            padding: 25px;
+            margin-bottom: 30px;
+            padding: 30px;
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            border-radius: 16px;
+            border-radius: 20px;
             border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .feature-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
           }
           
           .feature-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-light);
+          }
+          
+          .feature-item:hover::before {
+            opacity: 1;
           }
           
           .feature-item:last-child {
@@ -228,63 +279,97 @@ const getWelcomeEmailTemplate = (userName) => {
           }
           
           .feature-icon {
-            width: 56px;
-            height: 56px;
-            margin-right: 25px;
+            width: 64px;
+            height: 64px;
+            margin-right: 30px;
             flex-shrink: 0;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            border-radius: 16px;
+            background: var(--gradient-primary);
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .feature-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+          }
+          
+          .feature-item:hover .feature-icon::before {
+            left: 100%;
           }
           
           .feature-icon svg {
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
+            stroke-width: 2;
           }
           
           .feature-content h3 {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 8px;
+            color: var(--text-color);
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
           }
           
           .feature-content p {
             color: var(--text-light);
             margin: 0;
-            font-size: 14px;
+            font-size: 15px;
+            line-height: 1.6;
           }
           
           .cta-section {
             text-align: center;
-            margin: 50px 0 30px;
-            padding: 40px;
+            margin: 60px 0 40px;
+            padding: 50px;
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            border-radius: 20px;
+            border-radius: 24px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
           }
           
           .cta-button {
             display: inline-block;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            background: var(--gradient-primary);
             color: #ffffff;
-            padding: 18px 36px;
+            padding: 20px 40px;
             text-decoration: none;
             border-radius: 16px;
             font-weight: 700;
             font-size: 18px;
-            margin: 25px 0;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px 0 rgba(79, 70, 229, 0.4);
+            margin: 30px 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-lg);
             position: relative;
             overflow: hidden;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            border: none;
+            cursor: pointer;
           }
           
           .cta-button::before {
@@ -294,8 +379,8 @@ const getWelcomeEmailTemplate = (userName) => {
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
           }
           
           .cta-button:hover::before {
@@ -303,33 +388,34 @@ const getWelcomeEmailTemplate = (userName) => {
           }
           
           .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px 0 rgba(79, 70, 229, 0.4);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-2xl);
           }
           
           .footer {
             text-align: center;
-            padding: 30px;
+            padding: 40px;
             font-size: 14px;
             color: var(--footer-text);
-            background: #f8fafc;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             border-top: 1px solid var(--border-color);
           }
           
           .footer p {
-            margin: 5px 0;
+            margin: 8px 0;
           }
           
           .social-links {
-            margin: 20px 0;
+            margin: 25px 0;
           }
           
           .social-links a {
             display: inline-block;
-            margin: 0 10px;
-            color: var(--text-light);
+            margin: 0 12px;
+            color: var(--text-muted);
             text-decoration: none;
             transition: color 0.3s ease;
+            font-weight: 500;
           }
           
           .social-links a:hover {
@@ -343,33 +429,33 @@ const getWelcomeEmailTemplate = (userName) => {
             }
             
             .container {
-              border-radius: 12px;
+              border-radius: 20px;
             }
             
             .header {
-              padding: 30px 20px;
+              padding: 40px 25px;
             }
             
             .header h1 {
-              font-size: 28px;
+              font-size: 32px;
             }
             
             .content {
-              padding: 30px 20px;
+              padding: 40px 25px;
             }
             
             .feature-item {
-              padding: 15px;
+              padding: 25px;
             }
             
             .feature-icon {
-              width: 40px;
-              height: 40px;
-              margin-right: 15px;
+              width: 56px;
+              height: 56px;
+              margin-right: 20px;
             }
             
             .cta-section {
-              padding: 20px;
+              padding: 30px 25px;
             }
           }
           
@@ -377,24 +463,26 @@ const getWelcomeEmailTemplate = (userName) => {
           @media (prefers-color-scheme: dark) {
             :root {
               --background-color: #0f172a;
-              --text-color: #e2e8f0;
-              --text-light: #94a3b8;
+              --text-color: #f1f5f9;
+              --text-light: #cbd5e1;
+              --text-muted: #94a3b8;
               --card-background: #1e293b;
               --border-color: #334155;
+              --border-light: #475569;
               --footer-text: #64748b;
             }
             
             .content h2 { 
-              color: #f1f5f9; 
+              color: #f8fafc; 
             }
             
             .feature-item {
-              background: #334155;
+              background: linear-gradient(135deg, #334155 0%, #475569 100%);
               border-color: #475569;
             }
             
             .feature-content h3 { 
-              color: #f1f5f9; 
+              color: #f8fafc; 
             }
             
             .cta-section {
@@ -403,7 +491,7 @@ const getWelcomeEmailTemplate = (userName) => {
             }
             
             .footer {
-              background: #334155;
+              background: linear-gradient(135deg, #334155 0%, #475569 100%);
               border-color: #475569;
             }
           }
@@ -418,7 +506,7 @@ const getWelcomeEmailTemplate = (userName) => {
           </div>
           <div class="content">
             <h2>Welcome to the Future of Electronics Shopping</h2>
-            <p>Thank you for joining SkyElectroTech! We're thrilled to have you in our community. Get ready to discover amazing electronics at unbeatable prices.</p>
+            <p>Thank you for joining SkyElectroTech! We're thrilled to have you in our community. Get ready to discover amazing electronics at unbeatable prices with cutting-edge technology and exceptional service.</p>
             
             <ul class="features">
               <li class="feature-item">
@@ -429,7 +517,7 @@ const getWelcomeEmailTemplate = (userName) => {
                 </div>
                 <div class="feature-content">
                   <h3>Vast Product Catalog</h3>
-                  <p>Browse through thousands of high-quality electronics and components</p>
+                  <p>Browse through thousands of high-quality electronics and components with detailed specifications and real-time availability</p>
                 </div>
               </li>
               <li class="feature-item">
@@ -440,7 +528,7 @@ const getWelcomeEmailTemplate = (userName) => {
                 </div>
                 <div class="feature-content">
                   <h3>Secure Shopping</h3>
-                  <p>Shop with confidence with our secure payment and data protection</p>
+                  <p>Shop with confidence with our enterprise-grade security, encrypted payments, and comprehensive data protection</p>
                 </div>
               </li>
               <li class="feature-item">
@@ -452,7 +540,7 @@ const getWelcomeEmailTemplate = (userName) => {
                 </div>
                 <div class="feature-content">
                   <h3>Fast Delivery</h3>
-                  <p>Get your orders delivered quickly with real-time tracking</p>
+                  <p>Get your orders delivered quickly with real-time tracking, multiple shipping options, and guaranteed delivery times</p>
                 </div>
               </li>
             </ul>
@@ -460,15 +548,15 @@ const getWelcomeEmailTemplate = (userName) => {
             <div class="cta-section">
               <p>Ready to start your shopping journey?</p>
               <a href="${clientUrl}/products" class="cta-button">Start Shopping Now</a>
-              <p style="font-size: 14px; margin-top: 15px; color: var(--text-light);">
-                If you have any questions, our support team is here to help!
+              <p style="font-size: 15px; margin-top: 20px; color: var(--text-light);">
+                If you have any questions, our dedicated support team is here to help 24/7!
               </p>
             </div>
           </div>
           <div class="footer">
             <p>You received this email because you signed up at SkyElectroTech.</p>
             <div class="social-links">
-              <a href="#">Facebook</a> • <a href="#">Twitter</a> • <a href="#">Instagram</a>
+              <a href="#">Facebook</a> • <a href="#">Twitter</a> • <a href="#">Instagram</a> • <a href="#">LinkedIn</a>
             </div>
             <p>© ${new Date().getFullYear()} SkyElectroTech. All rights reserved.</p>
           </div>
@@ -508,21 +596,34 @@ const getForgotPasswordEmailTemplate = (userName, resetUrl) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
         <title>Reset Your Password</title>
         <style>
           :root {
             --primary-color: #f59e0b;
             --primary-dark: #d97706;
-            --warning-color: #fbbf24;
+            --primary-light: #fbbf24;
+            --secondary-color: #10b981;
+            --accent-color: #f59e0b;
             --background-color: #f8fafc;
-            --text-color: #334155;
+            --text-color: #1e293b;
             --text-light: #64748b;
+            --text-muted: #94a3b8;
             --card-background: #ffffff;
             --border-color: #e2e8f0;
-            --footer-text: #94a3b8;
+            --border-light: #f1f5f9;
+            --footer-text: #64748b;
+            --warning-color: #fbbf24;
             --warning-bg: #fefce8;
             --warning-border: #fde68a;
+            --gradient-primary: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --gradient-secondary: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
           }
           
           * {
@@ -532,10 +633,10 @@ const getForgotPasswordEmailTemplate = (userName, resetUrl) => {
           }
           
           body {
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
             color: var(--text-color);
-            background-color: var(--background-color);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             margin: 0;
             padding: 20px;
             -webkit-font-smoothing: antialiased;
@@ -543,22 +644,34 @@ const getForgotPasswordEmailTemplate = (userName, resetUrl) => {
           }
           
           .container {
-            max-width: 600px;
+            max-width: 650px;
             margin: 0 auto;
             background-color: var(--card-background);
-            border-radius: 16px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: var(--shadow-2xl);
             border: 1px solid var(--border-color);
+            position: relative;
+          }
+          
+          .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
           }
           
           .header {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            background: var(--gradient-primary);
             color: white;
-            padding: 40px 30px;
+            padding: 50px 30px;
             text-align: center;
             position: relative;
             overflow: hidden;
+            box-shadow: var(--shadow-xl);
           }
           
           .header::before {
@@ -864,21 +977,33 @@ const getOTPEmailTemplate = (userName, otpCode, purpose = 'profile update') => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
         <title>OTP Verification</title>
         <style>
           :root {
             --primary-color: #3b82f6;
             --primary-dark: #1d4ed8;
+            --primary-light: #60a5fa;
             --secondary-color: #10b981;
+            --accent-color: #f59e0b;
             --background-color: #f8fafc;
-            --text-color: #334155;
+            --text-color: #1e293b;
             --text-light: #64748b;
+            --text-muted: #94a3b8;
             --card-background: #ffffff;
             --border-color: #e2e8f0;
-            --footer-text: #94a3b8;
+            --border-light: #f1f5f9;
+            --footer-text: #64748b;
             --success-color: #10b981;
             --warning-color: #f59e0b;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            --gradient-secondary: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
           }
           
           * {
@@ -888,10 +1013,10 @@ const getOTPEmailTemplate = (userName, otpCode, purpose = 'profile update') => {
           }
           
           body {
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
             color: var(--text-color);
-            background-color: var(--background-color);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             margin: 0;
             padding: 20px;
             -webkit-font-smoothing: antialiased;
@@ -899,22 +1024,34 @@ const getOTPEmailTemplate = (userName, otpCode, purpose = 'profile update') => {
           }
           
           .container {
-            max-width: 600px;
+            max-width: 650px;
             margin: 0 auto;
             background-color: var(--card-background);
-            border-radius: 16px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: var(--shadow-2xl);
             border: 1px solid var(--border-color);
+            position: relative;
+          }
+          
+          .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
           }
           
           .header {
-            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            background: var(--gradient-primary);
             color: white;
-            padding: 40px 30px;
+            padding: 50px 30px;
             text-align: center;
             position: relative;
             overflow: hidden;
+            box-shadow: var(--shadow-xl);
           }
           
           .header::before {
@@ -1273,38 +1410,81 @@ const getOrderConfirmationEmailTemplate = (order, user) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
         <title>Order Confirmation</title>
         <style>
           :root {
             --primary-color: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #34d399;
+            --secondary-color: #3b82f6;
+            --accent-color: #f59e0b;
             --background-color: #f4f7f9;
-            --text-color: #334155;
+            --text-color: #1e293b;
+            --text-light: #64748b;
+            --text-muted: #94a3b8;
             --card-background: #ffffff;
-            --footer-text: #94a3b8;
+            --border-color: #e2e8f0;
+            --border-light: #f1f5f9;
+            --footer-text: #64748b;
+            --gradient-primary: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-secondary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
           }
           body {
-            font-family: 'Poppins', Arial, sans-serif;
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
             color: var(--text-color);
-            background-color: var(--background-color);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             margin: 0;
             padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
           }
           .container {
-            max-width: 700px;
+            max-width: 750px;
             margin: 0 auto;
             background-color: var(--card-background);
-            border-radius: 12px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-2xl);
+            border: 1px solid var(--border-color);
+            position: relative;
+          }
+          
+          .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
           }
           .header {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: var(--gradient-primary);
             color: white;
-            padding: 50px 30px;
+            padding: 60px 40px;
             text-align: center;
-            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+          }
+          
+          .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.2;
           }
           .logo {
             max-width: 120px;
