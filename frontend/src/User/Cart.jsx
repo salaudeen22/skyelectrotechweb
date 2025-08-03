@@ -2,16 +2,18 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaMinus, FaTrash, FaShoppingCart } from 'react-icons/fa';
 import { CartContext } from '../contexts/CartContext';
+import { useSettings } from '../contexts/SettingsContext';
 import toast from 'react-hot-toast';
 
 const Cart = () => {
   const { items: cartItems, updateCartItem, removeFromCart, totalPrice, loading } = useContext(CartContext);
+  const { settings } = useSettings();
   const [hasIncompleteCheckout, setHasIncompleteCheckout] = useState(false);
   
   console.log('Cart component rendered:', { cartItems, totalPrice, loading });
   
   const subtotal = totalPrice || 0;
-  const shipping = subtotal > 1000 ? 0 : 50; // Free shipping over ₹1000
+  const shipping = subtotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.defaultShippingCost;
   const total = subtotal + shipping;
 
   // Check for incomplete checkout data

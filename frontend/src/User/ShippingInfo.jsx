@@ -13,6 +13,7 @@ import {
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useSettings } from '../contexts/SettingsContext';
 import toast from 'react-hot-toast';
 
 // Helper Component for Form Inputs
@@ -304,6 +305,7 @@ const ShippingInfo = () => {
   const { items: cart, totalPrice: cartTotal } = useCart();
   const { user, getAddresses, addAddress } = useAuth();
   const { trackClick } = useAnalytics();
+  const { settings } = useSettings();
   
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -673,12 +675,12 @@ const ShippingInfo = () => {
               </div>
               <div className="p-6 border-t space-y-3">
                 <div className="flex justify-between text-slate-600"><span>Subtotal</span><span>{formatAmount(cartTotal)}</span></div>
-                <div className="flex justify-between text-slate-600"><span>Shipping</span><span>{formatAmount(50)}</span></div>
-                <div className="flex justify-between text-slate-600 mb-4"><span>Tax (18%)</span><span>{formatAmount(Math.round(cartTotal * 0.18))}</span></div>
+                <div className="flex justify-between text-slate-600"><span>Shipping</span><span>{formatAmount(cartTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.defaultShippingCost)}</span></div>
+                <div className="flex justify-between text-slate-600 mb-4"><span>Tax ({settings.payment.taxRate}%)</span><span>{formatAmount(Math.round(cartTotal * (settings.payment.taxRate / 100)))}</span></div>
                 <div className="border-t-2 border-dashed pt-4">
                   <div className="flex justify-between font-bold text-xl text-slate-900">
                     <span>Total</span>
-                    <span>{formatAmount(cartTotal + 50 + Math.round(cartTotal * 0.18))}</span>
+                    <span>{formatAmount(cartTotal + (cartTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.defaultShippingCost) + Math.round(cartTotal * (settings.payment.taxRate / 100)))}</span>
                   </div>
                 </div>
               </div>

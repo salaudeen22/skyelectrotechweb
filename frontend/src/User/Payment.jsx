@@ -36,8 +36,8 @@ const Payment = () => {
   // --- Calculations ---
   const totals = {
     subtotal: cartTotal,
-    shipping: cartTotal > 0 ? 50 : 0,
-    tax: Math.round(cartTotal * 0.18), // 18% GST
+    shipping: cartTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.defaultShippingCost,
+    tax: Math.round(cartTotal * (settings.payment.taxRate / 100)), // Dynamic tax rate
     get total() { return this.subtotal + this.shipping + this.tax }
   };
 
