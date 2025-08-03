@@ -2,6 +2,7 @@ const User = require('../models/User');
 const { generateToken } = require('../utils/jwt');
 const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 const { sendWelcomeEmail, sendForgotPasswordEmail, sendOTPEmail, sendNewUserNotificationEmail } = require('../utils/email');
+const { uploadImage, deleteImage } = require('../utils/s3');
 const crypto = require('crypto');
 const passport = require('../config/passport');
 
@@ -473,6 +474,72 @@ const linkGoogleAccount = asyncHandler(async (req, res) => {
   sendResponse(res, 200, null, 'Google account linked successfully');
 });
 
+// @desc    Upload user avatar
+// @route   POST /api/auth/avatar
+// @access  Private
+const uploadAvatar = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return sendError(res, 400, 'No image file provided');
+  }
+
+  try {
+    const user = await User.findById(req.user._id);
+
+    // Delete old avatar if exists
+    if (user.avatar && user.avatar.public_id) {
+      try {
+        await deleteImage(user.avatar.public_id);
+      } catch (deleteError) {
+        console.error('Error deleting old avatar:', deleteError);
+        // Continue with upload even if delete fails
+      }
+    }
+
+    // Upload new avatar to S3
+    const result = await uploadImage(req.file, 'avatars');
+
+    // Update user avatar
+    user.avatar = {
+      public_id: result.public_id,
+      url: result.url
+    };
+
+    await user.save();
+
+    sendResponse(res, 200, {
+      avatar: user.avatar
+    }, 'Avatar uploaded successfully');
+  } catch (error) {
+    console.error('Avatar upload error:', error);
+    sendError(res, 500, 'Error uploading avatar');
+  }
+});
+
+// @desc    Delete user avatar
+// @route   DELETE /api/auth/avatar
+// @access  Private
+const deleteAvatar = asyncHandler(async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user.avatar || !user.avatar.public_id) {
+      return sendError(res, 404, 'No avatar found');
+    }
+
+    // Delete from S3
+    await deleteImage(user.avatar.public_id);
+
+    // Remove avatar from user
+    user.avatar = undefined;
+    await user.save();
+
+    sendResponse(res, 200, null, 'Avatar deleted successfully');
+  } catch (error) {
+    console.error('Avatar delete error:', error);
+    sendError(res, 500, 'Error deleting avatar');
+  }
+});
+
 module.exports = {
   register,
   login,
@@ -490,5 +557,7 @@ module.exports = {
   resetPassword,
   googleAuth,
   googleCallback,
-  linkGoogleAccount
+  linkGoogleAccount,
+  uploadAvatar,
+  deleteAvatar
 };

@@ -17,11 +17,14 @@ const {
   resetPassword,
   googleAuth,
   googleCallback,
-  linkGoogleAccount
+  linkGoogleAccount,
+  uploadAvatar,
+  deleteAvatar
 } = require('../controllers/auth');
 const { auth } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 const logActivity = require('../middleware/activityLogger');
+const upload = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -164,6 +167,10 @@ router.post('/forgot-password', [
 router.put('/reset-password/:token', [
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
 ], validate, resetPassword);
+
+// Avatar routes
+router.post('/avatar', auth, upload.single('avatar'), uploadAvatar);
+router.delete('/avatar', auth, deleteAvatar);
 
 // Google OAuth routes
 router.get('/google', googleAuth);

@@ -348,6 +348,41 @@ export const AuthProvider = ({ children }) => {
     return roles.includes(state.user?.role);
   };
 
+  // Avatar management functions
+  const uploadAvatar = async (file) => {
+    try {
+      const response = await authAPI.uploadAvatar(file);
+      // Update user with new avatar
+      dispatch({
+        type: AUTH_ACTIONS.UPDATE_USER,
+        payload: { ...state.user, avatar: response.data.avatar }
+      });
+      toast.success('Avatar uploaded successfully!');
+      return { success: true, avatar: response.data.avatar };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to upload avatar';
+      toast.error(message);
+      return { success: false, error: message };
+    }
+  };
+
+  const deleteAvatar = async () => {
+    try {
+      await authAPI.deleteAvatar();
+      // Update user to remove avatar
+      dispatch({
+        type: AUTH_ACTIONS.UPDATE_USER,
+        payload: { ...state.user, avatar: undefined }
+      });
+      toast.success('Avatar deleted successfully!');
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to delete avatar';
+      toast.error(message);
+      return { success: false, error: message };
+    }
+  };
+
   const value = {
     ...state,
     login,
@@ -364,7 +399,9 @@ export const AuthProvider = ({ children }) => {
     clearError,
     setAuthData,
     hasRole,
-    hasAnyRole
+    hasAnyRole,
+    uploadAvatar,
+    deleteAvatar
   };
 
   return (

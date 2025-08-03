@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiUser, FiMail, FiPhone, FiMapPin, FiEdit2, FiSave, FiX, FiLock, FiPackage, FiHeart, FiPlus, FiTrash2, FiStar } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiMapPin, FiEdit2, FiSave, FiX, FiLock, FiPackage, FiHeart, FiPlus, FiTrash2, FiStar, FiCamera, FiTrash } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
+import toast from 'react-hot-toast';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -13,7 +14,9 @@ const Profile = () => {
     addAddress, 
     updateAddress, 
     deleteAddress, 
-    setDefaultAddress 
+    setDefaultAddress,
+    uploadAvatar,
+    deleteAvatar
   } = useAuth();
   
   const [isEditing, setIsEditing] = useState(false);
@@ -45,6 +48,10 @@ const Profile = () => {
     zipCode: '',
     isDefault: false
   });
+
+  // Avatar related state
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const fileInputRef = useRef(null);
 
 
   // Get default address from addresses array
@@ -222,12 +229,140 @@ const Profile = () => {
     setShowAddressForm(true);
   };
 
+  // Avatar handling functions
+  const handleAvatarUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+
+    try {
+      setAvatarLoading(true);
+      const result = await uploadAvatar(file);
+      if (result.success) {
+        // Avatar will be updated in context automatically
+      }
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+    } finally {
+      setAvatarLoading(false);
+    }
+  };
+
+  const handleAvatarDelete = async () => {
+    if (!user.avatar) return;
+
+    if (window.confirm('Are you sure you want to delete your avatar?')) {
+      try {
+        setAvatarLoading(true);
+        const result = await deleteAvatar();
+        if (result.success) {
+          // Avatar will be removed from context automatically
+        }
+      } catch (error) {
+        console.error('Avatar delete error:', error);
+      } finally {
+        setAvatarLoading(false);
+      }
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
           <p className="text-gray-600 mt-2">Manage your account information</p>
+        </div>
+
+        {/* Avatar Section */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <div className="flex items-center space-x-6">
+            {/* Avatar Display */}
+            <div className="relative">
+              {user.avatar && user.avatar.url ? (
+                <img
+                  src={user.avatar.url}
+                  alt={user.name}
+                  className="w-24 h-24 rounded-full object-cover border-4 border-gray-200"
+                  onError={(e) => {
+                    // Hide the broken image and show fallback
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              
+              {/* Fallback Avatar - Always present but hidden when image loads successfully */}
+              <div 
+                className={`w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center text-white text-3xl font-bold border-4 border-gray-200 ${
+                  user.avatar && user.avatar.url ? 'hidden' : ''
+                }`}
+              >
+                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              
+              {/* Avatar Loading Overlay */}
+              {avatarLoading && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                </div>
+              )}
+            </div>
+
+            {/* Avatar Actions */}
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Profile Picture</h3>
+              <p className="text-gray-600 mb-4">
+                {user.avatar ? 'Update your profile picture' : 'Add a profile picture to personalize your account'}
+              </p>
+              
+              <div className="flex space-x-3">
+                <button
+                  onClick={triggerFileInput}
+                  disabled={avatarLoading}
+                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <FiCamera className="w-4 h-4 mr-2" />
+                  {user.avatar ? 'Change Photo' : 'Upload Photo'}
+                </button>
+                
+                {user.avatar && (
+                  <button
+                    onClick={handleAvatarDelete}
+                    disabled={avatarLoading}
+                    className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <FiTrash className="w-4 h-4 mr-2" />
+                    Remove
+                  </button>
+                )}
+              </div>
+              
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

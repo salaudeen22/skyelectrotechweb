@@ -80,6 +80,23 @@ export const authAPI = {
   resetPassword: async (token, password) => {
     const response = await api.put(`/auth/reset-password/${token}`, { password });
     return response.data;
+  },
+
+  // Avatar management
+  uploadAvatar: async (file) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    const response = await api.post('/auth/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  deleteAvatar: async () => {
+    const response = await api.delete('/auth/avatar');
+    return response.data;
   }
 };
 

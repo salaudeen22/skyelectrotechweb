@@ -234,6 +234,30 @@ const Navbar = () => {
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                     className="flex items-center text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                   >
+                    {/* User Avatar */}
+                    <div className="mr-3">
+                      {user.avatar && user.avatar.url ? (
+                        <img
+                          src={user.avatar.url}
+                          alt={user.name}
+                          className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
+                          onError={(e) => {
+                            // Hide the broken image and show fallback
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      
+                      {/* Fallback Avatar - Always present but hidden when image loads successfully */}
+                      <div 
+                        className={`w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-medium border-2 border-gray-200 ${
+                          user.avatar && user.avatar.url ? 'hidden' : ''
+                        }`}
+                      >
+                        {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                      </div>
+                    </div>
                     <span className="mr-2">Welcome, {user.name}</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
