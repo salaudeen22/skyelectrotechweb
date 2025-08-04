@@ -12,7 +12,18 @@ const Cart = () => {
   
   console.log('Cart component rendered:', { cartItems, totalPrice, loading });
   
-  const subtotal = totalPrice || 0;
+  // Calculate subtotal dynamically from cart items
+  const calculateSubtotal = () => {
+    if (!cartItems || cartItems.length === 0) return 0;
+    
+    return cartItems.reduce((total, item) => {
+      // Use currentPrice if available (from backend), otherwise fallback to product.price
+      const itemPrice = item.currentPrice || item.product.price;
+      return total + (itemPrice * item.quantity);
+    }, 0);
+  };
+  
+  const subtotal = calculateSubtotal();
   const shipping = subtotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.defaultShippingCost;
   const total = subtotal + shipping;
 
@@ -110,7 +121,12 @@ const Cart = () => {
                 
                 {/* Cart Items */}
                 <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 space-y-6">
-                    {cartItems.map((item) => (
+                    {cartItems.map((item) => {
+                      // Use currentPrice if available (from backend), otherwise fallback to product.price
+                      const itemPrice = item.currentPrice || item.product.price;
+                      const itemTotal = itemPrice * item.quantity;
+                      
+                      return (
                         <div key={item.product._id} className="flex items-center space-x-4 border-b border-slate-200 pb-6 last:border-b-0">
                             <img 
                                 src={item.product.images?.[0]?.url || item.product.images?.[0] || 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png'} 
@@ -119,7 +135,14 @@ const Cart = () => {
                             />
                             <div className="flex-grow">
                                 <h2 className="font-bold text-slate-800">{item.product.name}</h2>
-                                <p className="text-sm text-slate-500">Price: ₹{item.product.price.toFixed(2)}</p>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm text-slate-500">Price: ₹{itemPrice.toFixed(2)}</p>
+                                  {item.currentPrice && item.currentPrice !== item.product.price && (
+                                    <span className="text-xs text-green-600 font-medium">
+                                      {Math.round(((item.product.price - item.currentPrice) / item.product.price) * 100)}% OFF
+                                    </span>
+                                  )}
+                                </div>
                                 <p className="text-xs text-slate-400">{item.product.brand}</p>
                             </div>
                             <div className="flex items-center space-x-3">
@@ -139,7 +162,7 @@ const Cart = () => {
                                 </button>
                             </div>
                             <p className="font-bold text-slate-800 w-24 text-right">
-                                ₹{(item.product.price * item.quantity).toFixed(2)}
+                                ₹{itemTotal.toFixed(2)}
                             </p>
                             <button 
                                 onClick={() => handleRemoveItem(item.product._id)}
@@ -148,7 +171,8 @@ const Cart = () => {
                                 <FaTrash />
                             </button>
                         </div>
-                    ))}
+                      );
+                    })}
                 </div>
 
                 {/* Order Summary */}
@@ -171,7 +195,7 @@ const Cart = () => {
                         </div>
                         {shipping > 0 && (
                             <div className="text-xs text-slate-500 bg-blue-50 p-2 rounded">
-                                Add ₹{(1000 - subtotal).toFixed(2)} more for free shipping!
+                                Add ₹{(settings.shipping.freeShippingThreshold - subtotal).toFixed(2)} more for free shipping!
                             </div>
                         )}
                         <div className="flex justify-between font-bold text-slate-900 text-lg border-t pt-3 mt-3">
