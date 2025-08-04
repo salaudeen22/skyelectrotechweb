@@ -18,13 +18,13 @@ const AdminLayout = () => {
           onClick={toggleSidebar}
           className="p-2 rounded-md bg-white shadow-md text-gray-600 hover:text-gray-900 hover:bg-gray-50"
         >
-          <FaBars className="h-6 w-6" />
+          <FaBars className="h-5 w-5 sm:h-6 sm:w-6" />
         </button>
       </div>
 
       <AdminSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
       
-      <main className="flex-1 p-6 lg:p-10 pt-16 lg:pt-6 overflow-auto"> {/* Added overflow-auto for proper scrolling */}
+      <main className="flex-1 p-2 sm:p-4 lg:p-6 xl:p-10 pt-16 lg:pt-6 overflow-auto w-full"> {/* Added w-full and improved padding */}
         <Outlet />
       </main>
     </div>

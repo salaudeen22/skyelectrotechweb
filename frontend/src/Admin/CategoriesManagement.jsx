@@ -119,46 +119,47 @@ const CategoriesManagement = () => {
   }
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="p-2 sm:p-4 lg:p-6 max-w-full">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Categories Management</h1>
-          <p className="text-gray-600 text-sm sm:text-base">Manage product categories with images for homepage display</p>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 truncate">Categories Management</h1>
+          <p className="text-gray-600 text-xs sm:text-sm lg:text-base">Manage product categories with images for homepage display</p>
         </div>
         <button
           onClick={handleCreate}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors whitespace-nowrap"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors whitespace-nowrap text-sm sm:text-base"
         >
-          <FaPlus className="w-4 h-4" />
-          Add Category
+          <FaPlus className="w-3 h-3 sm:w-4 sm:h-4" />
+          <span className="hidden xs:inline">Add Category</span>
+          <span className="xs:hidden">Add</span>
         </button>
       </div>
 
       {/* Search */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <div className="relative">
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3 sm:w-4 sm:h-4" />
           <input
             type="text"
             placeholder="Search categories..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-8 sm:pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
           />
         </div>
       </div>
 
       {/* Categories Grid */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {filteredCategories.map((category) => (
           <div key={category._id} className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
             {/* Main Category */}
-            <div className="p-4 sm:p-6 border-b border-gray-100">
-              <div className="flex items-start justify-between gap-4">
+            <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-100">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
                 <div className="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
                   {/* Category Image */}
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                     {category.image?.url ? (
                       <img
                         src={category.image.url}
@@ -170,33 +171,35 @@ const CategoriesManagement = () => {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                        <FaImage className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
+                        <FaImage className="w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-gray-400" />
                       </div>
                     )}
                   </div>
 
                   {/* Category Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        category.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {category.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                        {category.productCount || 0} products
-                      </span>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-2 gap-1 sm:gap-0">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{category.name}</h3>
+                      <div className="flex flex-wrap gap-1 sm:gap-2">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          category.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {category.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                          {category.productCount || 0} products
+                        </span>
+                      </div>
                     </div>
                     {category.description && (
-                      <p className="text-gray-600 text-sm mb-2">{category.description}</p>
+                      <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">{category.description}</p>
                     )}
                     <p className="text-xs text-gray-500">Created by {category.createdBy?.name}</p>
                   </div>
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+                <div className="flex items-center justify-end sm:justify-start space-x-1 sm:space-x-2 flex-shrink-0">
                   <button
                     onClick={() => handleCreateSubcategory(category)}
                     className="px-2 sm:px-3 py-1.5 bg-green-600 text-white text-xs sm:text-sm rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1"
@@ -217,7 +220,7 @@ const CategoriesManagement = () => {
                     className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                     title="Delete Category"
                   >
-                    <FaTrashAlt className="w-4 h-4" />
+                    <FaTrashAlt className="w-3 h-3 sm:w-4 sm:h-4" />
                   </button>
                 </div>
               </div>
@@ -225,22 +228,24 @@ const CategoriesManagement = () => {
 
             {/* Subcategories */}
             {category.subcategories && category.subcategories.length > 0 && (
-              <div className="bg-gray-50 px-6 py-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-3">
+              <div className="bg-gray-50 px-3 sm:px-6 py-3 sm:py-4">
+                <h4 className="text-xs sm:text-sm font-medium text-gray-700 mb-3">
                   Subcategories ({category.subcategories.length})
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
                   {category.subcategories.map((subcategory) => (
-                    <div key={subcategory._id} className="bg-white p-3 rounded-lg border border-gray-200">
+                    <div key={subcategory._id} className="bg-white p-2 sm:p-3 rounded-lg border border-gray-200">
                       <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h5 className="font-medium text-gray-900 text-sm">{subcategory.name}</h5>
-                            <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-                              subcategory.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}>
-                              {subcategory.isActive ? 'Active' : 'Inactive'}
-                            </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mb-1 gap-1 sm:gap-0">
+                            <h5 className="font-medium text-gray-900 text-xs sm:text-sm truncate">{subcategory.name}</h5>
+                            <div className="flex flex-wrap gap-1">
+                              <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+                                subcategory.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}>
+                                {subcategory.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                            </div>
                           </div>
                           {subcategory.description && (
                             <p className="text-gray-600 text-xs mb-1 line-clamp-2">{subcategory.description}</p>
@@ -249,7 +254,7 @@ const CategoriesManagement = () => {
                             <span>{subcategory.productCount || 0} products</span>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-1 ml-2">
+                        <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
                           <button
                             onClick={() => handleEdit(subcategory)}
                             className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
@@ -276,16 +281,16 @@ const CategoriesManagement = () => {
       </div>
 
       {filteredCategories.length === 0 && !loading && (
-        <div className="text-center py-12">
-          <FaImage className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No categories found</h3>
-          <p className="text-gray-500 mb-4">
+        <div className="text-center py-8 sm:py-12">
+          <FaImage className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No categories found</h3>
+          <p className="text-gray-500 mb-4 text-sm sm:text-base">
             {searchTerm ? 'Try adjusting your search terms.' : 'Get started by creating your first category.'}
           </p>
           {!searchTerm && (
             <button
               onClick={handleCreate}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center gap-2 text-sm sm:text-base"
             >
               <FaPlus className="w-4 h-4" />
               Add Category
@@ -394,31 +399,31 @@ const CategoryModal = ({ category, parentCategory, allCategories, onClose, onSav
   };
 
   return (
-            <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-2 sm:p-4">
       <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b">
+          <h2 className="text-lg sm:text-xl font-semibold">
             {isEditing 
               ? `Edit ${isSubcategory ? 'Subcategory' : 'Category'}` 
               : `Create ${isSubcategory ? 'Subcategory' : 'Category'}`
             }
             {parentCategory && !isEditing && (
-              <span className="text-sm font-normal text-gray-600 ml-2">
+              <span className="text-xs sm:text-sm font-normal text-gray-600 ml-2 block sm:inline">
                 under "{parentCategory.name}"
               </span>
             )}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1"
           >
-            <FaTimes className="w-5 h-5" />
+            <FaTimes className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3 sm:space-y-4">
           {/* Parent Category Selection */}
           {!parentCategory && (
             <div>
@@ -429,7 +434,7 @@ const CategoryModal = ({ category, parentCategory, allCategories, onClose, onSav
                 name="parentCategory"
                 value={formData.parentCategory}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               >
                 <option value="">Main Category (No Parent)</option>
                 {allCategories.map((cat) => (
@@ -455,13 +460,14 @@ const CategoryModal = ({ category, parentCategory, allCategories, onClose, onSav
               value={formData.order}
               onChange={handleInputChange}
               min="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               placeholder="0"
             />
             <p className="text-xs text-gray-500 mt-1">
               Lower numbers appear first
             </p>
           </div>
+
           {/* Image Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -473,7 +479,7 @@ const CategoryModal = ({ category, parentCategory, allCategories, onClose, onSav
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="w-full h-32 object-cover rounded-lg border"
+                    className="w-full h-24 sm:h-32 object-cover rounded-lg border"
                   />
                   <button
                     type="button"
@@ -506,7 +512,7 @@ const CategoryModal = ({ category, parentCategory, allCategories, onClose, onSav
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               placeholder="Enter category name"
               required
             />
@@ -522,7 +528,7 @@ const CategoryModal = ({ category, parentCategory, allCategories, onClose, onSav
               value={formData.description}
               onChange={handleInputChange}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               placeholder="Enter category description"
             />
           </div>
@@ -546,14 +552,14 @@ const CategoryModal = ({ category, parentCategory, allCategories, onClose, onSav
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+              className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || uploadingImage}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm"
             >
               {loading ? (uploadingImage ? 'Uploading...' : 'Saving...') : isEditing ? 'Update' : 'Create'}
             </button>
