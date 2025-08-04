@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaStar, FaUpload, FaTimes, FaCamera, FaEdit, FaCheck } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
-import Cookies from 'js-cookie';
+import { commentsAPI, uploadAPI } from '../services/apiServices';
 
 const CommentForm = ({ productId, onCommentCreated, onCancel, editComment = null }) => {
   const [formData, setFormData] = useState({
@@ -32,48 +32,20 @@ const CommentForm = ({ productId, onCommentCreated, onCancel, editComment = null
       const uploadedImages = [];
       
       for (const file of files) {
-        const formData = new FormData();
-        formData.append('image', file);
-
-        const response = await fetch('/api/upload/image', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${Cookies.get('token')}`
-          },
-          body: formData
-        });
-
-        // Check if response is ok before trying to parse JSON
-        if (!response.ok) {
-          if (response.status === 401) {
-            toast.error('Please login to upload images');
-            return;
-          } else if (response.status === 403) {
-            toast.error('Access denied. Please login to upload images');
-            return;
+        try {
+          const response = await uploadAPI.uploadSingle(file, 'comments');
+          
+          if (response.success) {
+            uploadedImages.push({
+              url: response.data.url,
+              publicId: response.data.publicId
+            });
           } else {
-            toast.error(`Failed to upload ${file.name}. Please try again.`);
-            continue;
+            toast.error(`Failed to upload ${file.name}: ${response.message || 'Unknown error'}`);
           }
-        }
-
-        // Check if response has content before parsing JSON
-        const text = await response.text();
-        if (!text) {
-          console.warn('Empty response from server for image upload');
-          toast.error(`Failed to upload ${file.name}. Empty response from server.`);
-          continue;
-        }
-
-        const data = JSON.parse(text);
-
-        if (data.success) {
-          uploadedImages.push({
-            url: data.data.url,
-            publicId: data.data.publicId
-          });
-        } else {
-          toast.error(`Failed to upload ${file.name}: ${data.message || 'Unknown error'}`);
+        } catch (error) {
+          console.error(`Error uploading ${file.name}:`, error);
+          toast.error(`Failed to upload ${file.name}. Please try again.`);
         }
       }
 
@@ -120,57 +92,28 @@ const CommentForm = ({ productId, onCommentCreated, onCancel, editComment = null
 
     setIsSubmitting(true);
     try {
-      const url = editComment 
-        ? `/api/comments/${editComment._id}`
-        : '/api/comments';
+      let response;
       
-      const method = editComment ? 'PUT' : 'POST';
-      const body = editComment 
-        ? { ...formData }
-        : { ...formData, productId };
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Cookies.get('token')}`
-        },
-        body: JSON.stringify(body)
-      });
-
-      // Check if response is ok before trying to parse JSON
-      if (!response.ok) {
-        if (response.status === 401) {
-          toast.error('Please login to submit a review');
-          return;
-        } else if (response.status === 403) {
-          toast.error('Access denied. Please login to submit a review');
-          return;
-        } else {
-          toast.error('Failed to submit review. Please try again.');
-          return;
-        }
+      if (editComment) {
+        // Update existing comment
+        response = await commentsAPI.updateComment(editComment._id, formData);
+      } else {
+        // Create new comment
+        response = await commentsAPI.createComment({
+          ...formData,
+          productId
+        });
       }
 
-      // Check if response has content before parsing JSON
-      const text = await response.text();
-      if (!text) {
-        console.warn('Empty response from server for comment submission');
-        toast.error('Failed to submit review. Empty response from server.');
-        return;
-      }
-
-      const data = JSON.parse(text);
-
-      if (data.success) {
+      if (response.success) {
         toast.success(editComment ? 'Review updated successfully' : 'Review submitted successfully');
-        onCommentCreated(data.data.comment);
+        onCommentCreated(response.data.comment);
       } else {
         // Handle specific error cases
-        if (data.message && data.message.includes('already reviewed')) {
+        if (response.message && response.message.includes('already reviewed')) {
           toast.error('You have already reviewed this product. You can edit your existing review instead.');
         } else {
-          toast.error(data.message || 'Failed to submit review');
+          toast.error(response.message || 'Failed to submit review');
         }
       }
     } catch (error) {

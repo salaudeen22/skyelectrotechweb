@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import CommentModal from './CommentModal';
 import CommentItem from './CommentItem';
 import RatingFilter from './RatingFilter';
+import { commentsAPI } from '../services/apiServices';
 
 const CommentSection = ({ productId }) => {
   const [comments, setComments] = useState([]);
@@ -31,52 +32,48 @@ const CommentSection = ({ productId }) => {
   const fetchComments = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({
+      console.log('Fetching comments for product:', productId);
+      console.log('Filters:', filters);
+      
+      const params = {
         page: filters.page,
         limit: 10,
         sort: filters.sort,
         ...(filters.rating && { rating: filters.rating })
-      });
+      };
 
-      const response = await fetch(`/api/comments/product/${productId}?${params}`);
+      console.log('API params:', params);
+      const response = await commentsAPI.getProductComments(productId, params);
       
-      // Check if response is ok before trying to parse JSON
-      if (!response.ok) {
-        if (response.status === 403) {
-          toast.error('Access denied. Please login to view comments.');
-        } else if (response.status === 404) {
-          toast.error('Product not found.');
-        } else {
-          toast.error('Failed to load comments. Please try again.');
-        }
-        return;
-      }
-
-      // Check if response has content before parsing JSON
-      const text = await response.text();
-      if (!text) {
-        console.warn('Empty response from server');
+      console.log('API response:', response);
+      
+      if (response.success) {
+        setComments(response.data.comments || []);
+        setPagination(response.data.pagination || { page: 1, totalPages: 1, totalItems: 0 });
+        setRatingStats({
+          ratingDistribution: response.data.ratingDistribution || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+          totalReviews: response.data.totalReviews || 0
+        });
+        console.log('Comments loaded successfully:', response.data.comments?.length || 0, 'comments');
+      } else {
+        console.error('API returned error:', response.message);
+        toast.error(response.message || 'Failed to load comments');
         setComments([]);
         setPagination({ page: 1, totalPages: 1, totalItems: 0 });
-        setRatingStats({ ratingDistribution: {}, totalReviews: 0 });
-        return;
-      }
-
-      const data = JSON.parse(text);
-
-      if (data.success) {
-        setComments(data.data.comments);
-        setPagination(data.data.pagination);
-        setRatingStats({
-          ratingDistribution: data.data.ratingDistribution,
-          totalReviews: data.data.totalReviews
-        });
-      } else {
-        toast.error(data.message || 'Failed to load comments');
+        setRatingStats({ ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, totalReviews: 0 });
       }
     } catch (error) {
       console.error('Error fetching comments:', error);
-      toast.error('Failed to load comments');
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        statusText: error.response?.statusText
+      });
+      toast.error('Failed to load comments. Please try again.');
+      setComments([]);
+      setPagination({ page: 1, totalPages: 1, totalItems: 0 });
+      setRatingStats({ ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, totalReviews: 0 });
     } finally {
       setLoading(false);
     }
@@ -123,26 +120,17 @@ const CommentSection = ({ productId }) => {
     }
 
     try {
-      const response = await fetch(`/api/comments/${commentId}/vote`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ vote })
-      });
+      const response = await commentsAPI.voteComment(commentId, vote);
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.success) {
         setComments(prev => 
           prev.map(comment => 
-            comment._id === commentId ? data.data.comment : comment
+            comment._id === commentId ? response.data.comment : comment
           )
         );
         toast.success('Vote recorded successfully');
       } else {
-        toast.error(data.message || 'Failed to record vote');
+        toast.error(response.message || 'Failed to record vote');
       }
     } catch (error) {
       console.error('Error voting:', error);
