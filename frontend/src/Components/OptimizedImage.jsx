@@ -19,25 +19,24 @@ const OptimizedImage = ({
   const imgRef = useRef(null);
   const observerRef = useRef(null);
 
-  // Generate WebP src if supported
-  const generateWebPSrc = (originalSrc) => {
+  // Generate optimized image URLs with proper sizing
+  const generateOptimizedSrc = (originalSrc, targetWidth) => {
     if (!originalSrc) return originalSrc;
     
-    // If it's already a WebP image, return as is
-    if (originalSrc.includes('.webp')) return originalSrc;
-    
-    // For external images, we can't convert to WebP
+    // For external images, return as is
     if (originalSrc.startsWith('http') && !originalSrc.includes('skyelectrotech.in')) {
       return originalSrc;
     }
     
-    // For local images, we can serve WebP versions
-    // This assumes you have WebP versions of your images
-    const webpSrc = originalSrc.replace(/\.(jpg|jpeg|png)$/i, '.webp');
-    return webpSrc;
+    // For local images, add width parameter for optimization
+    if (originalSrc.includes('?')) {
+      return `${originalSrc}&w=${targetWidth}`;
+    } else {
+      return `${originalSrc}?w=${targetWidth}`;
+    }
   };
 
-  // Generate responsive srcset
+  // Generate responsive srcset with optimized sizes
   const generateSrcSet = (originalSrc) => {
     if (!originalSrc) return '';
     
@@ -46,9 +45,9 @@ const OptimizedImage = ({
       return '';
     }
     
-    // Generate different sizes for local images
-    const sizes = [320, 640, 768, 1024, 1280];
-    const srcSet = sizes.map(size => `${originalSrc}?w=${size} ${size}w`).join(', ');
+    // Generate optimized sizes for different screen sizes
+    const sizes = [320, 480, 640, 768, 1024, 1280];
+    const srcSet = sizes.map(size => `${generateOptimizedSrc(originalSrc, size)} ${size}w`).join(', ');
     return srcSet;
   };
 
@@ -95,9 +94,8 @@ const OptimizedImage = ({
     onError?.();
   };
 
-  const webpSrc = generateWebPSrc(src);
+  const optimizedSrc = generateOptimizedSrc(src, 800); // Default optimized size
   const srcSet = generateSrcSet(src);
-  const webpSrcSet = generateSrcSet(webpSrc);
 
   return (
     <div 
@@ -108,44 +106,23 @@ const OptimizedImage = ({
         height: height ? `${height}px` : 'auto'
       }}
     >
-      {/* Placeholder */}
+      {/* Placeholder with blur effect */}
       {!isLoaded && !hasError && (
-        <img
-          src={placeholder}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: 'blur(10px)' }}
+        <div 
+          className="absolute inset-0 bg-gray-200 animate-pulse"
+          style={{ 
+            backgroundImage: `url(${placeholder})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'blur(10px)'
+          }}
         />
       )}
 
-      {/* WebP Image */}
-      {isInView && webpSrc !== src && (
-        <picture>
-          <source
-            type="image/webp"
-            srcSet={webpSrcSet}
-            sizes={sizes}
-          />
-          <img
-            src={src}
-            srcSet={srcSet}
-            sizes={sizes}
-            alt={alt}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
-              isLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            onLoad={handleLoad}
-            onError={handleError}
-            loading={priority ? 'eager' : 'lazy'}
-            {...props}
-          />
-        </picture>
-      )}
-
-      {/* Fallback Image */}
-      {isInView && webpSrc === src && (
+      {/* Optimized Image */}
+      {isInView && (
         <img
-          src={src}
+          src={optimizedSrc}
           srcSet={srcSet}
           sizes={sizes}
           alt={alt}
@@ -155,6 +132,7 @@ const OptimizedImage = ({
           onLoad={handleLoad}
           onError={handleError}
           loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
           {...props}
         />
       )}

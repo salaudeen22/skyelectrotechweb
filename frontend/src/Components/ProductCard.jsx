@@ -86,19 +86,25 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
           disabled={isAddingToWishlist}
           className="absolute top-3 right-3 z-20 p-2.5 sm:p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 touch-manipulation cursor-pointer"
           title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+          aria-label={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
           type="button"
         >
           <FiHeart 
             className={`w-6 h-6 sm:w-5 sm:h-5 ${isAddingToWishlist ? 'text-red-500 animate-pulse' : isInWishlist ? 'text-red-500 fill-current' : 'text-gray-600'}`} 
+            aria-hidden="true"
           />
         </button>
       )}
 
       {/* Product Image Section */}
-      <Link to={`/products/${product._id}`} className="block overflow-hidden">
+      <Link 
+        to={`/products/${product._id}`} 
+        className="block overflow-hidden"
+        aria-label={`View details for ${product.name}`}
+      >
         <OptimizedImage 
           src={getPrimaryImage(product.images)} 
-          alt={product.name}
+          alt={`${product.name} - ${product.category?.name || 'Electronics'}`}
           className="w-full h-40 sm:h-52 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
@@ -110,7 +116,10 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
           <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
             {product.category?.name || 'Electronics'}
           </p>
-          <Link to={`/products/${product._id}`}>
+          <Link 
+            to={`/products/${product._id}`}
+            aria-label={`View details for ${product.name}`}
+          >
             <h3 className="text-sm sm:text-lg font-bold text-gray-900 mt-1 hover:text-blue-600 transition-colors" title={product.name}>
               {product.name}
             </h3>
@@ -118,7 +127,7 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
           
           {/* Rating */}
           {product.averageRating > 0 && (
-            <div className="flex items-center mt-1 sm:mt-2">
+            <div className="flex items-center mt-1 sm:mt-2" role="img" aria-label={`Rating: ${product.averageRating} out of 5 stars`}>
               <div className="flex items-center">
                 {[...Array(5)].map((_, i) => (
                   <svg
@@ -130,6 +139,7 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
                     }`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
+                    aria-hidden="true"
                   >
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
@@ -166,9 +176,10 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
               onClick={handleAddToCart}
               disabled={addingToCart}
               className="w-full flex items-center justify-center py-2.5 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300 sm:opacity-0 sm:group-hover:opacity-100 sm:transform sm:translate-y-2 sm:group-hover:translate-y-0 touch-manipulation cursor-pointer"
+              aria-label={`Add ${product.name} to cart`}
               type="button"
             >
-              <FiShoppingCart className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+              <FiShoppingCart className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
               {addingToCart ? 'Adding...' : 'Add to Cart'}
             </button>
           </div>
@@ -179,19 +190,12 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
           <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
             <Link 
               to="/auth/login"
-              className="w-full flex items-center justify-center py-2.5 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all duration-300 ease-in-out sm:opacity-0 sm:group-hover:opacity-100 sm:transform sm:translate-y-2 sm:group-hover:translate-y-0 touch-manipulation cursor-pointer"
+              className="w-full flex items-center justify-center py-2.5 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-300 sm:opacity-0 sm:group-hover:opacity-100 sm:transform sm:translate-y-2 sm:group-hover:translate-y-0 touch-manipulation cursor-pointer"
+              aria-label="Login to add items to cart"
             >
-              Login to Purchase
+              <FiShoppingCart className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+              Login to Add to Cart
             </Link>
-          </div>
-        )}
-        
-        {/* For admin/employee users, show view-only message */}
-        {isAuthenticated && (user?.role === 'admin' || user?.role === 'employee') && (
-          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
-            <div className="w-full flex items-center justify-center py-2.5 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium bg-blue-50 text-blue-600 border border-blue-200">
-              Admin/Employee View
-            </div>
           </div>
         )}
       </div>
