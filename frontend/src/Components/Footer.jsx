@@ -24,25 +24,25 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-gray-500 tracking-wider uppercase">Company</h3>
             <ul className="space-y-2">
-              <li><Link to="#" className="text-base text-gray-600 hover:text-blue-600">About</Link></li>
-              <li><Link to="#" className="text-base text-gray-600 hover:text-blue-600">Careers</Link></li>
+              <li><Link to="/about" className="text-base text-gray-600 hover:text-blue-600">About</Link></li>
+              <li><Link to="/contact" className="text-base text-gray-600 hover:text-blue-600">Contact</Link></li>
             </ul>
           </div>
           {/* Help & Support */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-gray-500 tracking-wider uppercase">Support</h3>
             <ul className="space-y-2">
-              <li><Link to="#" className="text-base text-gray-600 hover:text-blue-600">Contact Us</Link></li>
-              <li><Link to="#" className="text-base text-gray-600 hover:text-blue-600">FAQs</Link></li>
-              <li><Link to="#" className="text-base text-gray-600 hover:text-blue-600">Shipping</Link></li>
+              <li><Link to="/contact" className="text-base text-gray-600 hover:text-blue-600">Contact Us</Link></li>
+              <li><Link to="/faq" className="text-base text-gray-600 hover:text-blue-600">FAQs</Link></li>
+              <li><Link to="/products" className="text-base text-gray-600 hover:text-blue-600">Products</Link></li>
             </ul>
           </div>
           {/* Legal */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-gray-500 tracking-wider uppercase">Legal</h3>
             <ul className="space-y-2">
-              <li><Link to="#" className="text-base text-gray-600 hover:text-blue-600">Privacy Policy</Link></li>
-              <li><Link to="#" className="text-base text-gray-600 hover:text-blue-600">Terms of Service</Link></li>
+              <li><Link to="/privacy-policy" className="text-base text-gray-600 hover:text-blue-600">Privacy Policy</Link></li>
+              <li><Link to="/terms-of-service" className="text-base text-gray-600 hover:text-blue-600">Terms of Service</Link></li>
             </ul>
           </div>
           {/* Newsletter */}

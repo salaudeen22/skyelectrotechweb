@@ -17,6 +17,11 @@ import AuthLayout from './Layouts/AuthLayout';
 
 // Pages
 import Home from './Page/Home';
+import About from './Page/About';
+import Contact from './Page/Contact';
+import FAQ from './Page/FAQ';
+import PrivacyPolicy from './Page/PrivacyPolicy';
+import TermsOfService from './Page/TermsOfService';
 import ProductList from './User/ProductList';
 import ProductDetails from './User/ProductDetails';
 import Cart from './User/Cart';
@@ -66,7 +71,8 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  const pwa = usePWA();
+  // Initialize PWA functionality
+  usePWA();
 
   useEffect(() => {
     initializeAnalytics();
@@ -103,6 +109,11 @@ const App = () => {
                 {/* Public Routes */}
                 <Route path="/" element={<MainLayout />}>
                   <Route index element={<Home />} />
+                  <Route path="about" element={<About />} />
+                  <Route path="contact" element={<Contact />} />
+                  <Route path="faq" element={<FAQ />} />
+                  <Route path="privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="terms-of-service" element={<TermsOfService />} />
                   <Route path="products" element={<ProductList />} />
                   <Route path="products/:id" element={<ProductDetails />} />
                   <Route path="category/:categoryId" element={<ProductList />} />
