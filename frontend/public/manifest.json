@@ -1,7 +1,7 @@
 {
-  "name": "SkyElectroTech - Premium Electronics Store",
+  "name": "SkyElectroTech - Electronics Store",
   "short_name": "SkyElectroTech",
-  "description": "Discover high-quality electronic components, tools, and equipment at SkyElectroTech. Fast delivery, secure payments, and expert support.",
+  "description": "Discover electronic components, tools, and equipment at SkyElectroTech. Fast delivery, secure payments, and expert support.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
