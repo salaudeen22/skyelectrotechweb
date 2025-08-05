@@ -52,6 +52,7 @@ import ReturnRequests from './Admin/ReturnRequests';
 import ProtectedRoute from './Components/ProtectedRoute';
 import NotFound from './Components/NotFound';
 import AnalyticsTracker from './Components/AnalyticsTracker';
+import { usePWA } from './hooks/usePWA';
 
 // Create a query client
 const queryClient = new QueryClient({
@@ -65,6 +66,8 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
+  const pwa = usePWA();
+
   useEffect(() => {
     initializeAnalytics();
   }, []);

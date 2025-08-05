@@ -7,6 +7,7 @@ import { useCart } from '../hooks/useCart';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { toast } from 'react-hot-toast';
 import CommentSection from '../Components/CommentSection';
+import SEO from '../Components/SEO';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -174,8 +175,19 @@ const ProductDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ scrollBehavior: 'auto' }}>
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
+    <>
+      <SEO 
+        title={`${product.name} - SkyElectroTech`}
+        description={product.description}
+        keywords={`${product.name}, ${product.brand || 'electronics'}, ${product.category?.name || 'electronics'}, SkyElectroTech`}
+        image={product.images?.[0]?.url}
+        url={`https://skyelectrotech.in/products/${product._id}`}
+        type="product"
+        product={product}
+        category={product.category}
+      />
+      <div className="min-h-screen bg-gray-50" style={{ scrollBehavior: 'auto' }}>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Breadcrumb */}
         <nav className="flex mb-4 sm:mb-8" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-3">
@@ -432,6 +444,7 @@ const ProductDetails = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
