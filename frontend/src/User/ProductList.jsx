@@ -18,7 +18,7 @@ const ProductList = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   
   // Filter states
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || searchParams.get('search') || '');
   const [selectedCategories, setSelectedCategories] = useState(categoryId ? [categoryId] : []);
   const [priceRange, setPriceRange] = useState({ 
     min: searchParams.get('minPrice') || '', 
@@ -56,7 +56,9 @@ const ProductList = () => {
           ...(sortOrder && { sort: sortOrder })
         };
 
+        console.log('Fetching products with params:', params);
         const response = await productsAPI.getProducts(params);
+        console.log('Products response:', response);
         setProducts(response.data.products);
         setTotalProducts(response.data.total);
         
@@ -116,8 +118,8 @@ const ProductList = () => {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
             {categoryId ? 
               categories.find(c => c._id === categoryId)?.name + ' Products' || 'Products' 
-              : searchParams.get('q') ? 
-              `Search Results for "${searchParams.get('q')}"` 
+              : searchParams.get('q') || searchParams.get('search') ? 
+              `Search Results for "${searchParams.get('q') || searchParams.get('search')}"` 
               : 'All Products'
             }
           </h1>

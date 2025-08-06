@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { FiSearch, FiShoppingCart } from 'react-icons/fi';
 import HeroSlider from '../Components/Subcompo/HeroSlider';
 import ProductCard from '../Components/ProductCard'; 
 import { FaShippingFast, FaShieldAlt, FaHeadset } from 'react-icons/fa';
 import { productsAPI, categoriesAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
 
-
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,6 +57,16 @@ const Home = () => {
     fetchData();
   }, []);
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      console.log('Searching for:', searchTerm.trim());
+      navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+    } else {
+      toast.error('Please enter a search term');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -62,11 +74,65 @@ const Home = () => {
       </div>
     );
   }
+
   return (
     <div className="bg-gray-50">
       <main className="pt-16 md:pt-0"> 
         
-        <HeroSlider />
+        {/* Hero Section */}
+        <section className="relative">
+          {/* Hero Slider */}
+          <div className="h-[40vh] sm:h-[50vh] md:h-[60vh]">
+            <HeroSlider />
+          </div>
+        </section>
+
+        {/* Search Section - Below Hero */}
+        <section className="bg-white py-8 border-b border-gray-200">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Find Your Perfect Components</h2>
+              <p className="text-gray-600">Search thousands of electronic components and tools</p>
+            </div>
+            
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4 max-w-3xl mx-auto">
+              <div className="flex-1 relative">
+                <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
+                <input
+                  type="text"
+                  placeholder="Search for Arduino, Raspberry Pi, sensors, motors, or any electronic component..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 shadow-sm"
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl whitespace-nowrap"
+              >
+                <FiSearch className="text-xl" />
+                Search
+              </button>
+            </form>
+            
+            {/* Quick Search Suggestions */}
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              <span className="text-sm text-gray-500 mr-2">Popular:</span>
+              {['Arduino', 'Raspberry Pi', 'Sensors', 'Motors', 'LEDs', 'Resistors'].map((term) => (
+                <button
+                  key={term}
+                  onClick={() => {
+                    setSearchTerm(term);
+                    navigate(`/products?search=${encodeURIComponent(term)}`);
+                  }}
+                  className="text-sm bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 px-3 py-1 rounded-full transition-colors duration-200"
+                >
+                  {term}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* Shop by Category Section */}
         <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -83,9 +149,9 @@ const Home = () => {
                       src={category.image?.url || category.image || 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png'} 
                       alt={category.name} 
                       className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-105"
-                                              onError={(e) => {
-                          e.target.src = 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png';
-                        }}
+                      onError={(e) => {
+                        e.target.src = 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png';
+                      }}
                     />
                   </div>
                   <h3 className="mt-4 text-md font-semibold text-gray-800 group-hover:text-blue-600">{category.name}</h3>

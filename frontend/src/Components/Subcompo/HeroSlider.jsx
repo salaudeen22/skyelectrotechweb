@@ -65,7 +65,7 @@ const HeroSlider = () => {
 
   return (
     <div 
-      className="relative w-full h-[50vh] sm:h-[70vh] md:h-[85vh] lg:h-[90vh] overflow-hidden rounded-xl shadow-2xl"
+      className="relative w-full h-full overflow-hidden rounded-xl shadow-2xl"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -99,11 +99,11 @@ const HeroSlider = () => {
               <div className="absolute top-1/3 right-1/3 w-6 h-6 bg-blue-400 rounded-full animate-bounce"></div>
             </div>
             
-            {/* Text Content */}
-            <div className="absolute inset-0 flex flex-col justify-center items-start p-8 md:p-16 lg:p-24">
-              <div className="max-w-2xl">
+            {/* Text Content - More compact for smaller height */}
+            <div className="absolute inset-0 flex flex-col justify-center items-start p-6 md:p-12 lg:p-16">
+              <div className="max-w-xl">
                 <h2
-                  className={`text-white text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 leading-tight transition-all duration-1000 ease-out ${
+                  className={`text-white text-2xl md:text-3xl lg:text-4xl font-bold mb-3 leading-tight transition-all duration-1000 ease-out ${
                     current === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
                   style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
@@ -111,7 +111,7 @@ const HeroSlider = () => {
                   {slide.title}
                 </h2>
                 <p
-                  className={`text-blue-100 text-lg md:text-xl lg:text-2xl mb-8 transition-all duration-1000 ease-out delay-150 ${
+                  className={`text-blue-100 text-sm md:text-lg mb-6 transition-all duration-1000 ease-out delay-150 ${
                     current === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                   }`}
                 >
@@ -123,14 +123,14 @@ const HeroSlider = () => {
                   }`}
                 >
                   <button 
-                    className="bg-white text-blue-800 font-bold px-8 py-3 rounded-full hover:bg-blue-50 hover:scale-105 transition-all duration-300 shadow-lg flex items-center gap-2"
+                    className="bg-white text-blue-800 font-bold px-6 py-2 rounded-full hover:bg-blue-50 hover:scale-105 transition-all duration-300 shadow-lg flex items-center gap-2 text-sm"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleSlideClick(slide);
                     }}
                   >
                     {slide.cta}
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                   </button>
@@ -144,19 +144,19 @@ const HeroSlider = () => {
       {/* Navigation Arrows - Always visible but more prominent on hover */}
       <button 
         onClick={prevSlide}
-        className={`absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 text-white p-3 rounded-full z-20 transition-all duration-300 ${
+        className={`absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full z-20 transition-all duration-300 ${
           isHovered ? 'opacity-100 scale-110' : 'opacity-70 scale-100'
         } hover:bg-black/50 hover:scale-125`}
       >
-        <FiChevronLeft size={28} />
+        <FiChevronLeft size={24} />
       </button>
       <button 
         onClick={nextSlide}
-        className={`absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 text-white p-3 rounded-full z-20 transition-all duration-300 ${
+        className={`absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full z-20 transition-all duration-300 ${
           isHovered ? 'opacity-100 scale-110' : 'opacity-70 scale-100'
         } hover:bg-black/50 hover:scale-125`}
       >
-        <FiChevronRight size={28} />
+        <FiChevronRight size={24} />
       </button>
 
       {/* Progress Bar */}
@@ -171,13 +171,13 @@ const HeroSlider = () => {
       </div>
 
       {/* Pagination Dots */}
-      <div className="absolute bottom-6 left-0 right-0 z-20 flex justify-center gap-2">
+      <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-2">
         {slides.map((_, i) => (
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            className={`h-3 w-3 rounded-full transition-all duration-300 ${
-              current === i ? 'bg-white w-8' : 'bg-white/50 w-3 hover:bg-white/70'
+            className={`h-2 w-2 rounded-full transition-all duration-300 ${
+              current === i ? 'bg-white w-6' : 'bg-white/50 w-2 hover:bg-white/70'
             }`}
             aria-label={`Go to slide ${i + 1}`}
           />
@@ -185,7 +185,7 @@ const HeroSlider = () => {
       </div>
 
       {/* Current slide indicator */}
-      <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm z-20">
+      <div className="absolute top-2 right-2 bg-black/50 text-white px-2 py-1 rounded-full text-xs z-20">
         {current + 1} / {slides.length}
       </div>
     </div>

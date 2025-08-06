@@ -67,6 +67,7 @@ const getProducts = asyncHandler(async (req, res) => {
 
   // Search filter
   if (search) {
+    console.log('Search query:', search);
     query.$text = { $search: search };
   }
 
@@ -74,9 +75,19 @@ const getProducts = asyncHandler(async (req, res) => {
   const { skip, limit: pageLimit } = paginate(page, limit);
 
   // Execute query
+  let sortOptions = sort;
+  
+  // If search is active, sort by text score first, then by the specified sort
+  if (search) {
+    sortOptions = { score: { $meta: 'textScore' }, [sort.replace('-', '')]: sort.startsWith('-') ? -1 : 1 };
+  }
+  
+  console.log('Final query:', JSON.stringify(query, null, 2));
+  console.log('Sort options:', sortOptions);
+  
   const products = await Product.find(query)
     .populate('category', 'name')
-    .sort(sort)
+    .sort(sortOptions)
     .skip(skip)
     .limit(pageLimit)
     .lean();
