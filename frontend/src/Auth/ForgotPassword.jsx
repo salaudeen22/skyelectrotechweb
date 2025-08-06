@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authServices } from '../services/apiServices';
-import { FiMail, FiCheckCircle, FiXCircle, FiArrowLeft } from 'react-icons/fi';
+import { FiMail, FiCheckCircle, FiXCircle, FiArrowLeft, FiShield, FiSend } from 'react-icons/fi';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -32,101 +32,152 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 py-8">
-      <div className="max-w-md w-full mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="p-6 sm:p-8">
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-6">
-              <div className="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center">
-                <img 
-                  src="/favicon_io (1)/android-chrome-512x512.png" 
-                  alt="SkyElectroTech" 
-                  className="h-10 w-auto object-contain"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-                <div 
-                  className="hidden items-center justify-center h-10 w-10 bg-blue-600 rounded-lg text-white font-bold text-xs"
-                  style={{ display: 'none' }}
-                >
-                  SET
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center px-4 py-8 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div className="relative max-w-md w-full mx-auto">
+        {/* Card Container */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+          <div className="p-8">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="flex justify-center mb-6">
+                <div className="relative">
+                  <div className="h-20 w-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <FiShield className="h-10 w-10 text-white" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 h-6 w-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <FiCheckCircle className="h-3 w-3 text-white" />
+                  </div>
                 </div>
               </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">Forgot Password?</h1>
+              <p className="text-gray-600 text-lg leading-relaxed">
+                No worries! Enter your email address and we'll send you a secure link to reset your password.
+              </p>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Forgot Password?</h2>
-            <p className="text-gray-600">No worries, we'll send you reset instructions.</p>
-          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiMail className="h-5 w-5 text-gray-400" />
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
+                  Email Address
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <FiMail className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                  </div>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                    placeholder="Enter your email address"
+                    disabled={isLoading}
+                  />
                 </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                  placeholder="you@example.com"
-                  disabled={isLoading}
-                />
               </div>
-            </div>
 
-            {error && (
-              <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md flex items-start">
-                <FiXCircle className="h-5 w-5 text-red-500 mr-3 flex-shrink-0" />
-                <p className="text-sm text-red-800">{error}</p>
-              </div>
-            )}
-
-            {message && (
-              <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-md flex items-start">
-                <FiCheckCircle className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                <p className="text-sm text-green-800">{message}</p>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={isLoading || !email}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Sending...
-                </span>
-              ) : (
-                'Send Reset Email'
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl flex items-start space-x-3 animate-in slide-in-from-top-2 duration-300">
+                  <FiXCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-red-800">Error</p>
+                    <p className="text-sm text-red-700 mt-1">{error}</p>
+                  </div>
+                </div>
               )}
-            </button>
 
-            <div className="text-center">
-              <Link
-                to="/auth/login"
-                className="text-sm font-medium text-blue-600 hover:text-blue-500 inline-flex items-center"
+              {/* Success Message */}
+              {message && (
+                <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-xl flex items-start space-x-3 animate-in slide-in-from-top-2 duration-300">
+                  <FiCheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-green-800">Success!</p>
+                    <p className="text-sm text-green-700 mt-1">{message}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isLoading || !email}
+                className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
               >
-                <FiArrowLeft className="w-4 h-4 mr-1" />
-                Back to Sign In
-              </Link>
-            </div>
-          </form>
+                {isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Sending Reset Link...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center">
+                    <FiSend className="mr-2 h-5 w-5" />
+                    Send Reset Link
+                  </span>
+                )}
+              </button>
+
+              {/* Back to Login */}
+              <div className="text-center pt-4">
+                <Link
+                  to="/auth/login"
+                  className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200 group"
+                >
+                  <FiArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />
+                  Back to Sign In
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-8">
+          <p className="text-sm text-gray-500">
+            Need help? <a href="/contact" className="text-blue-600 hover:text-blue-700 font-medium">Contact Support</a>
+          </p>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes blob {
+          0% {
+            transform: translate(0px, 0px) scale(1);
+          }
+          33% {
+            transform: translate(30px, -50px) scale(1.1);
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.9);
+          }
+          100% {
+            transform: translate(0px, 0px) scale(1);
+          }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
   );
 };
