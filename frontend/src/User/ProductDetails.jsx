@@ -88,7 +88,7 @@ const ProductDetails = () => {
       await addToCart(product._id, quantity);
       trackCartAdd(product, quantity);
       trackClick('add_to_cart_button', 'product_details');
-      toast.success(`Added ${quantity} item(s) to cart!`);
+      // Toast notification is already handled in CartContext
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error('Failed to add product to cart');

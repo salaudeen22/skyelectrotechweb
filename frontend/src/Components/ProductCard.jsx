@@ -31,7 +31,7 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
 
     try {
       await addToCart(product._id, 1);
-      toast.success('Product added to cart!');
+      // Toast notification is already handled in CartContext
     } catch (err) {
       console.error('Add to cart error:', err);
       toast.error('Failed to add product to cart');
