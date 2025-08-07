@@ -17,7 +17,7 @@ const returnRequestSchema = new mongoose.Schema({
   },
   reason: {
     type: String,
-    enum: ['defective', 'wrong_item', 'not_as_described', 'size_issue', 'quality_issue', 'changed_mind', 'duplicate_order', 'other'],
+    enum: ['defective', 'wrong_item', 'not_as_described', 'quality_issue', 'incompatible', 'missing_parts', 'changed_mind', 'duplicate_order', 'other'],
     required: true
   },
   description: {
@@ -46,6 +46,26 @@ const returnRequestSchema = new mongoose.Schema({
   },
   processedAt: {
     type: Date
+  },
+  returnShippingCost: {
+    type: Number,
+    default: 0
+  },
+  pickupScheduled: {
+    type: Boolean,
+    default: false
+  },
+  pickupDate: {
+    type: Date
+  },
+  pickupAddress: {
+    type: String
+  },
+  deliveryPartner: {
+    type: String
+  },
+  trackingNumber: {
+    type: String
   },
   requestedAt: {
     type: Date,

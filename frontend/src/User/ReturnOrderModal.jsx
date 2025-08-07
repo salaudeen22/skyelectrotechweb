@@ -16,8 +16,9 @@ const ReturnOrderModal = ({ order, isOpen, onClose, onReturnSubmit }) => {
     { value: 'defective', label: 'Product is defective/damaged' },
     { value: 'wrong_item', label: 'Wrong item received' },
     { value: 'not_as_described', label: 'Product not as described' },
-    { value: 'size_issue', label: 'Size doesn\'t fit' },
     { value: 'quality_issue', label: 'Quality not satisfactory' },
+    { value: 'incompatible', label: 'Product not compatible with my setup' },
+    { value: 'missing_parts', label: 'Missing parts/accessories' },
     { value: 'changed_mind', label: 'Changed my mind' },
     { value: 'duplicate_order', label: 'Duplicate order' },
     { value: 'other', label: 'Other reason' }
@@ -259,15 +260,16 @@ const ReturnOrderModal = ({ order, isOpen, onClose, onReturnSubmit }) => {
             <div className="flex items-start">
               <FiAlertCircle className="w-5 h-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
               <div className="text-sm text-blue-800">
-                <p className="font-medium mb-1">Return Policy</p>
+                <p className="font-medium mb-1">Return Policy (Small Business)</p>
                 <ul className="space-y-1 text-xs">
-                  <li>• Returns must be requested within 2 days of shipping/delivery</li>
-                  <li>• Products must be in original condition</li>
-                  <li>• Return shipping costs may apply</li>
-                  <li>• Refunds will be processed within 5-7 business days</li>
-                  <li>• Multiple return requests allowed per order</li>
-                  <li>• After 2 days, contact support for assistance</li>
-                  <li>• Each order can have multiple return requests</li>
+                  <li>• Returns must be requested within 48 hours of delivery</li>
+                  <li>• Products must be in original condition with all packaging</li>
+                  <li>• Return shipping costs: ₹100-200 (depending on location)</li>
+                  <li>• Refunds processed within 3-5 business days after receiving return</li>
+                  <li>• We use third-party delivery partners for returns</li>
+                  <li>• After 48 hours, contact support for special cases</li>
+                  <li>• Electronics items require careful handling during return</li>
+                  <li>• Return pickup scheduled within 24-48 hours of approval</li>
                 </ul>
               </div>
             </div>

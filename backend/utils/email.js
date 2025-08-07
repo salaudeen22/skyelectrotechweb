@@ -2534,8 +2534,9 @@ const sendReturnApprovedEmail = async (order, user, returnRequest) => {
         defective: 'Defective Product',
         wrong_item: 'Wrong Item Received',
         not_as_described: 'Not as Described',
-        size_issue: 'Size Issue',
         quality_issue: 'Quality Issue',
+        incompatible: 'Product Not Compatible',
+        missing_parts: 'Missing Parts/Accessories',
         changed_mind: 'Changed Mind',
         duplicate_order: 'Duplicate Order',
         other: 'Other'
@@ -2586,12 +2587,14 @@ const sendReturnApprovedEmail = async (order, user, returnRequest) => {
                     ${returnRequest.adminNotes ? `<p><strong>Admin Notes:</strong> ${returnRequest.adminNotes}</p>` : ''}
                 </div>
 
-                <h3>Next Steps:</h3>
+                <h3>Next Steps :</h3>
                 <ol>
-                    <li>Please package the items securely</li>
-                    <li>Include all original packaging and accessories</li>
-                    <li>We will arrange pickup or provide return shipping details</li>
-                    <li>Refund will be processed once we receive and inspect the items</li>
+                    <li>Please package the items securely in original packaging</li>
+                    <li>Include all accessories, manuals, and warranty cards</li>
+                    <li>Our third-party delivery partner will schedule pickup within 24-48 hours</li>
+                    <li>Return shipping cost: ₹100-200 (will be deducted from refund)</li>
+                    <li>Refund will be processed within 3-5 business days after receiving return</li>
+                    <li>You will receive tracking details via SMS/Email</li>
                 </ol>
 
                 <p>If you have any questions, please contact our customer support team.</p>
@@ -2644,19 +2647,20 @@ const sendReturnRejectedEmail = async (order, user, returnRequest) => {
       }).format(amount);
     };
 
-    const getReasonLabel = (reason) => {
-      const reasons = {
-        defective: 'Defective Product',
-        wrong_item: 'Wrong Item Received',
-        not_as_described: 'Not as Described',
-        size_issue: 'Size Issue',
-        quality_issue: 'Quality Issue',
-        changed_mind: 'Changed Mind',
-        duplicate_order: 'Duplicate Order',
-        other: 'Other'
-      };
-      return reasons[reason] || reason;
+      const getReasonLabel = (reason) => {
+    const reasons = {
+      defective: 'Defective Product',
+      wrong_item: 'Wrong Item Received',
+      not_as_described: 'Not as Described',
+      quality_issue: 'Quality Issue',
+      incompatible: 'Product Not Compatible',
+      missing_parts: 'Missing Parts/Accessories',
+      changed_mind: 'Changed Mind',
+      duplicate_order: 'Duplicate Order',
+      other: 'Other'
     };
+    return reasons[reason] || reason;
+  };
 
     const emailContent = `
     <!DOCTYPE html>

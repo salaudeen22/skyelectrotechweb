@@ -426,10 +426,10 @@ const returnOrder = asyncHandler(async (req, res) => {
   const shippedDate = order.statusHistory.find(h => h.status === 'shipped')?.updatedAt || 
                      order.statusHistory.find(h => h.status === 'delivered')?.updatedAt || 
                      order.updatedAt;
-  const daysSinceShipped = (new Date() - new Date(shippedDate)) / (1000 * 60 * 60 * 24);
+  const hoursSinceDelivered = (new Date() - new Date(shippedDate)) / (1000 * 60 * 60);
   
-  if (daysSinceShipped > 2) {
-    return sendError(res, 400, `Order can only be returned within 2 days of shipping/delivery. Days since shipped: ${Math.round(daysSinceShipped)}`);
+  if (hoursSinceDelivered > 48) {
+    return sendError(res, 400, `Order can only be returned within 48 hours of delivery. Hours since delivered: ${Math.round(hoursSinceDelivered)}`);
   }
 
   const { reason, description, condition } = req.body;
