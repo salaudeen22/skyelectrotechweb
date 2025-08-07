@@ -34,7 +34,7 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
       // Toast notification is already handled in CartContext
     } catch (err) {
       console.error('Add to cart error:', err);
-      toast.error('Failed to add product to cart');
+      // Toast notification is already handled in CartContext
     }
   };
 
