@@ -219,8 +219,8 @@ export const ordersAPI = {
   },
 
   // Cancel order
-  cancelOrder: async (id) => {
-    const response = await api.put(`/orders/${id}/cancel`);
+  cancelOrder: async (id, data) => {
+    const response = await api.put(`/orders/${id}/cancel`, data);
     return response.data;
   },
 

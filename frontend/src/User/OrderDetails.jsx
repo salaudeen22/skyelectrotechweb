@@ -3,12 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiPackage, FiTruck, FiCheck, FiX, FiCalendar, FiCreditCard, FiMapPin, FiPhone, FiMail, FiTruck as FiTruckIcon } from 'react-icons/fi';
 import { ordersAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
+import CancelOrderModal from './CancelOrderModal';
 
 const OrderDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -60,6 +62,34 @@ const OrderDetails = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  // Check if order can be cancelled (pending or confirmed status)
+  const canCancelOrder = (order) => {
+    return ['pending', 'confirmed'].includes(order?.orderStatus);
+  };
+
+  const handleCancelOrder = async (orderId, formData) => {
+    try {
+      await ordersAPI.cancelOrder(orderId, formData);
+      toast.success('Order cancelled successfully');
+      // Refresh order data
+      const response = await ordersAPI.getOrder(id);
+      setOrder(response.data.order);
+      setCancelModalOpen(false);
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      toast.error(error.response?.data?.message || 'Failed to cancel order');
+      throw error;
+    }
+  };
+
+  const openCancelModal = () => {
+    setCancelModalOpen(true);
+  };
+
+  const closeCancelModal = () => {
+    setCancelModalOpen(false);
   };
 
   const getOrderTimeline = () => {
@@ -142,6 +172,16 @@ const OrderDetails = () => {
             >
               {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
             </span>
+            {/* Cancel Order Button - Only show for pending/confirmed orders */}
+            {canCancelOrder(order) && (
+              <button
+                onClick={openCancelModal}
+                className="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+              >
+                <FiX className="w-4 h-4" />
+                <span>Cancel Order</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -367,6 +407,14 @@ const OrderDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Cancel Order Modal */}
+      <CancelOrderModal
+        order={order}
+        isOpen={cancelModalOpen}
+        onClose={closeCancelModal}
+        onCancelSubmit={handleCancelOrder}
+      />
     </div>
   );
 };

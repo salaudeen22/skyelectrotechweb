@@ -4,12 +4,14 @@ import { FiPackage, FiTruck, FiCheck, FiX, FiEye, FiCalendar, FiCreditCard, FiRo
 import { ordersAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
 import ReturnOrderModal from './ReturnOrderModal';
+import CancelOrderModal from './CancelOrderModal';
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [returnModalOpen, setReturnModalOpen] = useState(false);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [returnRequests, setReturnRequests] = useState({});
   const [expandedOrders, setExpandedOrders] = useState({});
@@ -69,6 +71,11 @@ const OrderHistory = () => {
     }
   };
 
+  // Check if order can be cancelled (pending or confirmed status)
+  const canCancelOrder = (order) => {
+    return ['pending', 'confirmed'].includes(order.orderStatus);
+  };
+
   // Check if order can be returned (shipped/delivered within 2 days)
   const canReturnOrder = (order) => {
     if (order.orderStatus !== 'shipped' && order.orderStatus !== 'delivered') return false;
@@ -96,6 +103,20 @@ const OrderHistory = () => {
     return order.orderStatus === filter;
   });
 
+  const handleCancelOrder = async (orderId, formData) => {
+    try {
+      await ordersAPI.cancelOrder(orderId, formData);
+      toast.success('Order cancelled successfully');
+      // Refresh orders
+      const response = await ordersAPI.getMyOrders();
+      setOrders(response.data.orders || []);
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      toast.error(error.response?.data?.message || 'Failed to cancel order');
+      throw error; // Re-throw to let modal handle the error
+    }
+  };
+
   const handleReturnOrder = async (orderId, formData) => {
     try {
       await ordersAPI.returnOrder(orderId, formData);
@@ -110,6 +131,16 @@ const OrderHistory = () => {
       toast.error(error.response?.data?.message || 'Failed to submit return request');
       throw error; // Re-throw to let modal handle the error
     }
+  };
+
+  const openCancelModal = (order) => {
+    setSelectedOrder(order);
+    setCancelModalOpen(true);
+  };
+
+  const closeCancelModal = () => {
+    setCancelModalOpen(false);
+    setSelectedOrder(null);
   };
 
   const openReturnModal = (order) => {
@@ -342,16 +373,30 @@ const OrderHistory = () => {
                         )}
                       </button>
                       
-                      {/* Return Button - Only show for shipped/delivered orders within 2 days */}
-                      {canReturnOrder(order) && (
-                        <button
-                          onClick={() => openReturnModal(order)}
-                          className="flex items-center space-x-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors text-xs sm:text-sm font-medium"
-                        >
-                          <FiRotateCcw className="w-3 h-3 sm:w-4 sm:h-4" />
-                          <span>Request Return</span>
-                        </button>
-                      )}
+                      {/* Action Buttons */}
+                      <div className="flex items-center space-x-2">
+                        {/* Cancel Button - Only show for pending/confirmed orders */}
+                        {canCancelOrder(order) && (
+                          <button
+                            onClick={() => openCancelModal(order)}
+                            className="flex items-center space-x-1 px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors text-xs sm:text-sm font-medium"
+                          >
+                            <FiX className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <span>Cancel Order</span>
+                          </button>
+                        )}
+                        
+                        {/* Return Button - Only show for shipped/delivered orders within 2 days */}
+                        {canReturnOrder(order) && (
+                          <button
+                            onClick={() => openReturnModal(order)}
+                            className="flex items-center space-x-1 px-3 py-1 bg-orange-100 text-orange-700 rounded-md hover:bg-orange-200 transition-colors text-xs sm:text-sm font-medium"
+                          >
+                            <FiRotateCcw className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <span>Request Return</span>
+                          </button>
+                        )}
+                      </div>
                       
                       {/* Contact Info - Show when return period has passed */}
                       {showContactInfo(order) && (
@@ -432,6 +477,16 @@ const OrderHistory = () => {
           isOpen={returnModalOpen}
           onClose={closeReturnModal}
           onReturnSubmit={handleReturnOrder}
+        />
+      )}
+
+      {/* Cancel Order Modal */}
+      {selectedOrder && (
+        <CancelOrderModal
+          order={selectedOrder}
+          isOpen={cancelModalOpen}
+          onClose={closeCancelModal}
+          onCancelSubmit={handleCancelOrder}
         />
       )}
     </div>

@@ -381,6 +381,12 @@ const cancelOrder = asyncHandler(async (req, res) => {
     return sendError(res, 400, 'Order cannot be cancelled at this stage');
   }
 
+  // Validate cancellation reason
+  const { reason } = req.body;
+  if (!reason || !reason.trim()) {
+    return sendError(res, 400, 'Cancellation reason is required');
+  }
+
   // Restore product stock
   for (const item of order.orderItems) {
     await Product.findByIdAndUpdate(
@@ -393,10 +399,18 @@ const cancelOrder = asyncHandler(async (req, res) => {
   order.statusHistory.push({
     status: 'cancelled',
     updatedBy: req.user._id,
-    note: 'Cancelled by customer'
+    note: `Cancelled by customer: ${reason.trim()}`
   });
 
   await order.save();
+
+  // Send cancellation email notification
+  try {
+    await sendOrderStatusUpdateEmail(order, req.user, 'cancelled');
+  } catch (emailError) {
+    console.error('Failed to send cancellation email:', emailError);
+    // Don't fail the cancellation if email fails
+  }
 
   sendResponse(res, 200, { order }, 'Order cancelled successfully');
 });
