@@ -77,7 +77,7 @@ const getWelcomeEmailTemplate = (userName) => {
   const logoUrl = getEmailLogoUrl();
   
   return {
-    subject: 'Welcome to SkyElectroTech! 🚀',
+    subject: 'Welcome to SkyElectroTech!',
     html: `
       <!DOCTYPE html>
       <html lang="en">
@@ -501,7 +501,7 @@ const getWelcomeEmailTemplate = (userName) => {
         <div class="container">
           <div class="header">
             <img src="${logoUrl}" alt="SkyElectroTech Logo" class="logo">
-            <h1>Welcome Aboard, ${userName}! 🚀</h1>
+            <h1>Welcome Aboard, ${userName}!</h1>
             <p>Your journey into the world of electronics starts now</p>
           </div>
           <div class="content">
@@ -917,7 +917,7 @@ const getForgotPasswordEmailTemplate = (userName, resetUrl) => {
               </svg>
             </div>
             <div class="notice-content">
-              <h3>⏰ Time-Sensitive Link</h3>
+              <h3>Time-Sensitive Link</h3>
               <p>For your security, this link will expire in 10 minutes.</p>
             </div>
           </div>
@@ -929,7 +929,7 @@ const getForgotPasswordEmailTemplate = (userName, resetUrl) => {
           <div class="link-box">${resetUrl}</div>
           
           <p style="margin-top: 30px; padding: 20px; background: #f8fafc; border-radius: 12px; border-left: 4px solid #10b981;">
-            <strong>🔒 Security Note:</strong> Never share this link with anyone. Our team will never ask for your password via email.
+            <strong>Security Note:</strong> Never share this link with anyone. Our team will never ask for your password via email.
           </p>
         </div>
         <div class="footer">
@@ -1272,17 +1272,17 @@ const getOTPEmailTemplate = (userName, otpCode, purpose = 'profile update') => {
                 <p>OTP Verification</p>
             </div>
             <div class="content">
-                <h2>Hello ${userName}! 👋</h2>
+                <h2>Hello ${userName}!</h2>
                 <p>We received a request to ${purposeText[purpose] || purpose}. Please use the OTP code below to complete the verification:</p>
                 
                 <div class="otp-box">
                     <p class="otp-label">Your OTP Code:</p>
                     <div class="otp-code">${otpCode}</div>
-                    <p class="otp-expiry">⏰ This code expires in 10 minutes</p>
+                    <p class="otp-expiry">This code expires in 10 minutes</p>
                 </div>
 
                 <div class="notice">
-                    <strong>🔒 Security Notice:</strong> Never share this OTP with anyone. Our team will never ask for your OTP via email or phone.
+                    <strong>Security Notice:</strong> Never share this OTP with anyone. Our team will never ask for your OTP via email or phone.
                 </div>
 
                 <p>If you didn't request this verification, please ignore this email or contact our support team.</p>
@@ -1893,7 +1893,7 @@ const getOrderNotificationEmailTemplate = (order, user) => {
             </div>
             <div class="content">
                 <div class="alert-box">
-                    <h3>🛍️ New Order Alert</h3>
+                    <h3>New Order Alert</h3>
                     <p>A new order has been placed and requires your attention.</p>
                 </div>
 
@@ -1903,7 +1903,7 @@ const getOrderNotificationEmailTemplate = (order, user) => {
                     <p><strong>Date:</strong> ${orderDate}</p>
                     <p><strong>Customer:</strong> ${user.name} (${user.email})</p>
                     <p><strong>Payment Method:</strong> ${order.paymentInfo?.method?.charAt(0).toUpperCase() + order.paymentInfo?.method?.slice(1) || 'Not specified'}</p>
-                    <p><strong>Payment Status:</strong> ${order.paymentInfo?.status === 'completed' ? '✅ Paid' : '⏳ Pending'}</p>
+                    <p><strong>Payment Status:</strong> ${order.paymentInfo?.status === 'completed' ? 'Paid' : 'Pending'}</p>
                 </div>
 
                 <div class="customer-info">
@@ -2263,7 +2263,7 @@ const sendLowStockAlertEmail = async (product) => {
     <body>
         <div class="container">
             <div class="header">
-                <h1>⚠️ Low Stock Alert</h1>
+                <h1>Low Stock Alert</h1>
                 <p>Product stock is running low</p>
             </div>
             <div class="content">
@@ -2343,7 +2343,7 @@ const sendNewUserNotificationEmail = async (user) => {
     <body>
         <div class="container">
             <div class="header">
-                <h1>👤 New User Registration</h1>
+                <h1>New User Registration</h1>
                 <p>A new user has joined SkyElectroTech</p>
             </div>
             <div class="content">
@@ -2450,7 +2450,7 @@ const sendReturnRequestEmail = async (order, user, returnRequest) => {
     <body>
         <div class="container">
             <div class="header">
-                <h1>🔄 Return Request</h1>
+                <h1>Return Request</h1>
                 <p>Order ${order.orderId} - ${user.name}</p>
             </div>
             <div class="content">
@@ -2563,7 +2563,7 @@ const sendReturnApprovedEmail = async (order, user, returnRequest) => {
     <body>
         <div class="container">
             <div class="header">
-                <h1>✅ Return Request Approved</h1>
+                <h1>Return Request Approved</h1>
                 <p>Order ${order.orderId} - Return Request #${returnRequest.requestNumber}</p>
             </div>
             <div class="content">
@@ -2678,7 +2678,7 @@ const sendReturnRejectedEmail = async (order, user, returnRequest) => {
     <body>
         <div class="container">
             <div class="header">
-                <h1>❌ Return Request Status</h1>
+                <h1>Return Request Status</h1>
                 <p>Order ${order.orderId} - Return Request #${returnRequest.requestNumber}</p>
             </div>
             <div class="content">
@@ -2737,6 +2737,670 @@ const sendReturnRejectedEmail = async (order, user, returnRequest) => {
   }
 };
 
+// Service request confirmation email template for customer
+const getServiceRequestEmailTemplate = (serviceRequest) => {
+  const logoUrl = getEmailLogoUrl();
+  
+  const getServiceTypeDisplay = (type) => {
+    const types = {
+      '3d-printing': '3D Printing',
+      'drone-services': 'Drone Services',
+      'project-building': 'Project Building'
+    };
+    return types[type] || type;
+  };
+
+  return {
+    subject: `Service Request Confirmation - ${getServiceTypeDisplay(serviceRequest.serviceType)}`,
+    html: `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        <title>Service Request Confirmation</title>
+        <style>
+          :root {
+            --primary-color: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --primary-light: #60a5fa;
+            --secondary-color: #10b981;
+            --accent-color: #f59e0b;
+            --background-color: #f8fafc;
+            --text-color: #1e293b;
+            --text-light: #64748b;
+            --text-muted: #94a3b8;
+            --card-background: #ffffff;
+            --border-color: #e2e8f0;
+            --border-light: #f1f5f9;
+            --footer-text: #64748b;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            --gradient-secondary: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+          }
+          
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
+          body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            margin: 0;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+          }
+          
+          .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background-color: var(--card-background);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow-2xl);
+            border: 1px solid var(--border-color);
+            position: relative;
+          }
+          
+          .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+          }
+          
+          .header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 50px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+          }
+          
+          .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.2;
+          }
+          
+          .logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+          }
+          
+          .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          }
+          
+          .header p {
+            margin: 10px 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+          }
+          
+          .content {
+            padding: 40px 30px;
+          }
+          
+          .content h2 {
+            font-size: 24px;
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-weight: 600;
+          }
+          
+          .content p {
+            margin-bottom: 20px;
+            color: var(--text-light);
+            font-size: 16px;
+          }
+          
+          .request-summary {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+          }
+          
+          .request-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+          }
+          
+          .detail-item {
+            padding: 20px;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+          }
+          
+          .detail-item strong {
+            display: block;
+            color: #1e293b;
+            margin-bottom: 5px;
+          }
+          
+          .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: white;
+            background-color: #f59e0b;
+          }
+          
+          .footer {
+            text-align: center;
+            padding: 30px;
+            font-size: 14px;
+            color: var(--footer-text);
+            background: #f8fafc;
+            border-top: 1px solid var(--border-color);
+          }
+          
+          .footer p {
+            margin: 5px 0;
+          }
+          
+          @media (max-width: 600px) {
+            .request-details {
+              grid-template-columns: 1fr;
+            }
+          }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <img src="${logoUrl}" alt="SkyElectroTech Logo" class="logo">
+                <h1>Service Request Confirmed</h1>
+                <p>Request #${serviceRequest.requestNumber}</p>
+            </div>
+            <div class="content">
+                <h2>Hello ${serviceRequest.name}!</h2>
+                <p>Thank you for submitting your service request. We have received your inquiry and our team will review it shortly.</p>
+                
+                <div class="request-summary">
+                    <h3>Request Summary</h3>
+                    <p><strong>Service Type:</strong> ${getServiceTypeDisplay(serviceRequest.serviceType)}</p>
+                    <p><strong>Request Number:</strong> #${serviceRequest.requestNumber}</p>
+                    <p><strong>Status:</strong> <span class="status-badge">Pending Review</span></p>
+                </div>
+
+                <div class="request-details">
+                    <div class="detail-item">
+                        <strong>Service Type</strong>
+                        ${getServiceTypeDisplay(serviceRequest.serviceType)}
+                    </div>
+                    <div class="detail-item">
+                        <strong>Request Number</strong>
+                        #${serviceRequest.requestNumber}
+                    </div>
+                    ${serviceRequest.projectType ? `
+                    <div class="detail-item">
+                        <strong>Project Type</strong>
+                        ${serviceRequest.projectType}
+                    </div>
+                    ` : ''}
+                    ${serviceRequest.budget ? `
+                    <div class="detail-item">
+                        <strong>Budget Range</strong>
+                        ${serviceRequest.budget}
+                    </div>
+                    ` : ''}
+                    ${serviceRequest.timeline ? `
+                    <div class="detail-item">
+                        <strong>Timeline</strong>
+                        ${serviceRequest.timeline}
+                    </div>
+                    ` : ''}
+                </div>
+
+                <h3>Project Description</h3>
+                <div class="detail-item">
+                    <p>${serviceRequest.description}</p>
+                </div>
+
+                ${serviceRequest.requirements ? `
+                <h3>Additional Requirements</h3>
+                <div class="detail-item">
+                    <p>${serviceRequest.requirements}</p>
+                </div>
+                ` : ''}
+
+                <p>Our team will review your request and contact you within 24-48 hours with a detailed quote and next steps.</p>
+                
+                <p>If you have any questions or need to provide additional information, please don't hesitate to contact us.</p>
+            </div>
+            <div class="footer">
+                <p>Thank you for choosing SkyElectroTech for your project needs!</p>
+                <p>© ${new Date().getFullYear()} SkyElectroTech. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `,
+    text: `
+    Service Request Confirmation - SkyElectroTech
+
+    Hello ${serviceRequest.name}!
+
+    Thank you for submitting your service request. We have received your inquiry and our team will review it shortly.
+
+    Request Summary:
+    - Service Type: ${getServiceTypeDisplay(serviceRequest.serviceType)}
+    - Request Number: #${serviceRequest.requestNumber}
+    - Status: Pending Review
+    ${serviceRequest.projectType ? `- Project Type: ${serviceRequest.projectType}` : ''}
+    ${serviceRequest.budget ? `- Budget Range: ${serviceRequest.budget}` : ''}
+    ${serviceRequest.timeline ? `- Timeline: ${serviceRequest.timeline}` : ''}
+
+    Project Description:
+    ${serviceRequest.description}
+
+    ${serviceRequest.requirements ? `
+    Additional Requirements:
+    ${serviceRequest.requirements}
+    ` : ''}
+
+    Our team will review your request and contact you within 24-48 hours with a detailed quote and next steps.
+
+    If you have any questions or need to provide additional information, please don't hesitate to contact us.
+
+    Thank you for choosing SkyElectroTech for your project needs!
+
+    © ${new Date().getFullYear()} SkyElectroTech. All rights reserved.
+    `
+  };
+};
+
+// Service request notification email template for admin
+const getServiceRequestNotificationEmailTemplate = (serviceRequest) => {
+  const logoUrl = getEmailLogoUrl();
+  
+  const getServiceTypeDisplay = (type) => {
+    const types = {
+      '3d-printing': '3D Printing',
+      'drone-services': 'Drone Services',
+      'project-building': 'Project Building'
+    };
+    return types[type] || type;
+  };
+
+  return {
+    subject: `New Service Request - ${getServiceTypeDisplay(serviceRequest.serviceType)} - ${serviceRequest.name}`,
+    html: `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        <title>New Service Request</title>
+        <style>
+          :root {
+            --primary-color: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --primary-light: #60a5fa;
+            --secondary-color: #10b981;
+            --accent-color: #f59e0b;
+            --background-color: #f8fafc;
+            --text-color: #1e293b;
+            --text-light: #64748b;
+            --text-muted: #94a3b8;
+            --card-background: #ffffff;
+            --border-color: #e2e8f0;
+            --border-light: #f1f5f9;
+            --footer-text: #64748b;
+            --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            --gradient-secondary: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-accent: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+          }
+          
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
+          body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            margin: 0;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+          }
+          
+          .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background-color: var(--card-background);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow-2xl);
+            border: 1px solid var(--border-color);
+            position: relative;
+          }
+          
+          .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+          }
+          
+          .header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 50px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+          }
+          
+          .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.2;
+          }
+          
+          .logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+          }
+          
+          .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          }
+          
+          .header p {
+            margin: 10px 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+          }
+          
+          .content {
+            padding: 40px 30px;
+          }
+          
+          .content h2 {
+            font-size: 24px;
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-weight: 600;
+          }
+          
+          .content p {
+            margin-bottom: 20px;
+            color: var(--text-light);
+            font-size: 16px;
+          }
+          
+          .alert-box {
+            background: #dbeafe;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+          }
+          
+          .request-summary {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+          }
+          
+          .customer-info {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+          }
+          
+          .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: white;
+            background-color: #f59e0b;
+          }
+          
+          .cta-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            padding: 14px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 20px 0;
+            transition: background-color 0.2s;
+          }
+          
+          .cta-button:hover {
+            background-color: #1d4ed8;
+          }
+          
+          .footer {
+            text-align: center;
+            padding: 25px;
+            font-size: 14px;
+            color: var(--footer-text);
+            background: #f8fafc;
+          }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <img src="${logoUrl}" alt="SkyElectroTech Logo" class="logo">
+                <h1>New Service Request</h1>
+                <p>Request #${serviceRequest.requestNumber} - ${getServiceTypeDisplay(serviceRequest.serviceType)}</p>
+            </div>
+            <div class="content">
+                <div class="alert-box">
+                    <h3>New Service Request Alert</h3>
+                    <p>A new service request has been submitted and requires your attention.</p>
+                </div>
+
+                <div class="request-summary">
+                    <h3>Request Summary</h3>
+                    <p><strong>Service Type:</strong> ${getServiceTypeDisplay(serviceRequest.serviceType)}</p>
+                    <p><strong>Request Number:</strong> #${serviceRequest.requestNumber}</p>
+                    <p><strong>Customer:</strong> ${serviceRequest.name} (${serviceRequest.email})</p>
+                    <p><strong>Status:</strong> <span class="status-badge">Pending Review</span></p>
+                </div>
+
+                <div class="customer-info">
+                    <h3>Customer Information</h3>
+                    <p><strong>Name:</strong> ${serviceRequest.name}</p>
+                    <p><strong>Email:</strong> ${serviceRequest.email}</p>
+                    <p><strong>Phone:</strong> ${serviceRequest.phone}</p>
+                    ${serviceRequest.projectType ? `<p><strong>Project Type:</strong> ${serviceRequest.projectType}</p>` : ''}
+                    ${serviceRequest.budget ? `<p><strong>Budget Range:</strong> ${serviceRequest.budget}</p>` : ''}
+                    ${serviceRequest.timeline ? `<p><strong>Timeline:</strong> ${serviceRequest.timeline}</p>` : ''}
+                </div>
+
+                <h3>Project Description</h3>
+                <div class="customer-info">
+                    <p>${serviceRequest.description}</p>
+                </div>
+
+                ${serviceRequest.requirements ? `
+                <h3>Additional Requirements</h3>
+                <div class="customer-info">
+                    <p>${serviceRequest.requirements}</p>
+                </div>
+                ` : ''}
+
+                <p>Please review this service request and take appropriate action.</p>
+                <a href="${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/services" class="cta-button">Review Service Request</a>
+            </div>
+            <div class="footer">
+                <p>This is an automated notification from SkyElectroTech.</p>
+                <p>© ${new Date().getFullYear()} SkyElectroTech. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `,
+    text: `
+    New Service Request - SkyElectroTech
+
+    A new service request has been submitted!
+
+    Request Summary:
+    - Service Type: ${getServiceTypeDisplay(serviceRequest.serviceType)}
+    - Request Number: #${serviceRequest.requestNumber}
+    - Customer: ${serviceRequest.name} (${serviceRequest.email})
+    - Status: Pending Review
+
+    Customer Information:
+    - Name: ${serviceRequest.name}
+    - Email: ${serviceRequest.email}
+    - Phone: ${serviceRequest.phone}
+    ${serviceRequest.projectType ? `- Project Type: ${serviceRequest.projectType}` : ''}
+    ${serviceRequest.budget ? `- Budget Range: ${serviceRequest.budget}` : ''}
+    ${serviceRequest.timeline ? `- Timeline: ${serviceRequest.timeline}` : ''}
+
+    Project Description:
+    ${serviceRequest.description}
+
+    ${serviceRequest.requirements ? `
+    Additional Requirements:
+    ${serviceRequest.requirements}
+    ` : ''}
+
+    Please review this service request and take appropriate action.
+
+    Review service request: ${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/services
+    `
+  };
+};
+
+// Send service request confirmation email to customer
+const sendServiceRequestEmail = async (serviceRequest) => {
+  try {
+    const emailTemplate = getServiceRequestEmailTemplate(serviceRequest);
+    await sendEmail({
+      to: serviceRequest.email,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
+    });
+    console.log(`Service request confirmation email sent to ${serviceRequest.email}`);
+  } catch (error) {
+    console.error(`Failed to send service request confirmation email to ${serviceRequest.email}:`, error);
+  }
+};
+
+// Send service request notification email to admin
+const sendServiceRequestNotificationEmail = async (serviceRequest) => {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
+    if (!adminEmail) {
+      console.warn('Admin email not configured, skipping service request notification');
+      return;
+    }
+
+    const emailTemplate = getServiceRequestNotificationEmailTemplate(serviceRequest);
+    await sendEmail({
+      to: adminEmail,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
+    });
+    console.log(`Service request notification email sent to admin: ${adminEmail}`);
+  } catch (error) {
+    console.error(`Failed to send service request notification email to admin:`, error);
+  }
+};
+
 module.exports = {
   sendEmail,
   sendWelcomeEmail,
@@ -2750,6 +3414,8 @@ module.exports = {
   sendReturnRejectedEmail,
   sendLowStockAlertEmail,
   sendNewUserNotificationEmail,
+  sendServiceRequestEmail,
+  sendServiceRequestNotificationEmail,
   getWelcomeEmailTemplate,
   getOTPEmailTemplate,
   getForgotPasswordEmailTemplate,

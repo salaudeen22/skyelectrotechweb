@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiSearch, FiShoppingCart } from 'react-icons/fi';
+import { FiSearch, FiShoppingCart, FiPrinter, FiCamera, FiTool } from 'react-icons/fi';
 import HeroSlider from '../Components/Subcompo/HeroSlider';
 import ProductCard from '../Components/ProductCard'; 
 import { FaShippingFast, FaShieldAlt, FaHeadset } from 'react-icons/fa';
-import { productsAPI, categoriesAPI } from '../services/apiServices';
+import { productsAPI, categoriesAPI, servicesAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
 
 const Home = () => {
@@ -12,6 +12,18 @@ const Home = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showServiceForm, setShowServiceForm] = useState(null);
+  const [serviceFormData, setServiceFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    projectType: '',
+    description: '',
+    budget: '',
+    timeline: '',
+    requirements: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -64,6 +76,84 @@ const Home = () => {
       navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
     } else {
       toast.error('Please enter a search term');
+    }
+  };
+
+  const handleServiceFormChange = (e) => {
+    const { name, value } = e.target;
+    setServiceFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleServiceFormSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      const response = await servicesAPI.submitServiceRequest({
+        serviceType: showServiceForm,
+        ...serviceFormData
+      });
+
+      if (response.success) {
+        toast.success('Service request submitted successfully! We will contact you soon.');
+        setShowServiceForm(null);
+        setServiceFormData({
+          name: '',
+          email: '',
+          phone: '',
+          projectType: '',
+          description: '',
+          budget: '',
+          timeline: '',
+          requirements: ''
+        });
+      } else {
+        toast.error(response.message || 'Failed to submit service request. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting service request:', error);
+      toast.error('Failed to submit service request. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const getServiceFormFields = () => {
+    const baseFields = [
+      { name: 'name', label: 'Full Name', type: 'text', required: true },
+      { name: 'email', label: 'Email Address', type: 'email', required: true },
+      { name: 'phone', label: 'Phone Number', type: 'tel', required: true },
+      { name: 'description', label: 'Project Description', type: 'textarea', required: true }
+    ];
+
+    switch (showServiceForm) {
+      case '3d-printing':
+        return [
+          ...baseFields,
+          { name: 'projectType', label: '3D Printing Type', type: 'select', options: ['Prototype', 'Production Part', 'Art/Decoration', 'Educational Model', 'Custom Design', 'Other'], required: true },
+          { name: 'requirements', label: 'Technical Requirements', type: 'textarea', placeholder: 'Material preferences, size specifications, quantity, etc.' },
+          { name: 'timeline', label: 'Timeline', type: 'select', options: ['Urgent (1-3 days)', 'Standard (1 week)', 'Flexible (2+ weeks)'], required: true }
+        ];
+      case 'drone-services':
+        return [
+          ...baseFields,
+          { name: 'projectType', label: 'Drone Service Type', type: 'select', options: ['Agricultural Spraying', 'Crop Monitoring', 'Aerial Photography', 'Videography', 'Surveying & Mapping', 'Inspection & Monitoring', 'Precision Agriculture', 'Other'], required: true },
+          { name: 'requirements', label: 'Service Requirements', type: 'textarea', placeholder: 'Location, area size, crop type (if agricultural), specific requirements, duration, etc.' },
+          { name: 'budget', label: 'Budget Range', type: 'select', options: ['Under ₹5,000', '₹5,000 - ₹10,000', '₹10,000 - ₹25,000', '₹25,000 - ₹50,000', '₹50,000+'], required: true }
+        ];
+      case 'project-building':
+        return [
+          ...baseFields,
+          { name: 'projectType', label: 'Project Type', type: 'select', options: ['IoT Project', 'Robotics', 'Automation', 'Electronics Prototype', 'Custom Circuit', 'Other'], required: true },
+          { name: 'requirements', label: 'Technical Specifications', type: 'textarea', placeholder: 'Components needed, functionality requirements, etc.' },
+          { name: 'budget', label: 'Budget Range', type: 'select', options: ['Under ₹10,000', '₹10,000 - ₹25,000', '₹25,000 - ₹50,000', '₹50,000+'], required: true },
+          { name: 'timeline', label: 'Timeline', type: 'select', options: ['Urgent (1-2 weeks)', 'Standard (1 month)', 'Flexible (2+ months)'], required: true }
+        ];
+      default:
+        return baseFields;
     }
   };
 
@@ -209,6 +299,175 @@ const Home = () => {
             )}
             </div>
         </section>
+
+        {/* Services Section */}
+        <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">Our Services</h2>
+            <p className="mt-4 text-lg text-gray-600">Beyond components, we offer comprehensive project solutions and specialized services.</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            {/* 3D Printing Service */}
+            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FiPrinter className="text-3xl text-blue-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">3D Printing</h3>
+                <p className="text-gray-600">Professional 3D printing services for prototypes, production parts, and custom designs.</p>
+              </div>
+              <ul className="text-sm text-gray-600 mb-6 space-y-2">
+                <li>• Prototype Development</li>
+                <li>• Production Parts</li>
+                <li>• Custom Designs</li>
+                <li>• Multiple Materials</li>
+                <li>• Fast Turnaround</li>
+              </ul>
+              <button
+                onClick={() => setShowServiceForm('3d-printing')}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+              >
+                Get Quote
+              </button>
+            </div>
+
+            {/* Drone Services */}
+            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FiCamera className="text-3xl text-green-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Drone Services</h3>
+                <p className="text-gray-600">Comprehensive drone solutions for agriculture, photography, surveying, and specialized applications.</p>
+              </div>
+              <ul className="text-sm text-gray-600 mb-6 space-y-2">
+                <li>• Agricultural Spraying</li>
+                <li>• Crop Monitoring & Analysis</li>
+                <li>• Aerial Photography & Videography</li>
+                <li>• Surveying & Mapping</li>
+                <li>• Inspection & Monitoring</li>
+                <li>• Precision Agriculture</li>
+              </ul>
+              <button
+                onClick={() => setShowServiceForm('drone-services')}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+              >
+                Get Quote
+              </button>
+            </div>
+
+            {/* Project Building */}
+            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FiTool className="text-3xl text-purple-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Project Building</h3>
+                <p className="text-gray-600">Custom electronics projects, IoT solutions, and automation systems.</p>
+              </div>
+              <ul className="text-sm text-gray-600 mb-6 space-y-2">
+                <li>• IoT Projects</li>
+                <li>• Robotics Solutions</li>
+                <li>• Automation Systems</li>
+                <li>• Custom Circuits</li>
+                <li>• Prototype Development</li>
+              </ul>
+              <button
+                onClick={() => setShowServiceForm('project-building')}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+              >
+                Get Quote
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Service Form Modal */}
+        {showServiceForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-bold text-gray-900">
+                    {showServiceForm === '3d-printing' && '3D Printing Service Request'}
+                    {showServiceForm === 'drone-services' && 'Drone Service Request'}
+                    {showServiceForm === 'project-building' && 'Project Building Request'}
+                  </h3>
+                  <button
+                    onClick={() => setShowServiceForm(null)}
+                    className="text-gray-400 hover:text-gray-600 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+              
+              <form onSubmit={handleServiceFormSubmit} className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {getServiceFormFields().map((field) => (
+                    <div key={field.name} className={field.type === 'textarea' ? 'md:col-span-2' : ''}>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {field.label} {field.required && <span className="text-red-500">*</span>}
+                      </label>
+                      
+                      {field.type === 'textarea' ? (
+                        <textarea
+                          name={field.name}
+                          value={serviceFormData[field.name]}
+                          onChange={handleServiceFormChange}
+                          required={field.required}
+                          placeholder={field.placeholder}
+                          rows={4}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      ) : field.type === 'select' ? (
+                        <select
+                          name={field.name}
+                          value={serviceFormData[field.name]}
+                          onChange={handleServiceFormChange}
+                          required={field.required}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="">Select {field.label}</option>
+                          {field.options.map((option) => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type={field.type}
+                          name={field.name}
+                          value={serviceFormData[field.name]}
+                          onChange={handleServiceFormChange}
+                          required={field.required}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-6 flex gap-4">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                  >
+                    {submitting ? 'Submitting...' : 'Submit Request'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowServiceForm(null)}
+                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* Why Choose Us Section */}
         <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

@@ -52,6 +52,7 @@ import Employees from './Admin/Employees';
 import Settings from './Admin/Settings';
 import OrdersAndSales from './Admin/OrderManagement';
 import ReturnRequests from './Admin/ReturnRequests';
+import ServiceRequests from './Admin/ServiceRequests';
 
 // Components
 import ProtectedRoute from './Components/ProtectedRoute';
@@ -199,6 +200,11 @@ const App = () => {
                   <Route path="return-requests" element={
                     <ProtectedRoute allowedRoles={['admin']}>
                       <ReturnRequests />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="services" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <ServiceRequests />
                     </ProtectedRoute>
                   } />
                   <Route path="employees" element={

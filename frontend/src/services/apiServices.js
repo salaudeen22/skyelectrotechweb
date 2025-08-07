@@ -679,6 +679,33 @@ export const commentsAPI = {
   }
 };
 
+// Services API calls
+export const servicesAPI = {
+  // Submit service request
+  submitServiceRequest: async (serviceData) => {
+    const response = await api.post('/services/submit', serviceData);
+    return response.data;
+  },
+
+  // Get all service requests (Admin)
+  getAllServiceRequests: async (params = {}) => {
+    const response = await api.get('/services/requests', { params });
+    return response.data;
+  },
+
+  // Get service request by ID (Admin)
+  getServiceRequestById: async (requestId) => {
+    const response = await api.get(`/services/requests/${requestId}`);
+    return response.data;
+  },
+
+  // Update service request status (Admin)
+  updateServiceRequestStatus: async (requestId, statusData) => {
+    const response = await api.patch(`/services/requests/${requestId}/status`, statusData);
+    return response.data;
+  }
+};
+
 // Export aliases for backward compatibility
 export const authServices = authAPI;
 export const productServices = productsAPI;
@@ -691,3 +718,4 @@ export const analyticsServices = analyticsAPI;
 export const uploadServices = uploadAPI;
 export const bulkUploadServices = bulkUploadAPI;
 export const commentServices = commentsAPI;
+export const serviceServices = servicesAPI;
