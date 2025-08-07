@@ -309,7 +309,7 @@ const Home = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             {/* 3D Printing Service */}
-            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
               <div className="text-center mb-6">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiPrinter className="text-3xl text-blue-600" />
@@ -317,13 +317,16 @@ const Home = () => {
                 <h3 className="text-xl font-bold text-gray-900 mb-2">3D Printing</h3>
                 <p className="text-gray-600">Professional 3D printing services for prototypes, production parts, and custom designs.</p>
               </div>
-              <ul className="text-sm text-gray-600 mb-6 space-y-2">
-                <li>• Prototype Development</li>
-                <li>• Production Parts</li>
-                <li>• Custom Designs</li>
-                <li>• Multiple Materials</li>
-                <li>• Fast Turnaround</li>
-              </ul>
+              <div className="flex-grow">
+                <ul className="text-sm text-gray-600 mb-6 space-y-2">
+                  <li>• Prototype Development</li>
+                  <li>• Production Parts</li>
+                  <li>• Custom Designs</li>
+                  <li>• Multiple Materials</li>
+                  <li>• Fast Turnaround</li>
+                  <li>• Quality Assurance</li>
+                </ul>
+              </div>
               <button
                 onClick={() => setShowServiceForm('3d-printing')}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
@@ -333,7 +336,7 @@ const Home = () => {
             </div>
 
             {/* Drone Services */}
-            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
               <div className="text-center mb-6">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiCamera className="text-3xl text-green-600" />
@@ -341,14 +344,16 @@ const Home = () => {
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Drone Services</h3>
                 <p className="text-gray-600">Comprehensive drone solutions for agriculture, photography, surveying, and specialized applications.</p>
               </div>
-              <ul className="text-sm text-gray-600 mb-6 space-y-2">
-                <li>• Agricultural Spraying</li>
-                <li>• Crop Monitoring & Analysis</li>
-                <li>• Aerial Photography & Videography</li>
-                <li>• Surveying & Mapping</li>
-                <li>• Inspection & Monitoring</li>
-                <li>• Precision Agriculture</li>
-              </ul>
+              <div className="flex-grow">
+                <ul className="text-sm text-gray-600 mb-6 space-y-2">
+                  <li>• Agricultural Spraying</li>
+                  <li>• Crop Monitoring & Analysis</li>
+                  <li>• Aerial Photography & Videography</li>
+                  <li>• Surveying & Mapping</li>
+                  <li>• Inspection & Monitoring</li>
+                  <li>• Precision Agriculture</li>
+                </ul>
+              </div>
               <button
                 onClick={() => setShowServiceForm('drone-services')}
                 className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
@@ -358,7 +363,7 @@ const Home = () => {
             </div>
 
             {/* Project Building */}
-            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200 hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
               <div className="text-center mb-6">
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FiTool className="text-3xl text-purple-600" />
@@ -366,13 +371,16 @@ const Home = () => {
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Project Building</h3>
                 <p className="text-gray-600">Custom electronics projects, IoT solutions, and automation systems.</p>
               </div>
-              <ul className="text-sm text-gray-600 mb-6 space-y-2">
-                <li>• IoT Projects</li>
-                <li>• Robotics Solutions</li>
-                <li>• Automation Systems</li>
-                <li>• Custom Circuits</li>
-                <li>• Prototype Development</li>
-              </ul>
+              <div className="flex-grow">
+                <ul className="text-sm text-gray-600 mb-6 space-y-2">
+                  <li>• IoT Projects</li>
+                  <li>• Robotics Solutions</li>
+                  <li>• Automation Systems</li>
+                  <li>• Custom Circuits</li>
+                  <li>• Prototype Development</li>
+                  <li>• Technical Support</li>
+                </ul>
+              </div>
               <button
                 onClick={() => setShowServiceForm('project-building')}
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
