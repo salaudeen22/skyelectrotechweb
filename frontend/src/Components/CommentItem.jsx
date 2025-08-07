@@ -133,7 +133,7 @@ const CommentItem = ({ comment, currentUser, onCommentUpdated, onCommentDeleted,
               
               <div className="flex items-center gap-1 text-gray-500">
                 <FaCalendarAlt className="w-3 h-3" />
-                <span>{formatDate(comment.createdAt)}</span>
+                <span>{formatDate(comment.createdAt).date}</span>
               </div>
             </div>
           </div>
@@ -293,7 +293,7 @@ const CommentItem = ({ comment, currentUser, onCommentUpdated, onCommentDeleted,
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <FaCalendarAlt className="w-3 h-3" />
-                    <span>{formatDate(reply.createdAt)}</span>
+                    <span>{formatDate(reply.createdAt).date}</span>
                   </div>
                 </div>
               </div>

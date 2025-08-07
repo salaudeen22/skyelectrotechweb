@@ -5,10 +5,16 @@ import OrderStatus from '../Components/OrderStatus';
 
 
 const OrderDetailsModal = ({ order, isOpen, onClose }) => {
-    if (!isOpen || !order) return null;
+    if (!isOpen || !order) {
+        return null;
+    }
 
     const formatDate = (dateString) => {
+        if (!dateString) return { date: 'N/A', time: 'N/A', full: 'N/A' };
+        
         const date = new Date(dateString);
+        if (isNaN(date.getTime())) return { date: 'Invalid Date', time: 'Invalid Time', full: 'Invalid Date' };
+        
         return {
             date: date.toLocaleDateString('en-IN', { 
                 day: '2-digit', 
@@ -17,14 +23,16 @@ const OrderDetailsModal = ({ order, isOpen, onClose }) => {
             }),
             time: date.toLocaleTimeString('en-IN', { 
                 hour: '2-digit', 
-                minute: '2-digit' 
+                minute: '2-digit',
+                hour12: true
             }),
             full: date.toLocaleDateString('en-IN', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                hour12: true
             })
         };
     };
@@ -34,8 +42,8 @@ const OrderDetailsModal = ({ order, isOpen, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-[9999] p-4" onClick={onClose}>
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                 <div className="p-6">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-xl font-semibold text-gray-900">Order Details</h3>
@@ -56,7 +64,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }) => {
                             </div>
                             <div>
                                 <p className="text-sm text-gray-600">Order Date</p>
-                                <p className="font-semibold">{formatDate(order.createdAt)}</p>
+                                <p className="font-semibold">{formatDate(order.createdAt).date}</p>
                             </div>
                             <div>
                                 <p className="text-sm text-gray-600">Status</p>
@@ -120,39 +128,48 @@ const OrderDetailsModal = ({ order, isOpen, onClose }) => {
                             Order Items ({order.orderItems?.length || 0})
                         </h4>
                         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                            <table className="w-full">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                    {order.orderItems?.map((item, index) => (
-                                        <tr key={index}>
-                                            <td className="px-4 py-4">
-                                                <div className="flex items-center">
-                                                    {item.image && (
-                                                        <img 
-                                                            src={item.image} 
-                                                            alt={item.name}
-                                                            className="w-12 h-12 object-cover rounded-lg mr-3"
-                                                        />
-                                                    )}
-                                                    <div>
-                                                        <p className="font-semibold text-gray-900">{item.name}</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-4 text-gray-700">{formatCurrency(item.price)}</td>
-                                            <td className="px-4 py-4 text-gray-700">{item.quantity}</td>
-                                            <td className="px-4 py-4 text-gray-700 font-semibold">{formatCurrency(item.price * item.quantity)}</td>
+                            {order.orderItems && order.orderItems.length > 0 ? (
+                                <table className="w-full">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200">
+                                        {order.orderItems.map((item, index) => (
+                                            <tr key={index}>
+                                                <td className="px-4 py-4">
+                                                    <div className="flex items-center">
+                                                        {item.image && (
+                                                            <img 
+                                                                src={item.image} 
+                                                                alt={item.name}
+                                                                className="w-12 h-12 object-cover rounded-lg mr-3"
+                                                                onError={(e) => {
+                                                                    e.target.style.display = 'none';
+                                                                }}
+                                                            />
+                                                        )}
+                                                        <div>
+                                                            <p className="font-semibold text-gray-900">{item.name || 'Product Name Not Available'}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-4 text-gray-700">{formatCurrency(item.price || 0)}</td>
+                                                <td className="px-4 py-4 text-gray-700">{item.quantity || 0}</td>
+                                                <td className="px-4 py-4 text-gray-700 font-semibold">{formatCurrency((item.price || 0) * (item.quantity || 0))}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            ) : (
+                                <div className="p-4 text-center text-gray-500">
+                                    No order items found
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -181,7 +198,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }) => {
                                 {order.paymentInfo?.paidAt && (
                                     <div>
                                         <p className="text-sm text-gray-600">Paid At</p>
-                                        <p className="font-semibold">{formatDate(order.paymentInfo.paidAt)}</p>
+                                        <p className="font-semibold">{formatDate(order.paymentInfo.paidAt).date}</p>
                                     </div>
                                 )}
                             </div>
@@ -231,7 +248,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }) => {
                                     {order.estimatedDelivery && (
                                         <div>
                                             <p className="text-sm text-gray-600">Estimated Delivery</p>
-                                            <p className="font-semibold">{formatDate(order.estimatedDelivery)}</p>
+                                            <p className="font-semibold">{formatDate(order.estimatedDelivery).date}</p>
                                         </div>
                                     )}
                                 </div>
@@ -259,7 +276,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose }) => {
                                                 </div>
                                             </div>
                                             <div className="text-xs text-gray-500">
-                                                {formatDate(history.updatedAt)}
+                                                {formatDate(history.updatedAt).date}
                                             </div>
                                         </div>
                                     ))}

@@ -274,7 +274,7 @@ const ServiceRequests = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(request.createdAt)}
+                    {formatDate(request.createdAt).date}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
@@ -375,7 +375,7 @@ const ServiceRequests = () => {
                     <p><strong>Name:</strong> {selectedRequest.name}</p>
                     <p><strong>Email:</strong> {selectedRequest.email}</p>
                     <p><strong>Phone:</strong> {selectedRequest.phone}</p>
-                    <p><strong>Request Date:</strong> {formatDate(selectedRequest.createdAt)}</p>
+                    <p><strong>Request Date:</strong> {formatDate(selectedRequest.createdAt).date}</p>
                   </div>
                 </div>
                 

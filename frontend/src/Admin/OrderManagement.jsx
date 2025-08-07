@@ -43,7 +43,10 @@ const OrdersAndSales = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [detailsLoading, setDetailsLoading] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
+
+
     
     // Date filtering state
     const [dateFrom, setDateFrom] = useState('');
@@ -428,6 +431,25 @@ const OrdersAndSales = () => {
         setShowStatusModal(true);
     };
 
+    const openDetailsModal = async (order) => {
+        try {
+            setDetailsLoading(true);
+            // Fetch full order details with populated product information
+            const response = await ordersAPI.getOrder(order._id);
+            if (response.success) {
+                setSelectedOrder(response.data.order);
+                setShowDetailsModal(true);
+            } else {
+                toast.error('Failed to load order details');
+            }
+        } catch (error) {
+            console.error('Error fetching order details:', error);
+            toast.error('Failed to load order details');
+        } finally {
+            setDetailsLoading(false);
+        }
+    };
+
     const formatDate = (dateString) => {
         if (!dateString) return { date: 'N/A', time: 'N/A' };
         
@@ -609,6 +631,8 @@ const OrdersAndSales = () => {
                         )}
                         Export Invoice
                     </button>
+                    
+
                 </div>
             </div>
 
@@ -760,14 +784,16 @@ const OrdersAndSales = () => {
                                                                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <div className="flex items-center space-x-2">
                                                     <button
-                                                        onClick={() => {
-                                                            setSelectedOrder(order);
-                                                            setShowDetailsModal(true);
-                                                        }}
-                                                        className="text-indigo-600 hover:text-indigo-900"
+                                                        onClick={() => openDetailsModal(order)}
+                                                        disabled={detailsLoading}
+                                                        className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50 disabled:cursor-not-allowed"
                                                         title="View Details"
                                                     >
-                                                        <FaEye className="h-4 w-4" />
+                                                        {detailsLoading ? (
+                                                            <FaSpinner className="h-4 w-4 animate-spin" />
+                                                        ) : (
+                                                            <FaEye className="h-4 w-4" />
+                                                        )}
                                                     </button>
                                                     <button
                                                         onClick={() => openStatusModal(order)}
@@ -1093,7 +1119,8 @@ const OrdersAndSales = () => {
             {showDetailsModal && selectedOrder && (
             <OrderDetailsModal
                 order={selectedOrder}
-                    onClose={() => setShowDetailsModal(false)}
+                isOpen={showDetailsModal}
+                onClose={() => setShowDetailsModal(false)}
                 />
             )}
         </div>

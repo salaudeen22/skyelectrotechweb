@@ -575,7 +575,7 @@ const CommentsManagement = () => {
                           
                           <div className="flex items-center gap-1">
                             <FaCalendarAlt className="w-2 h-2 sm:w-3 sm:h-3" />
-                            <span>{formatDate(comment.createdAt)}</span>
+                            <span>{formatDate(comment.createdAt).date}</span>
                           </div>
                         </div>
                       </div>
@@ -773,7 +773,7 @@ const CommentsManagement = () => {
                       </div>
                       <div className="flex items-center gap-1">
                         <FaCalendarAlt className="w-2 h-2 sm:w-3 sm:h-3" />
-                        <span>{formatDate(selectedComment.createdAt)}</span>
+                        <span>{formatDate(selectedComment.createdAt).date}</span>
                       </div>
                     </div>
                     
