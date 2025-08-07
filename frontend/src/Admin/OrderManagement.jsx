@@ -440,7 +440,7 @@ const OrdersAndSales = () => {
                 setSelectedOrder(response.data.order);
                 setShowDetailsModal(true);
             } else {
-                toast.error('Failed to load order details');
+                throw new Error('Failed to load order details');
             }
         } catch (error) {
             console.error('Error fetching order details:', error);
