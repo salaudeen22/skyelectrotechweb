@@ -25,19 +25,22 @@ const getProducts = asyncHandler(async (req, res) => {
 
   // Category filter
   if (category) {
-    // Check if category is an ObjectId or a category name
-    if (mongoose.Types.ObjectId.isValid(category)) {
-      query.category = category;
+    const categoryIds = category.split(',').map(cat => cat.trim());
+    const validCategoryIds = categoryIds.filter(cat => mongoose.Types.ObjectId.isValid(cat));
+    
+    if (validCategoryIds.length > 0) {
+      query.category = { $in: validCategoryIds };
     } else {
-      // If it's a category name, find the category ObjectId
-      const categoryDoc = await Category.findOne({ 
-        name: { $regex: new RegExp(`^${category}$`, 'i') },
+      // If no valid category IDs, try to find by category names
+      const categoryDocs = await Category.find({ 
+        name: { $in: categoryIds.map(name => new RegExp(`^${name}$`, 'i')) },
         isActive: true 
       });
-      if (categoryDoc) {
-        query.category = categoryDoc._id;
+      
+      if (categoryDocs.length > 0) {
+        query.category = { $in: categoryDocs.map(doc => doc._id) };
       } else {
-        // If category not found, return empty results
+        // If no categories found, return empty results
         query.category = new mongoose.Types.ObjectId();
       }
     }

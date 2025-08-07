@@ -40,6 +40,15 @@ const ProductList = () => {
     fetchCategories();
   }, []);
 
+  // Handle URL parameters for categories
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam && categories.length > 0) {
+      const categoryIds = categoryParam.split(',');
+      setSelectedCategories(categoryIds);
+    }
+  }, [searchParams, categories]);
+
   // Fetch products when filters change
   useEffect(() => {
     const fetchProducts = async () => {
@@ -50,13 +59,24 @@ const ProductList = () => {
           page: currentPage,
           limit: 12,
           ...(searchTerm && { search: searchTerm }),
-          ...(selectedCategories.length > 0 && { category: selectedCategories.join(',') }),
           ...(priceRange.min && { minPrice: priceRange.min }),
           ...(priceRange.max && { maxPrice: priceRange.max }),
           ...(sortOrder && { sort: sortOrder })
         };
 
+        // Only add category filter if categories are selected but not all categories
+        // If all categories are selected or no categories are selected, don't filter by category (show all products)
+        if (selectedCategories.length > 0 && categories.length > 0 && selectedCategories.length < categories.length) {
+          params.category = selectedCategories.join(',');
+        } else if (selectedCategories.length > 0 && categories.length === 0) {
+          // If categories haven't loaded yet but we have selected categories, still filter
+          params.category = selectedCategories.join(',');
+        }
+
         console.log('Fetching products with params:', params);
+        console.log('Selected categories:', selectedCategories);
+        console.log('Total categories:', categories.length);
+        console.log('All categories selected:', selectedCategories.length === categories.length);
         const response = await productsAPI.getProducts(params);
         console.log('Products response:', response);
         setProducts(response.data.products);
@@ -69,6 +89,12 @@ const ProductList = () => {
             newSearchParams.set(key, value);
           }
         });
+        
+        // Add category parameter to URL if categories are selected but not all
+        if (selectedCategories.length > 0 && categories.length > 0 && selectedCategories.length < categories.length) {
+          newSearchParams.set('category', selectedCategories.join(','));
+        }
+        
         setSearchParams(newSearchParams);
         
       } catch (error) {
@@ -173,8 +199,33 @@ const ProductList = () => {
 
               {/* Category Filter */}
               <div className="mb-6">
-                <h4 className="font-medium text-gray-700 mb-3">Categories</h4>
+                <h4 className="font-medium text-gray-700 mb-3">
+                  Categories
+                  {selectedCategories.length === categories.length && categories.length > 0 && (
+                    <span className="ml-2 text-xs text-blue-600 font-normal">(All Selected)</span>
+                  )}
+                </h4>
                 <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {/* Select All Option */}
+                  <label className="flex items-center space-x-3 cursor-pointer border-b border-gray-200 pb-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.length === categories.length && categories.length > 0}
+                      onChange={() => {
+                        if (selectedCategories.length === categories.length) {
+                          setSelectedCategories([]);
+                        } else {
+                          setSelectedCategories(categories.map(cat => cat._id));
+                        }
+                        setCurrentPage(1);
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-700 text-sm font-medium">
+                      {selectedCategories.length === categories.length && categories.length > 0 ? 'Deselect All' : 'Select All'}
+                    </span>
+                  </label>
+                  
                   {categories.map(category => (
                     <label key={category._id} className="flex items-center space-x-3 cursor-pointer">
                       <input
