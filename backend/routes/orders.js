@@ -476,64 +476,106 @@ function generateOrderInvoiceHTML(order, companyInfo) {
             <meta charset="utf-8">
             <title>Order Invoice - Sky Electro Tech</title>
             <style>
+                * {
+                    box-sizing: border-box;
+                }
                 body { 
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
                     margin: 0; 
-                    padding: 20px; 
+                    padding: 10px; 
                     background-color: #f8f9fa;
+                    font-size: 14px;
+                    line-height: 1.4;
                 }
                 .container {
-                    max-width: 800px;
+                    max-width: 100%;
                     margin: 0 auto;
                     background: white;
-                    padding: 30px;
-                    border-radius: 10px;
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+                @media print {
+                    body { padding: 0; }
+                    .container { 
+                        max-width: none; 
+                        padding: 15px; 
+                        box-shadow: none; 
+                    }
                 }
                 .header { 
                     text-align: center; 
-                    margin-bottom: 30px; 
-                    border-bottom: 3px solid #3B82F6; 
-                    padding-bottom: 20px; 
+                    margin-bottom: 25px; 
+                    border-bottom: 2px solid #3B82F6; 
+                    padding-bottom: 15px; 
                 }
                 .company-name { 
-                    font-size: 28px; 
+                    font-size: 20px; 
                     font-weight: bold; 
                     color: #1F2937; 
                     margin-bottom: 5px;
                 }
                 .company-tagline {
-                    font-size: 14px;
+                    font-size: 12px;
                     color: #6B7280;
-                    margin-bottom: 10px;
+                    margin-bottom: 8px;
                 }
                 .invoice-title { 
-                    font-size: 22px; 
+                    font-size: 18px; 
                     color: #3B82F6; 
-                    margin: 10px 0;
+                    margin: 8px 0;
                     font-weight: 600;
+                }
+                @media (min-width: 600px) {
+                    .company-name { 
+                        font-size: 24px; 
+                    }
+                    .company-tagline {
+                        font-size: 14px;
+                    }
+                    .invoice-title { 
+                        font-size: 20px; 
+                    }
                 }
                 .order-info {
                     display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 30px;
-                    margin-bottom: 30px;
+                    grid-template-columns: 1fr;
+                    gap: 20px;
+                    margin-bottom: 25px;
+                }
+                @media (min-width: 600px) {
+                    .order-info {
+                        grid-template-columns: 1fr 1fr;
+                        gap: 25px;
+                    }
                 }
                 .info-section {
                     background: #F9FAFB;
-                    padding: 20px;
-                    border-radius: 8px;
-                    border-left: 4px solid #3B82F6;
+                    padding: 15px;
+                    border-radius: 6px;
+                    border-left: 3px solid #3B82F6;
                 }
                 .info-title {
                     font-weight: 600;
                     color: #374151;
-                    margin-bottom: 10px;
-                    font-size: 14px;
+                    margin-bottom: 8px;
+                    font-size: 12px;
                 }
                 .info-content {
                     color: #1F2937;
-                    font-size: 14px;
+                    font-size: 12px;
+                }
+                @media (min-width: 600px) {
+                    .info-section {
+                        padding: 18px;
+                    }
+                    .info-title {
+                        font-size: 14px;
+                        margin-bottom: 10px;
+                    }
+                    .info-content {
+                        font-size: 14px;
+                    }
                 }
                 .order-id {
                     font-family: 'Courier New', monospace;
@@ -544,16 +586,26 @@ function generateOrderInvoiceHTML(order, companyInfo) {
                 .items-table { 
                     width: 100%; 
                     border-collapse: collapse; 
-                    margin: 20px 0;
+                    margin: 15px 0;
                     background: white;
-                    border-radius: 8px;
+                    border-radius: 6px;
                     overflow: hidden;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                    font-size: 12px;
                 }
                 .items-table th, .items-table td { 
                     border: 1px solid #E5E7EB; 
-                    padding: 12px; 
+                    padding: 8px 6px; 
                     text-align: left; 
+                    word-wrap: break-word;
+                }
+                @media (min-width: 600px) {
+                    .items-table {
+                        font-size: 14px;
+                    }
+                    .items-table th, .items-table td {
+                        padding: 10px 8px;
+                    }
                 }
                 .items-table th { 
                     background-color: #F3F4F6; 
@@ -567,23 +619,37 @@ function generateOrderInvoiceHTML(order, companyInfo) {
                 }
                 .total-section {
                     background: #FEF3C7;
-                    padding: 20px;
-                    border-radius: 8px;
-                    margin-top: 20px;
+                    padding: 15px;
+                    border-radius: 6px;
+                    margin-top: 15px;
                 }
                 .total-row {
                     display: flex;
                     justify-content: space-between;
-                    margin-bottom: 8px;
-                    font-size: 16px;
+                    margin-bottom: 6px;
+                    font-size: 14px;
                 }
                 .total-final {
                     font-weight: bold;
-                    font-size: 18px;
+                    font-size: 16px;
                     color: #92400E;
                     border-top: 2px solid #F59E0B;
-                    padding-top: 10px;
-                    margin-top: 10px;
+                    padding-top: 8px;
+                    margin-top: 8px;
+                }
+                @media (min-width: 600px) {
+                    .total-section {
+                        padding: 18px;
+                    }
+                    .total-row {
+                        font-size: 16px;
+                        margin-bottom: 8px;
+                    }
+                    .total-final {
+                        font-size: 18px;
+                        padding-top: 10px;
+                        margin-top: 10px;
+                    }
                 }
                 .status-badge {
                     padding: 6px 12px;
@@ -758,28 +824,41 @@ function generateInvoiceHTML(data) {
             <meta charset="utf-8">
             <title>Today's Sales Invoice - Sky Electro Tech</title>
             <style>
+                * {
+                    box-sizing: border-box;
+                }
                 body { 
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
                     margin: 0; 
-                    padding: 20px; 
+                    padding: 10px; 
                     background-color: #f8f9fa;
+                    font-size: 14px;
+                    line-height: 1.4;
                 }
                 .container {
-                    max-width: 800px;
+                    max-width: 100%;
                     margin: 0 auto;
                     background: white;
-                    padding: 30px;
-                    border-radius: 10px;
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+                @media print {
+                    body { padding: 0; }
+                    .container { 
+                        max-width: none; 
+                        padding: 15px; 
+                        box-shadow: none; 
+                    }
                 }
                 .header { 
                     text-align: center; 
-                    margin-bottom: 30px; 
-                    border-bottom: 3px solid #3B82F6; 
-                    padding-bottom: 20px; 
+                    margin-bottom: 25px; 
+                    border-bottom: 2px solid #3B82F6; 
+                    padding-bottom: 15px; 
                 }
                 .company-name { 
-                    font-size: 28px; 
+                    font-size: 20px; 
                     font-weight: bold; 
                     color: #1F2937; 
                     margin-bottom: 5px;
@@ -1060,10 +1139,11 @@ async function generatePDF(htmlContent) {
         console.log('Creating new page...');
         const page = await browser.newPage();
         
-        // Set viewport for consistent rendering
+        // Set viewport for responsive rendering
         await page.setViewport({
             width: 1200,
-            height: 800
+            height: 800,
+            deviceScaleFactor: 2 // Higher resolution for better quality
         });
         
         console.log('Setting content...');
@@ -1080,12 +1160,13 @@ async function generatePDF(htmlContent) {
             format: 'A4',
             printBackground: true,
             margin: {
-                top: '20px',
-                right: '20px',
-                bottom: '20px',
-                left: '20px'
+                top: '15px',
+                right: '15px',
+                bottom: '15px',
+                left: '15px'
             },
-            timeout: 15000 // Reduced timeout
+            timeout: 15000, // Reduced timeout
+            preferCSSPageSize: true // Better CSS support
         });
         
         console.log('Closing browser...');
