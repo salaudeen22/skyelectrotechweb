@@ -38,7 +38,7 @@ const AdminDashboard = () => {
 
   // Date filtering state
   const [dateFilter, setDateFilter] = useState({
-    period: 'month',
+    period: 'day',
     customStartDate: '',
     customEndDate: '',
     year: new Date().getFullYear()

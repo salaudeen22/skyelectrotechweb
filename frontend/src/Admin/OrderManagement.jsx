@@ -57,7 +57,7 @@ const OrdersAndSales = () => {
         topProducts: [],
         customerMetrics: {}
     });
-    const [dateRange, setDateRange] = useState('month');
+    const [dateRange, setDateRange] = useState('day');
     const [analyticsLoading, setAnalyticsLoading] = useState(false);
     const [exporting, setExporting] = useState(false);
 
