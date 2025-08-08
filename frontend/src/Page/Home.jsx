@@ -6,6 +6,7 @@ import ProductCard from '../Components/ProductCard';
 import { FaShippingFast, FaShieldAlt, FaHeadset } from 'react-icons/fa';
 import { productsAPI, categoriesAPI, servicesAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
+import ProductRecommendations from '../Components/ProductRecommendations';
 
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -298,6 +299,29 @@ const Home = () => {
               </div>
             )}
             </div>
+        </section>
+
+        {/* Trending Products Section */}
+        <section className="bg-gray-50">
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="space-y-12">
+              {/* Trending Products */}
+              <ProductRecommendations 
+                type="trending"
+                limit={8}
+                title="Trending Products"
+                showViewAll={true}
+              />
+              
+              {/* Recently Viewed */}
+              <ProductRecommendations 
+                type="recently-viewed"
+                limit={8}
+                title="Recently Viewed"
+                showViewAll={true}
+              />
+            </div>
+          </div>
         </section>
 
         {/* Services Section */}

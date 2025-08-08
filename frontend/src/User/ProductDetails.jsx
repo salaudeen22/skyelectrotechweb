@@ -9,6 +9,7 @@ import { toast } from 'react-hot-toast';
 import CommentSection from '../Components/CommentSection';
 import SEO from '../Components/SEO';
 import LoadingErrorHandler from '../Components/LoadingErrorHandler';
+import ProductRecommendations from '../Components/ProductRecommendations';
 
 
 // Development-only render counter
@@ -554,6 +555,18 @@ const ProductDetails = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Product Recommendations */}
+        <div className="mt-8">
+          {/* Similar Products */}
+          <ProductRecommendations 
+            type="similar"
+            productId={product._id}
+            limit={4}
+            title="Similar Products"
+            showViewAll={false}
+          />
         </div>
       </div>
     </div>

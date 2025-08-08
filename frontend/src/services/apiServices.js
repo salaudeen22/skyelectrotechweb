@@ -736,6 +736,65 @@ export const servicesAPI = {
   }
 };
 
+// Recommendations API calls
+export const recommendationsAPI = {
+  // Track product view
+  trackProductView: async (productId) => {
+    const response = await api.post('/recommendations/track-view', { productId });
+    return response.data;
+  },
+
+  // Track product interaction
+  trackInteraction: async (productId, action, metadata = {}) => {
+    const response = await api.post('/recommendations/track-interaction', { 
+      productId, 
+      action, 
+      metadata 
+    });
+    return response.data;
+  },
+
+  // Get recently viewed products
+  getRecentlyViewed: async (limit = 8) => {
+    const response = await api.get('/recommendations/recently-viewed', { 
+      params: { limit } 
+    });
+    return response.data;
+  },
+
+  // Get personalized recommendations
+  getRecommendations: async (limit = 8) => {
+    const response = await api.get('/recommendations', { 
+      params: { limit } 
+    });
+    return response.data;
+  },
+
+  // Get category recommendations
+  getCategoryRecommendations: async (categoryId, limit = 8) => {
+    const response = await api.get(`/recommendations/category/${categoryId}`, { 
+      params: { limit } 
+    });
+    return response.data;
+  },
+
+  // Get trending products
+  getTrendingProducts: async (limit = 8) => {
+    const response = await api.get('/recommendations/trending', { 
+      params: { limit } 
+    });
+    return response.data;
+  },
+
+  // Get similar products
+  getSimilarProducts: async (productId, limit = 8) => {
+    const response = await api.get(`/recommendations/similar/${productId}`, { 
+      params: { limit } 
+    });
+    return response.data;
+  }
+};
+
 // Export aliases for backward compatibility
 export const authServices = authAPI;
 export const productServices = productsAPI;
@@ -749,3 +808,4 @@ export const uploadServices = uploadAPI;
 export const bulkUploadServices = bulkUploadAPI;
 export const commentServices = commentsAPI;
 export const serviceServices = servicesAPI;
+export const recommendationServices = recommendationsAPI;

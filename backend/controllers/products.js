@@ -126,6 +126,25 @@ const getProduct = asyncHandler(async (req, res) => {
     return sendError(res, 404, 'Product not found');
   }
 
+  // Track product view if user is authenticated
+  if (req.user) {
+    try {
+      const UserBehavior = require('../models/UserBehavior');
+      let userBehavior = await UserBehavior.findOne({ user: req.user._id });
+      
+      if (!userBehavior) {
+        userBehavior = new UserBehavior({ user: req.user._id });
+      }
+
+      userBehavior.addRecentlyViewed(req.params.id);
+      userBehavior.addInteraction(req.params.id, 'view');
+      await userBehavior.save();
+    } catch (error) {
+      console.error('Error tracking product view:', error);
+      // Don't fail the request if tracking fails
+    }
+  }
+
   sendResponse(res, 200, { product }, 'Product retrieved successfully');
 });
 
