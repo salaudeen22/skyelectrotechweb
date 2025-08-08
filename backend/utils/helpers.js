@@ -30,7 +30,7 @@ const paginate = (page = 1, limit = 10) => {
 };
 
 // Generate pagination metadata
-const getPaginationMeta = (page, limit, total) => {
+const getPaginationMeta = (total, page, limit) => {
   const totalPages = Math.ceil(total / limit);
   const hasNext = page < totalPages;
   const hasPrev = page > 1;

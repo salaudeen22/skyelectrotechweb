@@ -99,10 +99,31 @@ console.log('MongoDB URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
 console.log('Google Client ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Not set');
 console.log('Google Client Secret:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Not set');
 
-// Database connection
-mongoose.connect(process.env.MONGODB_URI )
+// Database connection with better error handling
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
 .then(() => console.log('MongoDB connected successfully'))
-.catch((err) => console.error('MongoDB connection error:', err));
+.catch((err) => {
+  console.error('MongoDB connection error:', err);
+  process.exit(1);
+});
+
+// Handle MongoDB connection events
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected');
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('MongoDB reconnected');
+});
 
 // Start payment cron jobs if not in test environment
 if (process.env.NODE_ENV !== 'test') {
@@ -111,7 +132,7 @@ if (process.env.NODE_ENV !== 'test') {
     startPaymentCronJobs();
     console.log('Payment cron jobs started');
   } catch (error) {
-    console.log('Payment cron jobs not started (node-cron not installed):', error.message);
+    console.log('Payment cron jobs not started:', error.message);
   }
 }
 
@@ -206,6 +227,18 @@ app.use('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

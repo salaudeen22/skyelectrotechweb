@@ -70,8 +70,12 @@ const getProducts = asyncHandler(async (req, res) => {
 
   // Search filter
   if (search) {
-    console.log('Search query:', search);
-    query.$text = { $search: search };
+    // Use regex search instead of text search to avoid index issues
+    query.$or = [
+      { name: { $regex: search, $options: 'i' } },
+      { description: { $regex: search, $options: 'i' } },
+      { brand: { $regex: search, $options: 'i' } }
+    ];
   }
 
   // Pagination
@@ -80,13 +84,14 @@ const getProducts = asyncHandler(async (req, res) => {
   // Execute query
   let sortOptions = sort;
   
-  // If search is active, sort by text score first, then by the specified sort
-  if (search) {
-    sortOptions = { score: { $meta: 'textScore' }, [sort.replace('-', '')]: sort.startsWith('-') ? -1 : 1 };
+  // Convert sort string to object
+  if (typeof sortOptions === 'string') {
+    const field = sortOptions.startsWith('-') ? sortOptions.slice(1) : sortOptions;
+    const order = sortOptions.startsWith('-') ? -1 : 1;
+    sortOptions = { [field]: order };
   }
   
-  console.log('Final query:', JSON.stringify(query, null, 2));
-  console.log('Sort options:', sortOptions);
+  // Query and sort options ready for execution
   
   const products = await Product.find(query)
     .populate('category', 'name')
