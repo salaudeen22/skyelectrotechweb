@@ -505,8 +505,8 @@ const Profile = () => {
                 {/* Address Information */}
                 <div className="border-t border-gray-200 pt-6">
                   <h3 className="text-md font-medium text-gray-900 mb-4">Address Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="md:col-span-2">
+                  <div className="space-y-4">
+                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Street Address
                       </label>
@@ -519,84 +519,86 @@ const Profile = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
                       ) : (
-                        <div className="flex items-center space-x-2">
-                          <FiMapPin className="w-5 h-5 text-gray-400" />
-                          <span className="text-gray-900">{defaultAddress?.street || 'Not provided'}</span>
+                        <div className="flex items-start space-x-2">
+                          <FiMapPin className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                          <span className="text-gray-900 break-words">{defaultAddress?.street || 'Not provided'}</span>
                         </div>
                       )}
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        City
-                      </label>
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          name="address.city"
-                          value={formData.address.city}
-                          onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      ) : (
-                        <span className="text-gray-900">{defaultAddress?.city || 'Not provided'}</span>
-                      )}
-                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          City
+                        </label>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            name="address.city"
+                            value={formData.address.city}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        ) : (
+                          <span className="text-gray-900 break-words">{defaultAddress?.city || 'Not provided'}</span>
+                        )}
+                      </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        State
-                      </label>
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          name="address.state"
-                          value={formData.address.state}
-                          onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      ) : (
-                        <span className="text-gray-900">{defaultAddress?.state || 'Not provided'}</span>
-                      )}
-                    </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          State
+                        </label>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            name="address.state"
+                            value={formData.address.state}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        ) : (
+                          <span className="text-gray-900 break-words">{defaultAddress?.state || 'Not provided'}</span>
+                        )}
+                      </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        ZIP Code
-                      </label>
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          name="address.zipCode"
-                          value={formData.address.zipCode}
-                          onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      ) : (
-                        <span className="text-gray-900">{defaultAddress?.zipCode || 'Not provided'}</span>
-                      )}
-                    </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          ZIP Code
+                        </label>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            name="address.zipCode"
+                            value={formData.address.zipCode}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        ) : (
+                          <span className="text-gray-900 break-words">{defaultAddress?.zipCode || 'Not provided'}</span>
+                        )}
+                      </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Country
-                      </label>
-                      {isEditing ? (
-                        <select
-                          name="address.country"
-                          value={formData.address.country}
-                          onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="India">India</option>
-                          <option value="USA">United States</option>
-                          <option value="UK">United Kingdom</option>
-                          <option value="Canada">Canada</option>
-                          <option value="Australia">Australia</option>
-                        </select>
-                      ) : (
-                        <span className="text-gray-900">{defaultAddress?.country || 'Not provided'}</span>
-                      )}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Country
+                        </label>
+                        {isEditing ? (
+                          <select
+                            name="address.country"
+                            value={formData.address.country}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            <option value="India">India</option>
+                            <option value="USA">United States</option>
+                            <option value="UK">United Kingdom</option>
+                            <option value="Canada">Canada</option>
+                            <option value="Australia">Australia</option>
+                          </select>
+                        ) : (
+                          <span className="text-gray-900 break-words">{defaultAddress?.country || 'Not provided'}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -662,57 +664,57 @@ const Profile = () => {
 
                   {addresses.map((address) => (
                     <div key={address.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <h4 className="font-medium text-gray-900">{address.name}</h4>
-                            {address.isDefault && (
-                              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium flex items-center">
-                                <FiStar className="w-3 h-3 mr-1" />
-                                Default
-                              </span>
-                            )}
+                                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                              <h4 className="font-medium text-gray-900 break-words">{address.name}</h4>
+                              {address.isDefault && (
+                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium flex items-center flex-shrink-0">
+                                  <FiStar className="w-3 h-3 mr-1" />
+                                  Default
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-gray-600 text-sm break-words">
+                              {address.street}, {address.city}, {address.state} {address.zipCode}, {address.country}
+                            </p>
                           </div>
-                          <p className="text-gray-600 text-sm">
-                            {address.street}, {address.city}, {address.state} {address.zipCode}, {address.country}
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-4">
-                          {!address.isDefault && (
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {!address.isDefault && (
+                              <button
+                                onClick={() => handleSetDefault(address.id)}
+                                className="text-blue-600 hover:text-blue-700 text-sm whitespace-nowrap"
+                              >
+                                Set Default
+                              </button>
+                            )}
                             <button
-                              onClick={() => handleSetDefault(address.id)}
-                              className="text-blue-600 hover:text-blue-700 text-sm"
+                              onClick={() => startEditAddress(address)}
+                              className="text-gray-600 hover:text-gray-700 p-1"
                             >
-                              Set Default
+                              <FiEdit2 className="w-4 h-4" />
                             </button>
-                          )}
-                          <button
-                            onClick={() => startEditAddress(address)}
-                            className="text-gray-600 hover:text-gray-700"
-                          >
-                            <FiEdit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteAddress(address.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <FiTrash2 className="w-4 h-4" />
-                          </button>
+                            <button
+                              onClick={() => handleDeleteAddress(address.id)}
+                              className="text-red-600 hover:text-red-700 p-1"
+                            >
+                              <FiTrash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
-                      </div>
                     </div>
                   ))}
 
                   {/* Address Form Modal */}
                   {showAddressForm && (
-                    <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50">
-                      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                    <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
+                      <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">
                           {editingAddress ? 'Edit Address' : 'Add New Address'}
                         </h3>
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
                               Address Name
                             </label>
                             <input
@@ -725,7 +727,7 @@ const Profile = () => {
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
                               Street Address
                             </label>
                             <input
@@ -736,9 +738,9 @@ const Profile = () => {
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             />
                           </div>
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
                                 City
                               </label>
                               <input
@@ -750,7 +752,7 @@ const Profile = () => {
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
                                 State
                               </label>
                               <input
@@ -762,9 +764,9 @@ const Profile = () => {
                               />
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
                                 ZIP Code
                               </label>
                               <input
@@ -776,7 +778,7 @@ const Profile = () => {
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Country
                               </label>
                               <select
@@ -810,19 +812,19 @@ const Profile = () => {
                             </label>
                           </div>
                         </div>
-                        <div className="flex items-center justify-end space-x-3 mt-6">
+                        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 mt-6">
                           <button
                             onClick={() => {
                               setShowAddressForm(false);
                               setEditingAddress(null);
                             }}
-                            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                            className="w-full sm:w-auto px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
                           >
                             Cancel
                           </button>
                           <button
                             onClick={editingAddress ? handleUpdateAddress : handleAddAddress}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                           >
                             {editingAddress ? 'Update' : 'Add'} Address
                           </button>
