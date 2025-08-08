@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const { sendResponse, sendError, asyncHandler, paginate, getPaginationMeta, generateSKU } = require('../utils/helpers');
+const notificationService = require('../services/notificationService');
 
 // @desc    Get all products with filtering, sorting, and pagination
 // @route   GET /api/products
@@ -240,6 +241,18 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
   }
 
+  // Check for price changes to send notifications
+  const oldPrice = product.discountPrice || product.price;
+  const newPrice = req.body.discountPrice || req.body.price || oldPrice;
+  const hasPriceDrop = newPrice < oldPrice;
+
+  // Check for stock changes to send notifications
+  const oldStock = product.stockQuantity;
+  const newStock = req.body.stockQuantity !== undefined ? req.body.stockQuantity : oldStock;
+  const wasOutOfStock = oldStock <= 0;
+  const isBackInStock = wasOutOfStock && newStock > 0;
+  const isLowStock = newStock > 0 && newStock <= 5;
+
   // Update product
   req.body.updatedBy = req.user._id;
   product = await Product.findByIdAndUpdate(
@@ -247,6 +260,63 @@ const updateProduct = asyncHandler(async (req, res) => {
     req.body,
     { new: true, runValidators: true }
   ).populate('category', 'name');
+
+  // Send price drop notifications if price decreased
+  if (hasPriceDrop && newPrice < oldPrice) {
+    try {
+      // Get users who have this product in their wishlist
+      const Wishlist = require('../models/Wishlist');
+      const wishlistUsers = await Wishlist.find({
+        'items.product': product._id
+      }).populate('user', '_id');
+
+      // Send notifications to users who have this product in their wishlist
+      for (const wishlist of wishlistUsers) {
+        try {
+          await notificationService.sendPriceDropNotification(
+            wishlist.user._id,
+            product,
+            oldPrice,
+            newPrice
+          );
+          console.log(`Price drop notification sent to user ${wishlist.user._id} for product ${product._id}`);
+        } catch (notificationError) {
+          console.error(`Failed to send price drop notification to user ${wishlist.user._id}:`, notificationError);
+        }
+      }
+    } catch (error) {
+      console.error('Error sending price drop notifications:', error);
+      // Don't fail the product update if notifications fail
+    }
+  }
+
+  // Send stock alert notifications
+  if (isBackInStock || isLowStock) {
+    try {
+      // Get users who have this product in their wishlist
+      const Wishlist = require('../models/Wishlist');
+      const wishlistUsers = await Wishlist.find({
+        'items.product': product._id
+      }).populate('user', '_id');
+
+      // Send notifications to users who have this product in their wishlist
+      for (const wishlist of wishlistUsers) {
+        try {
+          await notificationService.sendStockAlertNotification(
+            wishlist.user._id,
+            product,
+            isBackInStock
+          );
+          console.log(`Stock alert notification sent to user ${wishlist.user._id} for product ${product._id}`);
+        } catch (notificationError) {
+          console.error(`Failed to send stock alert notification to user ${wishlist.user._id}:`, notificationError);
+        }
+      }
+    } catch (error) {
+      console.error('Error sending stock alert notifications:', error);
+      // Don't fail the product update if notifications fail
+    }
+  }
 
   sendResponse(res, 200, { product }, 'Product updated successfully');
 });

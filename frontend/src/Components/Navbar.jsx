@@ -5,6 +5,7 @@ import { CartContext } from '../contexts/CartContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useCategories } from '../hooks/useCategories';
 import { IoCartOutline } from 'react-icons/io5';
+import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -217,6 +218,9 @@ const Navbar = () => {
                     )}
                   </Link>
                 )}
+
+                {/* Notification Bell */}
+                <NotificationBell />
 
                 {/* Admin/Employee Dashboard Link */}
                 {(user.role === 'admin' || user.role === 'employee') && (

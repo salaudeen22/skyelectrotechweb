@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { initializeAnalytics } from './utils/analytics';
+import { io } from 'socket.io-client';
 
 // Context Providers
 import { AuthProvider } from './contexts/AuthContext';
@@ -42,6 +43,8 @@ import ChangePassword from './Auth/ChangePassword';
 
 // User Pages
 import Wishlist from './User/Wishlist';
+import Notifications from './User/Notifications';
+import NotificationSettings from './User/NotificationSettings';
 
 // Admin Pages
 import AdminDashboard from './Admin/AdminDashboard';
@@ -75,6 +78,35 @@ const queryClient = new QueryClient({
 const App = () => {
   useEffect(() => {
     initializeAnalytics();
+    
+    // Initialize Socket.IO for real-time notifications
+    const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5001', {
+      transports: ['websocket', 'polling'],
+      autoConnect: true
+    });
+
+    // Store socket in window object for use in hooks
+    window.io = socket;
+
+    // Socket event listeners
+    socket.on('connect', () => {
+      console.log('Socket.IO connected:', socket.id);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Socket.IO disconnected');
+    });
+
+    socket.on('error', (error) => {
+      console.error('Socket.IO error:', error);
+    });
+
+    // Cleanup on unmount
+    return () => {
+      if (socket) {
+        socket.disconnect();
+      }
+    };
   }, []);
 
   return (
@@ -167,6 +199,16 @@ const App = () => {
                 }>
                   <Route index element={<OrderHistory />} />
                   <Route path=":id" element={<OrderDetails />} />
+                </Route>
+
+                {/* Notifications route (accessible to all authenticated users) */}
+                <Route path="/notifications" element={
+                  <ProtectedRoute allowedRoles={['user', 'admin', 'employee']}>
+                    <MainLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Notifications />} />
+                  <Route path="settings" element={<NotificationSettings />} />
                 </Route>
 
                 {/* Admin/Employee Routes */}

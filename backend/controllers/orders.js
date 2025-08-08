@@ -6,6 +6,7 @@ const ReturnRequest = require('../models/ReturnRequest');
 const { sendResponse, sendError, asyncHandler, paginate, getPaginationMeta } = require('../utils/helpers');
 const { sendOrderConfirmationEmail, sendOrderNotificationEmail, sendOrderStatusUpdateEmail, sendReturnRequestEmail, sendReturnApprovedEmail, sendReturnRejectedEmail } = require('../utils/email');
 const { uploadImage } = require('../utils/s3');
+const notificationService = require('../services/notificationService');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -94,6 +95,23 @@ const createOrder = asyncHandler(async (req, res) => {
     } catch (emailError) {
       console.error('Failed to send order emails:', emailError);
       // Don't fail the order creation if emails fail
+    }
+
+    // Send push notification for new order
+    try {
+      await notificationService.sendOrderUpdateNotification(
+        req.user._id,
+        order,
+        order.orderStatus,
+        {
+          orderNumber: order._id,
+          totalAmount: order.totalPrice
+        }
+      );
+      console.log(`Push notification sent for new order ${order._id}`);
+    } catch (notificationError) {
+      console.error('Failed to send push notification for new order:', notificationError);
+      // Don't fail the order creation if notification fails
     }
 
     sendResponse(res, 201, { order }, 'Order created successfully');
@@ -237,6 +255,24 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
       console.error('Failed to send shipping notification email:', emailError);
       // Don't fail the status update if email fails
     }
+  }
+
+  // Send push notification for all status updates
+  try {
+    await notificationService.sendOrderUpdateNotification(
+      order.user._id,
+      order,
+      status,
+      {
+        trackingNumber: order.trackingNumber,
+        estimatedDelivery: order.estimatedDelivery,
+        updatedBy: req.user.name
+      }
+    );
+    console.log(`Push notification sent for order ${order._id} status: ${status}`);
+  } catch (notificationError) {
+    console.error('Failed to send push notification:', notificationError);
+    // Don't fail the status update if notification fails
   }
 
   sendResponse(res, 200, { order }, 'Order status updated successfully');

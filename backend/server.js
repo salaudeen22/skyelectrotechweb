@@ -7,9 +7,68 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const multer = require('multer');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
 require('dotenv').config();
 
 const app = express();
+const server = createServer(app);
+
+// Initialize Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // In development, allow all localhost origins
+      if (process.env.NODE_ENV !== 'production' && origin.includes('localhost')) {
+        return callback(null, true);
+      }
+      
+      const allowedOrigins = [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://localhost:5001',
+        'http://51.20.12.36',
+        'https://sweet-hamster-f11198.netlify.app',
+        'https://6877b765d91a4d4ccae4b296--sweet-hamster-f11198.netlify.app',
+        process.env.FRONTEND_URL
+      ].filter(Boolean);
+      
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      } else {
+        console.log('Socket.IO CORS blocked origin:', origin);
+        return callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true
+  }
+});
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+  
+  // Join user to their personal room
+  socket.on('join-user', (userId) => {
+    socket.join(`user_${userId}`);
+    console.log(`User ${userId} joined their room`);
+  });
+  
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+// Make io available globally
+global.io = io;
+
+// Initialize notification service with Socket.IO
+const notificationService = require('./services/notificationService');
+notificationService.setIO(io);
 
 // Trust proxy for Render deployment
 app.set('trust proxy', 1);
@@ -152,6 +211,7 @@ app.use('/api/settings', require('./routes/settings'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/services', require('./routes/services'));
 app.use('/api/recommendations', require('./routes/recommendations'));
+app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api', require('./routes/sitemap'));
 
 // Health check endpoint
