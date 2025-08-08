@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaMinus, FaTrash, FaShoppingCart } from 'react-icons/fa';
 import { CartContext } from '../contexts/CartContext';
@@ -6,14 +6,12 @@ import { useSettings } from '../contexts/SettingsContext';
 import toast from 'react-hot-toast';
 
 const Cart = () => {
-  const { items: cartItems, updateCartItem, removeFromCart, totalPrice, loading } = useContext(CartContext);
+  const { items: cartItems, updateCartItem, removeFromCart, loading } = useContext(CartContext);
   const { settings } = useSettings();
   const [hasIncompleteCheckout, setHasIncompleteCheckout] = useState(false);
   
-  console.log('Cart component rendered:', { cartItems, totalPrice, loading });
-  
-  // Calculate subtotal dynamically from cart items
-  const calculateSubtotal = () => {
+  // Calculate subtotal dynamically from cart items - memoized
+  const subtotal = useMemo(() => {
     if (!cartItems || cartItems.length === 0) return 0;
     
     return cartItems.reduce((total, item) => {
@@ -21,11 +19,15 @@ const Cart = () => {
       const itemPrice = item.currentPrice || item.product.price;
       return total + (itemPrice * item.quantity);
     }, 0);
-  };
+  }, [cartItems]);
   
-  const subtotal = calculateSubtotal();
-  const shipping = subtotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.defaultShippingCost;
-  const total = subtotal + shipping;
+  const shipping = useMemo(() => {
+    return subtotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.defaultShippingCost;
+  }, [subtotal, settings.shipping.freeShippingThreshold, settings.shipping.defaultShippingCost]);
+  
+  const total = useMemo(() => {
+    return subtotal + shipping;
+  }, [subtotal, shipping]);
 
   // Check for incomplete checkout data
   useEffect(() => {

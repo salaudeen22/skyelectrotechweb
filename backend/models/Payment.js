@@ -152,7 +152,7 @@ paymentSchema.statics.findExpiredPayments = function() {
 paymentSchema.statics.findPaymentsForRetry = function() {
   return this.find({
     status: 'failed',
-    retryCount: { $lt: '$maxRetries' },
+    $expr: { $lt: ['$retryCount', '$maxRetries'] },
     nextRetryAt: { $lte: new Date() }
   });
 };

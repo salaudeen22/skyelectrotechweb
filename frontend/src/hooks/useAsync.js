@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { retryWithBackoff } from '../utils/retryUtils';
 
 export const useAsync = (asyncFunction, options = {}) => {
@@ -13,8 +13,15 @@ export const useAsync = (asyncFunction, options = {}) => {
   const [loading, setLoading] = useState(immediate);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+  
+  // Use ref to track if component is mounted
+  const isMountedRef = useRef(true);
+  const isExecutingRef = useRef(false);
 
   const execute = useCallback(async (...args) => {
+    if (!isMountedRef.current || isExecutingRef.current) return;
+    
+    isExecutingRef.current = true;
     setLoading(true);
     setError(null);
 
@@ -26,8 +33,10 @@ export const useAsync = (asyncFunction, options = {}) => {
           () => asyncFunction(...args),
           {
             maxRetries,
-            shouldRetry: (error) => {
-              setRetryCount(prev => prev + 1);
+            shouldRetry: () => {
+              if (isMountedRef.current) {
+                setRetryCount(prev => prev + 1);
+              }
               return true;
             }
           }
@@ -36,14 +45,21 @@ export const useAsync = (asyncFunction, options = {}) => {
         result = await asyncFunction(...args);
       }
       
-      setData(result);
-      setRetryCount(0);
+      if (isMountedRef.current) {
+        setData(result);
+        setRetryCount(0);
+      }
       return result;
     } catch (err) {
-      setError(err);
+      if (isMountedRef.current) {
+        setError(err);
+      }
       throw err;
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
+      isExecutingRef.current = false;
     }
   }, [asyncFunction, shouldRetry, maxRetries]);
 
@@ -52,16 +68,29 @@ export const useAsync = (asyncFunction, options = {}) => {
     setLoading(false);
     setError(null);
     setRetryCount(0);
+    isExecutingRef.current = false;
   }, []);
 
   const retry = useCallback(() => {
-    if (error) {
+    if (error && !isExecutingRef.current) {
       execute();
     }
   }, [execute, error]);
 
   useEffect(() => {
-    if (immediate) {
+    isMountedRef.current = true;
+    
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (immediate && !isExecutingRef.current) {
+      // Reset state when dependencies change
+      setData(null);
+      setError(null);
+      setRetryCount(0);
       execute();
     }
   }, [execute, immediate, ...dependencies]);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FiShoppingCart, FiHeart, FiMinus, FiPlus, FiStar, FiShare2, FiTruck, FiShield, FiRefreshCw } from 'react-icons/fi';
 import { productsAPI } from '../services/apiServices';
@@ -9,9 +9,24 @@ import { toast } from 'react-hot-toast';
 import CommentSection from '../Components/CommentSection';
 import SEO from '../Components/SEO';
 import LoadingErrorHandler from '../Components/LoadingErrorHandler';
-import { useAsync } from '../hooks/useAsync';
+
+
+// Development-only render counter
+const useRenderCounter = () => {
+  const renderCount = useRef(0);
+  renderCount.current += 1;
+  
+  useEffect(() => {
+    // Development render counter - no console log to reduce noise
+  });
+  
+  return renderCount.current;
+};
 
 const ProductDetails = () => {
+  // Development-only render counter
+  const renderCount = useRenderCounter();
+  
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
@@ -22,77 +37,99 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
 
-  // Use the enhanced async hook
-  const {
-    data: product,
-    loading,
-    error,
-    retryCount,
-    execute: fetchProduct,
-    retry
-  } = useAsync(
-    async () => {
-      const response = await productsAPI.getProduct(id);
-      return response.data.product;
-    },
-    {
-      immediate: true,
-      retry: true,
-      maxRetries: 3,
-      dependencies: [id]
-    }
-  );
+  // Temporary simple state management to test
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Simple fetch function
+  const fetchProduct = useCallback(async () => {
+    if (!id) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout')), 10000); // 10 second timeout
+      });
+      
+      const apiPromise = productsAPI.getProduct(id);
+      const response = await Promise.race([apiPromise, timeoutPromise]);
+      
+      setProduct(response.data.product);
+    } catch (err) {
+      setError(err);
+      console.error('Error fetching product:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  // Fetch product on mount and when id changes
+  useEffect(() => {
+    fetchProduct();
+  }, [fetchProduct]);
+
+  // Debug logging removed for cleaner console
+
+  // Memoize analytics tracking functions
+  const memoizedTrackProduct = useCallback((productData) => {
+    if (productData) {
+      trackProduct(productData);
+    }
+  }, [trackProduct]);
+
+  const memoizedTrackCartAdd = useCallback((productData, qty) => {
+    trackCartAdd(productData, qty);
+  }, [trackCartAdd]);
+
+  const memoizedTrackWishlistAdd = useCallback((productData) => {
+    trackWishlistAdd(productData);
+  }, [trackWishlistAdd]);
+
+  const memoizedTrackClick = useCallback((buttonName, location) => {
+    trackClick(buttonName, location);
+  }, [trackClick]);
+
+  // Consolidated useEffect for scroll management and analytics
   useEffect(() => {
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
     
+    // Prevent scroll restoration
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    
     // Track product view after a small delay to prevent scroll interference
     if (product) {
-      setTimeout(() => {
-        trackProduct(product);
+      const timer = setTimeout(() => {
+        memoizedTrackProduct(product);
       }, 100);
-    }
-  }, [product, trackProduct]);
-
-  // Handle error navigation
-  useEffect(() => {
-    if (error && retryCount >= 3) {
-      toast.error('Product not found');
-      navigate('/products');
-    }
-  }, [error, retryCount, navigate]);
-
-  // Use useLayoutEffect to prevent autoscroll before render
-  useLayoutEffect(() => {
-    // Force scroll to top immediately
-    window.scrollTo(0, 0);
-    
-    // Prevent scroll restoration
-    if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
-    }
-  }, []);
-
-  // Ensure scroll position is maintained and prevent unwanted scrolling
-  useEffect(() => {
-    // Force scroll to top on mount
-    window.scrollTo(0, 0);
-    
-    // Prevent scroll restoration
-    if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
+      
+      return () => clearTimeout(timer);
     }
     
+    // Cleanup function
     return () => {
-      // Reset scroll restoration when component unmounts
       if ('scrollRestoration' in window.history) {
         window.history.scrollRestoration = 'auto';
       }
     };
-  }, []);
+  }, [product, memoizedTrackProduct]);
 
-  const handleAddToCart = async () => {
+  // Handle error navigation
+  useEffect(() => {
+    if (error && loading) { // Only show error if loading is true
+      toast.error('Product not found');
+      navigate('/products');
+    }
+  }, [error, loading, navigate]);
+
+  // Memoize event handlers to prevent unnecessary re-renders
+  const handleAddToCart = useCallback(async () => {
     if (!isAuthenticated) {
       toast.error('Please login to add items to cart');
       return;
@@ -100,16 +137,15 @@ const ProductDetails = () => {
 
     try {
       await addToCart(product._id, quantity);
-      trackCartAdd(product, quantity);
-      trackClick('add_to_cart_button', 'product_details');
-      // Toast notification is already handled in CartContext
+      memoizedTrackCartAdd(product, quantity);
+      memoizedTrackClick('add_to_cart_button', 'product_details');
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error('Failed to add product to cart');
     }
-  };
+  }, [isAuthenticated, product, quantity, addToCart, memoizedTrackCartAdd, memoizedTrackClick]);
 
-  const handleBuyNow = async () => {
+  const handleBuyNow = useCallback(async () => {
     if (!isAuthenticated) {
       toast.error('Please login to purchase');
       return;
@@ -122,22 +158,41 @@ const ProductDetails = () => {
       console.error('Error in buy now:', error);
       toast.error('Failed to add product to cart');
     }
-  };
+  }, [isAuthenticated, product, quantity, addToCart, navigate]);
 
-  const handleAddToWishlist = () => {
+  const handleAddToWishlist = useCallback(() => {
     if (!isAuthenticated) {
       toast.error('Please login to add items to wishlist');
       return;
     }
     
     // TODO: Implement wishlist functionality
-    trackWishlistAdd(product);
-    trackClick('add_to_wishlist_button', 'product_details');
+    memoizedTrackWishlistAdd(product);
+    memoizedTrackClick('add_to_wishlist_button', 'product_details');
     toast.success('Added to wishlist!');
-  };
+  }, [isAuthenticated, product, memoizedTrackWishlistAdd, memoizedTrackClick]);
 
-  // Safe text rendering function
-  const renderSafeText = (text) => {
+  // Memoize quantity handlers
+  const handleQuantityDecrease = useCallback(() => {
+    setQuantity(prev => Math.max(1, prev - 1));
+  }, []);
+
+  const handleQuantityIncrease = useCallback(() => {
+    setQuantity(prev => prev + 1);
+  }, []);
+
+  // Memoize image selection handler
+  const handleImageSelect = useCallback((index) => {
+    setSelectedImage(index);
+  }, []);
+
+  // Memoize tab selection handler
+  const handleTabSelect = useCallback((tabId) => {
+    setActiveTab(tabId);
+  }, []);
+
+  // Memoize safe text rendering function
+  const renderSafeText = useCallback((text) => {
     if (!text) return 'No information available.';
     
     // Clean and sanitize the text
@@ -149,20 +204,48 @@ const ProductDetails = () => {
       .replace(/\//g, '&#x2F;');
     
     return cleanText;
-  };
+  }, []);
 
-  // Convert specifications array to object for easier rendering
-  const getSpecificationsObject = (specs) => {
-    if (!specs || !Array.isArray(specs)) return {};
+  // Memoize specifications object conversion
+  const specificationsObject = useMemo(() => {
+    if (!product?.specifications || !Array.isArray(product.specifications)) return {};
     
     const specsObj = {};
-    specs.forEach(spec => {
+    product.specifications.forEach(spec => {
       if (spec.name && spec.value) {
         specsObj[spec.name] = spec.value;
       }
     });
     return specsObj;
-  };
+  }, [product?.specifications]);
+
+  // Memoize SEO data
+  const seoData = useMemo(() => ({
+    title: `${product?.name} - SkyElectroTech`,
+    description: product?.description,
+    keywords: `${product?.name}, ${product?.brand || 'electronics'}, ${product?.category?.name || 'electronics'}, SkyElectroTech`,
+    image: product?.images?.[0]?.url,
+    url: `https://skyelectrotech.in/products/${product?._id}`,
+    type: "product",
+    product: product,
+    category: product?.category
+  }), [product]);
+
+  if (loading && !id) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Invalid Product ID</h2>
+          <button
+            onClick={() => navigate('/products')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+          >
+            Back to Products
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -192,23 +275,31 @@ const ProductDetails = () => {
     <LoadingErrorHandler
       loading={loading}
       error={error}
-      retryCount={retryCount}
-      onRetry={retry}
+      retryCount={0} // No retryCount for simple state management
+      onRetry={() => fetchProduct()} // Retry logic for simple state
       loadingMessage="Loading product details..."
       errorMessage="Failed to load product details"
       data={product}
     >
       <>
-        <SEO 
-          title={`${product.name} - SkyElectroTech`}
-          description={product.description}
-          keywords={`${product.name}, ${product.brand || 'electronics'}, ${product.category?.name || 'electronics'}, SkyElectroTech`}
-          image={product.images?.[0]?.url}
-          url={`https://skyelectrotech.in/products/${product._id}`}
-          type="product"
-          product={product}
-          category={product.category}
-        />
+        {/* Development-only render counter display */}
+        {import.meta.env.DEV && (
+          <div style={{ 
+            position: 'fixed', 
+            top: '10px', 
+            right: '10px', 
+            background: 'rgba(0,0,0,0.8)', 
+            color: 'white', 
+            padding: '5px 10px', 
+            borderRadius: '5px', 
+            fontSize: '12px',
+            zIndex: 9999 
+          }}>
+            Renders: {renderCount}
+          </div>
+        )}
+        
+        <SEO {...seoData} />
         <div className="min-h-screen bg-gray-50" style={{ scrollBehavior: 'auto' }}>
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Breadcrumb */}
@@ -260,7 +351,7 @@ const ProductDetails = () => {
                 {product.images.map((image, index) => (
                   <button
                     key={image._id || index}
-                    onClick={() => setSelectedImage(index)}
+                    onClick={() => handleImageSelect(index)}
                     className={`aspect-square bg-white rounded-lg overflow-hidden border-2 ${
                       selectedImage === index ? 'border-blue-600' : 'border-gray-200'
                     }`}
@@ -335,14 +426,14 @@ const ProductDetails = () => {
                 </label>
                 <div className="flex items-center space-x-3">
                   <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    onClick={handleQuantityDecrease}
                     className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                   >
                     <FiMinus className="w-4 h-4" />
                   </button>
                   <span className="text-base sm:text-lg font-medium w-12 text-center">{quantity}</span>
                   <button
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={handleQuantityIncrease}
                     className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                   >
                     <FiPlus className="w-4 h-4" />
@@ -407,7 +498,7 @@ const ProductDetails = () => {
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabSelect(tab.id)}
                   className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
@@ -435,12 +526,11 @@ const ProductDetails = () => {
             {activeTab === 'specifications' && (
               <div className="space-y-3 sm:space-y-4">
                 {(() => {
-                  const specsObj = getSpecificationsObject(product.specifications);
-                  const hasSpecs = Object.keys(specsObj).length > 0;
+                  const hasSpecs = Object.keys(specificationsObject).length > 0;
                   
                   return hasSpecs ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                      {Object.entries(specsObj).map(([key, value]) => (
+                      {Object.entries(specificationsObject).map(([key, value]) => (
                         <div key={key} className="flex justify-between py-2 border-b border-gray-100">
                           <span className="text-xs sm:text-sm font-medium text-gray-700 capitalize">
                             {renderSafeText(key)}
