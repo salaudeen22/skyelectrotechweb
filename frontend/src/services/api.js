@@ -1,6 +1,7 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
+import { retryWithBackoff } from '../utils/retryUtils';
 
 // Create axios instance
 const api = axios.create({
@@ -61,5 +62,28 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Enhanced API methods with retry mechanism
+export const apiWithRetry = {
+  get: async (url, config = {}) => {
+    return retryWithBackoff(() => api.get(url, config));
+  },
+  
+  post: async (url, data = {}, config = {}) => {
+    return retryWithBackoff(() => api.post(url, data, config));
+  },
+  
+  put: async (url, data = {}, config = {}) => {
+    return retryWithBackoff(() => api.put(url, data, config));
+  },
+  
+  delete: async (url, config = {}) => {
+    return retryWithBackoff(() => api.delete(url, config));
+  },
+  
+  patch: async (url, data = {}, config = {}) => {
+    return retryWithBackoff(() => api.patch(url, data, config));
+  }
+};
 
 export default api;

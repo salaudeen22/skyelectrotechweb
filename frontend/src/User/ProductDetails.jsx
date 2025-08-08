@@ -8,6 +8,8 @@ import { useAnalytics } from '../hooks/useAnalytics';
 import { toast } from 'react-hot-toast';
 import CommentSection from '../Components/CommentSection';
 import SEO from '../Components/SEO';
+import LoadingErrorHandler from '../Components/LoadingErrorHandler';
+import { useAsync } from '../hooks/useAsync';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -16,38 +18,50 @@ const ProductDetails = () => {
   const { addToCart, addingToCart } = useCart();
   const { trackProduct, trackCartAdd, trackWishlistAdd, trackClick } = useAnalytics();
 
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        // Scroll to top when component mounts
-        window.scrollTo(0, 0);
-        
-        const response = await productsAPI.getProduct(id);
-        const productData = response.data.product;
-        setProduct(productData);
-        
-        // Track product view after a small delay to prevent scroll interference
-        setTimeout(() => {
-          trackProduct(productData);
-        }, 100);
-      } catch (error) {
-        console.error('Error fetching product:', error);
-        toast.error('Product not found');
-        navigate('/products');
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Use the enhanced async hook
+  const {
+    data: product,
+    loading,
+    error,
+    retryCount,
+    execute: fetchProduct,
+    retry
+  } = useAsync(
+    async () => {
+      const response = await productsAPI.getProduct(id);
+      return response.data.product;
+    },
+    {
+      immediate: true,
+      retry: true,
+      maxRetries: 3,
+      dependencies: [id]
+    }
+  );
 
-    fetchProduct();
-  }, [id, navigate, trackProduct]);
+  useEffect(() => {
+    // Scroll to top when component mounts
+    window.scrollTo(0, 0);
+    
+    // Track product view after a small delay to prevent scroll interference
+    if (product) {
+      setTimeout(() => {
+        trackProduct(product);
+      }, 100);
+    }
+  }, [product, trackProduct]);
+
+  // Handle error navigation
+  useEffect(() => {
+    if (error && retryCount >= 3) {
+      toast.error('Product not found');
+      navigate('/products');
+    }
+  }, [error, retryCount, navigate]);
 
   // Use useLayoutEffect to prevent autoscroll before render
   useLayoutEffect(() => {
@@ -175,18 +189,27 @@ const ProductDetails = () => {
   }
 
   return (
-    <>
-      <SEO 
-        title={`${product.name} - SkyElectroTech`}
-        description={product.description}
-        keywords={`${product.name}, ${product.brand || 'electronics'}, ${product.category?.name || 'electronics'}, SkyElectroTech`}
-        image={product.images?.[0]?.url}
-        url={`https://skyelectrotech.in/products/${product._id}`}
-        type="product"
-        product={product}
-        category={product.category}
-      />
-      <div className="min-h-screen bg-gray-50" style={{ scrollBehavior: 'auto' }}>
+    <LoadingErrorHandler
+      loading={loading}
+      error={error}
+      retryCount={retryCount}
+      onRetry={retry}
+      loadingMessage="Loading product details..."
+      errorMessage="Failed to load product details"
+      data={product}
+    >
+      <>
+        <SEO 
+          title={`${product.name} - SkyElectroTech`}
+          description={product.description}
+          keywords={`${product.name}, ${product.brand || 'electronics'}, ${product.category?.name || 'electronics'}, SkyElectroTech`}
+          image={product.images?.[0]?.url}
+          url={`https://skyelectrotech.in/products/${product._id}`}
+          type="product"
+          product={product}
+          category={product.category}
+        />
+        <div className="min-h-screen bg-gray-50" style={{ scrollBehavior: 'auto' }}>
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Breadcrumb */}
         <nav className="flex mb-4 sm:mb-8" aria-label="Breadcrumb">
@@ -444,7 +467,8 @@ const ProductDetails = () => {
         </div>
       </div>
     </div>
-    </>
+      </>
+    </LoadingErrorHandler>
   );
 };
 

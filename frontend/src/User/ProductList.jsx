@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
 import ProductCard from '../Components/ProductCard';
-import { FiSearch, FiX, FiFilter } from 'react-icons/fi';
+import { FiSearch, FiX, FiFilter, FiRefreshCw } from 'react-icons/fi';
 import { productsAPI, categoriesAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
+import LoadingSpinner, { SkeletonLoader } from '../Components/LoadingSpinner';
+import LoadingErrorHandler from '../Components/LoadingErrorHandler';
 
 const ProductList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,6 +15,8 @@ const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [totalProducts, setTotalProducts] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -26,15 +30,18 @@ const ProductList = () => {
   });
   const [sortOrder, setSortOrder] = useState(searchParams.get('sort') || 'createdAt');
 
-  // Fetch categories
+  // Fetch categories with retry
   useEffect(() => {
     const fetchCategories = async () => {
       try {
+        setCategoriesLoading(true);
         const response = await categoriesAPI.getCategories();
         setCategories(response.data.categories);
       } catch (error) {
         console.error('Error fetching categories:', error);
         toast.error('Failed to load categories');
+      } finally {
+        setCategoriesLoading(false);
       }
     };
     fetchCategories();
@@ -54,6 +61,7 @@ const ProductList = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
+        setError(null);
         
         const params = {
           page: currentPage,
@@ -99,6 +107,7 @@ const ProductList = () => {
         
       } catch (error) {
         console.error('Error fetching products:', error);
+        setError(error);
         toast.error('Failed to load products');
       } finally {
         setLoading(false);
@@ -206,37 +215,50 @@ const ProductList = () => {
                   )}
                 </h4>
                 <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {/* Select All Option */}
-                  <label className="flex items-center space-x-3 cursor-pointer border-b border-gray-200 pb-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.length === categories.length && categories.length > 0}
-                      onChange={() => {
-                        if (selectedCategories.length === categories.length) {
-                          setSelectedCategories([]);
-                        } else {
-                          setSelectedCategories(categories.map(cat => cat._id));
-                        }
-                        setCurrentPage(1);
-                      }}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-gray-700 text-sm font-medium">
-                      {selectedCategories.length === categories.length && categories.length > 0 ? 'Deselect All' : 'Select All'}
-                    </span>
-                  </label>
-                  
-                  {categories.map(category => (
-                    <label key={category._id} className="flex items-center space-x-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedCategories.includes(category._id)}
-                        onChange={() => handleCategoryChange(category._id)}
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-gray-600 text-sm">{category.name}</span>
-                    </label>
-                  ))}
+                  {categoriesLoading ? (
+                    <div className="space-y-2">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="flex items-center space-x-3">
+                          <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
+                          <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <>
+                      {/* Select All Option */}
+                      <label className="flex items-center space-x-3 cursor-pointer border-b border-gray-200 pb-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedCategories.length === categories.length && categories.length > 0}
+                          onChange={() => {
+                            if (selectedCategories.length === categories.length) {
+                              setSelectedCategories([]);
+                            } else {
+                              setSelectedCategories(categories.map(cat => cat._id));
+                            }
+                            setCurrentPage(1);
+                          }}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-gray-700 text-sm font-medium">
+                          {selectedCategories.length === categories.length && categories.length > 0 ? 'Deselect All' : 'Select All'}
+                        </span>
+                      </label>
+                      
+                      {categories.map(category => (
+                        <label key={category._id} className="flex items-center space-x-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedCategories.includes(category._id)}
+                            onChange={() => handleCategoryChange(category._id)}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-gray-600 text-sm">{category.name}</span>
+                        </label>
+                      ))}
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -286,21 +308,25 @@ const ProductList = () => {
               </select>
             </div>
 
-            {/* Loading State */}
-            {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-lg shadow-sm animate-pulse">
-                    <div className="h-48 bg-gray-200 rounded-t-lg"></div>
-                    <div className="p-4">
-                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                      <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : products.length > 0 ? (
+            {/* Loading and Error States */}
+            <LoadingErrorHandler
+              loading={loading}
+              error={error}
+              onRetry={() => {
+                setError(null);
+                setLoading(true);
+                setCurrentPage(currentPage);
+              }}
+              loadingMessage="Loading products..."
+              errorMessage="Failed to load products"
+              data={products}
+              emptyState={
+                <div className="text-center py-20 bg-white rounded-lg shadow-sm">
+                  <h3 className="text-xl font-semibold text-gray-700">No Products Found</h3>
+                  <p className="text-gray-500 mt-2">Try adjusting your filters to find what you're looking for.</p>
+                </div>
+              }
+            >
               <>
                 {/* Products Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -344,12 +370,7 @@ const ProductList = () => {
                   </div>
                 )}
               </>
-            ) : (
-              <div className="text-center py-20 bg-white rounded-lg shadow-sm">
-                <h3 className="text-xl font-semibold text-gray-700">No Products Found</h3>
-                <p className="text-gray-500 mt-2">Try adjusting your filters to find what you're looking for.</p>
-              </div>
-            )}
+            </LoadingErrorHandler>
           </div>
         </div>
       </div>

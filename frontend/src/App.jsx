@@ -58,6 +58,7 @@ import ServiceRequests from './Admin/ServiceRequests';
 import ProtectedRoute from './Components/ProtectedRoute';
 import NotFound from './Components/NotFound';
 import AnalyticsTracker from './Components/AnalyticsTracker';
+import ErrorBoundary from './Components/ErrorBoundary';
 
 
 // Create a query client
@@ -82,28 +83,29 @@ const App = () => {
         <CartProvider>
           <CategoriesProvider>
             <SettingsProvider>
-            <Router>
-                          <div className="App">
-              <AnalyticsTracker />
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: '#363636',
-                    color: '#fff',
-                  },
-                  success: {
-                    duration: 3000,
-                    theme: {
-                      primary: 'green',
-                      secondary: 'black',
-                    },
-                  },
-                }}
-              />
-            
-            <Routes>
+              <Router>
+                <ErrorBoundary>
+                  <div className="App">
+                    <AnalyticsTracker />
+                    <Toaster
+                      position="top-right"
+                      toastOptions={{
+                        duration: 4000,
+                        style: {
+                          background: '#363636',
+                          color: '#fff',
+                        },
+                        success: {
+                          duration: 3000,
+                          theme: {
+                            primary: 'green',
+                            secondary: 'black',
+                          },
+                        },
+                      }}
+                    />
+                    
+                    <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<MainLayout />}>
                   <Route index element={<Home />} />
@@ -230,12 +232,13 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
-                      </Router>
-            </SettingsProvider>
-          </CategoriesProvider>
-        </CartProvider>
-      </AuthProvider>
-  </QueryClientProvider>
+                  </ErrorBoundary>
+                </Router>
+              </SettingsProvider>
+            </CategoriesProvider>
+          </CartProvider>
+        </AuthProvider>
+      </QueryClientProvider>
   );
 };
 
