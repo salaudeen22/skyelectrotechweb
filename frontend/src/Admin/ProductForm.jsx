@@ -215,6 +215,7 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
         if (!formData.description.trim()) newErrors.description = 'Description is required';
         if (!formData.price || formData.price <= 0) newErrors.price = 'Valid price is required';
         if (!formData.category) newErrors.category = 'Category is required';
+        if (!formData.sku.trim()) newErrors.sku = 'SKU is required';
         if (images.length === 0) newErrors.images = 'At least one image is required';
 
         setErrors(newErrors);
@@ -389,7 +390,7 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
                                             {errors.category && <p className="mt-1.5 flex items-center text-sm text-red-600"><FaExclamationCircle className="mr-1.5" /> {errors.category}</p>}
                                         </div>
                                         <FormInput label="Brand" name="brand" value={formData.brand} onChange={handleInputChange} placeholder="e.g., Quantum" />
-                                        <FormInput label="SKU" name="sku" value={formData.sku} onChange={handleInputChange} placeholder="Auto-generated if empty" />
+                                        <FormInput label="SKU *" name="sku" value={formData.sku} onChange={handleInputChange} error={errors.sku} placeholder="Auto-generated if empty" />
                                         <FormInput label="Warranty" name="warranty" value={formData.warranty} onChange={handleInputChange} placeholder="e.g., 2 Years Limited" />
                                         <div className="flex items-center pt-2"><input type="checkbox" id="isFeatured" name="isFeatured" checked={formData.isFeatured} onChange={handleInputChange} className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" /><label htmlFor="isFeatured" className="ml-3 block text-sm font-medium text-gray-700">Mark as a featured product</label></div>
                                     </div>
