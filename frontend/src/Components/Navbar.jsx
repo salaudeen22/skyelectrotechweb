@@ -5,7 +5,9 @@ import { CartContext } from '../contexts/CartContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useCategories } from '../hooks/useCategories';
 import { IoCartOutline } from 'react-icons/io5';
+import { FiBell } from 'react-icons/fi';
 import NotificationBell from './NotificationBell';
+import { useNotifications } from '../hooks/useNotifications';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,6 +20,7 @@ const Navbar = () => {
   const { items: cartItems, totalItems } = useContext(CartContext);
   const { settings } = useSettings();
   const { categories } = useCategories();
+  const { unreadCount } = useNotifications();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -346,6 +349,27 @@ const Navbar = () => {
               </Link>
             )}
             
+            {/* Notification Bell for Mobile */}
+            {user && (
+              <div className="relative">
+                <Link 
+                  to="/notifications" 
+                  className={`relative p-2 rounded-md transition-colors ${
+                    unreadCount > 0 
+                      ? 'text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100' 
+                      : 'text-gray-700 hover:text-blue-600'
+                  }`}
+                >
+                  <FiBell className={`w-6 h-6 ${unreadCount > 0 ? 'animate-pulse' : ''}`} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium animate-bounce">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </Link>
+              </div>
+            )}
+            
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-700 hover:text-blue-600 focus:outline-none focus:text-blue-600 p-2 rounded-md transition-colors"
@@ -515,6 +539,13 @@ const Navbar = () => {
                         onClick={resetMobileStates}
                       >
                         Order History
+                      </Link>
+                      <Link
+                        to="/notifications"
+                        className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                        onClick={resetMobileStates}
+                      >
+                        Notifications
                       </Link>
                     </>
                   )}

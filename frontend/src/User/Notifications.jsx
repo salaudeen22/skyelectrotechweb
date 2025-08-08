@@ -140,13 +140,25 @@ const Notifications = () => {
                 {unreadCount} unread • {notifications.length} total
               </p>
             </div>
-            <Link
-              to="/notifications/settings"
-              className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              <FiSettings className="w-4 h-4" />
-              <span>Settings</span>
-            </Link>
+            <div className="flex items-center space-x-3">
+              {unreadCount > 0 && (
+                <button
+                  onClick={handleMarkAsRead}
+                  disabled={isMarkingRead}
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors"
+                >
+                  <FiCheck className="w-4 h-4" />
+                  <span>{isMarkingRead ? 'Marking...' : 'Mark All as Read'}</span>
+                </button>
+              )}
+              <Link
+                to="/notifications/settings"
+                className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <FiSettings className="w-4 h-4" />
+                <span>Settings</span>
+              </Link>
+            </div>
           </div>
 
           {/* Search and Filter */}
@@ -243,7 +255,7 @@ const Notifications = () => {
                   key={notification._id}
                   className={`p-6 hover:bg-gray-50 transition-colors ${
                     selectedNotifications.includes(notification._id) ? 'bg-blue-50' : ''
-                  } ${!notification.isRead ? 'bg-blue-50/50' : ''}`}
+                  } ${!notification.isRead ? 'bg-blue-50/50 border-l-4 border-blue-500' : ''}`}
                 >
                   <div className="flex items-start space-x-4">
                     {/* Checkbox */}
