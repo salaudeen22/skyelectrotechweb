@@ -140,6 +140,7 @@ const Payment = () => {
         amount: orderPayload.totalPrice,
         currency: 'INR',
         method: selectedMethod,
+        orderId: `temp_${Date.now()}`, // Temporary order ID for payment tracking
         customerName: shippingInfo.name,
         customerEmail: shippingInfo.email,
         customerPhone: shippingInfo.phone,
@@ -147,6 +148,24 @@ const Payment = () => {
       });
 
       const paymentData = paymentResponse.data;
+      
+      // Check for payment timeout
+      if (paymentData.timeoutAt) {
+        const timeoutDate = new Date(paymentData.timeoutAt);
+        const now = new Date();
+        const timeUntilTimeout = timeoutDate.getTime() - now.getTime();
+        
+        if (timeUntilTimeout <= 0) {
+          toast.error('Payment session has expired. Please try again.');
+          setIsSubmitting(false);
+          return;
+        }
+        
+        // Set a timeout to warn user before payment expires
+        setTimeout(() => {
+          toast.error('Payment session will expire soon. Please complete your payment.');
+        }, timeUntilTimeout - 60000); // Warn 1 minute before expiry
+      }
       
       // Track payment initiation
       trackClick('payment_initiated', 'payment');
@@ -184,6 +203,18 @@ const Payment = () => {
       razorpay.on('payment.failed', (response) => {
         console.error('Payment failed:', response.error);
         toast.error(`Payment failed: ${response.error.description}`);
+        
+        // Show retry option for certain failure types
+        if (response.error.code === 'PAYMENT_DECLINED' || response.error.code === 'NETWORK_ERROR') {
+          const retryPayment = window.confirm(
+            'Payment failed due to a temporary issue. Would you like to retry?'
+          );
+          if (retryPayment) {
+            handleOnlinePayment(orderPayload);
+            return;
+          }
+        }
+        
         setIsSubmitting(false);
       });
       

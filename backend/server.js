@@ -104,6 +104,17 @@ mongoose.connect(process.env.MONGODB_URI )
 .then(() => console.log('MongoDB connected successfully'))
 .catch((err) => console.error('MongoDB connection error:', err));
 
+// Start payment cron jobs if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  try {
+    const { startPaymentCronJobs } = require('./scripts/paymentCron');
+    startPaymentCronJobs();
+    console.log('Payment cron jobs started');
+  } catch (error) {
+    console.log('Payment cron jobs not started (node-cron not installed):', error.message);
+  }
+}
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));

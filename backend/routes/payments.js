@@ -6,7 +6,12 @@ const {
   getPaymentInfo,
   processRefund,
   getPaymentMethods,
-  testRazorpayConfig
+  testRazorpayConfig,
+  synchronizePaymentStatus,
+  retryPayment,
+  getPaymentStats,
+  processExpiredPayments,
+  retryFailedPayments
 } = require('../controllers/payments');
 const { auth, adminOnly, userAccess } = require('../middleware/auth');
 const validate = require('../middleware/validate');
@@ -87,12 +92,48 @@ router.post('/verify',
   verifyPayment
 );
 
+// User/Admin routes
+router.post('/retry/:paymentId', 
+  auth, 
+  [body('delayMinutes').optional().isInt({ min: 1, max: 60 })], 
+  validate, 
+  logActivity('retry_payment', 'payment'),
+  retryPayment
+);
+
 // Admin routes
 router.get('/:paymentId', 
   auth, 
   adminOnly, 
   logActivity('view_payment_details', 'payment'),
   getPaymentInfo
+);
+
+router.post('/sync/:paymentId', 
+  auth, 
+  adminOnly, 
+  logActivity('sync_payment_status', 'payment'),
+  synchronizePaymentStatus
+);
+
+router.get('/stats/overview', 
+  auth, 
+  adminOnly, 
+  getPaymentStats
+);
+
+router.post('/process-expired', 
+  auth, 
+  adminOnly, 
+  logActivity('process_expired_payments', 'payment'),
+  processExpiredPayments
+);
+
+router.post('/retry-failed', 
+  auth, 
+  adminOnly, 
+  logActivity('retry_failed_payments', 'payment'),
+  retryFailedPayments
 );
 
 router.post('/refund', 

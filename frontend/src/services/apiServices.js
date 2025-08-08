@@ -529,6 +529,36 @@ export const paymentAPI = {
   processRefund: async (refundData) => {
     const response = await api.post('/payments/refund', refundData);
     return response.data;
+  },
+
+  // Retry failed payment
+  retryPayment: async (paymentId, delayMinutes = 5) => {
+    const response = await api.post(`/payments/retry/${paymentId}`, { delayMinutes });
+    return response.data;
+  },
+
+  // Synchronize payment status (Admin)
+  synchronizePaymentStatus: async (paymentId) => {
+    const response = await api.post(`/payments/sync/${paymentId}`);
+    return response.data;
+  },
+
+  // Get payment statistics (Admin)
+  getPaymentStats: async () => {
+    const response = await api.get('/payments/stats/overview');
+    return response.data;
+  },
+
+  // Process expired payments (Admin)
+  processExpiredPayments: async () => {
+    const response = await api.post('/payments/process-expired');
+    return response.data;
+  },
+
+  // Retry failed payments (Admin)
+  retryFailedPayments: async () => {
+    const response = await api.post('/payments/retry-failed');
+    return response.data;
   }
 };
 

@@ -40,7 +40,8 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "puppeteer": "^19.11.1",
-    "razorpay": "^2.9.6"
+    "razorpay": "^2.9.6",
+    "node-cron": "^3.0.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",

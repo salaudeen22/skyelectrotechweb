@@ -1,4 +1,5 @@
 const Order = require('../models/Order');
+const Payment = require('../models/Payment');
 const { 
   razorpay,
   generateRazorpayOrderId, 
@@ -6,35 +7,59 @@ const {
   getPaymentDetails,
   refundPayment 
 } = require('../config/razorpay');
+const paymentService = require('../utils/paymentService');
 const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 
 // @desc    Create Razorpay order
 // @route   POST /api/payments/create-order
 // @access  Private (User)
 const createPaymentOrder = asyncHandler(async (req, res) => {
-  const { amount, currency = 'INR', orderData } = req.body;
+  const { amount, currency = 'INR', orderData, orderId } = req.body;
 
   if (!amount || amount <= 0) {
     return sendError(res, 400, 'Invalid amount');
   }
 
   try {
+    console.log('Creating payment order with data:', { amount, currency, orderId });
+    
+    // Create payment record with timeout
+    const payment = await paymentService.createPayment(
+      orderId,
+      req.user._id,
+      amount,
+      currency,
+      'card'
+    );
+
+    console.log('Payment record created:', payment._id);
+
     // Generate Razorpay order
     const razorpayOrder = await generateRazorpayOrderId(
       amount, 
       currency, 
-      `order_${Date.now()}`
+      `order_${payment._id}`
     );
 
+    console.log('Razorpay order created:', razorpayOrder.id);
+
+    // Update payment with Razorpay order ID
+    await paymentService.updatePaymentWithOrderId(payment._id, razorpayOrder.id);
+
+    console.log('Payment updated with Razorpay order ID');
+
     sendResponse(res, 200, {
+      paymentId: payment._id,
       orderId: razorpayOrder.id,
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
-      key: process.env.RAZORPAY_KEY_ID
+      key: process.env.RAZORPAY_KEY_ID,
+      timeoutAt: payment.timeoutAt
     }, 'Payment order created successfully');
   } catch (error) {
     console.error('Payment order creation error:', error);
-    sendError(res, 500, 'Failed to create payment order');
+    console.error('Error stack:', error.stack);
+    sendError(res, 500, `Failed to create payment order: ${error.message}`);
   }
 });
 
@@ -59,32 +84,22 @@ const verifyPayment = asyncHandler(async (req, res) => {
       razorpay_signature: razorpay_signature ? 'present' : 'missing'
     });
 
-    // Verify payment signature
-    const isValidSignature = verifyPaymentSignature(
+    // Verify payment with retry mechanism
+    const verificationResult = await paymentService.verifyPaymentWithRetry(
       razorpay_order_id,
       razorpay_payment_id,
-      razorpay_signature
+      razorpay_signature,
+      3 // max attempts
     );
 
-    console.log('Signature verification result:', isValidSignature);
-
-    if (!isValidSignature) {
-      console.error('Invalid payment signature for:', {
-        orderId: razorpay_order_id,
-        paymentId: razorpay_payment_id
-      });
-      return sendError(res, 400, 'Invalid payment signature');
-    }
-
-    // Get payment details from Razorpay
-    const paymentDetails = await getPaymentDetails(razorpay_payment_id);
-    console.log('Payment details retrieved successfully');
+    console.log('Payment verification successful:', verificationResult);
 
     sendResponse(res, 200, {
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
       status: 'success',
-      paymentDetails
+      paymentDetails: verificationResult.paymentDetails,
+      attempts: verificationResult.attempts
     }, 'Payment verified successfully');
   } catch (error) {
     console.error('Payment verification error:', error);
@@ -232,11 +247,106 @@ const getPaymentMethods = asyncHandler(async (req, res) => {
   sendResponse(res, 200, { paymentMethods }, 'Payment methods retrieved successfully');
 });
 
+// @desc    Synchronize payment status
+// @route   POST /api/payments/sync/:paymentId
+// @access  Private (Admin)
+const synchronizePaymentStatus = asyncHandler(async (req, res) => {
+  const { paymentId } = req.params;
+
+  try {
+    const result = await paymentService.synchronizePaymentStatus(paymentId);
+    
+    sendResponse(res, 200, result, 'Payment status synchronized successfully');
+  } catch (error) {
+    console.error('Payment synchronization error:', error);
+    sendError(res, 500, `Failed to synchronize payment: ${error.message}`);
+  }
+});
+
+// @desc    Retry failed payment
+// @route   POST /api/payments/retry/:paymentId
+// @access  Private (User/Admin)
+const retryPayment = asyncHandler(async (req, res) => {
+  const { paymentId } = req.params;
+  const { delayMinutes = 5 } = req.body;
+
+  try {
+    const payment = await Payment.findById(paymentId);
+    if (!payment) {
+      return sendError(res, 404, 'Payment not found');
+    }
+
+    // Check if user has permission to retry this payment
+    if (req.user.role !== 'admin' && payment.user.toString() !== req.user._id.toString()) {
+      return sendError(res, 403, 'Access denied');
+    }
+
+    if (!payment.canRetry) {
+      return sendError(res, 400, 'Payment cannot be retried');
+    }
+
+    await payment.scheduleRetry(delayMinutes);
+    
+    sendResponse(res, 200, {
+      paymentId: payment._id,
+      nextRetryAt: payment.nextRetryAt,
+      retryCount: payment.retryCount
+    }, 'Payment retry scheduled successfully');
+  } catch (error) {
+    console.error('Payment retry error:', error);
+    sendError(res, 500, `Failed to retry payment: ${error.message}`);
+  }
+});
+
+// @desc    Get payment statistics
+// @route   GET /api/payments/stats
+// @access  Private (Admin)
+const getPaymentStats = asyncHandler(async (req, res) => {
+  try {
+    const stats = await paymentService.getPaymentStats();
+    sendResponse(res, 200, stats, 'Payment statistics retrieved successfully');
+  } catch (error) {
+    console.error('Get payment stats error:', error);
+    sendError(res, 500, 'Failed to get payment statistics');
+  }
+});
+
+// @desc    Process expired payments (cron job endpoint)
+// @route   POST /api/payments/process-expired
+// @access  Private (Admin)
+const processExpiredPayments = asyncHandler(async (req, res) => {
+  try {
+    const processedCount = await paymentService.processExpiredPayments();
+    sendResponse(res, 200, { processedCount }, `${processedCount} expired payments processed`);
+  } catch (error) {
+    console.error('Process expired payments error:', error);
+    sendError(res, 500, 'Failed to process expired payments');
+  }
+});
+
+// @desc    Retry failed payments (cron job endpoint)
+// @route   POST /api/payments/retry-failed
+// @access  Private (Admin)
+const retryFailedPayments = asyncHandler(async (req, res) => {
+  try {
+    const retriedCount = await paymentService.retryFailedPayments();
+    sendResponse(res, 200, { retriedCount }, `${retriedCount} failed payments retried`);
+  } catch (error) {
+    console.error('Retry failed payments error:', error);
+    sendError(res, 500, 'Failed to retry failed payments');
+  }
+});
+
 module.exports = {
   createPaymentOrder,
   verifyPayment,
   getPaymentInfo,
   processRefund,
   getPaymentMethods,
-  testRazorpayConfig
+  testRazorpayConfig,
+  synchronizePaymentStatus,
+  retryPayment,
+  getPaymentStats,
+  processExpiredPayments,
+  retryFailedPayments
 }; 
