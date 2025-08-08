@@ -85,19 +85,19 @@ const Notifications = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'order_update':
-        return '📦';
+        return '';
       case 'price_drop':
-        return '💰';
+        return '';
       case 'stock_alert':
-        return '⚠️';
+        return '';
       case 'promotional':
-        return '🎉';
+        return '';
       case 'payment':
-        return '💳';
+        return '';
       case 'delivery':
-        return '🚚';
+        return '';
       default:
-        return '🔔';
+        return '';
     }
   };
 
@@ -209,7 +209,7 @@ const Notifications = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           {filteredNotifications.length === 0 ? (
             <div className="p-12 text-center">
-              <div className="text-6xl mb-4">🔔</div>
+              <div className="text-6xl mb-4"></div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 {searchTerm || filter !== 'all' ? 'No matching notifications' : 'No notifications yet'}
               </h3>

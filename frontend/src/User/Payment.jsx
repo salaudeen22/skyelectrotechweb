@@ -248,7 +248,7 @@ const Payment = () => {
       console.log('Verification response keys:', Object.keys(verificationResponse));
 
       if (verificationResponse.success) {
-        console.log('✅ Payment verification successful, creating order...');
+        console.log('Payment verification successful, creating order...');
         
         // Create order only after payment is verified
         const finalOrderPayload = {
@@ -273,12 +273,12 @@ const Payment = () => {
         clearCart();
         clearAllCheckoutData();
         
-        console.log('✅ Payment and order creation completed successfully!');
+        console.log('Payment and order creation completed successfully!');
         setIsSubmitting(false);
         toast.success('Payment successful! Your order has been placed.');
         navigate(`/user/orders/${order._id}`);
       } else {
-        console.log('❌ Payment verification failed:', verificationResponse);
+        console.log('Payment verification failed:', verificationResponse);
         throw new Error('Payment verification failed');
       }
     } catch (error) {

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiBell, FiBellOff, FiSave, FiCheck, FiPlay } from 'react-icons/fi';
+import { FiArrowLeft, FiBell, FiBellOff, FiSave, FiCheck } from 'react-icons/fi';
 import { useNotifications } from '../hooks/useNotifications';
 import { toast } from 'react-hot-toast';
 import LoadingSpinner from '../Components/LoadingSpinner';
-import { testNotificationSystem, sendTestNotification, enablePushNotifications } from '../utils/notificationTest';
-import { testMobileNotifications, testMobilePushNotification, sendMobileTestNotification } from '../utils/mobileNotificationTest';
+import { setupPushNotifications, getPermissionStatus, showBrowserSettingsInstructions } from '../utils/notificationPermission';
 
 const NotificationSettings = () => {
   const { updatePreferences, getPreferences } = useNotifications();
@@ -22,12 +21,26 @@ const NotificationSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const [testing, setTesting] = useState(false);
+
+  const [permissionStatus, setPermissionStatus] = useState(null);
 
   useEffect(() => {
     loadPreferences();
     checkPushStatus();
+    checkPermissionStatus();
   }, []);
+
+  const checkPermissionStatus = () => {
+    const status = getPermissionStatus();
+    setPermissionStatus(status);
+    console.log('Permission status:', status);
+    
+    // Additional debugging
+    console.log('Notification.permission:', Notification.permission);
+    console.log('Service Worker support:', 'serviceWorker' in navigator);
+    console.log('Push Manager support:', 'PushManager' in window);
+    console.log('HTTPS/SSL:', window.location.protocol === 'https:' || window.location.hostname === 'localhost');
+  };
 
   const loadPreferences = async () => {
     try {
@@ -75,61 +88,7 @@ const NotificationSettings = () => {
     }
   };
 
-  const handleEnablePush = async () => {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      toast.error('Push notifications are not supported in this browser');
-      return;
-    }
 
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        toast.error('Notification permission denied');
-        return;
-      }
-
-      // Get VAPID public key
-      const response = await fetch('/api/notifications/vapid-public-key');
-      const { publicKey } = await response.json();
-
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: publicKey
-      });
-
-      // Send subscription to server
-      const deviceInfo = {
-        userAgent: navigator.userAgent,
-        platform: navigator.platform,
-        browser: getBrowserInfo(),
-        version: getBrowserVersion()
-      };
-
-      await fetch('/api/notifications/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          endpoint: subscription.endpoint,
-          keys: {
-            p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))),
-            auth: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth'))))
-          },
-          deviceInfo,
-          preferences
-        })
-      });
-
-      setPushEnabled(true);
-      toast.success('Push notifications enabled successfully');
-    } catch (error) {
-      console.error('Error enabling push notifications:', error);
-      toast.error('Failed to enable push notifications');
-    }
-  };
 
   const handleDisablePush = async () => {
     try {
@@ -156,131 +115,103 @@ const NotificationSettings = () => {
     }
   };
 
-  const handleTestNotificationSystem = async () => {
-    setTesting(true);
-    try {
-      console.log('🧪 Testing notification system...');
-      const results = await testNotificationSystem();
-      console.log('Test results:', results);
-      
-      if (results.socketIO) {
-        toast.success('Socket.IO connected! Real-time notifications working.');
-      } else {
-        toast.error('Socket.IO not connected. Check console for details.');
-      }
-      
-      if (results.subscription) {
-        toast.success('Push notifications enabled!');
-      } else {
-        toast.error('Push notifications not enabled. Please enable them first.');
-      }
-    } catch (error) {
-      console.error('Test failed:', error);
-      toast.error('Test failed. Check console for details.');
-    } finally {
-      setTesting(false);
-    }
-  };
 
-  const handleSendTestNotification = async () => {
-    setTesting(true);
-    try {
-      const success = await sendTestNotification();
-      if (success) {
-        toast.success('Test notification sent! Check your notifications.');
-      } else {
-        toast.error('Failed to send test notification.');
-      }
-    } catch (error) {
-      console.error('Error sending test notification:', error);
-      toast.error('Error sending test notification.');
-    } finally {
-      setTesting(false);
-    }
-  };
 
   const handleEnablePushNotifications = async () => {
-    setTesting(true);
+    setSaving(true);
     try {
-      const success = await enablePushNotifications();
+      // First check current permission status
+      const currentPermission = Notification.permission;
+      console.log('Current notification permission:', currentPermission);
+      
+      if (currentPermission === 'denied') {
+        toast.error('Notification permission is blocked. Please enable it in your browser settings and refresh the page.');
+        return;
+      }
+      
+      const success = await setupPushNotifications();
       if (success) {
         setPushEnabled(true);
+        checkPermissionStatus();
         toast.success('Push notifications enabled successfully!');
       } else {
-        toast.error('Failed to enable push notifications.');
+        toast.error('Failed to enable push notifications. Please try again.');
       }
     } catch (error) {
       console.error('Error enabling push notifications:', error);
-      toast.error('Error enabling push notifications.');
+      
+      if (error.message.includes('denied')) {
+        toast.error('Permission denied. Please allow notifications in your browser settings and try again.');
+      } else if (error.message.includes('not supported')) {
+        toast.error('Push notifications are not supported in this browser.');
+      } else if (error.message.includes('HTTPS')) {
+        toast.error('Push notifications require HTTPS. Please use a secure connection.');
+      } else {
+        toast.error(error.message || 'Error enabling push notifications. Please try again.');
+      }
     } finally {
-      setTesting(false);
+      setSaving(false);
     }
   };
 
-  const handleTestMobileNotifications = async () => {
-    setTesting(true);
+  const handleShowInstructions = () => {
+    const instructions = showBrowserSettingsInstructions();
+    alert(instructions);
+  };
+
+  const handleRefreshPermissionStatus = async () => {
+    console.log('Refreshing permission status...');
+    
+    // Force a page reload to clear any cached permission states
+    if (Notification.permission === 'denied') {
+      const shouldReload = confirm(
+        'The notification permission appears to be cached. Would you like to refresh the page to apply the new browser settings?\n\nThis will reload the page to clear any cached permission states.'
+      );
+      if (shouldReload) {
+        // Clear any cached data and reload
+        if ('caches' in window) {
+          try {
+            await caches.delete('notification-cache');
+          } catch {
+            console.log('No notification cache to clear');
+          }
+        }
+        window.location.reload();
+        return;
+      }
+    }
+    
+    // Re-check permission status
+    checkPermissionStatus();
+    checkPushStatus();
+    
+    toast.success('Permission status refreshed');
+  };
+
+  const handleForcePermissionReset = async () => {
+    console.log('Force resetting notification permission...');
+    
     try {
-      const results = await testMobileNotifications();
-      console.log('Mobile test results:', results);
+      // Try to request permission again to trigger browser dialog
+      const permission = await Notification.requestPermission();
+      console.log('New permission result:', permission);
       
-      if (results.isMobile) {
-        toast.success(`Mobile device detected! Chrome: ${results.isChrome ? 'Yes' : 'No'}`);
+      if (permission === 'granted') {
+        toast.success('Notification permission granted!');
+        checkPermissionStatus();
+        checkPushStatus();
+      } else if (permission === 'denied') {
+        toast.error('Permission still denied. Please check browser settings and try again.');
       } else {
-        toast.info('Not a mobile device');
-      }
-      
-      if (results.https) {
-        toast.success('HTTPS/SSL: OK');
-      } else {
-        toast.error('HTTPS required for production');
-      }
-      
-      if (results.serviceWorker && results.pushManager) {
-        toast.success('Mobile notifications supported!');
-      } else {
-        toast.error('Mobile notifications not supported');
+        toast.info('Permission request was dismissed. Please try again.');
       }
     } catch (error) {
-      console.error('Mobile test failed:', error);
-      toast.error('Mobile test failed');
-    } finally {
-      setTesting(false);
+      console.error('Error requesting permission:', error);
+      toast.error('Error requesting permission. Please try refreshing the page.');
     }
   };
 
-  const handleTestMobilePushNotification = async () => {
-    setTesting(true);
-    try {
-      const success = await testMobilePushNotification();
-      if (success) {
-        toast.success('Mobile push notification setup successful!');
-      } else {
-        toast.error('Mobile push notification setup failed');
-      }
-    } catch (error) {
-      console.error('Mobile push test failed:', error);
-      toast.error('Mobile push test failed');
-    } finally {
-      setTesting(false);
-    }
-  };
 
-  const handleSendMobileTestNotification = async () => {
-    setTesting(true);
-    try {
-      const success = await sendMobileTestNotification();
-      if (success) {
-        toast.success('Mobile test notification sent!');
-      } else {
-        toast.error('Failed to send mobile test notification');
-      }
-    } catch (error) {
-      console.error('Mobile notification send failed:', error);
-      toast.error('Mobile notification send failed');
-    } finally {
-      setTesting(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -316,10 +247,20 @@ const NotificationSettings = () => {
                 <p className="text-gray-600 mt-1">
                   Receive notifications even when the app is closed
                 </p>
+                {permissionStatus && (
+                  <p className={`text-sm mt-1 ${
+                    permissionStatus.status === 'granted' ? 'text-green-600' :
+                    permissionStatus.status === 'denied' ? 'text-red-600' :
+                    'text-yellow-600'
+                  }`}>
+                    Status: {permissionStatus.message}
+                  </p>
+                )}
               </div>
               <button
-                onClick={pushEnabled ? handleDisablePush : handleEnablePush}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                onClick={pushEnabled ? handleDisablePush : handleEnablePushNotifications}
+                disabled={saving}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 ${
                   pushEnabled
                     ? 'bg-red-500 text-white hover:bg-red-600'
                     : 'bg-blue-500 text-white hover:bg-blue-600'
@@ -333,7 +274,7 @@ const NotificationSettings = () => {
                 ) : (
                   <>
                     <FiBell className="w-4 h-4" />
-                    <span>Enable</span>
+                    <span>{saving ? 'Enabling...' : 'Enable'}</span>
                   </>
                 )}
               </button>
@@ -341,10 +282,18 @@ const NotificationSettings = () => {
             <div className="mt-3 p-3 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600">
                 {pushEnabled 
-                  ? '✅ Push notifications are enabled. You\'ll receive notifications even when the app is closed.'
-                  : '⚠️ Push notifications are disabled. You\'ll only see notifications when the app is open.'
+                  ? 'Push notifications are enabled. You\'ll receive notifications even when the app is closed.'
+                  : 'Push notifications are disabled. You\'ll only see notifications when the app is open.'
                 }
               </p>
+              {permissionStatus?.status === 'denied' && (
+                <button
+                  onClick={handleShowInstructions}
+                  className="mt-2 text-sm text-blue-600 hover:text-blue-800 underline"
+                >
+                  How to enable notifications in browser settings
+                </button>
+              )}
             </div>
           </div>
 
@@ -357,31 +306,31 @@ const NotificationSettings = () => {
                   key: 'orderUpdates',
                   title: 'Order Updates',
                   description: 'Get notified about order status changes, shipping updates, and delivery confirmations',
-                  icon: '📦'
+                  icon: ''
                 },
                 {
                   key: 'priceDrops',
                   title: 'Price Drops',
                   description: 'Be the first to know when items in your wishlist go on sale',
-                  icon: '💰'
+                  icon: ''
                 },
                 {
                   key: 'stockAlerts',
                   title: 'Stock Alerts',
                   description: 'Get notified when out-of-stock items become available again',
-                  icon: '⚠️'
+                  icon: ''
                 },
                 {
                   key: 'promotional',
                   title: 'Promotional Offers',
                   description: 'Receive updates about sales, discounts, and special offers',
-                  icon: '🎉'
+                  icon: ''
                 },
                 {
                   key: 'system',
                   title: 'System Notifications',
                   description: 'Important account updates and security notifications',
-                  icon: '🔔'
+                  icon: ''
                 }
               ].map((type) => (
                 <div key={type.key} className="flex items-start space-x-3 p-4 border border-gray-200 rounded-lg">
@@ -433,86 +382,66 @@ const NotificationSettings = () => {
           </div>
         )}
 
-        {/* Test Section */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-6">
-          <h4 className="font-medium text-yellow-900 mb-4">🧪 Test Notifications</h4>
-          <div className="space-y-3">
-            <button
-              onClick={handleTestNotificationSystem}
-              disabled={testing}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors"
-            >
-              <FiPlay className="w-4 h-4" />
-              <span>{testing ? 'Testing...' : 'Test System'}</span>
-            </button>
-            
-            <button
-              onClick={handleSendTestNotification}
-              disabled={testing}
-              className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors"
-            >
-              <FiBell className="w-4 h-4" />
-              <span>{testing ? 'Sending...' : 'Send Test Notification'}</span>
-            </button>
-            
-            <button
-              onClick={handleEnablePushNotifications}
-              disabled={testing || pushEnabled}
-              className="flex items-center space-x-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 transition-colors"
-            >
-              <FiBell className="w-4 h-4" />
-              <span>{testing ? 'Enabling...' : 'Enable Push Notifications'}</span>
-            </button>
-          </div>
-          <p className="text-sm text-yellow-800 mt-3">
-            Use these buttons to test your notification system. Check the browser console for detailed results.
-          </p>
-        </div>
 
-        {/* Mobile Test Section */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
-          <h4 className="font-medium text-blue-900 mb-4">📱 Mobile Notifications</h4>
-          <div className="space-y-3">
-            <button
-              onClick={handleTestMobileNotifications}
-              disabled={testing}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-            >
-              <FiPlay className="w-4 h-4" />
-              <span>{testing ? 'Testing...' : 'Test Mobile Compatibility'}</span>
-            </button>
-            
-            <button
-              onClick={handleTestMobilePushNotification}
-              disabled={testing}
-              className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
-            >
-              <FiBell className="w-4 h-4" />
-              <span>{testing ? 'Setting up...' : 'Setup Mobile Push'}</span>
-            </button>
-            
-            <button
-              onClick={handleSendMobileTestNotification}
-              disabled={testing}
-              className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
-            >
-              <FiBell className="w-4 h-4" />
-              <span>{testing ? 'Sending...' : 'Send Mobile Test'}</span>
-            </button>
+
+        {/* Debug Info (only in development) */}
+        {import.meta.env.DEV && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+            <h4 className="font-medium text-gray-900 mb-2">Debug Information</h4>
+            <div className="text-xs text-gray-600 space-y-1">
+              <p>Notification.permission: <span className="font-mono">{Notification.permission}</span></p>
+              <p>Service Worker: <span className="font-mono">{'serviceWorker' in navigator ? 'Supported' : 'Not supported'}</span></p>
+              <p>Push Manager: <span className="font-mono">{'PushManager' in window ? 'Supported' : 'Not supported'}</span></p>
+              <p>HTTPS/SSL: <span className="font-mono">{window.location.protocol === 'https:' || window.location.hostname === 'localhost' ? 'Yes' : 'No'}</span></p>
+              <p>Push Enabled: <span className="font-mono">{pushEnabled ? 'Yes' : 'No'}</span></p>
+            </div>
           </div>
-          <p className="text-sm text-blue-800 mt-3">
-            Test mobile-specific notification features. Works best on Chrome mobile with HTTPS.
-          </p>
-        </div>
+        )}
+
+        {/* Troubleshooting Section */}
+        {permissionStatus?.status === 'denied' && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <h4 className="font-medium text-red-900 mb-2">Troubleshooting</h4>
+            <div className="text-sm text-red-800 space-y-2">
+              <p><strong>Notifications are blocked in your browser.</strong></p>
+              <p>To fix this:</p>
+              <ol className="list-decimal list-inside space-y-1 ml-4">
+                <li>Click the lock/shield icon in your browser's address bar</li>
+                <li>Find "Notifications" in the site settings</li>
+                <li>Change it from "Block" to "Allow"</li>
+                <li>Refresh this page and try again</li>
+              </ol>
+              <button
+                onClick={handleShowInstructions}
+                className="mt-3 text-sm text-blue-600 hover:text-blue-800 underline"
+              >
+                View detailed instructions for your browser
+              </button>
+              <button
+                onClick={handleRefreshPermissionStatus}
+                className="mt-2 text-sm text-green-600 hover:text-green-800 underline block"
+              >
+                Refresh permission status
+              </button>
+              <button
+                onClick={handleForcePermissionReset}
+                className="mt-2 text-sm text-orange-600 hover:text-orange-800 underline block"
+              >
+                Force permission request
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Additional Info */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
-          <h4 className="font-medium text-blue-900 mb-2">💡 Tips</h4>
+                      <h4 className="font-medium text-blue-900 mb-2">Tips</h4>
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• You can change these settings at any time</li>
             <li>• Push notifications work best when the app is installed on your device</li>
             <li>• Some notifications are important and cannot be disabled</li>
             <li>• You can also manage notifications in your browser settings</li>
+            <li>• Make sure you're using HTTPS for push notifications to work</li>
           </ul>
         </div>
       </div>
@@ -520,20 +449,6 @@ const NotificationSettings = () => {
   );
 };
 
-// Helper functions
-function getBrowserInfo() {
-  const userAgent = navigator.userAgent;
-  if (userAgent.includes('Chrome')) return 'Chrome';
-  if (userAgent.includes('Firefox')) return 'Firefox';
-  if (userAgent.includes('Safari')) return 'Safari';
-  if (userAgent.includes('Edge')) return 'Edge';
-  return 'Unknown';
-}
 
-function getBrowserVersion() {
-  const userAgent = navigator.userAgent;
-  const match = userAgent.match(/(chrome|firefox|safari|edge)\/(\d+)/i);
-  return match ? match[2] : 'Unknown';
-}
 
 export default NotificationSettings;

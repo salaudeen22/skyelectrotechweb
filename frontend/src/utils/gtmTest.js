@@ -4,10 +4,10 @@ export const testGTM = () => {
   
   // Check if dataLayer exists
   if (typeof window !== 'undefined' && window.dataLayer) {
-    console.log('✅ dataLayer is available');
+    console.log('dataLayer is available');
     console.log('dataLayer:', window.dataLayer);
   } else {
-    console.log('❌ dataLayer is not available');
+          console.log('dataLayer is not available');
   }
   
   // Test pushing an event
@@ -17,23 +17,23 @@ export const testGTM = () => {
       test_message: 'GTM is working correctly',
       timestamp: new Date().toISOString()
     });
-    console.log('✅ Test event pushed to dataLayer');
+    console.log('Test event pushed to dataLayer');
   }
   
   // Check if GTM script is loaded
   const gtmScript = document.querySelector('script[src*="googletagmanager.com/gtm.js"]');
   if (gtmScript) {
-    console.log('✅ GTM script is loaded');
+          console.log('GTM script is loaded');
   } else {
-    console.log('❌ GTM script is not loaded');
+          console.log('GTM script is not loaded');
   }
   
   // Check noscript fallback
   const gtmNoscript = document.querySelector('noscript iframe[src*="googletagmanager.com"]');
   if (gtmNoscript) {
-    console.log('✅ GTM noscript fallback is present');
+          console.log('GTM noscript fallback is present');
   } else {
-    console.log('❌ GTM noscript fallback is missing');
+          console.log('GTM noscript fallback is missing');
   }
   
   console.log('=== End GTM Test ===');
@@ -71,6 +71,6 @@ export const testGTMEvents = () => {
     }]
   });
   
-  console.log('✅ Test events pushed to dataLayer');
+      console.log('Test events pushed to dataLayer');
   console.log('=== End Event Test ===');
 }; 

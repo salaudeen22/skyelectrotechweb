@@ -61,7 +61,7 @@ export const useRecommendations = () => {
       
       setPersonalizedRecommendations(response.products || []);
     } catch (err) {
-      console.error('❌ Error fetching personalized recommendations:', err);
+      console.error('Error fetching personalized recommendations:', err);
       setError(prev => ({ 
         ...prev, 
         personalized: err.message || 'Failed to load recommendations' 
@@ -82,9 +82,9 @@ export const useRecommendations = () => {
       const response = await recommendationsAPI.getTrendingProducts(limit);
       console.log('📊 Trending products response:', response);
       setTrendingProducts(response.products || []);
-      console.log('✅ Set trending products:', response.products?.length || 0, 'products');
+              console.log('Set trending products:', response.products?.length || 0, 'products');
     } catch (err) {
-      console.error('❌ Error fetching trending products:', err);
+              console.error('Error fetching trending products:', err);
       setError(prev => ({ 
         ...prev, 
         trending: err.message || 'Failed to load trending products' 

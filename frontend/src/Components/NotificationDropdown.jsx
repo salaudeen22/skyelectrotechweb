@@ -80,19 +80,19 @@ const NotificationDropdown = ({ onClose }) => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'order_update':
-        return '📦';
+        return '';
       case 'price_drop':
-        return '💰';
+        return '';
       case 'stock_alert':
-        return '⚠️';
+        return '';
       case 'promotional':
-        return '🎉';
+        return '';
       case 'payment':
-        return '💳';
+        return '';
       case 'delivery':
-        return '🚚';
+        return '';
       default:
-        return '🔔';
+        return '';
     }
   };
 
@@ -181,7 +181,7 @@ const NotificationDropdown = ({ onClose }) => {
           </div>
         ) : notifications.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
-            <div className="text-4xl mb-2">🔔</div>
+            <div className="text-4xl mb-2"></div>
             <p className="text-sm">No notifications yet</p>
             <p className="text-xs text-gray-400 mt-1">We'll notify you about important updates</p>
           </div>

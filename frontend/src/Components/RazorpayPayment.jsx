@@ -303,7 +303,7 @@ const RazorpayPayment = ({
       {/* Security Notice */}
       <div className="mt-4 text-center">
         <p className="text-xs text-gray-500">
-          🔒 Your payment information is secure and encrypted
+                          Your payment information is secure and encrypted
         </p>
       </div>
     </div>
