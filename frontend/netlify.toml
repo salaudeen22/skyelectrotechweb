@@ -59,7 +59,7 @@
 
 [[redirects]]
   from = "/sitemap.xml"
-  to = "/sitemap.xml"
+  to = "https://skyelectrotechweb.onrender.com/api/sitemap.xml"
   status = 200
 
 [[redirects]]
