@@ -158,16 +158,30 @@ console.log('MongoDB URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
 console.log('Google Client ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Not set');
 console.log('Google Client Secret:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Not set');
 
-// Database connection with better error handling
-mongoose.connect(process.env.MONGODB_URI, {
-  serverSelectionTimeoutMS: 5000,
-  socketTimeoutMS: 45000,
-})
-.then(() => console.log('MongoDB connected successfully'))
-.catch((err) => {
-  console.error('MongoDB connection error:', err);
-  process.exit(1);
-});
+// Database connection with retry/backoff (do not crash on initial failure)
+const connectWithRetry = async (retries = 5, delayMs = 5000) => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    console.log('MongoDB connected successfully');
+  } catch (err) {
+    console.error('MongoDB connection error:', err.message || err);
+
+    if (retries > 0) {
+      const nextDelay = Math.min(delayMs * 2, 60000);
+      console.log(`Retrying MongoDB connection in ${delayMs / 1000}s... (${retries} retries left)`);
+      setTimeout(() => connectWithRetry(retries - 1, nextDelay), delayMs);
+    } else {
+      console.error('MongoDB connection failed after retries. Will continue running and retry periodically.');
+      // Keep attempting in background every 60s
+      setTimeout(() => connectWithRetry(5, 5000), 60000);
+    }
+  }
+};
+
+connectWithRetry();
 
 // Handle MongoDB connection events
 mongoose.connection.on('error', (err) => {
@@ -287,16 +301,26 @@ app.use('*', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Handle uncaught exceptions
+// Handle uncaught exceptions (do not crash unless explicitly forced)
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
-  process.exit(1);
+  const shouldExit = process.env.FORCE_EXIT_ON_ERROR === 'true';
+  if (shouldExit) {
+    process.exit(1);
+  } else {
+    console.warn('Continuing process after uncaught exception. Set FORCE_EXIT_ON_ERROR=true to exit on errors.');
+  }
 });
 
-// Handle unhandled promise rejections
+// Handle unhandled promise rejections (do not crash unless explicitly forced)
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
+  const shouldExit = process.env.FORCE_EXIT_ON_ERROR === 'true';
+  if (shouldExit) {
+    process.exit(1);
+  } else {
+    console.warn('Continuing process after unhandled rejection. Set FORCE_EXIT_ON_ERROR=true to exit on errors.');
+  }
 });
 
 server.listen(PORT, () => {
