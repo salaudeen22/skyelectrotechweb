@@ -208,8 +208,7 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     pending: ['confirmed', 'cancelled'],
     confirmed: ['packed', 'cancelled'],
     packed: ['shipped', 'cancelled'],
-    shipped: ['delivered', 'returned'],
-    delivered: ['returned'],
+    shipped: ['returned'],
     cancelled: [],
     returned: []
   };
@@ -234,10 +233,7 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     order.estimatedDelivery = new Date(estimatedDelivery);
   }
 
-  // If marking as delivered, set deliveredAt timestamp
-  if (status === 'delivered') {
-    order.deliveredAt = new Date();
-  }
+  // Note: delivered status removed from standardized workflow
 
   // Add to status history
   order.statusHistory.push({
@@ -280,57 +276,6 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   }
 
   sendResponse(res, 200, { order }, 'Order status updated successfully');
-});
-
-// @desc    Confirm delivery by user (no courier webhook)
-// @route   PUT /api/orders/:id/confirm-delivery
-// @access  Private (User)
-const confirmDelivery = asyncHandler(async (req, res) => {
-  const order = await Order.findById(req.params.id).populate('user', 'name email');
-
-  if (!order) {
-    return sendError(res, 404, 'Order not found');
-  }
-
-  // Only order owner can confirm delivery
-  if (order.user._id.toString() !== req.user._id.toString()) {
-    return sendError(res, 403, 'Access denied');
-  }
-
-  // Only shipped orders can be confirmed delivered
-  if (order.orderStatus !== 'shipped') {
-    return sendError(res, 400, 'Only shipped orders can be confirmed as delivered');
-  }
-
-  order.orderStatus = 'delivered';
-  order.deliveredAt = new Date();
-  order.statusHistory.push({
-    status: 'delivered',
-    updatedBy: req.user._id,
-    note: 'Delivery confirmed by customer'
-  });
-
-  await order.save();
-
-  try {
-    await sendOrderStatusUpdateEmail(order, order.user, 'delivered');
-  } catch (emailError) {
-    console.error('Failed to send delivery confirmation email:', emailError);
-  }
-
-  // Optional: Push notification
-  try {
-    await notificationService.sendOrderUpdateNotification(
-      order.user._id,
-      order,
-      'delivered',
-      { deliveredAt: order.deliveredAt }
-    );
-  } catch (notificationError) {
-    console.error('Failed to send delivery confirmation notification:', notificationError);
-  }
-
-  sendResponse(res, 200, { order }, 'Delivery confirmed successfully');
 });
 
 // @desc    Get all orders (Admin)
@@ -726,6 +671,5 @@ module.exports = {
   returnOrder,
   getReturnRequests,
   getOrderReturnRequests,
-  processReturnRequest,
-  confirmDelivery
+  processReturnRequest
 };

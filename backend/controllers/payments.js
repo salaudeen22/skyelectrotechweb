@@ -94,24 +94,12 @@ const verifyPayment = asyncHandler(async (req, res) => {
 
     console.log('Payment verification successful:', verificationResult);
 
-    // Also return minimal order info when available so frontend can reflect status
-    let updatedOrder = null;
-    try {
-      const paymentRecord = await Payment.findOne({ razorpayOrderId: razorpay_order_id }).lean();
-      if (paymentRecord?.order) {
-        updatedOrder = await Order.findById(paymentRecord.order).lean();
-      }
-    } catch (lookupErr) {
-      console.warn('Could not fetch updated order after payment verification:', lookupErr?.message);
-    }
-
     sendResponse(res, 200, {
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
       status: 'success',
       paymentDetails: verificationResult.paymentDetails,
-      attempts: verificationResult.attempts,
-      order: updatedOrder || null
+      attempts: verificationResult.attempts
     }, 'Payment verified successfully');
   } catch (error) {
     console.error('Payment verification error:', error);
@@ -154,12 +142,13 @@ const processRefund = asyncHandler(async (req, res) => {
       const order = await Order.findById(orderId);
       
       if (order) {
-        // Keep order status as-is; append refund note to history for audit
+        order.orderStatus = 'refunded';
         order.statusHistory.push({
-          status: order.orderStatus,
+          status: 'refunded',
           updatedBy: req.user._id,
-          note: `Refund processed${amount ? ` (₹${amount})` : ''}: ${reason || 'No reason provided'}`
+          note: `Refund processed: ${reason}`
         });
+
         await order.save();
       }
     }

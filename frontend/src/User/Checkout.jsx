@@ -18,7 +18,7 @@ import {
 } from 'react-icons/fi';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
-import { paymentAPI, ordersAPI, settingsAPI } from '../services/apiServices'; // Assuming these are correctly set up
+import { paymentAPI, ordersAPI } from '../services/apiServices'; // Assuming these are correctly set up
 import { useAnalytics } from '../hooks/useAnalytics'; // Assuming this is correctly set up
 import { useSettings } from '../contexts/SettingsContext';
 import toast from 'react-hot-toast';
@@ -307,10 +307,9 @@ const Checkout = () => {
   const paymentSectionRef = useRef(null);
 
   // --- Calculations ---
-  const [shippingQuote, setShippingQuote] = useState({ shippingCost: 0 });
   const totals = {
     subtotal: cartTotal,
-    shipping: shippingQuote.shippingCost ?? (cartTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.defaultShippingCost),
+    shipping: cartTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.defaultShippingCost,
     tax: Math.round(cartTotal * (settings.payment.taxRate / 100)), // Dynamic tax rate
     get total() { return this.subtotal + this.shipping + this.tax }
   };
@@ -323,8 +322,6 @@ const Checkout = () => {
     }
     loadPaymentMethods();
     loadUserAddresses();
-    // initial shipping quote
-    calculateShippingQuote();
   }, [cart, navigate]);
 
   // Load user addresses
@@ -358,8 +355,6 @@ const Checkout = () => {
       zipCode: address.zipCode,
       country: address.country
     }));
-    // recalc shipping on address change
-    calculateShippingQuote(address);
   };
 
   // Handle adding new address
@@ -432,9 +427,6 @@ const Checkout = () => {
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
-    if (['country','state'].includes(name)) {
-      calculateShippingQuote({ ...formData, [name]: value });
-    }
   };
 
   const handleInputBlur = (e) => {
@@ -469,24 +461,6 @@ const Checkout = () => {
       case 'wallet': return <FiPocket {...iconProps} />;
       case 'cod': return <FiTruck {...iconProps} />;
       default: return <FiCreditCard {...iconProps} />;
-    }
-  };
-
-  // Calculate shipping from server settings API
-  const calculateShippingQuote = async (addr = null) => {
-    try {
-      const payload = {
-        subtotal: cartTotal,
-        country: (addr?.country || formData.country || 'India'),
-        state: (addr?.state || formData.state || ''),
-        method: selectedMethod === 'cod' ? 'cod' : 'standard'
-      };
-      const res = await settingsAPI.calculateShippingCost(payload);
-      if (res.success) {
-        setShippingQuote({ shippingCost: res.data.shippingCost });
-      }
-    } catch (e) {
-      // fallback silently
     }
   };
 

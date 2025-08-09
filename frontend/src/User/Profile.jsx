@@ -663,8 +663,8 @@ const Profile = () => {
                   )}
 
                   {addresses.map((address) => (
-                    <div key={address.id} className="border border-gray-200 rounded-lg p-4 overflow-hidden">
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div key={address.id} className="border border-gray-200 rounded-lg p-4">
+                                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-2 mb-2">
                               <h4 className="font-medium text-gray-900 break-words">{address.name}</h4>
@@ -679,7 +679,7 @@ const Profile = () => {
                               {address.street}, {address.city}, {address.state} {address.zipCode}, {address.country}
                             </p>
                           </div>
-                          <div className="flex items-center gap-2 flex-shrink-0 whitespace-nowrap">
+                          <div className="flex items-center gap-2 flex-shrink-0">
                             {!address.isDefault && (
                               <button
                                 onClick={() => handleSetDefault(address.id)}
