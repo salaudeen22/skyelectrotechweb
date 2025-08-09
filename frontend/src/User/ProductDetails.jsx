@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiShoppingCart, FiHeart, FiMinus, FiPlus, FiStar, FiShare2, FiTruck, FiShield, FiRefreshCw } from 'react-icons/fi';
+import { FiShoppingCart, FiHeart, FiMinus, FiPlus, FiStar, FiTruck, FiShield, FiRefreshCw } from 'react-icons/fi';
 import { productsAPI } from '../services/apiServices';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
@@ -10,6 +10,8 @@ import CommentSection from '../Components/CommentSection';
 import SEO from '../Components/SEO';
 import LoadingErrorHandler from '../Components/LoadingErrorHandler';
 import ProductRecommendations from '../Components/ProductRecommendations';
+import ShareSheet from '../Components/ShareSheet';
+import { buildProductUrl } from '../utils/env';
 
 
 // Development-only render counter
@@ -467,6 +469,7 @@ const ProductDetails = () => {
                     Wishlist
                   </button>
                 </div>
+                {/* Share sheet trigger is floating; nothing inline here */}
               </div>
             </div>
 
@@ -556,6 +559,14 @@ const ProductDetails = () => {
             )}
           </div>
         </div>
+
+        {/* Floating Share Sheet */}
+        <ShareSheet
+          title={`${product.name} - SkyElectroTech`}
+          description={product.description}
+          image={product.images?.[0]?.url}
+          url={buildProductUrl(product._id)}
+        />
 
         {/* Product Recommendations */}
         <div className="mt-8">
