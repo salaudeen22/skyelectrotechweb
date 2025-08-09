@@ -320,6 +320,10 @@ class PaymentService {
       }
       if (status === 'completed') {
         order.paymentInfo.paidAt = new Date();
+        // If order is pending, auto-confirm upon successful payment
+        if (order.orderStatus === 'pending') {
+          order.orderStatus = 'confirmed';
+        }
       }
 
       // Add status history entry

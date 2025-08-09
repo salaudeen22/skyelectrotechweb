@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FiShoppingCart, FiHeart, FiMinus, FiPlus, FiStar, FiShare2, FiTruck, FiShield, FiRefreshCw } from 'react-icons/fi';
-import { productsAPI } from '../services/apiServices';
+import { productsAPI, wishlistAPI, recommendationsAPI } from '../services/apiServices';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
 import { useAnalytics } from '../hooks/useAnalytics';
@@ -161,16 +161,25 @@ const ProductDetails = () => {
     }
   }, [isAuthenticated, product, quantity, addToCart, navigate]);
 
-  const handleAddToWishlist = useCallback(() => {
+  const handleAddToWishlist = useCallback(async () => {
     if (!isAuthenticated) {
       toast.error('Please login to add items to wishlist');
       return;
     }
-    
-    // TODO: Implement wishlist functionality
-    memoizedTrackWishlistAdd(product);
-    memoizedTrackClick('add_to_wishlist_button', 'product_details');
-    toast.success('Added to wishlist!');
+    try {
+      await wishlistAPI.addToWishlist(product._id);
+      memoizedTrackWishlistAdd(product);
+      memoizedTrackClick('add_to_wishlist_button', 'product_details');
+      try {
+        await recommendationsAPI.trackInteraction(product._id, 'wishlist_add', { location: 'product_details' });
+      } catch {
+        // non-blocking
+      }
+      toast.success('Added to wishlist!');
+    } catch (err) {
+      console.error('Wishlist add failed', err);
+      toast.error(err?.response?.data?.message || 'Failed to add to wishlist');
+    }
   }, [isAuthenticated, product, memoizedTrackWishlistAdd, memoizedTrackClick]);
 
   // Memoize quantity handlers

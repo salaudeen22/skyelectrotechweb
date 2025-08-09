@@ -224,6 +224,12 @@ export const ordersAPI = {
     return response.data;
   },
 
+  // Confirm delivery (User)
+  confirmDelivery: async (id) => {
+    const response = await api.put(`/orders/${id}/confirm-delivery`);
+    return response.data;
+  },
+
   // Return order
   returnOrder: async (id, formData) => {
     const config = {

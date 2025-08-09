@@ -11,6 +11,7 @@ const OrderDetails = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [confirmingDelivery, setConfirmingDelivery] = useState(false);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -95,9 +96,10 @@ const OrderDetails = () => {
   const getOrderTimeline = () => {
     const timeline = [
       { status: 'pending', label: 'Order Placed', completed: true },
-      { status: 'confirmed', label: 'Order Confirmed', completed: ['confirmed', 'packed', 'shipped'].includes(order?.orderStatus) },
-      { status: 'packed', label: 'Packed', completed: ['packed', 'shipped'].includes(order?.orderStatus) },
-      { status: 'shipped', label: 'Shipped', completed: order?.orderStatus === 'shipped' }
+      { status: 'confirmed', label: 'Order Confirmed', completed: ['confirmed', 'packed', 'shipped', 'delivered'].includes(order?.orderStatus) },
+      { status: 'packed', label: 'Packed', completed: ['packed', 'shipped', 'delivered'].includes(order?.orderStatus) },
+      { status: 'shipped', label: 'Shipped', completed: ['shipped', 'delivered'].includes(order?.orderStatus) },
+      { status: 'delivered', label: 'Delivered', completed: order?.orderStatus === 'delivered', isLast: order?.orderStatus === 'delivered' }
     ];
 
     if (order?.orderStatus === 'cancelled') {
@@ -118,6 +120,21 @@ const OrderDetails = () => {
     }
 
     return timeline;
+  };
+
+  const handleConfirmDelivery = async () => {
+    try {
+      setConfirmingDelivery(true);
+      await ordersAPI.confirmDelivery(id);
+      toast.success('Thanks! Delivery confirmed.');
+      const refreshed = await ordersAPI.getOrder(id);
+      setOrder(refreshed.data.order);
+    } catch (err) {
+      console.error('Confirm delivery failed:', err);
+      toast.error(err?.response?.data?.message || 'Failed to confirm delivery');
+    } finally {
+      setConfirmingDelivery(false);
+    }
   };
 
   if (loading) {
@@ -180,6 +197,17 @@ const OrderDetails = () => {
               >
                 <FiX className="w-4 h-4" />
                 <span>Cancel Order</span>
+              </button>
+            )}
+            {/* Confirm Delivery - Only show for shipped orders */}
+            {order.orderStatus === 'shipped' && (
+              <button
+                onClick={handleConfirmDelivery}
+                disabled={confirmingDelivery}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium disabled:opacity-60"
+              >
+                <FiCheck className="w-4 h-4" />
+                <span>{confirmingDelivery ? 'Confirming...' : 'Confirm Delivery'}</span>
               </button>
             )}
           </div>

@@ -12,7 +12,8 @@ const {
   returnOrder,
   getReturnRequests,
   getOrderReturnRequests,
-  processReturnRequest
+  processReturnRequest,
+  confirmDelivery
 } = require('../controllers/orders');
 const { auth, adminOnly, adminOrEmployee, userAccess } = require('../middleware/auth');
 const validate = require('../middleware/validate');
@@ -77,7 +78,7 @@ const createOrderValidation = [
 
 const updateOrderStatusValidation = [
   body('status')
-    .isIn(['pending', 'confirmed', 'packed', 'shipped', 'cancelled', 'returned'])
+    .isIn(['pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled', 'returned'])
     .withMessage('Invalid order status'),
   body('note')
     .optional()
@@ -259,6 +260,7 @@ router.get('/:id', auth, userAccess, getOrder);
 router.put('/:id/cancel', auth, userAccess, cancelOrder);
 router.put('/:id/return', auth, userAccess, upload.array('images', 5), returnOrder);
 router.get('/:id/return-requests', auth, userAccess, getOrderReturnRequests);
+router.put('/:id/confirm-delivery', auth, userAccess, confirmDelivery);
 
 // Admin/Employee routes (can update order status)
 router.put('/:id/status', 
