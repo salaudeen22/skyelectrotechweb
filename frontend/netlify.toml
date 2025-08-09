@@ -59,13 +59,13 @@
 
 [[redirects]]
   from = "/sitemap.xml"
-  to = "https://skyelectrotechweb.onrender.com/api/sitemap.xml"
+  to = "/sitemap.xml"
   status = 200
   force = true
 
 [[redirects]]
   from = "/robots.txt"
-  to = "https://skyelectrotechweb.onrender.com/api/robots.txt"
+  to = "/robots.txt"
   status = 200
   force = true
 

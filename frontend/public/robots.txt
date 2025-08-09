@@ -13,7 +13,7 @@ Allow: /category/
 Allow: /search
 
 # Sitemap
-Sitemap: https://sweet-hamster-f11198.netlify.app/api/sitemap.xml
+Sitemap: https://sweet-hamster-f11198.netlify.app/sitemap.xml
 
 # Crawl-delay
 Crawl-delay: 1 
