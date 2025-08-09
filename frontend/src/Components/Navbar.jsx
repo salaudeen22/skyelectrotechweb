@@ -354,7 +354,7 @@ const Navbar = () => {
               <div className="relative">
                 <Link 
                   to="/notifications" 
-                  className={`relative p-2 rounded-md transition-colors ${
+                  className={`relative inline-flex shrink-0 p-2 rounded-md transition-colors ${
                     unreadCount > 0 
                       ? 'text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100' 
                       : 'text-gray-700 hover:text-blue-600'
@@ -362,7 +362,7 @@ const Navbar = () => {
                 >
                   <FiBell className={`w-6 h-6 ${unreadCount > 0 ? 'animate-pulse' : ''}`} />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium animate-bounce">
+                    <span className="absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 bg-red-500 text-white text-[10px] leading-none rounded-full h-5 min-w-[1.25rem] px-1 flex items-center justify-center font-semibold">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   )}
