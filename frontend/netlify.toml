@@ -58,28 +58,14 @@
     Content-Type = "font/woff2"
 
 [[redirects]]
-  from = "/api/sitemap.xml"
-  to = "https://skyelectrotechweb.onrender.com/api/sitemap.xml"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/api/robots.txt"
-  to = "https://skyelectrotechweb.onrender.com/api/robots.txt"
-  status = 200
-  force = true
-
-[[redirects]]
   from = "/sitemap.xml"
   to = "/sitemap.xml"
   status = 200
-  force = true
 
 [[redirects]]
   from = "/robots.txt"
   to = "/robots.txt"
   status = 200
-  force = true
 
 [[redirects]]
   from = "/*"
