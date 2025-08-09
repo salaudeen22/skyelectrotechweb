@@ -4,7 +4,8 @@ const Cart = require('../models/Cart');
 const User = require('../models/User');
 const ReturnRequest = require('../models/ReturnRequest');
 const { sendResponse, sendError, asyncHandler, paginate, getPaginationMeta } = require('../utils/helpers');
-const { sendOrderConfirmationEmail, sendOrderNotificationEmail, sendOrderStatusUpdateEmail, sendReturnRequestEmail, sendReturnApprovedEmail, sendReturnRejectedEmail } = require('../utils/email');
+const { refundPayment } = require('../config/razorpay');
+const { sendOrderConfirmationEmail, sendOrderNotificationEmail, sendOrderStatusUpdateEmail, sendReturnRequestEmail, sendReturnApprovedEmail, sendReturnRejectedEmail, sendReturnPickupScheduledEmail, sendReturnUserHandedOverEmail } = require('../utils/email');
 const { uploadImage } = require('../utils/s3');
 const notificationService = require('../services/notificationService');
 
@@ -227,9 +228,11 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     pending: ['confirmed', 'cancelled'],
     confirmed: ['packed', 'cancelled'],
     packed: ['shipped', 'cancelled'],
-    shipped: ['returned'],
+    shipped: ['delivered', 'returned'],
+    delivered: [],
     cancelled: [],
-    returned: []
+    returned: [],
+    refunded: []
   };
 
   if (!validTransitions[order.orderStatus].includes(status)) {
@@ -344,13 +347,38 @@ const getAllOrders = asyncHandler(async (req, res) => {
 
   const { skip, limit: pageLimit } = paginate(page, limit);
 
-  const orders = await Order.find(query)
+  let orders = await Order.find(query)
     .populate('user', 'name email')
     .populate('assignedTo', 'name email')
     .sort('-createdAt')
     .skip(skip)
     .limit(pageLimit)
     .lean();
+
+  // Attach latest return info for UI signaling
+  try {
+    const orderIds = orders.map(o => o._id);
+    const latestByOrder = await ReturnRequest.aggregate([
+      { $match: { order: { $in: orderIds } } },
+      { $sort: { requestedAt: -1 } },
+      { $group: {
+          _id: '$order',
+          status: { $first: '$status' },
+          pickupScheduled: { $first: '$pickupScheduled' },
+          pickupDate: { $first: '$pickupDate' },
+          userHandedOver: { $first: '$userHandedOver' },
+          handedOverAt: { $first: '$handedOverAt' }
+        }
+      }
+    ]);
+    const map = new Map(latestByOrder.map(d => [String(d._id), d]));
+    orders = orders.map(o => ({
+      ...o,
+      returnInfo: map.get(String(o._id)) || null
+    }));
+  } catch (e) {
+    // Fallback: keep orders without returnInfo on any error
+  }
 
   const total = await Order.countDocuments(query);
   const pagination = getPaginationMeta(total, page, pageLimit);
@@ -446,14 +474,49 @@ const cancelOrder = asyncHandler(async (req, res) => {
 
   // No inventory management – do not modify product stock on cancel
 
-  order.orderStatus = 'cancelled';
-  order.statusHistory.push({
-    status: 'cancelled',
-    updatedBy: req.user._id,
-    note: `Cancelled by customer: ${reason.trim()}`
-  });
+  // Auto-refund for prepaid (non-COD) orders
+  const isPrepaid = order.paymentInfo?.method !== 'cod' && order.paymentInfo?.status === 'completed';
+  const hasRazorpayPayment = !!order.razorpayPaymentId;
 
-  await order.save();
+  if (isPrepaid && hasRazorpayPayment) {
+    try {
+      // Attempt full refund
+      await refundPayment(order.razorpayPaymentId, order.totalPrice, `User cancellation: ${reason.trim()}`);
+
+      // Mark as refunded
+      order.orderStatus = 'refunded';
+      order.statusHistory.push({
+        status: 'cancelled',
+        updatedBy: req.user._id,
+        note: `Cancelled by customer: ${reason.trim()}`
+      });
+      order.statusHistory.push({
+        status: 'refunded',
+        updatedBy: req.user._id,
+        note: 'Auto-refund processed after cancellation'
+      });
+      await order.save();
+    } catch (refundError) {
+      console.error('Auto-refund failed on cancellation:', refundError);
+      // Fall back to cancelled; admin can process refund manually
+      order.orderStatus = 'cancelled';
+      order.statusHistory.push({
+        status: 'cancelled',
+        updatedBy: req.user._id,
+        note: `Cancelled by customer: ${reason.trim()} (Auto-refund failed; admin action required)`
+      });
+      await order.save();
+    }
+  } else {
+    // Not prepaid or no payment id -> just cancel
+    order.orderStatus = 'cancelled';
+    order.statusHistory.push({
+      status: 'cancelled',
+      updatedBy: req.user._id,
+      note: `Cancelled by customer: ${reason.trim()}`
+    });
+    await order.save();
+  }
 
   // Send cancellation email notification
   try {
@@ -502,6 +565,16 @@ const returnOrder = asyncHandler(async (req, res) => {
   // Validate required fields
   if (!reason || !description || !condition) {
     return sendError(res, 400, 'Please provide reason, description, and condition');
+  }
+
+  // Prevent multiple active return requests for same order by same user
+  const activeExisting = await ReturnRequest.findOne({
+    order: order._id,
+    user: req.user._id,
+    status: { $in: ['pending', 'approved'] }
+  });
+  if (activeExisting) {
+    return sendError(res, 400, 'You already have an active return request for this order. Please wait for it to be resolved.');
   }
 
   // Handle image uploads
@@ -565,11 +638,39 @@ const returnOrder = asyncHandler(async (req, res) => {
 // @route   GET /api/orders/return-requests
 // @access  Private (Admin)
 const getReturnRequests = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, status } = req.query;
+  const { page = 1, limit = 10, status, search, dateFrom, dateTo } = req.query;
 
   const query = {};
   if (status) {
     query.status = status;
+  }
+
+  // Date range filter
+  if (dateFrom || dateTo) {
+    query.requestedAt = {};
+    if (dateFrom) query.requestedAt.$gte = new Date(dateFrom);
+    if (dateTo) {
+      const to = new Date(dateTo);
+      // include the whole day
+      to.setHours(23, 59, 59, 999);
+      query.requestedAt.$lte = to;
+    }
+  }
+
+  // Search by user name/email
+  if (search && String(search).trim().length > 0) {
+    const users = await User.find({
+      $or: [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ]
+    }).select('_id');
+    if (users.length > 0) {
+      query.user = { $in: users.map(u => u._id) };
+    } else {
+      // If no user matches, return empty result fast
+      return sendResponse(res, 200, { returnRequests: [], meta: getPaginationMeta(0, limit, 0) }, 'Return requests retrieved successfully');
+    }
   }
 
   const { skip, limit: pageLimit } = paginate(page, limit);
@@ -652,12 +753,11 @@ const processReturnRequest = asyncHandler(async (req, res) => {
 
   await returnRequest.save();
 
-  // Update order status if approved
+  // If approved, only log approval (no refund or status change yet)
   if (status === 'approved') {
     const order = await Order.findById(returnRequest.order._id);
-    order.orderStatus = 'returned';
     order.statusHistory.push({
-      status: 'returned',
+      status: 'return_approved',
       updatedBy: req.user._id,
       note: `Return approved: ${adminNotes || 'No additional notes'}`
     });
@@ -678,6 +778,211 @@ const processReturnRequest = asyncHandler(async (req, res) => {
   sendResponse(res, 200, { returnRequest }, `Return request ${status} successfully`);
 });
 
+// @desc    Schedule pickup requested by user (user proposes date)
+// @route   PUT /api/orders/return-requests/:id/schedule-pickup
+// @access  Private (User)
+const scheduleReturnPickup = asyncHandler(async (req, res) => {
+  const { pickupDate, pickupAddress } = req.body;
+
+  const returnRequest = await ReturnRequest.findById(req.params.id).populate('order', 'user shippingInfo');
+  if (!returnRequest) {
+    return sendError(res, 404, 'Return request not found');
+  }
+
+  // Only the owner (user) can propose a pickup date here
+  if (returnRequest.order.user.toString() !== req.user._id.toString()) {
+    return sendError(res, 403, 'Access denied');
+  }
+
+  if (returnRequest.status !== 'approved') {
+    return sendError(res, 400, 'Pickup can be scheduled only for approved return requests');
+  }
+
+  if (!pickupDate) {
+    return sendError(res, 400, 'Pickup date is required');
+  }
+
+  const dateObj = new Date(pickupDate);
+  if (isNaN(dateObj.getTime())) {
+    return sendError(res, 400, 'Invalid pickup date');
+  }
+
+  // Do not allow past dates
+  const today = new Date();
+  if (dateObj < new Date(today.getFullYear(), today.getMonth(), today.getDate())) {
+    return sendError(res, 400, 'Pickup date cannot be in the past');
+  }
+
+  // Store proposed date; not confirmed yet
+  returnRequest.pickupScheduled = false;
+  returnRequest.pickupDate = dateObj;
+  returnRequest.pickupAddress = pickupAddress || `${returnRequest.order.shippingInfo?.address || ''}, ${returnRequest.order.shippingInfo?.city || ''}`.trim();
+  returnRequest.adminPickupConfirmed = false;
+  await returnRequest.save();
+
+  // Add order status history entry
+  const order = await Order.findById(returnRequest.order._id);
+  order.statusHistory.push({
+    status: 'return_pickup_proposed',
+    updatedBy: req.user._id,
+    note: `Pickup requested for ${dateObj.toDateString()}`
+  });
+  await order.save();
+
+  // Notify admin of pickup request
+  try {
+    await order.populate('user', 'name email');
+    // Reuse existing admin return approved email if needed; otherwise a dedicated email can be added
+    // For now, notify admin via the existing channels/logs
+  } catch (emailError) {
+    console.error('Failed to send pickup schedule email:', emailError);
+  }
+
+  sendResponse(res, 200, { returnRequest }, 'Return pickup scheduled successfully');
+});
+
+// @desc    Admin confirms/schedules pickup (final confirmation email to user)
+// @route   PUT /api/orders/return-requests/:id/confirm-pickup
+// @access  Private (Admin)
+const confirmReturnPickup = asyncHandler(async (req, res) => {
+  const { pickupDate, pickupAddress } = req.body;
+  const returnRequest = await ReturnRequest.findById(req.params.id).populate('order', 'user shippingInfo orderId');
+  if (!returnRequest) {
+    return sendError(res, 404, 'Return request not found');
+  }
+
+  if (returnRequest.status !== 'approved') {
+    return sendError(res, 400, 'Only approved return requests can be confirmed for pickup');
+  }
+
+  const dateObj = pickupDate ? new Date(pickupDate) : returnRequest.pickupDate;
+  if (!dateObj || isNaN(dateObj.getTime())) {
+    return sendError(res, 400, 'Valid pickup date is required');
+  }
+
+  returnRequest.pickupScheduled = true;
+  returnRequest.pickupDate = dateObj;
+  returnRequest.pickupAddress = pickupAddress || returnRequest.pickupAddress;
+  returnRequest.adminPickupConfirmed = true;
+  returnRequest.adminPickupConfirmedAt = new Date();
+  await returnRequest.save();
+
+  const order = await Order.findById(returnRequest.order._id).populate('user', 'name email');
+  order.statusHistory.push({
+    status: 'return_pickup_scheduled',
+    updatedBy: req.user._id,
+    note: `Pickup scheduled on ${dateObj.toDateString()}`
+  });
+  await order.save();
+
+  try {
+    await sendReturnPickupScheduledEmail(order, order.user, returnRequest);
+  } catch (emailError) {
+    console.error('Failed to send pickup confirmation email:', emailError);
+  }
+
+  sendResponse(res, 200, { returnRequest }, 'Return pickup confirmed');
+});
+
+// @desc    User marks package handed over to courier (User)
+// @route   PUT /api/orders/return-requests/:id/user-returned
+// @access  Private (User)
+const markUserReturned = asyncHandler(async (req, res) => {
+  const returnRequest = await ReturnRequest.findById(req.params.id).populate('order', 'user');
+  if (!returnRequest) {
+    return sendError(res, 404, 'Return request not found');
+  }
+
+  if (returnRequest.order.user.toString() !== req.user._id.toString()) {
+    return sendError(res, 403, 'Access denied');
+  }
+
+  if (returnRequest.status !== 'approved') {
+    return sendError(res, 400, 'Only approved return requests can be updated');
+  }
+
+  returnRequest.userHandedOver = true;
+  returnRequest.handedOverAt = new Date();
+  await returnRequest.save();
+
+  const order = await Order.findById(returnRequest.order._id);
+  order.orderStatus = 'returned';
+  order.statusHistory.push({
+    status: 'returned',
+    updatedBy: req.user._id,
+    note: 'Customer marked item as handed over'
+  });
+  await order.save();
+
+  try {
+    await order.populate('user', 'name email');
+    await sendReturnUserHandedOverEmail(order, order.user, returnRequest);
+  } catch (emailError) {
+    console.error('Failed to send user handed over email:', emailError);
+  }
+
+  // Notify user: order marked as returned
+  try {
+    await sendOrderStatusUpdateEmail(order, order.user, 'returned');
+  } catch (emailError) {
+    console.error('Failed to send returned status email:', emailError);
+  }
+
+  sendResponse(res, 200, { returnRequest, order }, 'Return marked as handed over');
+});
+
+// @desc    Mark return as received and process refund if prepaid (Admin)
+// @route   PUT /api/orders/return-requests/:id/mark-received
+// @access  Private (Admin)
+const markReturnReceived = asyncHandler(async (req, res) => {
+  const { adminNotes } = req.body;
+
+  const returnRequest = await ReturnRequest.findById(req.params.id).populate('order', 'orderId user totalPrice paymentInfo razorpayPaymentId');
+  if (!returnRequest) {
+    return sendError(res, 404, 'Return request not found');
+  }
+
+  if (returnRequest.status !== 'approved') {
+    return sendError(res, 400, 'Only approved return requests can be marked as received');
+  }
+
+  const order = await Order.findById(returnRequest.order._id);
+  order.statusHistory.push({
+    status: 'return_received',
+    updatedBy: req.user._id,
+    note: adminNotes || 'Return item received'
+  });
+  await order.save();
+
+  const isPrepaid = order.paymentInfo?.method !== 'cod' && order.paymentInfo?.status === 'completed';
+  const hasRazorpayPayment = !!order.razorpayPaymentId;
+
+  if (isPrepaid && hasRazorpayPayment) {
+    try {
+      await refundPayment(order.razorpayPaymentId, order.totalPrice, 'Refund after return received');
+      order.orderStatus = 'refunded';
+      order.statusHistory.push({
+        status: 'refunded',
+        updatedBy: req.user._id,
+        note: 'Refund processed after return received'
+      });
+      await order.save();
+
+      // Notify user refund processed
+      try {
+        await order.populate('user', 'name email');
+        await sendOrderStatusUpdateEmail(order, order.user, 'refunded');
+      } catch (emailError) {
+        console.error('Failed to send refunded status email:', emailError);
+      }
+    } catch (refundError) {
+      console.error('Refund failed after return received:', refundError);
+    }
+  }
+
+  sendResponse(res, 200, { order }, 'Return received processed successfully');
+});
+
 module.exports = {
   createOrder,
   getMyOrders,
@@ -690,5 +995,9 @@ module.exports = {
   returnOrder,
   getReturnRequests,
   getOrderReturnRequests,
-  processReturnRequest
+  processReturnRequest,
+  scheduleReturnPickup,
+  confirmReturnPickup,
+  markUserReturned,
+  markReturnReceived
 };

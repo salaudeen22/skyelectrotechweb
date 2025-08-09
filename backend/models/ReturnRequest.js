@@ -67,6 +67,20 @@ const returnRequestSchema = new mongoose.Schema({
   trackingNumber: {
     type: String
   },
+  adminPickupConfirmed: {
+    type: Boolean,
+    default: false
+  },
+  adminPickupConfirmedAt: {
+    type: Date
+  },
+  userHandedOver: {
+    type: Boolean,
+    default: false
+  },
+  handedOverAt: {
+    type: Date
+  },
   requestedAt: {
     type: Date,
     default: Date.now

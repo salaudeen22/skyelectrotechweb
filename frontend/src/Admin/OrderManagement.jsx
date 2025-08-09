@@ -481,7 +481,8 @@ const OrdersAndSales = () => {
             packed: FaBox,
             shipped: FaTruck,
             cancelled: FaBan,
-            returned: FaUndo
+            returned: FaUndo,
+            refunded: FaDollarSign
         };
         return icons[status?.toLowerCase()] || FaClock;
     };
@@ -493,7 +494,8 @@ const OrdersAndSales = () => {
             packed: 'text-indigo-600',
             shipped: 'text-green-600',
             cancelled: 'text-red-600',
-            returned: 'text-orange-600'
+            returned: 'text-orange-600',
+            refunded: 'text-teal-600'
         };
         return colors[status?.toLowerCase()] || 'text-gray-600';
     };
@@ -600,6 +602,7 @@ const OrdersAndSales = () => {
                         <option value="shipped">Shipped</option>
                         <option value="cancelled">Cancelled</option>
                         <option value="returned">Returned</option>
+                        <option value="refunded">Refunded</option>
                     </select>
                     
                     <button
@@ -770,9 +773,9 @@ const OrdersAndSales = () => {
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <StatusIcon className={`mr-2 h-4 w-4 ${getStatusColor(order.orderStatus)}`} />
-                                                <OrderStatus status={order.orderStatus} />
-                                            </div>
-                                        </td>
+                                                    <OrderStatus status={order.orderStatus} />
+                                                </div>
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-sm font-medium text-gray-900">
                                                     {formatDate(order.createdAt).date}

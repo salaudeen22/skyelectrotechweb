@@ -1,22 +1,37 @@
 // Service Worker for Push Notifications
-const CACHE_NAME = 'skyelectrotech-v1';
-const STATIC_CACHE = 'static-v1';
-const DYNAMIC_CACHE = 'dynamic-v1';
+const CACHE_NAME = 'skyelectrotech-v2';
+const STATIC_CACHE = 'static-v2';
+const DYNAMIC_CACHE = 'dynamic-v2';
 
 // Install event
 self.addEventListener('install', (event) => {
   console.log('Service Worker installing...');
-  event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => {
-      return cache.addAll([
-        '/',
-        '/static/js/bundle.js',
-        '/static/css/main.css',
-        '/logo.svg',
-        '/favicon.ico'
-      ]);
-    })
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(STATIC_CACHE);
+    const urlsToCache = [
+      '/',
+      '/index.html',
+      '/logo.svg',
+      '/vite.svg'
+    ];
+
+    // Cache each resource individually so one failure doesn't break install
+    await Promise.allSettled(
+      urlsToCache.map(async (url) => {
+        try {
+          const request = new Request(url, { cache: 'reload' });
+          const response = await fetch(request);
+          if (response && response.ok) {
+            await cache.put(request, response);
+          } else {
+            console.warn('Skipping cache for', url, '- response not OK');
+          }
+        } catch (err) {
+          console.warn('Failed to cache', url, err);
+        }
+      })
+    );
+  })());
   self.skipWaiting();
 });
 
@@ -91,7 +106,7 @@ self.addEventListener('notificationclick', (event) => {
   const urlToOpen = event.notification.data?.url || '/notifications';
 
   event.waitUntil(
-    clients.matchAll({
+    self.clients.matchAll({
       type: 'window',
       includeUncontrolled: true
     }).then((clientList) => {
@@ -103,8 +118,8 @@ self.addEventListener('notificationclick', (event) => {
       }
       
       // If no window/tab is open, open a new one
-      if (clients.openWindow) {
-        return clients.openWindow(urlToOpen);
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(urlToOpen);
       }
     })
   );

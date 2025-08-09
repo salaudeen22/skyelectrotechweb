@@ -60,6 +60,13 @@ const orderSchema = new mongoose.Schema({
       required: true
     }
   },
+  // Captures the selected shipping/delivery method at checkout time
+  shippingMethod: {
+    methodId: { type: String },
+    name: { type: String },
+    estimatedDays: { type: String },
+    cost: { type: Number, default: 0 }
+  },
   paymentInfo: {
     method: {
       type: String,
@@ -98,7 +105,7 @@ const orderSchema = new mongoose.Schema({
   },
   orderStatus: {
     type: String,
-    enum: ['pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled', 'returned'],
+    enum: ['pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled', 'returned', 'refunded'],
     default: 'pending'
   },
   statusHistory: [{
@@ -143,12 +150,19 @@ orderSchema.virtual('orderId').get(function() {
 orderSchema.pre('save', function(next) {
   // Update the updatedAt field
   this.updatedAt = new Date();
-  
+
   if (this.isModified('orderStatus')) {
-    this.statusHistory.push({
-      status: this.orderStatus,
-      updatedAt: new Date()
-    });
+    // Avoid duplicating entries when controllers already pushed a history record
+    const lastEntry = this.statusHistory && this.statusHistory.length > 0
+      ? this.statusHistory[this.statusHistory.length - 1]
+      : null;
+
+    if (!lastEntry || lastEntry.status !== this.orderStatus) {
+      this.statusHistory.push({
+        status: this.orderStatus,
+        updatedAt: new Date()
+      });
+    }
   }
   next();
 });

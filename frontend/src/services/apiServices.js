@@ -293,6 +293,30 @@ export const ordersAPI = {
   processReturnRequest: async (requestId, data) => {
     const response = await api.put(`/orders/return-requests/${requestId}/process`, data);
     return response.data;
+  },
+
+  // Schedule pickup for approved return (User)
+  scheduleReturnPickup: async (requestId, data) => {
+    const response = await api.put(`/orders/return-requests/${requestId}/schedule-pickup`, data);
+    return response.data;
+  },
+
+  // Confirm pickup (Admin)
+  confirmReturnPickup: async (requestId, data) => {
+    const response = await api.put(`/orders/return-requests/${requestId}/confirm-pickup`, data);
+    return response.data;
+  },
+
+  // Mark return as received (Admin)
+  markReturnReceived: async (requestId, data) => {
+    const response = await api.put(`/orders/return-requests/${requestId}/mark-received`, data);
+    return response.data;
+  },
+
+  // User marks handed over to courier (User)
+  markUserReturned: async (requestId) => {
+    const response = await api.put(`/orders/return-requests/${requestId}/user-returned`);
+    return response.data;
   }
 };
 

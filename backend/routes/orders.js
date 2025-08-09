@@ -12,7 +12,11 @@ const {
   returnOrder,
   getReturnRequests,
   getOrderReturnRequests,
-  processReturnRequest
+  processReturnRequest,
+  scheduleReturnPickup,
+  markReturnReceived,
+  markUserReturned,
+  confirmReturnPickup
 } = require('../controllers/orders');
 const { auth, adminOnly, adminOrEmployee, userAccess } = require('../middleware/auth');
 const validate = require('../middleware/validate');
@@ -77,7 +81,7 @@ const createOrderValidation = [
 
 const updateOrderStatusValidation = [
   body('status')
-    .isIn(['pending', 'confirmed', 'packed', 'shipped', 'cancelled', 'returned'])
+    .isIn(['pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled', 'returned', 'refunded'])
     .withMessage('Invalid order status'),
   body('note')
     .optional()
@@ -104,6 +108,10 @@ router.get('/', auth, adminOnly, getAllOrders);
 // Return request routes
 router.get('/return-requests', auth, adminOnly, getReturnRequests);
 router.put('/return-requests/:id/process', auth, adminOnly, processReturnRequest);
+router.put('/return-requests/:id/schedule-pickup', auth, userAccess, scheduleReturnPickup);
+router.put('/return-requests/:id/confirm-pickup', auth, adminOnly, confirmReturnPickup);
+router.put('/return-requests/:id/mark-received', auth, adminOnly, markReturnReceived);
+router.put('/return-requests/:id/user-returned', auth, userAccess, markUserReturned);
 
 // Test route to check if orders routes are working
 router.get('/test', auth, (req, res) => {

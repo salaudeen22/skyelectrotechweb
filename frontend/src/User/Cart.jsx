@@ -41,20 +41,11 @@ const Cart = () => {
 
   const handleQuantityChange = async (productId, newQuantity) => {
     if (newQuantity < 1) return;
-    try {
-      await updateCartItem(productId, newQuantity);
-    } catch {
-      toast.error('Failed to update quantity');
-    }
+    await updateCartItem(productId, newQuantity);
   };
 
   const handleRemoveItem = async (productId) => {
-    try {
-      await removeFromCart(productId);
-      toast.success('Item removed from cart');
-    } catch {
-      toast.error('Failed to remove item');
-    }
+    await removeFromCart(productId);
   };
 
   const clearIncompleteCheckout = () => {

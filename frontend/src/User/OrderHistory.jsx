@@ -15,6 +15,10 @@ const OrderHistory = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [returnRequests, setReturnRequests] = useState({});
   const [expandedOrders, setExpandedOrders] = useState({});
+  // Pickup schedule modal state
+  const [pickupModalOpen, setPickupModalOpen] = useState(false);
+  const [pickupRequest, setPickupRequest] = useState(null);
+  const [pickupForm, setPickupForm] = useState({ date: '', address: '' });
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -164,6 +168,94 @@ const OrderHistory = () => {
       console.error('Error fetching return requests:', error);
     }
   };
+
+  const schedulePickup = async (requestId, date) => {
+    try {
+      if (!date) {
+        toast.error('Please select a pickup date');
+        return;
+      }
+      await ordersAPI.scheduleReturnPickup(requestId, { pickupDate: date });
+      toast.success('Pickup scheduled successfully');
+      // Refresh current order's requests
+      if (selectedOrder?._id) {
+        await fetchReturnRequests(selectedOrder._id);
+      }
+    } catch (error) {
+      console.error('Error scheduling pickup:', error);
+      toast.error(error.response?.data?.message || 'Failed to schedule pickup');
+    }
+  };
+
+  const markHandedOver = async (requestId) => {
+    try {
+      await ordersAPI.markUserReturned(requestId);
+      toast.success('Marked as handed over');
+      if (selectedOrder?._id) {
+        await fetchReturnRequests(selectedOrder._id);
+      }
+    } catch (error) {
+      console.error('Error marking handed over:', error);
+      toast.error(error.response?.data?.message || 'Failed to update return status');
+    }
+  };
+
+  // Pickup Modal UI
+  const PickupModal = () => (
+    pickupModalOpen && pickupRequest ? (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="bg-white rounded-xl w-full max-w-md shadow-xl">
+          <div className="px-5 py-4 border-b flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Schedule Pickup</h3>
+            <button
+              onClick={() => setPickupModalOpen(false)}
+              className="text-gray-500 hover:text-gray-700 text-xl"
+            >
+              ×
+            </button>
+          </div>
+          <div className="p-5 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Pickup Date</label>
+              <input
+                type="date"
+                value={pickupForm.date}
+                onChange={(e) => setPickupForm({ ...pickupForm, date: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Pickup Address (optional)</label>
+              <textarea
+                rows={3}
+                value={pickupForm.address}
+                onChange={(e) => setPickupForm({ ...pickupForm, address: e.target.value })}
+                placeholder="Enter a different pickup address if needed"
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <div className="px-5 py-4 border-t flex items-center justify-end gap-2">
+            <button
+              onClick={() => setPickupModalOpen(false)}
+              className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={async () => {
+                await schedulePickup(pickupRequest._id, pickupForm.date);
+                setPickupModalOpen(false);
+              }}
+              className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+      </div>
+    ) : null
+  );
 
   const toggleOrderExpansion = (orderId) => {
     setExpandedOrders(prev => ({
@@ -448,6 +540,49 @@ const OrderHistory = () => {
                                     <strong>Admin Notes:</strong> {request.adminNotes}
                                   </p>
                                 )}
+
+                                {/* Allow user to schedule pickup when approved and not yet scheduled */}
+                                {request.status === 'approved' && !request.pickupScheduled && (
+                                  <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <div className="text-xs text-blue-800">Return approved • Schedule a pickup</div>
+                                      <button
+                                        onClick={() => {
+                                          setPickupRequest(request);
+                                          setPickupForm({ date: '', address: (selectedOrder?.shippingInfo?.address || '') });
+                                          setPickupModalOpen(true);
+                                        }}
+                                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                                      >
+                                        Schedule Pickup
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {request.pickupScheduled && request.pickupDate && (
+                                  <div className="mt-2 text-xs text-green-700 bg-green-50 border border-green-200 rounded p-2">
+                                    Pickup scheduled on {new Date(request.pickupDate).toLocaleDateString()}
+                                  </div>
+                                )}
+
+                                {/* Allow user to mark handed over after pickup scheduled */}
+                                {request.status === 'approved' && request.pickupScheduled && !request.userHandedOver && (
+                                  <div className="mt-2">
+                                    <button
+                                      onClick={() => markHandedOver(request._id)}
+                                      className="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700"
+                                    >
+                                      I have handed over the package
+                                    </button>
+                                  </div>
+                                )}
+
+                                {request.userHandedOver && (
+                                  <div className="mt-2 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded p-2">
+                                    You marked the package as handed over
+                                  </div>
+                                )}
                               </div>
                             ))
                           ) : (
@@ -479,6 +614,8 @@ const OrderHistory = () => {
           onReturnSubmit={handleReturnOrder}
         />
       )}
+
+      <PickupModal />
 
       {/* Cancel Order Modal */}
       {selectedOrder && (

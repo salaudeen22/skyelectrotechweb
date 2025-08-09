@@ -19,7 +19,7 @@ import {
     FaUndo, // Icon for return requests
     FaTools // Icon for services
 } from 'react-icons/fa';
-import { toast } from 'react-hot-toast';
+// import { toast } from 'react-hot-toast';
 
 const AdminSidebar = ({ isOpen, onToggle }) => {
     const { settings } = useSettings();
@@ -44,7 +44,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
 
     const handleLogout = () => {
         logout();
-        toast.success("Logged out successfully!");
+        // Remove duplicate toast: global logout already shows a toast
         navigate('/admin/login');
     };
 
@@ -63,7 +63,8 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                 fixed top-0 left-0 h-screen w-64 bg-white border-r border-gray-200 shadow-xl flex flex-col z-50 
                 transform transition-transform duration-300 ease-in-out
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
-                lg:translate-x-0 lg:relative lg:z-40 lg:h-auto lg:min-h-screen lg:shadow-none
+                lg:translate-x-0 lg:sticky lg:top-0 lg:left-0 lg:z-40 lg:h-screen lg:shadow-none
+                overflow-y-auto lg:overflow-y-hidden
             `}>
                 
                 {/* Mobile close button */}
@@ -98,7 +99,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
             </div>
 
             {/* Main Navigation */}
-            <nav className="flex-1 px-3 sm:px-4 py-4 sm:py-6 space-y-1 sm:space-y-2">
+            <nav className="flex-1 px-3 sm:px-4 py-4 sm:py-6 space-y-1 sm:space-y-2 overflow-y-auto">
                 <NavLink 
                     to="/admin" 
                     end 
@@ -175,7 +176,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
             </nav>
 
             {/* Footer / User & Logout Section */}
-            <div className="px-3 sm:px-4 py-3 sm:py-4 border-t border-gray-200">
+            <div className="px-3 sm:px-4 py-3 sm:py-4 border-t border-gray-200 mt-auto">
                 <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
                     <FaUserCircle className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400"/>
                     <div className="min-w-0 flex-1">

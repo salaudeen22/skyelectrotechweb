@@ -70,7 +70,8 @@ const verifyPayment = asyncHandler(async (req, res) => {
   const { 
     razorpay_order_id, 
     razorpay_payment_id, 
-    razorpay_signature
+    razorpay_signature,
+    orderId
   } = req.body;
 
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -94,12 +95,36 @@ const verifyPayment = asyncHandler(async (req, res) => {
 
     console.log('Payment verification successful:', verificationResult);
 
+    // Update the corresponding order with payment details if provided
+    let updatedOrder = null;
+    if (orderId) {
+      try {
+        const order = await Order.findById(orderId);
+        if (order) {
+          order.paymentInfo = {
+            ...order.paymentInfo,
+            status: 'completed',
+            transactionId: razorpay_payment_id,
+            paidAt: new Date()
+          };
+          order.razorpayOrderId = razorpay_order_id;
+          order.razorpayPaymentId = razorpay_payment_id;
+          // Mark order confirmed on successful online payment
+          order.orderStatus = 'confirmed';
+          updatedOrder = await order.save();
+        }
+      } catch (updateError) {
+        console.error('Failed to update order after payment verification:', updateError);
+      }
+    }
+
     sendResponse(res, 200, {
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
       status: 'success',
       paymentDetails: verificationResult.paymentDetails,
-      attempts: verificationResult.attempts
+      attempts: verificationResult.attempts,
+      order: updatedOrder
     }, 'Payment verified successfully');
   } catch (error) {
     console.error('Payment verification error:', error);

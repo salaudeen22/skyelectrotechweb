@@ -2663,6 +2663,45 @@ const sendReturnRejectedEmail = async (order, user, returnRequest) => {
   }
 };
 
+// Notify customer when pickup is scheduled
+const sendReturnPickupScheduledEmail = async (order, user, returnRequest) => {
+  const subject = `Return Pickup Scheduled - Order ${order.orderId}`;
+  const html = `
+    <html>
+      <head><title>Return Pickup Scheduled</title></head>
+      <body>
+        <h1>Return Pickup Scheduled</h1>
+        <p>Hi ${user.name || 'Customer'},</p>
+        <p>Your return pickup has been scheduled for <strong>${new Date(returnRequest.pickupDate).toLocaleString('en-IN')}</strong>.</p>
+        <p>Order: <strong>${order.orderId}</strong></p>
+        <p>Return Request #: <strong>${returnRequest.requestNumber}</strong></p>
+        <p>If you need to change the pickup time, please reply to this email.</p>
+        <p>— SkyElectroTech</p>
+      </body>
+    </html>
+  `;
+  await sendEmail({ to: user.email, subject, html });
+};
+
+// Notify admin when user confirms handover
+const sendReturnUserHandedOverEmail = async (order, user, returnRequest) => {
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@skyelectrotech.com';
+  const subject = `User Marked Return Handed Over - ${order.orderId}`;
+  const html = `
+    <html>
+      <head><title>Return Handed Over</title></head>
+      <body>
+        <h1>Return Item Handed Over</h1>
+        <p>Order: <strong>${order.orderId}</strong></p>
+        <p>Customer: <strong>${user.name}</strong> (${user.email})</p>
+        <p>Return Request #: <strong>${returnRequest.requestNumber}</strong></p>
+        <p>The customer has marked the item as handed over to the courier.</p>
+      </body>
+    </html>
+  `;
+  await sendEmail({ to: adminEmail, subject, html });
+};
+
 // Service request confirmation email template for customer
 const getServiceRequestEmailTemplate = (serviceRequest) => {
   const logoUrl = getEmailLogoUrl();
@@ -3467,6 +3506,9 @@ module.exports = {
   sendReturnRequestEmail,
   sendReturnApprovedEmail,
   sendReturnRejectedEmail,
+  sendReturnPickupScheduledEmail,
+  sendReturnUserHandedOverEmail,
+  // new export will be appended below
   sendLowStockAlertEmail,
   sendNewUserNotificationEmail,
   sendServiceRequestEmail,

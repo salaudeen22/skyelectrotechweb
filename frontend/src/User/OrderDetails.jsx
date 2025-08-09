@@ -42,6 +42,8 @@ const OrderDetails = () => {
         return <FiCheck className="w-6 h-6 text-green-500" />;
       case 'cancelled':
         return <FiX className="w-6 h-6 text-red-500" />;
+      case 'refunded':
+        return <FiCheck className="w-6 h-6 text-teal-500" />;
       default:
         return <FiPackage className="w-6 h-6 text-gray-500" />;
     }
@@ -59,6 +61,10 @@ const OrderDetails = () => {
         return 'bg-green-100 text-green-800';
       case 'cancelled':
         return 'bg-red-100 text-red-800';
+      case 'returned':
+        return 'bg-orange-100 text-orange-800';
+      case 'refunded':
+        return 'bg-teal-100 text-teal-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -114,6 +120,14 @@ const OrderDetails = () => {
         { status: 'packed', label: 'Packed', completed: true },
         { status: 'shipped', label: 'Shipped', completed: true },
         { status: 'returned', label: 'Returned', completed: true, isLast: true }
+      ];
+    }
+
+    if (order?.orderStatus === 'refunded') {
+      return [
+        { status: 'pending', label: 'Order Placed', completed: true },
+        { status: 'cancelled', label: 'Order Cancelled', completed: true },
+        { status: 'refunded', label: 'Refunded', completed: true, isLast: true }
       ];
     }
 

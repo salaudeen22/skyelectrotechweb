@@ -25,6 +25,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
+    // Global logout already toasts; avoid duplicate here
     navigate('/');
   };
 

@@ -12,7 +12,7 @@ import {
     FaBan,
     FaClock
 } from 'react-icons/fa';
-import { ordersAPI } from '../services/apiServices';
+import { ordersAPI, paymentAPI } from '../services/apiServices';
 import toast from 'react-hot-toast';
 import OrderStatus from '../Components/OrderStatus';
 
@@ -21,6 +21,7 @@ const OrderStatusManagement = ({ order, isOpen, onClose, onStatusUpdate }) => {
     const [trackingNumber, setTrackingNumber] = useState(order?.trackingNumber || '');
     const [estimatedDelivery, setEstimatedDelivery] = useState('');
     const [loading, setLoading] = useState(false);
+    const [refundLoading, setRefundLoading] = useState(false);
 
     useEffect(() => {
         if (order) {
@@ -45,6 +46,12 @@ const OrderStatusManagement = ({ order, isOpen, onClose, onStatusUpdate }) => {
 
     const nextStatus = getNextStatus(order?.orderStatus);
 
+    // Determine refund eligibility for admin action
+    const isPrepaid = order?.paymentInfo?.method !== 'cod' && order?.paymentInfo?.status === 'completed';
+    const hasGatewayPaymentId = !!order?.razorpayPaymentId;
+    const isRefundEligibleStatus = ['cancelled', 'returned'].includes(order?.orderStatus);
+    const canProcessRefund = isRefundEligibleStatus && isPrepaid && hasGatewayPaymentId;
+
     const getStatusIcon = (status) => {
         const icons = {
             pending: FaClock,
@@ -64,7 +71,8 @@ const OrderStatusManagement = ({ order, isOpen, onClose, onStatusUpdate }) => {
             packed: 'Order has been packed and is ready for shipping',
             shipped: 'Order has been shipped with tracking information',
             cancelled: 'Order has been cancelled',
-            returned: 'Order has been returned'
+            returned: 'Order has been returned',
+            refunded: 'Order has been refunded'
         };
         return descriptions[status] || '';
     };
@@ -118,6 +126,31 @@ const OrderStatusManagement = ({ order, isOpen, onClose, onStatusUpdate }) => {
         }
     };
 
+    const handleRefund = async () => {
+        if (!canProcessRefund) {
+            toast.error('Refund is not applicable for this order');
+            return;
+        }
+
+        setRefundLoading(true);
+        try {
+            await paymentAPI.processRefund({
+                paymentId: order.razorpayPaymentId,
+                orderId: order._id,
+                reason: 'Manual refund from admin'
+            });
+            toast.success('Refund processed successfully');
+            onStatusUpdate();
+            onClose();
+        } catch (error) {
+            console.error('Error processing refund:', error);
+            const message = error.response?.data?.message || 'Failed to process refund';
+            toast.error(message);
+        } finally {
+            setRefundLoading(false);
+        }
+    };
+
     if (!isOpen || !order) return null;
 
     const StatusIcon = getStatusIcon(order.orderStatus);
@@ -149,9 +182,29 @@ const OrderStatusManagement = ({ order, isOpen, onClose, onStatusUpdate }) => {
                     </div>
 
                     {!nextStatus ? (
-                        <div className="text-center py-6">
-                            <p className="text-gray-500">This order cannot be updated further.</p>
-                            <p className="text-sm text-gray-400 mt-1">Status: {order.orderStatus}</p>
+                        <div className="space-y-4 py-2">
+                            <div className="text-center py-4">
+                                <p className="text-gray-500">This order cannot be updated further.</p>
+                                <p className="text-sm text-gray-400 mt-1">Status: {order.orderStatus}</p>
+                            </div>
+
+                            {canProcessRefund && (
+                                <div className="p-4 border rounded-lg bg-emerald-50 border-emerald-200">
+                                    <p className="text-sm text-emerald-800 mb-2">
+                                        Eligible for refund: prepaid order detected with successful payment. You can process a refund now.
+                                    </p>
+                                    <div className="flex items-center justify-end gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={handleRefund}
+                                            disabled={refundLoading}
+                                            className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {refundLoading ? 'Processing…' : 'Process Refund'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-4">
