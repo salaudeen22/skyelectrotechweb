@@ -629,7 +629,7 @@ const getSalesAnalytics = asyncHandler(async (req, res) => {
     ]);
 
     // Format sales data for chart
-    const chartData = salesOverTime.map(item => {
+    let chartData = salesOverTime.map(item => {
       let name;
       if (period === 'day') {
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

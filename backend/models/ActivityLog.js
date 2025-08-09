@@ -21,13 +21,26 @@ const activityLogSchema = new mongoose.Schema({
       'user_deleted',
       'category_created',
       'category_updated',
-      'category_deleted'
+      'category_deleted',
+      // Payments
+      'create_payment_order',
+      'verify_payment',
+      'retry_payment',
+      'view_payment_details',
+      'sync_payment_status',
+      'process_expired_payments',
+      'retry_failed_payments',
+      'process_refund',
+      // Bulk operations
+      'bulk_upload_products',
+      'bulk_update_products',
+      'bulk_delete_products'
     ]
   },
   resource: {
     type: String,
     required: true,
-    enum: ['user', 'product', 'order', 'category', 'system']
+    enum: ['user', 'product', 'order', 'category', 'system', 'payment']
   },
   resourceId: {
     type: mongoose.Schema.Types.ObjectId
