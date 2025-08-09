@@ -148,7 +148,7 @@ const OrderDetails = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate('/user/orders')}
@@ -165,7 +165,7 @@ const OrderDetails = () => {
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center flex-wrap gap-2">
             {getStatusIcon(order.orderStatus)}
             <span
               className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusColor(order.orderStatus)}`}
@@ -176,7 +176,7 @@ const OrderDetails = () => {
             {canCancelOrder(order) && (
               <button
                 onClick={openCancelModal}
-                className="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+                className="flex items-center gap-2 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
               >
                 <FiX className="w-4 h-4" />
                 <span>Cancel Order</span>
@@ -192,7 +192,7 @@ const OrderDetails = () => {
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Order Timeline</h2>
               <div className="space-y-4">
                 {getOrderTimeline().map((step, index) => (
-                  <div key={step.status} className="flex items-center">
+                  <div key={step.status} className="relative flex items-center">
                     <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
                       step.completed 
                         ? step.status === 'cancelled' 
@@ -229,16 +229,14 @@ const OrderDetails = () => {
                       )}
                       {step.completed && step.status === 'shipped' && order.trackingNumber && (
                         <div className="mt-1">
-                          <p className="text-sm text-blue-600 font-mono">
+                          <p className="text-sm text-blue-600 font-mono break-all">
                             Tracking: {order.trackingNumber}
                           </p>
                         </div>
                       )}
                     </div>
                     {!step.isLast && index < getOrderTimeline().length - 1 && (
-                      <div className={`absolute left-4 top-8 w-0.5 h-8 ${
-                        step.completed ? 'bg-green-200' : 'bg-gray-200'
-                      }`} style={{ marginLeft: '15px' }}></div>
+                      <div className={`${step.completed ? 'bg-green-200' : 'bg-gray-200'} absolute left-1/2 -translate-x-1/2 top-8 w-0.5 h-8`}></div>
                     )}
                   </div>
                 ))}
@@ -250,7 +248,7 @@ const OrderDetails = () => {
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Order Items</h2>
               <div className="space-y-4">
                 {order.orderItems.map((item, index) => (
-                  <div key={index} className="flex items-center space-x-4 py-4 border-b border-gray-100 last:border-b-0">
+                  <div key={index} className="flex flex-col sm:flex-row sm:items-center items-start sm:space-x-4 space-y-3 sm:space-y-0 py-4 border-b border-gray-100 last:border-b-0">
                     <img
                       src={item.image || '/placeholder-image.jpg'}
                       alt={item.name || 'Product'}
@@ -267,7 +265,7 @@ const OrderDetails = () => {
                         ₹{item.price.toLocaleString()} each
                       </p>
                     </div>
-                    <div className="text-right">
+                    <div className="w-full sm:w-auto text-left sm:text-right">
                       <p className="font-medium text-gray-900">
                         ₹{(item.price * item.quantity).toLocaleString()}
                       </p>

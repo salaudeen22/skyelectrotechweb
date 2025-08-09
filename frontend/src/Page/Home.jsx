@@ -168,7 +168,7 @@ const Home = () => {
 
   return (
     <div className="bg-gray-50">
-      <main className="pt-16 md:pt-0"> 
+      <main className="pt-0"> 
         
         {/* Hero Section */}
         <section className="relative">
@@ -235,11 +235,11 @@ const Home = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-8">
               {categories.map((category) => (
                 <Link key={category._id} to={`/category/${category._id}`} className="group block text-center">
-                  <div className="relative rounded-lg overflow-hidden aspect-w-3 aspect-h-2">
+                  <div className="relative rounded-lg overflow-hidden aspect-[3/2]">
                     <img 
                       src={category.image?.url || category.image || 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png'} 
                       alt={category.name} 
-                      className="w-full h-32 object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       onError={(e) => {
                         e.target.src = 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png';
                       }}

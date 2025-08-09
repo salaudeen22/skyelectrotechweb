@@ -111,7 +111,7 @@ const Navbar = () => {
               <img 
                 src="/favicon_io (1)/android-chrome-512x512.png" 
                 alt={settings.storeInfo.name} 
-                className="h-16 w-16 object-contain"
+                className="h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 object-contain"
               />
             
             </Link>
