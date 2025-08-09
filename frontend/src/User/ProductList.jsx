@@ -28,7 +28,7 @@ const ProductList = () => {
     min: searchParams.get('minPrice') || '', 
     max: searchParams.get('maxPrice') || '' 
   });
-  const [sortOrder, setSortOrder] = useState(searchParams.get('sort') || 'createdAt');
+  const [sortOrder, setSortOrder] = useState(searchParams.get('sort') || '-createdAt');
 
   // Refs to track if this is the initial load
   const isInitialLoad = useRef(true);
@@ -40,7 +40,7 @@ const ProductList = () => {
     categoryParam: searchParams.get('category'),
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
-    sort: searchParams.get('sort') || 'createdAt'
+    sort: searchParams.get('sort') || '-createdAt'
   }), [searchParams]);
 
   // Memoize the current filter state to prevent unnecessary API calls
@@ -79,7 +79,7 @@ const ProductList = () => {
   }, [memoizedSearchParams.categoryParam, categories.length]);
 
   // Memoize the fetch products function to prevent recreation
-  const fetchProducts = useCallback(async (filters = currentFilters) => {
+  const fetchProducts = useCallback(async (filters) => {
     // Check if we're already fetching with the same parameters
     const paramsKey = JSON.stringify(filters);
     if (lastFetchParams.current === paramsKey && !isInitialLoad.current) {
@@ -110,9 +110,9 @@ const ProductList = () => {
       }
 
       const response = await productsAPI.getProducts(params);
-      
+
       setProducts(response.data.products);
-      setTotalProducts(response.data.total);
+      setTotalProducts(response.data.pagination?.totalItems || 0);
       
       // Update URL params
       const newSearchParams = new URLSearchParams();
@@ -141,8 +141,8 @@ const ProductList = () => {
 
   // Fetch products when filters change - with proper dependencies
   useEffect(() => {
-    fetchProducts();
-  }, [currentFilters]);
+    fetchProducts(currentFilters);
+  }, [currentFilters, fetchProducts]);
 
   // Handle category change
   const handleCategoryChange = useCallback((categoryId) => {
@@ -297,17 +297,19 @@ const ProductList = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Sort By
                 </label>
-                <select
+                  <select
                   value={sortOrder}
                   onChange={(e) => setSortOrder(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="createdAt">Latest</option>
+                  <option value="-createdAt">Latest</option>
+                  <option value="createdAt">Oldest</option>
                   <option value="name">Name A-Z</option>
                   <option value="-name">Name Z-A</option>
                   <option value="price">Price Low to High</option>
                   <option value="-price">Price High to Low</option>
-                  <option value="-averageRating">Highest Rated</option>
+                  <option value="-ratings.average">Highest Rated</option>
+                  <option value="ratings.average">Lowest Rated</option>
                 </select>
               </div>
             </div>
