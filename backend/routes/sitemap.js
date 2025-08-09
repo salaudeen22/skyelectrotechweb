@@ -6,7 +6,7 @@ const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 
 // Generate sitemap XML
 const generateSitemap = async () => {
-  const baseUrl = process.env.CLIENT_URL || 'https://skyelectrotech.in';
+  const baseUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL || 'https://sweet-hamster-f11198.netlify.app';
   const currentDate = new Date().toISOString();
 
   let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -96,7 +96,7 @@ router.get('/sitemap.xml', asyncHandler(async (req, res) => {
 
 // GET /api/robots.txt
 router.get('/robots.txt', asyncHandler(async (req, res) => {
-  const baseUrl = process.env.CLIENT_URL || 'https://skyelectrotech.in';
+  const baseUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL || 'https://sweet-hamster-f11198.netlify.app';
   
   const robotsTxt = `User-agent: *
 Allow: /
@@ -113,7 +113,7 @@ Allow: /category/
 Allow: /search
 
 # Sitemap
-Sitemap: ${baseUrl}/api/sitemap.xml
+Sitemap: ${baseUrl}/sitemap.xml
 
 # Crawl-delay
 Crawl-delay: 1`;
