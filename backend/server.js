@@ -160,8 +160,6 @@ console.log('Google Client Secret:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 
 
 // Database connection with better error handling
 mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
 })
@@ -301,6 +299,6 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

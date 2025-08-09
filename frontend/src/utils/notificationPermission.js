@@ -245,7 +245,6 @@ export const setupPushNotifications = async () => {
         preferences: {
           orderUpdates: true,
           priceDrops: true,
-          stockAlerts: true,
           promotional: true,
           system: true
         }

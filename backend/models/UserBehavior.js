@@ -76,6 +76,7 @@ const userBehaviorSchema = new mongoose.Schema({
   // Session data for anonymous users
   sessionId: {
     type: String,
+    index: true,
     sparse: true
   },
   createdAt: {
@@ -96,7 +97,6 @@ userBehaviorSchema.pre('save', function(next) {
 
 // Indexes for efficient queries
 userBehaviorSchema.index({ user: 1 });
-userBehaviorSchema.index({ sessionId: 1 });
 userBehaviorSchema.index({ 'recentlyViewed.viewedAt': -1 });
 userBehaviorSchema.index({ 'interactions.timestamp': -1 });
 

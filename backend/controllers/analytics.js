@@ -257,11 +257,8 @@ const getDashboardStats = asyncHandler(async (req, res) => {
     }
   ]);
 
-  // Low stock products
-  const lowStockProducts = await Product.find({
-    isActive: true,
-    $expr: { $lte: ['$stock', '$lowStockThreshold'] }
-  }).select('name stock lowStockThreshold images').limit(10);
+  // No inventory: remove low stock products from dashboard
+  const lowStockProducts = [];
 
   // Top selling products (last 30 days) - count shipped orders as completed sales
   const topSellingProducts = await Order.aggregate([
@@ -743,7 +740,7 @@ const getProductAnalytics = asyncHandler(async (req, res) => {
         _id: null,
         totalProducts: { $sum: 1 },
         avgPrice: { $avg: '$price' },
-        totalStock: { $sum: '$stock' },
+         // totalStock removed (no inventory), keep other metrics only
         avgRating: { $avg: '$ratings.average' }
       }
     }
@@ -769,7 +766,7 @@ const getProductAnalytics = asyncHandler(async (req, res) => {
         categoryName: { $first: '$categoryInfo.name' },
         productCount: { $sum: 1 },
         avgPrice: { $avg: '$price' },
-        totalStock: { $sum: '$stock' }
+         // totalStock removed
       }
     },
     { $sort: { productCount: -1 } }
@@ -786,19 +783,13 @@ const getProductAnalytics = asyncHandler(async (req, res) => {
     .lean();
 
   // Low stock alert
-  const lowStockProducts = await Product.find({
-    isActive: true,
-    $expr: { $lte: ['$stock', '$lowStockThreshold'] }
-  })
-    .select('name stock lowStockThreshold price')
-    .sort('stock')
-    .lean();
+  const lowStockProducts = [];
 
   // Recently added products
   const recentProducts = await Product.find({ isActive: true })
     .populate('category', 'name')
     .populate('createdBy', 'name')
-    .select('name price stock createdAt')
+    .select('name price createdAt')
     .sort('-createdAt')
     .limit(10)
     .lean();

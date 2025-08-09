@@ -28,7 +28,6 @@ const validatePushSubscription = [
 const validateNotificationPreferences = [
   body('preferences.orderUpdates').optional().isBoolean(),
   body('preferences.priceDrops').optional().isBoolean(),
-  body('preferences.stockAlerts').optional().isBoolean(),
   body('preferences.promotional').optional().isBoolean(),
   body('preferences.system').optional().isBoolean()
 ];
@@ -36,7 +35,7 @@ const validateNotificationPreferences = [
 const validateTestNotification = [
   body('title').optional().isString().trim().isLength({ min: 1, max: 100 }),
   body('message').optional().isString().trim().isLength({ min: 1, max: 500 }),
-  body('type').optional().isIn(['order_update', 'price_drop', 'stock_alert', 'promotional', 'system', 'payment', 'delivery'])
+  body('type').optional().isIn(['order_update', 'price_drop', 'promotional', 'system', 'payment', 'delivery'])
 ];
 
 // Public routes

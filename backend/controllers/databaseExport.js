@@ -17,7 +17,7 @@ const exportProducts = asyncHandler(async (req, res) => {
     }
 
     // Create CSV header
-    const csvHeader = 'name,description,price,originalPrice,discount,category,brand,stock,lowStockThreshold,specifications,features,tags,warranty,isFeatured,isActive,imageUrls,dimensions_length,dimensions_width,dimensions_height,dimensions_weight,sku,createdAt\n';
+    const csvHeader = 'name,description,price,originalPrice,discount,category,brand,specifications,features,tags,warranty,isFeatured,isActive,imageUrls,dimensions_length,dimensions_width,dimensions_height,dimensions_weight,sku,createdAt\n';
 
     // Convert products to CSV rows
     const csvRows = products.map(product => {
@@ -66,8 +66,8 @@ const exportProducts = asyncHandler(async (req, res) => {
         product.discount || 0,
         escapeCSV(product.category?.name || ''),
         escapeCSV(product.brand || ''),
-        product.stock,
-        product.lowStockThreshold || 10,
+        
+        
         escapeCSV(specifications),
         escapeCSV(features),
         escapeCSV(tags),
@@ -106,10 +106,7 @@ const getDatabaseStats = asyncHandler(async (req, res) => {
     const totalProducts = await Product.countDocuments();
     const activeProducts = await Product.countDocuments({ isActive: true });
     const featuredProducts = await Product.countDocuments({ isFeatured: true, isActive: true });
-    const lowStockProducts = await Product.countDocuments({
-      $expr: { $lte: ['$stock', '$lowStockThreshold'] },
-      isActive: true
-    });
+    const lowStockProducts = 0;
 
     // Get category statistics
     const totalCategories = await Category.countDocuments();
@@ -133,8 +130,7 @@ const getDatabaseStats = asyncHandler(async (req, res) => {
           _id: null,
           minPrice: { $min: '$price' },
           maxPrice: { $max: '$price' },
-          avgPrice: { $avg: '$price' },
-          totalValue: { $sum: { $multiply: ['$price', '$stock'] } }
+          avgPrice: { $avg: '$price' }
         }
       }
     ]);
@@ -144,7 +140,7 @@ const getDatabaseStats = asyncHandler(async (req, res) => {
       .populate('category', 'name')
       .sort({ createdAt: -1 })
       .limit(10)
-      .select('name price stock category createdAt');
+      .select('name price category createdAt');
 
     // Get missing required fields
     const productsWithMissingData = await Product.aggregate([

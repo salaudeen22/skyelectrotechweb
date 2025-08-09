@@ -85,7 +85,7 @@ const SEO = ({
           "@type": "Offer",
           "price": product.price,
           "priceCurrency": "INR",
-          "availability": product.isActive ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          "availability": product.isActive ? "https://schema.org/InStock" : "https://schema.org/Discontinued",
           "seller": {
             "@type": "Organization",
             "name": "SkyElectroTech"

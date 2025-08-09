@@ -116,7 +116,6 @@ class NotificationService {
       'payment': 'orderUpdates',
       'delivery': 'orderUpdates',
       'price_drop': 'priceDrops',
-      'stock_alert': 'stockAlerts',
       'promotional': 'promotional',
       'system': 'system'
     };
@@ -175,26 +174,7 @@ class NotificationService {
     return await this.createAndSendNotification(userId, notificationData);
   }
 
-  // Send stock alert notification
-  async sendStockAlertNotification(userId, product, isBackInStock = true) {
-    const notificationData = {
-      title: isBackInStock ? 'Back in Stock! 🎉' : 'Low Stock Alert! ⚠️',
-      message: isBackInStock 
-        ? `${product.name} is back in stock! Order now before it sells out.`
-        : `${product.name} is running low on stock! Only ${product.stockQuantity} left.`,
-      type: 'stock_alert',
-      priority: isBackInStock ? 'high' : 'normal',
-      actionUrl: `/products/${product._id}`,
-      data: {
-        productId: product._id,
-        stockQuantity: product.stockQuantity,
-        isBackInStock: isBackInStock
-      },
-      icon: product.images?.[0] || '/logo.svg'
-    };
-
-    return await this.createAndSendNotification(userId, notificationData);
-  }
+  // Stock alert notifications removed (no inventory management)
 
   // Send promotional notification
   async sendPromotionalNotification(userId, title, message, actionUrl = '/', data = {}) {

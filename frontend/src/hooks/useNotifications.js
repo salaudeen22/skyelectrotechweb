@@ -89,7 +89,7 @@ export const useNotifications = () => {
         version: getBrowserVersion()
       };
 
-      await api.post('/notifications/subscribe', {
+        await api.post('/notifications/subscribe', {
         endpoint: subscription.endpoint,
         keys: {
           p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))),
@@ -99,7 +99,6 @@ export const useNotifications = () => {
         preferences: {
           orderUpdates: true,
           priceDrops: true,
-          stockAlerts: true,
           promotional: true,
           system: true
         }

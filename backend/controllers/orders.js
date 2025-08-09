@@ -425,13 +425,7 @@ const cancelOrder = asyncHandler(async (req, res) => {
     return sendError(res, 400, 'Cancellation reason is required');
   }
 
-  // Restore product stock
-  for (const item of order.orderItems) {
-    await Product.findByIdAndUpdate(
-      item.product,
-      { $inc: { stock: item.quantity } }
-    );
-  }
+  // No inventory management – do not modify product stock on cancel
 
   order.orderStatus = 'cancelled';
   order.statusHistory.push({

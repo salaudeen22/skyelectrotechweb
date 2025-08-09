@@ -37,7 +37,6 @@ const pushSubscriptionSchema = new mongoose.Schema({
   preferences: {
     orderUpdates: { type: Boolean, default: true },
     priceDrops: { type: Boolean, default: true },
-    stockAlerts: { type: Boolean, default: true },
     promotional: { type: Boolean, default: true },
     system: { type: Boolean, default: true }
   }

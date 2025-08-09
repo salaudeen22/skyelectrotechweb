@@ -7,7 +7,7 @@ const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 // @access  Private
 const getWishlist = asyncHandler(async (req, res) => {
   let wishlist = await Wishlist.findOne({ user: req.user._id })
-    .populate('products.product', 'name price discount images stock isActive ratings')
+    .populate('products.product', 'name price discount images isActive ratings')
     .lean();
 
   if (!wishlist) {
@@ -74,7 +74,7 @@ const addToWishlist = asyncHandler(async (req, res) => {
 
   // Populate and return updated wishlist
   wishlist = await Wishlist.findById(wishlist._id)
-    .populate('products.product', 'name price discount images stock ratings')
+    .populate('products.product', 'name price discount images ratings')
     .lean();
 
   sendResponse(res, 200, { wishlist }, 'Item added to wishlist successfully');
@@ -101,7 +101,7 @@ const removeFromWishlist = asyncHandler(async (req, res) => {
 
   // Return updated wishlist
   const updatedWishlist = await Wishlist.findById(wishlist._id)
-    .populate('products.product', 'name price discount images stock ratings')
+    .populate('products.product', 'name price discount images ratings')
     .lean();
 
   sendResponse(res, 200, { wishlist: updatedWishlist }, 'Item removed from wishlist successfully');

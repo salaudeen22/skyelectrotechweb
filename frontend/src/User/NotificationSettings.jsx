@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiBell, FiBellOff, FiSave, FiCheck } from 'react-icons/fi';
 import { useNotifications } from '../hooks/useNotifications';
@@ -12,7 +12,6 @@ const NotificationSettings = () => {
   const [preferences, setPreferences] = useState({
     orderUpdates: true,
     priceDrops: true,
-    stockAlerts: true,
     promotional: true,
     system: true
   });
@@ -28,9 +27,9 @@ const NotificationSettings = () => {
     loadPreferences();
     checkPushStatus();
     checkPermissionStatus();
-  }, []);
+  }, [loadPreferences, checkPushStatus, checkPermissionStatus]);
 
-  const checkPermissionStatus = () => {
+  const checkPermissionStatus = useCallback(() => {
     const status = getPermissionStatus();
     setPermissionStatus(status);
     console.log('Permission status:', status);
@@ -40,9 +39,9 @@ const NotificationSettings = () => {
     console.log('Service Worker support:', 'serviceWorker' in navigator);
     console.log('Push Manager support:', 'PushManager' in window);
     console.log('HTTPS/SSL:', window.location.protocol === 'https:' || window.location.hostname === 'localhost');
-  };
+  }, []);
 
-  const loadPreferences = async () => {
+  const loadPreferences = useCallback(async () => {
     try {
       const prefs = await getPreferences();
       if (prefs) {
@@ -53,9 +52,9 @@ const NotificationSettings = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getPreferences]);
 
-  const checkPushStatus = async () => {
+  const checkPushStatus = useCallback(async () => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       try {
         const registration = await navigator.serviceWorker.ready;
@@ -65,7 +64,7 @@ const NotificationSettings = () => {
         console.error('Error checking push status:', error);
       }
     }
-  };
+  }, []);
 
   const handlePreferenceChange = (key, value) => {
     setPreferences(prev => ({
@@ -314,12 +313,7 @@ const NotificationSettings = () => {
                   description: 'Be the first to know when items in your wishlist go on sale',
                   icon: ''
                 },
-                {
-                  key: 'stockAlerts',
-                  title: 'Stock Alerts',
-                  description: 'Get notified when out-of-stock items become available again',
-                  icon: ''
-                },
+                
                 {
                   key: 'promotional',
                   title: 'Promotional Offers',

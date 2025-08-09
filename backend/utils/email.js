@@ -2234,86 +2234,8 @@ const sendOrderStatusUpdateEmail = async (order, user, newStatus) => {
   }
 };
 
-// Send low stock alert email to admin
-const sendLowStockAlertEmail = async (product) => {
-  try {
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
-    if (!adminEmail) {
-      console.warn('Admin email not configured, skipping low stock alert');
-      return;
-    }
-
-    const emailContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Low Stock Alert</title>
-        <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #ef4444; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
-            .alert-box { background: #fef2f2; border: 1px solid #ef4444; border-radius: 8px; padding: 20px; margin: 20px 0; }
-            .product-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
-            .button { background: #ef4444; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>Low Stock Alert</h1>
-                <p>Product stock is running low</p>
-            </div>
-            <div class="content">
-                <div class="alert-box">
-                    <h3>Stock Alert</h3>
-                    <p>The following product is running low on stock and may need restocking soon.</p>
-                </div>
-
-                <div class="product-info">
-                    <h3>Product Details</h3>
-                    <p><strong>Product Name:</strong> ${product.name}</p>
-                    <p><strong>Current Stock:</strong> ${product.stock} units</p>
-                    <p><strong>Low Stock Threshold:</strong> ${product.lowStockThreshold || 10} units</p>
-                    <p><strong>Category:</strong> ${product.category?.name || 'N/A'}</p>
-                    <p><strong>Price:</strong> ₹${product.price?.toLocaleString() || 'N/A'}</p>
-                </div>
-
-                <p>Please consider restocking this product to avoid stockouts.</p>
-                <a href="${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/products/${product._id}" class="button">Update Stock</a>
-            </div>
-        </div>
-    </body>
-    </html>
-    `;
-
-    await sendEmail({
-      to: adminEmail,
-      subject: `Low Stock Alert - ${product.name}`,
-      html: emailContent,
-      text: `
-        Low Stock Alert - SkyElectroTech
-
-        The following product is running low on stock:
-
-        Product Name: ${product.name}
-        Current Stock: ${product.stock} units
-        Low Stock Threshold: ${product.lowStockThreshold || 10} units
-        Category: ${product.category?.name || 'N/A'}
-        Price: ₹${product.price?.toLocaleString() || 'N/A'}
-
-        Please consider restocking this product to avoid stockouts.
-
-        Update stock: ${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/products/${product._id}
-      `
-    });
-    console.log(`Low stock alert email sent to admin: ${adminEmail}`);
-  } catch (error) {
-    console.error(`Failed to send low stock alert email to admin:`, error);
-  }
-};
+// Low stock alert email removed (no inventory management)
+const sendLowStockAlertEmail = async () => {};
 
 // Send new user registration notification to admin
 const sendNewUserNotificationEmail = async (user) => {

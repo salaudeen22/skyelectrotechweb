@@ -89,7 +89,7 @@ const CancelOrderModal = ({ order, isOpen, onClose, onCancelSubmit }) => {
                 <ul className="space-y-1 text-xs">
                   <li>• Order cancellation is irreversible</li>
                   <li>• Refund will be processed according to payment method</li>
-                  <li>• Product stock will be restored automatically</li>
+                  {/* Inventory not tracked – no stock restoration */}
                 </ul>
               </div>
             </div>

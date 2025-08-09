@@ -7,7 +7,7 @@ const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 // @access  Private
 const getCart = asyncHandler(async (req, res) => {
   let cart = await Cart.findOne({ user: req.user._id })
-    .populate('items.product', 'name price discount images stock isActive')
+    .populate('items.product', 'name price discount images isActive')
     .lean();
 
   let processedCart = null;
@@ -76,10 +76,7 @@ const addToCart = asyncHandler(async (req, res) => {
     return sendError(res, 404, 'Product not found');
   }
 
-  // Check stock availability
-  if (product.stock < quantity) {
-    return sendError(res, 400, `Insufficient stock. Available: ${product.stock}`);
-  }
+  // No inventory management in this application – skip stock checks
 
   // Find or create cart
   let cart = await Cart.findOne({ user: req.user._id });
@@ -104,9 +101,7 @@ const addToCart = asyncHandler(async (req, res) => {
       return sendError(res, 400, 'Maximum quantity per item is 10');
     }
 
-    if (newQuantity > product.stock) {
-      return sendError(res, 400, `Insufficient stock. Available: ${product.stock}`);
-    }
+    // No stock ceiling beyond per-item limit
 
     cart.items[existingItemIndex].quantity = newQuantity;
   } else {
@@ -121,7 +116,7 @@ const addToCart = asyncHandler(async (req, res) => {
 
   // Populate and return updated cart with calculated totals
   cart = await Cart.findById(cart._id)
-    .populate('items.product', 'name price discount images stock isActive')
+    .populate('items.product', 'name price discount images isActive')
     .lean();
 
   // Calculate total price with current product prices
@@ -177,15 +172,12 @@ const updateCartItem = asyncHandler(async (req, res) => {
     return sendError(res, 404, 'Item not found in cart');
   }
 
-  // Check product stock
+  // No inventory management in this application – skip stock checks
   const product = await Product.findById(productId);
   if (!product || !product.isActive) {
     return sendError(res, 404, 'Product not found');
   }
 
-  if (quantity > product.stock) {
-    return sendError(res, 400, `Insufficient stock. Available: ${product.stock}`);
-  }
 
   // Update quantity
   cart.items[itemIndex].quantity = quantity;
@@ -193,7 +185,7 @@ const updateCartItem = asyncHandler(async (req, res) => {
 
   // Return updated cart with calculated totals
   const updatedCart = await Cart.findById(cart._id)
-    .populate('items.product', 'name price discount images stock isActive')
+    .populate('items.product', 'name price discount images isActive')
     .lean();
 
   // Calculate total price with current product prices
@@ -248,7 +240,7 @@ const removeFromCart = asyncHandler(async (req, res) => {
 
   // Return updated cart with calculated totals
   const updatedCart = await Cart.findById(cart._id)
-    .populate('items.product', 'name price discount images stock isActive')
+    .populate('items.product', 'name price discount images isActive')
     .lean();
 
   // Calculate total price with current product prices

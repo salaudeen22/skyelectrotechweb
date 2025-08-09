@@ -88,8 +88,7 @@ const Notifications = () => {
         return '';
       case 'price_drop':
         return '';
-      case 'stock_alert':
-        return '';
+      
       case 'promotional':
         return '';
       case 'payment':
@@ -107,8 +106,7 @@ const Notifications = () => {
         return 'bg-blue-50 border-blue-200';
       case 'price_drop':
         return 'bg-green-50 border-green-200';
-      case 'stock_alert':
-        return 'bg-yellow-50 border-yellow-200';
+      
       case 'promotional':
         return 'bg-purple-50 border-purple-200';
       case 'payment':

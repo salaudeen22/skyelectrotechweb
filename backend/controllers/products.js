@@ -246,12 +246,7 @@ const updateProduct = asyncHandler(async (req, res) => {
   const newPrice = req.body.discountPrice || req.body.price || oldPrice;
   const hasPriceDrop = newPrice < oldPrice;
 
-  // Check for stock changes to send notifications
-  const oldStock = product.stockQuantity;
-  const newStock = req.body.stockQuantity !== undefined ? req.body.stockQuantity : oldStock;
-  const wasOutOfStock = oldStock <= 0;
-  const isBackInStock = wasOutOfStock && newStock > 0;
-  const isLowStock = newStock > 0 && newStock <= 5;
+  // No inventory management – remove stock change logic
 
   // Update product
   req.body.updatedBy = req.user._id;
@@ -290,33 +285,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     }
   }
 
-  // Send stock alert notifications
-  if (isBackInStock || isLowStock) {
-    try {
-      // Get users who have this product in their wishlist
-      const Wishlist = require('../models/Wishlist');
-      const wishlistUsers = await Wishlist.find({
-        'items.product': product._id
-      }).populate('user', '_id');
-
-      // Send notifications to users who have this product in their wishlist
-      for (const wishlist of wishlistUsers) {
-        try {
-          await notificationService.sendStockAlertNotification(
-            wishlist.user._id,
-            product,
-            isBackInStock
-          );
-          console.log(`Stock alert notification sent to user ${wishlist.user._id} for product ${product._id}`);
-        } catch (notificationError) {
-          console.error(`Failed to send stock alert notification to user ${wishlist.user._id}:`, notificationError);
-        }
-      }
-    } catch (error) {
-      console.error('Error sending stock alert notifications:', error);
-      // Don't fail the product update if notifications fail
-    }
-  }
+  // Stock alert notifications removed
 
   sendResponse(res, 200, { product }, 'Product updated successfully');
 });

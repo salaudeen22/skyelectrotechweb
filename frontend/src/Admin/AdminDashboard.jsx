@@ -213,7 +213,7 @@ const AdminDashboard = () => {
       icon: FaBoxOpen,
       iconBg: 'bg-indigo-100',
       iconColor: 'text-indigo-600',
-      description: 'In stock products'
+      description: 'Active products'
     },
     {
       label: 'Total Customers',

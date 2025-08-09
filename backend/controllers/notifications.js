@@ -197,10 +197,9 @@ const getNotificationPreferences = async (req, res) => {
       isActive: true 
     });
 
-    const preferences = subscription?.preferences || {
+  const preferences = subscription?.preferences || {
       orderUpdates: true,
       priceDrops: true,
-      stockAlerts: true,
       promotional: true,
       system: true
     };

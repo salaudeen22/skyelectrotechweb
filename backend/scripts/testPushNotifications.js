@@ -30,17 +30,7 @@ const testNotifications = [
       discount: 25
     }
   },
-  {
-    type: 'stock_alert',
-    title: 'Back in Stock! ⚠️',
-    message: 'Raspberry Pi 4 Model B is back in stock! Only 10 units left.',
-    priority: 'high',
-    data: {
-      productId: 'test-product-456',
-      stockQuantity: 10,
-      isBackInStock: true
-    }
-  },
+  // stock_alert removed – no inventory notifications
   {
     type: 'promotional',
     title: 'Flash Sale! 🎉',
@@ -119,9 +109,9 @@ async function testNotificationPreferences() {
     
     // Test with different preference combinations
     const testCases = [
-      { orderUpdates: true, priceDrops: false, stockAlerts: true },
-      { orderUpdates: false, priceDrops: true, stockAlerts: false },
-      { orderUpdates: true, priceDrops: true, stockAlerts: true }
+      { orderUpdates: true, priceDrops: false },
+      { orderUpdates: false, priceDrops: true },
+      { orderUpdates: true, priceDrops: true }
     ];
     
     for (const preferences of testCases) {
