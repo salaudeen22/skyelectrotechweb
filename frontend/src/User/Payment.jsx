@@ -73,7 +73,12 @@ const Payment = () => {
   const loadPaymentMethods = async () => {
     try {
       const response = await paymentAPI.getPaymentMethods();
-      setPaymentMethods(response.data.paymentMethods || []);
+      const methods = response.data.paymentMethods || [];
+      setPaymentMethods(methods);
+      // If current selection is not available, default to first method
+      if (!methods.find(m => m.id === selectedMethod)) {
+        setSelectedMethod(methods[0]?.id || 'card');
+      }
     } catch (err) {
       console.error('Error loading payment methods:', err);
       // Fallback to basic methods
@@ -103,6 +108,10 @@ const Payment = () => {
   }).format(num);
 
   const handleSubmit = async () => {
+    if (!paymentMethods || paymentMethods.length === 0) {
+      toast.error('No payment methods are available. Please contact support.');
+      return;
+    }
     trackClick(`pay_button_clicked_${selectedMethod}`, 'payment');
     
     setIsSubmitting(true);
@@ -411,25 +420,31 @@ const Payment = () => {
                 <FiCreditCard className="w-6 h-6 mr-3 text-blue-600" />
                 Payment Method
               </h2>
-              <div className="space-y-4">
-                {paymentMethods.map((method) => (
-                  <label key={method.id} className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all duration-300 transform hover:-translate-y-1 ${
-                    selectedMethod === method.id ? 'border-transparent ring-2 ring-blue-600 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
-                  }`} onClick={() => setSelectedMethod(method.id)}>
-                    <input type="radio" name="paymentMethod" value={method.id} checked={selectedMethod === method.id} onChange={(e) => setSelectedMethod(e.target.value)} className="sr-only"/>
-                    <div className={`flex items-center justify-center w-12 h-12 rounded-full mr-4 transition-colors ${
-                      selectedMethod === method.id ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      {getMethodIcon(method.id)}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 text-lg">{method.name}</h3>
-                      <p className="text-sm text-gray-500">{method.description}</p>
-                    </div>
-                    {selectedMethod === method.id && <div className="w-6 h-6 flex items-center justify-center bg-blue-600 rounded-full text-white"><FiCheck className="w-4 h-4" /></div>}
-                  </label>
-                ))}
-              </div>
+              {paymentMethods.length > 0 ? (
+                <div className="space-y-4">
+                  {paymentMethods.map((method) => (
+                    <label key={method.id} className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all duration-300 transform hover:-translate-y-1 ${
+                      selectedMethod === method.id ? 'border-transparent ring-2 ring-blue-600 bg-blue-50' : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                    }`} onClick={() => setSelectedMethod(method.id)}>
+                      <input type="radio" name="paymentMethod" value={method.id} checked={selectedMethod === method.id} onChange={(e) => setSelectedMethod(e.target.value)} className="sr-only"/>
+                      <div className={`flex items-center justify-center w-12 h-12 rounded-full mr-4 transition-colors ${
+                        selectedMethod === method.id ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {getMethodIcon(method.id)}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 text-lg">{method.name}</h3>
+                        <p className="text-sm text-gray-500">{method.description}</p>
+                      </div>
+                      {selectedMethod === method.id && <div className="w-6 h-6 flex items-center justify-center bg-blue-600 rounded-full text-white"><FiCheck className="w-4 h-4" /></div>}
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800">
+                  No payment methods are currently available. Please contact support or try again later.
+                </div>
+              )}
             </div>
           </div>
 
@@ -472,9 +487,9 @@ const Payment = () => {
               <div className="p-6">
                 <button 
                   onClick={handleSubmit} 
-                  disabled={isSubmitting} 
+                  disabled={isSubmitting || paymentMethods.length === 0} 
                   className={`w-full py-4 px-6 rounded-lg font-bold text-lg text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 ${
-                    isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+                    (isSubmitting || paymentMethods.length === 0) ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
                   }`}
                 >
                   {isSubmitting ? (
@@ -482,6 +497,8 @@ const Payment = () => {
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
                       Processing...
                     </div>
+                  ) : paymentMethods.length === 0 ? (
+                    'No payment methods available'
                   ) : (
                     `Pay Securely ${formatAmount(totals.total)}`
                   )}

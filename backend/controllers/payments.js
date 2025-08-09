@@ -199,49 +199,73 @@ const testRazorpayConfig = asyncHandler(async (req, res) => {
 // @route   GET /api/payments/methods
 // @access  Public
 const getPaymentMethods = asyncHandler(async (req, res) => {
-  // COD can be enabled/disabled via environment variable
-  const codEnabled = process.env.ENABLE_COD === 'true';
-  
-  const paymentMethods = [
-    {
+  // Prefer dynamic settings; fall back to environment flag for COD
+  const Settings = require('../models/Settings');
+  let settings;
+  try {
+    settings = await Settings.findOne().sort('-createdAt');
+  } catch (_) {
+    settings = null;
+  }
+
+  const onlineEnabled = settings?.payment?.paymentMethods?.online?.enabled ?? true;
+  const configuredOnlineList = settings?.payment?.paymentMethods?.online?.methods;
+  const defaultOnlineList = ['card', 'upi', 'netbanking', 'wallet'];
+  const onlineList = Array.isArray(configuredOnlineList) && configuredOnlineList.length > 0
+    ? configuredOnlineList
+    : defaultOnlineList;
+  const codEnabledFromSettings = settings?.payment?.paymentMethods?.cod?.enabled;
+  const codEnabled = codEnabledFromSettings !== undefined ? codEnabledFromSettings : (process.env.ENABLE_COD === 'true');
+
+  const methodMetaMap = {
+    card: {
       id: 'card',
       name: 'Credit / Debit Card',
       description: 'Pay with Visa, MasterCard, RuPay',
-      icon: 'credit-card',
-      enabled: true
+      icon: 'credit-card'
     },
-    {
+    upi: {
       id: 'upi',
       name: 'UPI',
       description: 'Pay with any UPI app',
-      icon: 'smartphone',
-      enabled: true
+      icon: 'smartphone'
     },
-    {
+    netbanking: {
       id: 'netbanking',
       name: 'Net Banking',
       description: 'Pay with your bank account',
-      icon: 'bank',
-      enabled: true
+      icon: 'bank'
     },
-    {
+    wallet: {
       id: 'wallet',
       name: 'Digital Wallets',
       description: 'Pay with Paytm, PhonePe, etc.',
-      icon: 'wallet',
-      enabled: true
-    }
-  ];
-
-  // Add COD only if enabled
-  if (codEnabled) {
-    paymentMethods.push({
+      icon: 'wallet'
+    },
+    cod: {
       id: 'cod',
       name: 'Cash on Delivery',
       description: 'Pay when you receive your order',
-      icon: 'cash',
-      enabled: true
-    });
+      icon: 'cash'
+    }
+  };
+
+  const paymentMethods = [];
+
+  if (onlineEnabled) {
+    for (const methodId of onlineList) {
+      if (methodMetaMap[methodId]) {
+        paymentMethods.push({ ...methodMetaMap[methodId], enabled: true });
+      }
+    }
+  }
+
+  if (codEnabled) {
+    const codLimits = {
+      minOrderAmount: settings?.payment?.paymentMethods?.cod?.minOrderAmount ?? 0,
+      maxOrderAmount: settings?.payment?.paymentMethods?.cod?.maxOrderAmount ?? 5000
+    };
+    paymentMethods.push({ ...methodMetaMap.cod, enabled: true, ...codLimits });
   }
 
   sendResponse(res, 200, { paymentMethods }, 'Payment methods retrieved successfully');

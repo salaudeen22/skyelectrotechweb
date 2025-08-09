@@ -77,6 +77,25 @@ const createOrder = asyncHandler(async (req, res) => {
   console.log('Creating order with data:', orderData);
   
   try {
+    // Enforce COD availability from settings when method is COD
+    if ((paymentMethod || paymentInfo.method) === 'cod') {
+      const Settings = require('../models/Settings');
+      const settings = await Settings.findOne().sort('-createdAt');
+      const codEnabled = settings?.payment?.paymentMethods?.cod?.enabled ?? (process.env.ENABLE_COD === 'true');
+      if (!codEnabled) {
+        return sendError(res, 400, 'Cash on Delivery is currently disabled');
+      }
+      // Optional: enforce min/max limits if present
+      const minAmount = settings?.payment?.paymentMethods?.cod?.minOrderAmount ?? 0;
+      const maxAmount = settings?.payment?.paymentMethods?.cod?.maxOrderAmount ?? Infinity;
+      if (totalPrice < minAmount) {
+        return sendError(res, 400, `COD available for orders above ₹${minAmount}`);
+      }
+      if (totalPrice > maxAmount) {
+        return sendError(res, 400, `COD available for orders up to ₹${maxAmount}`);
+      }
+    }
+
     const order = await Order.create(orderData);
     console.log('Order created successfully:', order._id);
 
