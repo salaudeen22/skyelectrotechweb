@@ -6,7 +6,9 @@ const {
   getOrderAnalytics,
   getActivityLogs,
   getCustomerAnalytics,
-  getPerformanceMetrics
+  getPerformanceMetrics,
+  getSystemPerformance,
+  clearPerformanceMetrics
 } = require('../controllers/analytics');
 const { auth, adminOnly, adminOrEmployee } = require('../middleware/auth');
 
@@ -35,5 +37,9 @@ router.get('/customers', adminOnly, getCustomerAnalytics);
 
 // Performance metrics (admin only)
 router.get('/performance', adminOnly, getPerformanceMetrics);
+
+// System performance monitoring (admin only)
+router.get('/system-performance', adminOnly, getSystemPerformance);
+router.delete('/system-performance', adminOnly, clearPerformanceMetrics);
 
 module.exports = router;

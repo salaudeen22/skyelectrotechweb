@@ -15,6 +15,7 @@ const {
 const { auth, adminOnly, adminOrEmployee } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 const logActivity = require('../middleware/activityLogger');
+const { cacheSearchResults } = require('../utils/cache');
 
 const router = express.Router();
 
@@ -53,9 +54,9 @@ const reviewValidation = [
 ];
 
 // Public routes
-router.get('/', getProducts);
+router.get('/', cacheSearchResults(300), getProducts);
 router.get('/featured', getFeaturedProducts);
-router.get('/search', searchProducts);
+router.get('/search', cacheSearchResults(180), searchProducts);
 router.get('/category/:categoryId', getProductsByCategory);
 router.get('/:id', getProduct);
 

@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Category = require('../models/Category');
 const ActivityLog = require('../models/ActivityLog');
 const { sendResponse, sendError, asyncHandler, paginate, getPaginationMeta } = require('../utils/helpers');
+const { performanceMonitor } = require('../utils/performance');
 
 // @desc    Get dashboard statistics
 // @route   GET /api/analytics/dashboard
@@ -1233,6 +1234,29 @@ const getPerformanceMetrics = asyncHandler(async (req, res) => {
   }, 'Performance metrics retrieved successfully');
 });
 
+// @desc    Get system performance metrics
+// @route   GET /api/analytics/performance
+// @access  Private (Admin only)
+const getSystemPerformance = asyncHandler(async (req, res) => {
+  const metrics = performanceMonitor.getMetrics();
+  const slowQueries = performanceMonitor.getSlowQueries();
+  const summary = performanceMonitor.getSummary();
+
+  sendResponse(res, 200, {
+    metrics,
+    slowQueries: slowQueries.slice(0, 20), // Last 20 slow queries
+    summary
+  }, 'System performance metrics retrieved successfully');
+});
+
+// @desc    Clear performance metrics
+// @route   DELETE /api/analytics/performance
+// @access  Private (Admin only)
+const clearPerformanceMetrics = asyncHandler(async (req, res) => {
+  performanceMonitor.clearMetrics();
+  sendResponse(res, 200, null, 'Performance metrics cleared successfully');
+});
+
 module.exports = {
   getDashboardStats,
   getSalesAnalytics,
@@ -1240,5 +1264,7 @@ module.exports = {
   getOrderAnalytics,
   getActivityLogs,
   getCustomerAnalytics,
-  getPerformanceMetrics
+  getPerformanceMetrics,
+  getSystemPerformance,
+  clearPerformanceMetrics
 };

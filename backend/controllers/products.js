@@ -3,6 +3,7 @@ const Product = require('../models/Product');
 const Category = require('../models/Category');
 const { sendResponse, sendError, asyncHandler, paginate, getPaginationMeta, generateSKU } = require('../utils/helpers');
 const notificationService = require('../services/notificationService');
+const { cacheUtils } = require('../utils/cache');
 
 // @desc    Get all products with filtering, sorting, and pagination
 // @route   GET /api/products
@@ -69,20 +70,29 @@ const getProducts = asyncHandler(async (req, res) => {
     query.isFeatured = true;
   }
 
-  // Search filter
+  // Search filter - OPTIMIZED for large datasets
   if (search) {
-    // Use regex search instead of text search to avoid index issues
-    query.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
-      { brand: { $regex: search, $options: 'i' } }
-    ];
+    const searchTerm = search.trim();
+    
+    // Use text search for better performance on large datasets
+    if (searchTerm.length >= 3) {
+      // Use text search with score for relevance
+      query.$text = { $search: searchTerm };
+    } else {
+      // Fallback to regex for short terms, but limit to indexed fields
+      query.$or = [
+        { name: { $regex: searchTerm, $options: 'i' } },
+        { brand: { $regex: searchTerm, $options: 'i' } }
+        // Removed description from regex search for better performance
+      ];
+    }
   }
 
-  // Pagination
-  const { skip, limit: pageLimit } = paginate(page, limit);
+  // Pagination with reasonable limits
+  const maxLimit = Math.min(parseInt(limit) || 12, 50); // Cap at 50 items per page
+  const { skip, limit: pageLimit } = paginate(page, maxLimit);
 
-  // Execute query
+  // Execute query with performance optimizations
   let sortOptions = sort;
   
   // Convert sort string to object
@@ -92,17 +102,23 @@ const getProducts = asyncHandler(async (req, res) => {
     sortOptions = { [field]: order };
   }
   
-  // Query and sort options ready for execution
+  // Add text score to sort if using text search
+  if (search && search.trim().length >= 3) {
+    sortOptions = { score: { $meta: 'textScore' }, ...sortOptions };
+  }
   
+  // Query with lean() for better performance and select only needed fields
   const products = await Product.find(query)
+    .select('name description price images brand category ratings isFeatured discount sku')
     .populate('category', 'name')
     .sort(sortOptions)
     .skip(skip)
     .limit(pageLimit)
-    .lean();
+    .lean()
+    .maxTimeMS(5000); // 5 second timeout
 
-  // Get total count for pagination
-  const total = await Product.countDocuments(query);
+  // Get total count for pagination (with timeout)
+  const total = await Product.countDocuments(query).maxTimeMS(3000);
 
   // Generate pagination metadata
   const pagination = getPaginationMeta(total, page, pageLimit);
@@ -209,6 +225,10 @@ const createProduct = asyncHandler(async (req, res) => {
 
   await product.populate('category', 'name');
 
+  // Invalidate cache
+  cacheUtils.invalidateSearch();
+  cacheUtils.invalidateProductCache();
+
   sendResponse(res, 201, { product }, 'Product created successfully');
 });
 
@@ -287,6 +307,10 @@ const updateProduct = asyncHandler(async (req, res) => {
 
   // Stock alert notifications removed
 
+  // Invalidate cache
+  cacheUtils.invalidateSearch();
+  cacheUtils.invalidateProductCache(product._id);
+
   sendResponse(res, 200, { product }, 'Product updated successfully');
 });
 
@@ -302,6 +326,10 @@ const deleteProduct = asyncHandler(async (req, res) => {
 
   // Soft delete - just set isActive to false
   await Product.findByIdAndUpdate(req.params.id, { isActive: false });
+
+  // Invalidate cache
+  cacheUtils.invalidateSearch();
+  cacheUtils.invalidateProductCache(product._id);
 
   sendResponse(res, 200, null, 'Product deleted successfully');
 });
