@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet';
 import { FiHeart, FiShoppingCart, FiTrash2, FiGrid, FiList, FiStar } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from '../Components/ProductCard';
@@ -14,6 +15,10 @@ const Wishlist = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+
+  // Add meta tags for SEO
+  const pageTitle = "My Wishlist - SkyElectroTech | Save Your Favorite Electronic Components";
+  const pageDescription = "Save and organize your favorite electronic components, Arduino boards, PLCs, and automation parts. Create your personalized collection at SkyElectroTech's wishlist.";
 
   useEffect(() => {
     if (user) {
@@ -85,29 +90,51 @@ const Wishlist = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
-          <div className="animate-pulse">
-            <div className="h-6 sm:h-8 bg-gray-300 rounded w-1/2 sm:w-1/4 mb-3 sm:mb-4"></div>
-            <div className="h-3 sm:h-4 bg-gray-300 rounded w-2/3 sm:w-1/3 mb-6 sm:mb-8"></div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg p-3 sm:p-4">
-                  <div className="h-32 sm:h-48 bg-gray-300 rounded mb-3 sm:mb-4"></div>
-                  <div className="h-3 sm:h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 sm:h-4 bg-gray-300 rounded w-1/2"></div>
-                </div>
-              ))}
+      <>
+        <Helmet>
+          <title>{pageTitle}</title>
+          <meta name="description" content={pageDescription} />
+          <meta property="og:title" content={pageTitle} />
+          <meta property="og:description" content={pageDescription} />
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content="https://sweet-hamster-f11198.netlify.app/wishlist" />
+          <link rel="canonical" href="https://sweet-hamster-f11198.netlify.app/wishlist" />
+        </Helmet>
+        <div className="min-h-screen bg-gray-50">
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+            <div className="animate-pulse">
+              <div className="h-6 sm:h-8 bg-gray-300 rounded w-1/2 sm:w-1/4 mb-3 sm:mb-4"></div>
+              <div className="h-3 sm:h-4 bg-gray-300 rounded w-2/3 sm:w-1/3 mb-6 sm:mb-8"></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-lg p-3 sm:p-4">
+                    <div className="h-32 sm:h-48 bg-gray-300 rounded mb-3 sm:mb-4"></div>
+                    <div className="h-3 sm:h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 sm:h-4 bg-gray-300 rounded w-1/2"></div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+    <>
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://sweet-hamster-f11198.netlify.app/wishlist" />
+        <link rel="canonical" href="https://sweet-hamster-f11198.netlify.app/wishlist" />
+      </Helmet>
+      
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
@@ -308,8 +335,10 @@ const Wishlist = () => {
             ))}
           </div>
         )}
-
-        {/* Continue Shopping */}
+      </div>
+    </div>
+    </>
+  );
         {wishlistItems.length > 0 && (
           <div className="mt-8 sm:mt-12 text-center">
             <button

@@ -1,19 +1,23 @@
 User-agent: *
-Allow: /
 
-# Disallow admin and private areas
-Disallow: /admin/
-Disallow: /user/
-Disallow: /api/
+# Block sensitive pages
 Disallow: /auth/
+Disallow: /user/
+Disallow: /admin/
+Disallow: /checkout/
+Disallow: /cart/
+Disallow: /api/
 
-# Allow important pages
-Allow: /products
-Allow: /category/
-Allow: /search
+# Allow public pages
+Allow: /
+Allow: /products/
+Allow: /categories/
+Allow: /about/
+Allow: /wishlist/
+Allow: /contact/
 
 # Sitemap
 Sitemap: https://sweet-hamster-f11198.netlify.app/sitemap.xml
 
-# Crawl-delay
+# Crawl delay for better performance
 Crawl-delay: 1
