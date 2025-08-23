@@ -45,7 +45,7 @@
       "@type": "ElectronicsStore",
       "name": "SkyElectroTech",
       "image": "https://sweet-hamster-f11198.netlify.app/og-image.jpg",
-      "description": "Leading electronic components shop in Bangalore, specializing in industrial automation components, Arduino, Raspberry Pi, sensors, and PLCs.",
+      "description": "Leading electronic components shop in Bengaluru, specializing in industrial automation components, Arduino, Raspberry Pi, sensors, and PLCs.",
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete",
@@ -59,50 +59,71 @@
         "latitude": "12.9716",
         "longitude": "77.5946"
       },
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday"
-        ],
-        "opens": "10:30",
-        "closes": "19:30"
-      },
-      "openingHoursSpecification": [{
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Sunday"],
-        "opens": "10:30",
-        "closes": "14:30"
-      }],
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "opens": "10:30",
+          "closes": "19:30"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Sunday"],
+          "opens": "10:30",
+          "closes": "14:30"
+        }
+      ],
       "priceRange": "₹₹",
       "telephone": "+91-XXXXXXXXXX",
       "url": "https://sweet-hamster-f11198.netlify.app/",
-      "areaServed": ["Bangalore", "Karnataka", "India"],
-      "hasOfferCatalog": {
-        "@type": "OfferCatalog",
-        "name": "Electronic Components",
-        "itemListElement": [
-          {
-            "@type": "OfferCatalog",
+      "areaServed": ["Bengaluru", "Karnataka", "India"],
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://sweet-hamster-f11198.netlify.app/products?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      },
+      "makesOffer": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Product",
             "name": "Industrial Automation Components",
-            "description": "PLCs, sensors, and control systems"
-          },
-          {
-            "@type": "OfferCatalog",
-            "name": "Development Boards",
-            "description": "Arduino, Raspberry Pi, and other microcontroller boards"
-          },
-          {
-            "@type": "OfferCatalog",
-            "name": "Electronic Components",
-            "description": "Resistors, capacitors, ICs, and other electronic parts"
+            "description": "PLCs, sensors, and control systems for industrial automation",
+            "category": "Industrial Electronics"
           }
-        ]
-      }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Product",
+            "name": "Development Boards",
+            "description": "Arduino, Raspberry Pi, and other microcontroller boards for DIY projects",
+            "category": "Development Tools"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Product",
+            "name": "Electronic Components",
+            "description": "Resistors, capacitors, ICs, and other electronic parts",
+            "category": "Electronic Parts"
+          }
+        }
+      ],
+      "sameAs": [
+        "https://www.google.com/maps/place/Sky+Electro+Tech"
+      ]
     }
   </script>
   
