@@ -3,7 +3,7 @@ name: Build & Deploy Frontend to AWS S3
 on:
   push:
     branches:
-      - master  # Change to 'main' if your branch is main
+      - master  # Change to 'main' if needed
 
 jobs:
   build-and-deploy:
@@ -26,8 +26,8 @@ jobs:
         run: npm run build
         working-directory: ./frontend
 
-      - name: Sync files to S3
-        uses: aws-actions/s3-sync@v2
+      - name: Deploy to S3
+        uses: aws-actions/s3-sync@v1
         with:
           source-dir: ./frontend/dist
           bucket: skyelectrotech-files
