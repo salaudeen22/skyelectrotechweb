@@ -3,7 +3,7 @@ name: Build & Deploy Frontend to AWS S3
 on:
   push:
     branches:
-      - master  # Change to 'main' if needed
+      - master  # Change to main if needed
 
 jobs:
   build-and-deploy:
@@ -27,12 +27,12 @@ jobs:
         working-directory: ./frontend
 
       - name: Deploy to S3
-        uses: aws-actions/s3-sync@v1
+        uses: jakejarvis/s3-sync-action@v0.6.0
         with:
-          source-dir: ./frontend/dist
-          bucket: skyelectrotech-files
-          delete: true
+          args: --acl public-read --delete
         env:
+          AWS_S3_BUCKET: skyelectrotech-files
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: eu-north-1
+          SOURCE_DIR: ./frontend/dist
