@@ -335,10 +335,7 @@ const Wishlist = () => {
             ))}
           </div>
         )}
-      </div>
-    </div>
-    </>
-  );
+
         {wishlistItems.length > 0 && (
           <div className="mt-8 sm:mt-12 text-center">
             <button
@@ -349,8 +346,9 @@ const Wishlist = () => {
             </button>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
