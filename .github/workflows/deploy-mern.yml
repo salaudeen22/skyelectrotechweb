@@ -103,18 +103,23 @@ jobs:
     if: needs.detect-changes.outputs.backend-changed == 'true' && github.ref == 'refs/heads/master'
     runs-on: self-hosted
     steps:
-      - name: Free up disk space
-        run: |
-          docker system prune -f
-          docker image prune -af
-          
-      - name: Pull Latest Backend Image
-        run: docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.BACKEND_IMAGE }}:latest
-
       - name: Stop and Remove Old Backend Container
         run: |
           docker stop ${{ env.BACKEND_CONTAINER }} || true
           docker rm ${{ env.BACKEND_CONTAINER }} || true
+
+      - name: Aggressive cleanup to free disk space
+        run: |
+          docker system prune -af --volumes
+          docker image prune -af
+          docker container prune -f
+          docker volume prune -f
+          # Remove old backend images specifically
+          docker images ${{ secrets.DOCKER_USERNAME }}/${{ env.BACKEND_IMAGE }} -q | head -n -1 | xargs -r docker rmi || true
+          df -h
+          
+      - name: Pull Latest Backend Image
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.BACKEND_IMAGE }}:latest
 
       - name: Run New Backend Container
         run: |
