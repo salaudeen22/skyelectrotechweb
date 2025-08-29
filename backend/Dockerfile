@@ -1,4 +1,5 @@
 # Use Node.js Alpine image for smaller size
+# Updated for EC2 deployment
 FROM node:18-alpine
 
 # Set working directory
