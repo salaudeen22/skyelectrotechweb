@@ -103,6 +103,11 @@ jobs:
     if: needs.detect-changes.outputs.backend-changed == 'true' && github.ref == 'refs/heads/master'
     runs-on: self-hosted
     steps:
+      - name: Free up disk space
+        run: |
+          docker system prune -f
+          docker image prune -af
+          
       - name: Pull Latest Backend Image
         run: docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.BACKEND_IMAGE }}:latest
 
