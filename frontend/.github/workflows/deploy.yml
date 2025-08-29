@@ -1,9 +1,9 @@
-name: Build & Deploy Frontend to AWS S3
+name: Deploy Frontend to EC2 (Legacy - Use root workflow instead)
 
 on:
   push:
     branches:
-      - master  # Change to 'main' if your branch is main
+      - legacy-s3-deploy
 
 jobs:
   build-and-deploy:

@@ -1,0 +1,109 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'backend/**'
+
+env:
+  DOCKER_IMAGE_NAME: skyelectrotech-backend
+  CONTAINER_NAME: skyelectrotech-backend-container
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker Image
+        run: |
+          cd backend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }} .
+
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Pull Latest Image
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+
+      - name: Stop and Remove Old Container
+        run: |
+          docker stop ${{ env.CONTAINER_NAME }} || true
+          docker rm ${{ env.CONTAINER_NAME }} || true
+
+      - name: Run New Container
+        run: |
+          docker run -d \
+            --name ${{ env.CONTAINER_NAME }} \
+            --restart unless-stopped \
+            -p 5001:5001 \
+            -e NODE_ENV=production \
+            -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+            -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            -e JWT_EXPIRE="${{ secrets.JWT_EXPIRE }}" \
+            -e SESSION_SECRET="${{ secrets.SESSION_SECRET }}" \
+            -e FRONTEND_URL="${{ secrets.FRONTEND_URL }}" \
+            -e CLIENT_URL="${{ secrets.CLIENT_URL }}" \
+            -e CLOUDINARY_CLOUD_NAME="${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
+            -e CLOUDINARY_API_KEY="${{ secrets.CLOUDINARY_API_KEY }}" \
+            -e CLOUDINARY_API_SECRET="${{ secrets.CLOUDINARY_API_SECRET }}" \
+            -e EMAIL_SERVICE="${{ secrets.EMAIL_SERVICE }}" \
+            -e EMAIL_USER="${{ secrets.EMAIL_USER }}" \
+            -e EMAIL_PASS="${{ secrets.EMAIL_PASS }}" \
+            -e EMAIL_FROM_NAME="${{ secrets.EMAIL_FROM_NAME }}" \
+            -e ADMIN_EMAIL="${{ secrets.ADMIN_EMAIL }}" \
+            -e SMTP_HOST="${{ secrets.SMTP_HOST }}" \
+            -e SMTP_PORT="${{ secrets.SMTP_PORT }}" \
+            -e SMTP_SECURE="${{ secrets.SMTP_SECURE }}" \
+            -e PORT=5001 \
+            -e GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
+            -e GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+            -e GOOGLE_CALLBACK_URL="${{ secrets.GOOGLE_CALLBACK_URL }}" \
+            -e MAX_FILE_SIZE="${{ secrets.MAX_FILE_SIZE }}" \
+            -e FILE_UPLOAD_PATH="${{ secrets.FILE_UPLOAD_PATH }}" \
+            -e RAZORPAY_KEY_ID="${{ secrets.RAZORPAY_KEY_ID }}" \
+            -e RAZORPAY_KEY_SECRET="${{ secrets.RAZORPAY_KEY_SECRET }}" \
+            -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+            -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+            -e AWS_REGION="${{ secrets.AWS_REGION }}" \
+            -e AWS_S3_BUCKET_NAME="${{ secrets.AWS_S3_BUCKET_NAME }}" \
+            -e VAPID_PUBLIC_KEY="${{ secrets.VAPID_PUBLIC_KEY }}" \
+            -e VAPID_PRIVATE_KEY="${{ secrets.VAPID_PRIVATE_KEY }}" \
+            -e VAPID_EMAIL="${{ secrets.VAPID_EMAIL }}" \
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
+
+      - name: Clean up old images
+        run: |
+          docker image prune -f
+          docker images ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }} --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}" | tail -n +2 | head -n -3 | awk '{print $3}' | xargs -r docker rmi || true
+
+      - name: Verify Deployment
+        run: |
+          sleep 10
+          if docker ps | grep -q ${{ env.CONTAINER_NAME }}; then
+            echo "Backend deployment successful!"
+            docker logs ${{ env.CONTAINER_NAME }} --tail 20
+          else
+            echo "Backend deployment failed!"
+            docker logs ${{ env.CONTAINER_NAME }} --tail 50 || true
+            exit 1
+          fi

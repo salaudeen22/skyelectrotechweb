@@ -1,0 +1,201 @@
+name: Deploy MERN Stack to EC2
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+env:
+  BACKEND_IMAGE: skyelectrotech-backend
+  FRONTEND_IMAGE: skyelectrotech-frontend
+  BACKEND_CONTAINER: skyelectrotech-backend-container
+  FRONTEND_CONTAINER: skyelectrotech-frontend-container
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend-changed: ${{ steps.changes.outputs.backend }}
+      frontend-changed: ${{ steps.changes.outputs.frontend }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -q "^backend/"; then
+            echo "backend=true" >> $GITHUB_OUTPUT
+          else
+            echo "backend=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if git diff --name-only HEAD^ HEAD | grep -q "^frontend/"; then
+            echo "frontend=true" >> $GITHUB_OUTPUT
+          else
+            echo "frontend=false" >> $GITHUB_OUTPUT
+          fi
+
+  build-backend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend-changed == 'true' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Backend Docker Image
+        run: |
+          cd backend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ env.BACKEND_IMAGE }}:latest .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }} .
+
+      - name: Push Backend Docker Image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.BACKEND_IMAGE }}:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+
+  build-frontend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend-changed == 'true' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Frontend Docker Image
+        run: |
+          cd frontend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ env.FRONTEND_IMAGE }}:latest \
+            --build-arg VITE_API_URL="${{ secrets.VITE_API_URL }}" \
+            --build-arg VITE_APP_NAME="${{ secrets.VITE_APP_NAME }}" \
+            --build-arg VITE_APP_VERSION="${{ secrets.VITE_APP_VERSION }}" .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }} \
+            --build-arg VITE_API_URL="${{ secrets.VITE_API_URL }}" \
+            --build-arg VITE_APP_NAME="${{ secrets.VITE_APP_NAME }}" \
+            --build-arg VITE_APP_VERSION="${{ secrets.VITE_APP_VERSION }}" .
+
+      - name: Push Frontend Docker Image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.FRONTEND_IMAGE }}:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+
+  deploy-backend:
+    needs: [detect-changes, build-backend]
+    if: needs.detect-changes.outputs.backend-changed == 'true' && github.ref == 'refs/heads/master'
+    runs-on: self-hosted
+    steps:
+      - name: Pull Latest Backend Image
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.BACKEND_IMAGE }}:latest
+
+      - name: Stop and Remove Old Backend Container
+        run: |
+          docker stop ${{ env.BACKEND_CONTAINER }} || true
+          docker rm ${{ env.BACKEND_CONTAINER }} || true
+
+      - name: Run New Backend Container
+        run: |
+          docker run -d \
+            --name ${{ env.BACKEND_CONTAINER }} \
+            --restart unless-stopped \
+            -p 5001:5001 \
+            -e NODE_ENV=production \
+            -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+            -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            -e JWT_EXPIRE="${{ secrets.JWT_EXPIRE }}" \
+            -e SESSION_SECRET="${{ secrets.SESSION_SECRET }}" \
+            -e FRONTEND_URL="${{ secrets.FRONTEND_URL }}" \
+            -e CLIENT_URL="${{ secrets.CLIENT_URL }}" \
+            -e CLOUDINARY_CLOUD_NAME="${{ secrets.CLOUDINARY_CLOUD_NAME }}" \
+            -e CLOUDINARY_API_KEY="${{ secrets.CLOUDINARY_API_KEY }}" \
+            -e CLOUDINARY_API_SECRET="${{ secrets.CLOUDINARY_API_SECRET }}" \
+            -e EMAIL_SERVICE="${{ secrets.EMAIL_SERVICE }}" \
+            -e EMAIL_USER="${{ secrets.EMAIL_USER }}" \
+            -e EMAIL_PASS="${{ secrets.EMAIL_PASS }}" \
+            -e EMAIL_FROM_NAME="${{ secrets.EMAIL_FROM_NAME }}" \
+            -e ADMIN_EMAIL="${{ secrets.ADMIN_EMAIL }}" \
+            -e SMTP_HOST="${{ secrets.SMTP_HOST }}" \
+            -e SMTP_PORT="${{ secrets.SMTP_PORT }}" \
+            -e SMTP_SECURE="${{ secrets.SMTP_SECURE }}" \
+            -e PORT=5001 \
+            -e GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
+            -e GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+            -e GOOGLE_CALLBACK_URL="${{ secrets.GOOGLE_CALLBACK_URL }}" \
+            -e MAX_FILE_SIZE="${{ secrets.MAX_FILE_SIZE }}" \
+            -e FILE_UPLOAD_PATH="${{ secrets.FILE_UPLOAD_PATH }}" \
+            -e RAZORPAY_KEY_ID="${{ secrets.RAZORPAY_KEY_ID }}" \
+            -e RAZORPAY_KEY_SECRET="${{ secrets.RAZORPAY_KEY_SECRET }}" \
+            -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+            -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+            -e AWS_REGION="${{ secrets.AWS_REGION }}" \
+            -e AWS_S3_BUCKET_NAME="${{ secrets.AWS_S3_BUCKET_NAME }}" \
+            -e VAPID_PUBLIC_KEY="${{ secrets.VAPID_PUBLIC_KEY }}" \
+            -e VAPID_PRIVATE_KEY="${{ secrets.VAPID_PRIVATE_KEY }}" \
+            -e VAPID_EMAIL="${{ secrets.VAPID_EMAIL }}" \
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.BACKEND_IMAGE }}:latest
+
+      - name: Verify Backend Deployment
+        run: |
+          sleep 15
+          if docker ps | grep -q ${{ env.BACKEND_CONTAINER }}; then
+            echo "Backend deployment successful!"
+          else
+            echo "Backend deployment failed!"
+            docker logs ${{ env.BACKEND_CONTAINER }} --tail 50 || true
+            exit 1
+          fi
+
+  deploy-frontend:
+    needs: [detect-changes, build-frontend]
+    if: needs.detect-changes.outputs.frontend-changed == 'true' && github.ref == 'refs/heads/master'
+    runs-on: frontend-runner
+    steps:
+      - name: Pull Latest Frontend Image
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.FRONTEND_IMAGE }}:latest
+
+      - name: Stop and Remove Old Frontend Container
+        run: |
+          docker stop ${{ env.FRONTEND_CONTAINER }} || true
+          docker rm ${{ env.FRONTEND_CONTAINER }} || true
+
+      - name: Run New Frontend Container
+        run: |
+          docker run -d \
+            --name ${{ env.FRONTEND_CONTAINER }} \
+            --restart unless-stopped \
+            -p 3000:8080 \
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.FRONTEND_IMAGE }}:latest
+
+      - name: Verify Frontend Deployment
+        run: |
+          sleep 10
+          if docker ps | grep -q ${{ env.FRONTEND_CONTAINER }}; then
+            echo "Frontend deployment successful!"
+          else
+            echo "Frontend deployment failed!"
+            docker logs ${{ env.FRONTEND_CONTAINER }} --tail 50 || true
+            exit 1
+          fi
+
+  cleanup:
+    needs: [deploy-backend, deploy-frontend]
+    if: always() && github.ref == 'refs/heads/master'
+    runs-on: self-hosted
+    steps:
+      - name: Clean up old Docker images
+        run: |
+          docker image prune -f
+          # Keep only latest 3 versions of each image
+          docker images ${{ secrets.DOCKER_USERNAME }}/${{ env.BACKEND_IMAGE }} --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}" | tail -n +2 | head -n -3 | awk '{print $3}' | xargs -r docker rmi || true
+          docker images ${{ secrets.DOCKER_USERNAME }}/${{ env.FRONTEND_IMAGE }} --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}" | tail -n +2 | head -n -3 | awk '{print $3}' | xargs -r docker rmi || true
