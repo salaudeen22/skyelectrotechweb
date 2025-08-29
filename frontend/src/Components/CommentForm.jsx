@@ -38,7 +38,7 @@ const CommentForm = ({ productId, onCommentCreated, onCancel, editComment = null
           if (response.success) {
             uploadedImages.push({
               url: response.data.url,
-              publicId: response.data.publicId
+              publicId: response.data.public_id
             });
           } else {
             toast.error(`Failed to upload ${file.name}: ${response.message || 'Unknown error'}`);
