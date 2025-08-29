@@ -1,9 +1,12 @@
-name: Deploy Backend to EC2 (DISABLED - Use deploy-mern.yml instead)
+name: Deploy Backend to EC2
 
 on:
   push:
     branches:
-      - disabled-backend-workflow
+      - master
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
     paths:
       - 'backend/**'
   pull_request:
@@ -42,13 +45,21 @@ jobs:
     runs-on: self-hosted
     if: github.ref == 'refs/heads/master'
     steps:
-      - name: Pull Latest Image
-        run: docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-
       - name: Stop and Remove Old Container
         run: |
           docker stop ${{ env.CONTAINER_NAME }} || true
           docker rm ${{ env.CONTAINER_NAME }} || true
+
+      - name: Aggressive cleanup to free disk space
+        run: |
+          docker system prune -af --volumes
+          docker image prune -af
+          docker container prune -f
+          docker volume prune -f
+          df -h
+
+      - name: Pull Latest Image
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
 
       - name: Run New Container
         run: |

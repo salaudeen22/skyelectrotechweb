@@ -1,9 +1,9 @@
-name: Deploy MERN Stack to EC2
+name: Deploy MERN Stack to EC2 (DISABLED - Using separate workflows)
 
 on:
   push:
     branches:
-      - master
+      - disabled-combined-workflow
   pull_request:
     branches:
       - master

@@ -1,9 +1,12 @@
-name: Deploy Frontend to EC2 (DISABLED - Use deploy-mern.yml instead)
+name: Deploy Frontend to EC2
 
 on:
   push:
     branches:
-      - disabled-frontend-workflow
+      - master
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
     paths:
       - 'frontend/**'
   pull_request:
@@ -48,13 +51,19 @@ jobs:
     runs-on: frontend-runner
     if: github.ref == 'refs/heads/master'
     steps:
-      - name: Pull Latest Image
-        run: docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
-
       - name: Stop and Remove Old Container
         run: |
           docker stop ${{ env.CONTAINER_NAME }} || true
           docker rm ${{ env.CONTAINER_NAME }} || true
+
+      - name: Free up disk space
+        run: |
+          docker system prune -af
+          docker image prune -af
+          df -h
+
+      - name: Pull Latest Image
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest
 
       - name: Run New Container
         run: |
