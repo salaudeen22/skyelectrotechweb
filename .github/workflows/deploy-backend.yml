@@ -7,12 +7,11 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/deploy-backend.yml'
-    paths:
-      - 'backend/**'
   pull_request:
     branches:
       - master
     paths:
+      - 'backend/**'
       - 'backend/**'
 
 env:
