@@ -2,74 +2,74 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Home Page -->
   <url>
-    <loc>https://sweet-hamster-f11198.netlify.app/</loc>
-    <lastmod>2025-08-23</lastmod>
+    <loc>https://skyelectrotech.in/</loc>
+    <lastmod>2025-08-29</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   <!-- Product Pages -->
   <url>
-    <loc>https://sweet-hamster-f11198.netlify.app/products</loc>
-    <lastmod>2025-08-23</lastmod>
+    <loc>https://skyelectrotech.in/products</loc>
+    <lastmod>2025-08-29</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://sweet-hamster-f11198.netlify.app/search</loc>
-    <lastmod>2024-12-19</lastmod>
+    <loc>https://skyelectrotech.in/search</loc>
+    <lastmod>2025-08-29</lastmod>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>
 
   <!-- Static Pages -->
   <url>
-    <loc>https://sweet-hamster-f11198.netlify.app/about</loc>
-    <lastmod>2024-12-19</lastmod>
+    <loc>https://skyelectrotech.in/about</loc>
+    <lastmod>2025-08-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://sweet-hamster-f11198.netlify.app/contact</loc>
-    <lastmod>2024-12-19</lastmod>
+    <loc>https://skyelectrotech.in/contact</loc>
+    <lastmod>2025-08-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://sweet-hamster-f11198.netlify.app/faq</loc>
-    <lastmod>2024-12-19</lastmod>
+    <loc>https://skyelectrotech.in/faq</loc>
+    <lastmod>2025-08-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://sweet-hamster-f11198.netlify.app/privacy-policy</loc>
-    <lastmod>2024-12-19</lastmod>
+    <loc>https://skyelectrotech.in/privacy-policy</loc>
+    <lastmod>2025-08-29</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://sweet-hamster-f11198.netlify.app/terms-of-service</loc>
-    <lastmod>2024-12-19</lastmod>
+    <loc>https://skyelectrotech.in/terms-of-service</loc>
+    <lastmod>2025-08-29</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <!-- Authentication Pages -->
   <url>
-    <loc>https://sweet-hamster-f11198.netlify.app/auth/login</loc>
-    <lastmod>2024-12-19</lastmod>
+    <loc>https://skyelectrotech.in/auth/login</loc>
+    <lastmod>2025-08-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://sweet-hamster-f11198.netlify.app/auth/register</loc>
-    <lastmod>2024-12-19</lastmod>
+    <loc>https://skyelectrotech.in/auth/register</loc>
+    <lastmod>2025-08-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://sweet-hamster-f11198.netlify.app/auth/forgot-password</loc>
-    <lastmod>2024-12-19</lastmod>
+    <loc>https://skyelectrotech.in/auth/forgot-password</loc>
+    <lastmod>2025-08-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
