@@ -83,12 +83,23 @@ app.use(compression());
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 1000, // limit each IP to 1000 requests per windowMs (increased for testing)
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   trustProxy: true // Trust the proxy headers
 });
+
+// Stricter rate limiting for upload endpoints
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50, // limit uploads to 50 per 15 minutes
+  message: 'Too many upload requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  trustProxy: true
+});
+
 app.use('/api/', limiter);
 
 // CORS configuration
@@ -221,8 +232,8 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/cart', require('./routes/cart'));
 app.use('/api/wishlist', require('./routes/wishlist'));
 app.use('/api/analytics', require('./routes/analytics'));
-app.use('/api/upload', require('./routes/upload'));
-app.use('/api/bulk-upload', require('./routes/bulkUpload'));
+app.use('/api/upload', uploadLimiter, require('./routes/upload'));
+app.use('/api/bulk-upload', uploadLimiter, require('./routes/bulkUpload'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/comments', require('./routes/comments'));
