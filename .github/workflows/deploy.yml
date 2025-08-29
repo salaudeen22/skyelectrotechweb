@@ -3,11 +3,12 @@ name: Build & Deploy Frontend to AWS S3
 on:
   push:
     branches:
-      - master  # Change to main if needed
+      - master  # or 'main'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,6 +24,12 @@ jobs:
         run: npm install
         working-directory: ./frontend
 
+      - name: Set environment variables
+        run: |
+          echo "VITE_API_URL=https://api.skyelectrotech.in/api" >> $GITHUB_ENV
+          echo "VITE_APP_NAME=SkyElectroTech" >> $GITHUB_ENV
+          echo "VITE_APP_VERSION=1.0.0" >> $GITHUB_ENV
+
       - name: Build frontend
         run: npm run build
         working-directory: ./frontend
@@ -31,7 +38,6 @@ jobs:
         run: |
           echo "Build completed. Checking dist folder contents:"
           ls -la ./frontend/dist/
-          echo "Checking if index.html exists:"
           test -f ./frontend/dist/index.html && echo "✓ index.html found" || echo "✗ index.html missing"
 
       - name: Configure AWS credentials
@@ -43,65 +49,23 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          # Sync files to S3 with proper content types
           aws s3 sync ./frontend/dist/ s3://skyelectrotech-files/ --delete \
-            --exclude "*.html" \
-            --exclude "*.js" \
-            --exclude "*.css" \
-            --exclude "*.json" \
-            --exclude "*.xml" \
-            --exclude "*.ico" \
-            --exclude "*.png" \
-            --exclude "*.jpg" \
-            --exclude "*.jpeg" \
-            --exclude "*.svg"
-            
-          # Upload HTML files with correct content type
-          aws s3 sync ./frontend/dist/ s3://skyelectrotech-files/ \
-            --exclude "*" --include "*.html" \
-            --content-type "text/html" \
-            --cache-control "no-cache"
-            
-          # Upload JavaScript files with correct content type
-          aws s3 sync ./frontend/dist/ s3://skyelectrotech-files/ \
-            --exclude "*" --include "*.js" \
-            --content-type "application/javascript" \
-            --cache-control "max-age=31536000"
-            
-          # Upload CSS files with correct content type
-          aws s3 sync ./frontend/dist/ s3://skyelectrotech-files/ \
-            --exclude "*" --include "*.css" \
-            --content-type "text/css" \
-            --cache-control "max-age=31536000"
-            
-          # Upload JSON files with correct content type
-          aws s3 sync ./frontend/dist/ s3://skyelectrotech-files/ \
-            --exclude "*" --include "*.json" \
-            --content-type "application/json" \
-            --cache-control "max-age=86400"
-            
-          # Upload images with correct content types
-          aws s3 sync ./frontend/dist/ s3://skyelectrotech-files/ \
-            --exclude "*" --include "*.png" \
-            --content-type "image/png" \
-            --cache-control "max-age=31536000"
-            
-          aws s3 sync ./frontend/dist/ s3://skyelectrotech-files/ \
-            --exclude "*" --include "*.jpg" --include "*.jpeg" \
-            --content-type "image/jpeg" \
-            --cache-control "max-age=31536000"
-            
-          aws s3 sync ./frontend/dist/ s3://skyelectrotech-files/ \
-            --exclude "*" --include "*.svg" \
-            --content-type "image/svg+xml" \
-            --cache-control "max-age=31536000"
-            
-          # Configure S3 bucket for static website hosting
+            --exact-timestamps
+
+          # Set correct content-types for static assets
+          aws s3 cp ./frontend/dist/ s3://skyelectrotech-files/ --recursive --exclude "*" --include "*.html" --content-type "text/html" --cache-control "no-cache"
+          aws s3 cp ./frontend/dist/ s3://skyelectrotech-files/ --recursive --exclude "*" --include "*.js" --content-type "application/javascript" --cache-control "max-age=31536000"
+          aws s3 cp ./frontend/dist/ s3://skyelectrotech-files/ --recursive --exclude "*" --include "*.css" --content-type "text/css" --cache-control "max-age=31536000"
+          aws s3 cp ./frontend/dist/ s3://skyelectrotech-files/ --recursive --exclude "*" --include "*.json" --content-type "application/json" --cache-control "max-age=86400"
+          aws s3 cp ./frontend/dist/ s3://skyelectrotech-files/ --recursive --exclude "*" --include "*.png" --content-type "image/png" --cache-control "max-age=31536000"
+          aws s3 cp ./frontend/dist/ s3://skyelectrotech-files/ --recursive --exclude "*" --include "*.jpg" --include "*.jpeg" --content-type "image/jpeg" --cache-control "max-age=31536000"
+          aws s3 cp ./frontend/dist/ s3://skyelectrotech-files/ --recursive --exclude "*" --include "*.svg" --content-type "image/svg+xml" --cache-control "max-age=31536000"
+
+          # Enable static website hosting
           aws s3 website s3://skyelectrotech-files --index-document index.html --error-document index.html
 
       - name: Configure S3 bucket policy for public access
         run: |
-          # Create bucket policy for public read access
           cat > bucket-policy.json << EOF
           {
             "Version": "2012-10-17",
@@ -116,6 +80,5 @@ jobs:
             ]
           }
           EOF
-          
-          # Apply the bucket policy
+
           aws s3api put-bucket-policy --bucket skyelectrotech-files --policy file://bucket-policy.json
