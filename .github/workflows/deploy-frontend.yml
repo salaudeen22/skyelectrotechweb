@@ -1,9 +1,9 @@
-name: Deploy Frontend to EC2
+name: Deploy Frontend to EC2 (DISABLED - Use deploy-mern.yml instead)
 
 on:
   push:
     branches:
-      - master
+      - disabled-frontend-workflow
     paths:
       - 'frontend/**'
   pull_request:
