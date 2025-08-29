@@ -38,16 +38,30 @@ const commentSchema = new mongoose.Schema({
     trim: true,
     maxlength: 1000
   },
-  images: [{
-    url: {
-      type: String,
-      required: true
-    },
-    publicId: {
-      type: String,
-      required: true
+  images: {
+    type: [{
+      url: {
+        type: String,
+        required: true,
+        validate: {
+          validator: function(url) {
+            return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+          },
+          message: 'Invalid image URL format'
+        }
+      },
+      publicId: {
+        type: String,
+        required: true
+      }
+    }],
+    validate: {
+      validator: function(images) {
+        return images.length <= 5;
+      },
+      message: 'Maximum 5 images allowed'
     }
-  }],
+  },
   isVerifiedPurchase: {
     type: Boolean,
     default: false
@@ -170,7 +184,7 @@ commentSchema.statics.getAverageRating = async function(productId) {
 
 // Pre-save middleware to update product rating
 commentSchema.pre('save', async function(next) {
-  if (this.isModified('rating') || this.isModified('status')) {
+  if (this.isModified('rating') || this.isModified('status') || this.isNew) {
     const Product = mongoose.model('Product');
     const ratingData = await this.constructor.getAverageRating(this.product);
     

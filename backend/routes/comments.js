@@ -22,9 +22,9 @@ const createCommentValidation = [
   body('rating').isInt({ min: 1, max: 5 }).withMessage('Rating must be between 1 and 5'),
   body('title').trim().isLength({ min: 1, max: 100 }).withMessage('Title must be between 1 and 100 characters'),
   body('comment').trim().isLength({ min: 1, max: 1000 }).withMessage('Comment must be between 1 and 1000 characters'),
-  body('images').optional().isArray().withMessage('Images must be an array'),
+  body('images').optional().isArray({ max: 5 }).withMessage('Images must be an array with maximum 5 items'),
   body('images.*.url').optional().isURL().withMessage('Invalid image URL'),
-  body('images.*.publicId').optional().isString().withMessage('Invalid public ID')
+  body('images.*.publicId').optional().isString().notEmpty().withMessage('Public ID is required for images')
 ];
 
 const updateCommentValidation = [
