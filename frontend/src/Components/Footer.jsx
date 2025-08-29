@@ -45,16 +45,26 @@ const Footer = () => {
               <li><Link to="/terms-of-service" className="text-base text-gray-600 hover:text-blue-600">Terms of Service</Link></li>
             </ul>
           </div>
-          {/* Newsletter */}
+          {/* Google Maps Location */}
           <div className="space-y-4 md:col-span-2 lg:col-span-1">
-             <h3 className="text-sm font-semibold text-gray-500 tracking-wider uppercase">Subscribe to our newsletter</h3>
-             <p className="text-base text-gray-600">The latest news, articles, and resources, sent to your inbox weekly.</p>
-             <form className="mt-4 sm:flex sm:max-w-md">
-                 <input type="email" placeholder="Enter your email" className="appearance-none w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"/>
-                 <div className="mt-3 sm:mt-0 sm:ml-3 sm:flex-shrink-0">
-                     <button type="submit" className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Subscribe</button>
-                 </div>
-             </form>
+             <h3 className="text-sm font-semibold text-gray-500 tracking-wider uppercase">Visit Our Store</h3>
+             <p className="text-base text-gray-600">Find us at our physical location in Nagarathpete, Bengaluru.</p>
+             <div className="w-full h-48 rounded-lg overflow-hidden border border-gray-300">
+               <iframe 
+                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.112478761705!2d77.57936717531959!3d12.964653787350109!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae150076391a2b%3A0x8f80be7dae9c0a59!2sSky%20Electro%20Tech!5e0!3m2!1sen!2sin!4v1756483257812!5m2!1sen!2sin" 
+                 width="100%" 
+                 height="100%" 
+                 style={{border: 0}} 
+                 allowFullScreen="" 
+                 loading="lazy" 
+                 referrerPolicy="no-referrer-when-downgrade"
+                 title="SkyElectroTech Store Location"
+               />
+             </div>
+             <p className="text-sm text-gray-600">
+               2nd Floor, No 140, Sadar Patrappa Rd<br />
+               Nagarathpete, Bengaluru - 560002
+             </p>
           </div>
         </div>
         <div className="mt-12 border-t border-gray-200 pt-8 text-center">

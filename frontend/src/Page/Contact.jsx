@@ -77,9 +77,10 @@ const Contact = () => {
                       <h3 className="text-lg font-semibold text-gray-900">Address</h3>
                       <p className="text-gray-600">
                         SkyElectroTech<br />
-                        123 Electronics Street<br />
-                        Tech Park, Bangalore - 560001<br />
-                        Karnataka, India
+                        2nd Floor, No 140, Sadar Patrappa Rd<br />
+                        Thigalarpet, Kumbarpet, Dodpete<br />
+                        Nagarathpete, Bengaluru, Karnataka 560002<br />
+                        India
                       </p>
                     </div>
                   </div>
@@ -90,11 +91,34 @@ const Contact = () => {
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">Business Hours</h3>
-                      <p className="text-gray-600">Monday - Friday: 9:00 AM - 6:00 PM</p>
-                      <p className="text-gray-600">Saturday: 10:00 AM - 4:00 PM</p>
-                      <p className="text-gray-600">Sunday: Closed</p>
+                      <p className="text-gray-600">Monday - Friday: 10:30 AM - 7:30 PM</p>
+                      <p className="text-gray-600">Saturday: 10:30 AM - 7:30 PM</p>
+                      <p className="text-gray-600">Sunday: 10:30 AM - 2:30 PM</p>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Google Maps */}
+              <div className="bg-white rounded-lg shadow-sm p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Find Us</h2>
+                <div className="w-full h-80 rounded-lg overflow-hidden">
+                  <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.112478761705!2d77.57936717531959!3d12.964653787350109!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae150076391a2b%3A0x8f80be7dae9c0a59!2sSky%20Electro%20Tech!5e0!3m2!1sen!2sin!4v1756483257812!5m2!1sen!2sin" 
+                    width="100%" 
+                    height="100%" 
+                    style={{border: 0}} 
+                    allowFullScreen="" 
+                    loading="lazy" 
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="SkyElectroTech Location"
+                  />
+                </div>
+                <div className="mt-4 text-sm text-gray-600">
+                  <p><strong>Business Hours:</strong></p>
+                  <p>Monday - Friday: 10:30 AM - 7:30 PM</p>
+                  <p>Saturday: 10:30 AM - 7:30 PM</p>
+                  <p>Sunday: 10:30 AM - 2:30 PM</p>
                 </div>
               </div>
 
