@@ -35,6 +35,7 @@ const io = new Server(server, {
         'https://6877b765d91a4d4ccae4b296--sweet-hamster-f11198.netlify.app',
         'https://skyelectrotech.in',
         'https://www.skyelectrotech.in',
+        "http://skyelectrotech-files.s3-website.eu-north-1.amazonaws.com/",
         process.env.FRONTEND_URL
       ].filter(Boolean);
       
