@@ -47,7 +47,7 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: frontend-runner
+    runs-on: self-hosted
     if: github.ref == 'refs/heads/master'
     steps:
       - name: Stop and Remove Old Container
