@@ -17,7 +17,7 @@ Allow: /wishlist/
 Allow: /contact/
 
 # Sitemap
-Sitemap: https://sweet-hamster-f11198.netlify.app/sitemap.xml
+Sitemap: https://skyelectrotech.in/sitemap.xml
 
 # Crawl delay for better performance
 Crawl-delay: 1

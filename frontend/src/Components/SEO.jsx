@@ -90,14 +90,33 @@ const SEO = ({
             "@type": "Organization",
             "name": "SkyElectroTech"
           }
-        },
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": product.ratings?.average || 0,
-          "reviewCount": product.ratings?.count || 0
-        },
-        "category": category?.name || "Electronics"
+        }
       };
+
+      // Only add aggregateRating if there are actual ratings
+      if (product.ratings?.average > 0 && product.ratings?.count > 0) {
+        structuredData.aggregateRating = {
+          "@type": "AggregateRating",
+          "ratingValue": product.ratings.average,
+          "reviewCount": product.ratings.count
+        };
+      }
+
+      // Add category if available
+      structuredData.category = category?.name || "Electronics";
+      
+      // Add SKU if available
+      if (product.sku) {
+        structuredData.sku = product.sku;
+      }
+      
+      // Add brand
+      if (product.brand) {
+        structuredData.brand = {
+          "@type": "Brand",
+          "name": product.brand
+        };
+      }
     } else if (category) {
       // Category structured data
       structuredData = {

@@ -97,8 +97,8 @@ const Wishlist = () => {
           <meta property="og:title" content={pageTitle} />
           <meta property="og:description" content={pageDescription} />
           <meta property="og:type" content="website" />
-          <meta property="og:url" content="https://sweet-hamster-f11198.netlify.app/wishlist" />
-          <link rel="canonical" href="https://sweet-hamster-f11198.netlify.app/wishlist" />
+          <meta property="og:url" content="https://skyelectrotech.in/wishlist" />
+          <link rel="canonical" href="https://skyelectrotech.in/wishlist" />
         </Helmet>
         <div className="min-h-screen bg-gray-50">
           <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
@@ -129,8 +129,8 @@ const Wishlist = () => {
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://sweet-hamster-f11198.netlify.app/wishlist" />
-        <link rel="canonical" href="https://sweet-hamster-f11198.netlify.app/wishlist" />
+        <meta property="og:url" content="https://skyelectrotech.in/wishlist" />
+        <link rel="canonical" href="https://skyelectrotech.in/wishlist" />
       </Helmet>
       
       <div className="min-h-screen bg-gray-50">
