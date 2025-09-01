@@ -11,6 +11,15 @@ const SEO = ({
   product = null,
   category = null 
 }) => {
+  // Generate rich snippets for price
+  const priceSnippet = product?.price ? {
+    "@type": "Offer",
+    "price": product.price.toString(),
+    "priceCurrency": "INR",
+    "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+    "url": url || window.location.href
+  } : null;
   const location = useLocation();
 
   useEffect(() => {
@@ -76,21 +85,36 @@ const SEO = ({
         "@type": "Product",
         "name": product.name,
         "description": product.description,
-        "image": product.images?.[0]?.url || '',
+        "image": product.images?.map(img => img.url || img) || [],
         "brand": {
           "@type": "Brand",
           "name": product.brand || "SkyElectroTech"
         },
         "offers": {
           "@type": "Offer",
-          "price": product.price,
+          "price": product.price.toString(),
           "priceCurrency": "INR",
-          "availability": product.isActive ? "https://schema.org/InStock" : "https://schema.org/Discontinued",
+          "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+          "url": url || window.location.href,
           "seller": {
             "@type": "Organization",
-            "name": "SkyElectroTech"
+            "name": "SkyElectroTech",
+            "url": "https://skyelectrotech.in"
           }
-        }
+        },
+        "additionalProperty": [
+          {
+            "@type": "PropertyValue",
+            "name": "category",
+            "value": product.category?.name || "Electronics"
+          },
+          {
+            "@type": "PropertyValue",
+            "name": "sku",
+            "value": product.sku || ""
+          }
+        ]
       };
 
       // Only add aggregateRating if there are actual ratings

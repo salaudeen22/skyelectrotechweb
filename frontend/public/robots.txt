@@ -7,17 +7,30 @@ Disallow: /admin/
 Disallow: /checkout/
 Disallow: /cart/
 Disallow: /api/
+Disallow: /*?* # Block URLs with query parameters
+Disallow: /*/search # Block search result pages
 
 # Allow public pages
 Allow: /
 Allow: /products/
 Allow: /categories/
 Allow: /about/
-Allow: /wishlist/
 Allow: /contact/
+Allow: /*.js$ # Allow JavaScript files
+Allow: /*.css$ # Allow CSS files
+Allow: /*.png$ # Allow images
+Allow: /*.jpg$ # Allow images
+Allow: /*.svg$ # Allow SVG files
 
-# Sitemap
+# Crawl delay
+Crawl-delay: 5
+
+# Host
+Host: https://skyelectrotech.in
+
+# Sitemaps
 Sitemap: https://skyelectrotech.in/sitemap.xml
+Sitemap: https://skyelectrotech.in/products-sitemap.xml
 
 # Crawl delay for better performance
 Crawl-delay: 1
