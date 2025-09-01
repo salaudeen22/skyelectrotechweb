@@ -12,7 +12,7 @@ import LoadingErrorHandler from '../Components/LoadingErrorHandler';
 import ProductRecommendations from '../Components/ProductRecommendations';
 import ShareSheet from '../Components/ShareSheet';
 import { buildProductUrl } from '../utils/env';
-import { extractIdFromSlug } from '../utils/urlHelpers';
+import { extractIdFromSlug, generateProductUrl } from '../utils/urlHelpers';
 
 
 // Development-only render counter
@@ -73,13 +73,21 @@ const ProductDetails = () => {
       const response = await Promise.race([apiPromise, timeoutPromise]);
       
       setProduct(response.data.product);
+      
+      // If we're on the old URL format, redirect to SEO-friendly URL
+      if (id && !slugWithId && response.data.product) {
+        const seoUrl = generateProductUrl(response.data.product);
+        // Use replace: true to avoid creating browser history entry
+        navigate(seoUrl, { replace: true });
+        return; // Exit early to prevent unnecessary processing
+      }
     } catch (err) {
       setError(err);
       console.error('Error fetching product:', err);
     } finally {
       setLoading(false);
     }
-  }, [productId]);
+  }, [productId, id, slugWithId, navigate]);
 
   // Fetch product on mount and when id changes
   useEffect(() => {
@@ -239,7 +247,7 @@ const ProductDetails = () => {
     description: product?.description,
     keywords: `${product?.name}, ${product?.brand || 'electronics'}, ${product?.category?.name || 'electronics'}, SkyElectroTech`,
     image: product?.images?.[0]?.url,
-    url: `https://skyelectrotech.in/products/${product?._id}`,
+    url: product ? `https://skyelectrotech.in${generateProductUrl(product)}` : `https://skyelectrotech.in/products`,
     type: "product",
     product: product,
     category: product?.category

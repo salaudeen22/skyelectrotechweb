@@ -6,6 +6,7 @@ import ProductCard from '../Components/ProductCard';
 import { wishlistAPI } from '../services/apiServices';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
+import { generateProductUrl } from '../utils/urlHelpers';
 
 const Wishlist = () => {
   const navigate = useNavigate();
@@ -251,7 +252,7 @@ const Wishlist = () => {
                         src={item.product.images?.[0]?.url || item.product.images?.[0] || 'https://tepeseo.com/wp-content/uploads/2019/05/404notfound.png'}
                         alt={item.product.name}
                         className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg cursor-pointer"
-                        onClick={() => navigate(`/products/${item.product._id}`)}
+                        onClick={() => navigate(generateProductUrl(item.product))}
                       />
                     </div>
 
@@ -261,7 +262,7 @@ const Wishlist = () => {
                         <div className="min-w-0 flex-1">
                           <h3 
                             className="text-base sm:text-lg font-medium text-gray-900 cursor-pointer hover:text-blue-600 truncate"
-                            onClick={() => navigate(`/products/${item.product._id}`)}
+                            onClick={() => navigate(generateProductUrl(item.product))}
                           >
                             {item.product.name}
                           </h3>
