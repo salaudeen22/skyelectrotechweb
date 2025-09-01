@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams, useParams } from 'react-router-dom';
 import ProductCard from '../Components/ProductCard';
+import SEO from '../Components/SEO';
 import { FiSearch, FiX, FiFilter, FiRefreshCw } from 'react-icons/fi';
 import { productsAPI, categoriesAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
@@ -172,8 +173,30 @@ const ProductList = () => {
   // Calculate pagination
   const totalPages = Math.ceil(totalProducts / 12);
 
+  // SEO data
+  const currentCategory = categories.find(c => c._id === categoryId);
+  const pageTitle = categoryId ? 
+    `${currentCategory?.name || 'Category'} Products - SkyElectroTech` :
+    searchParams.get('q') || searchParams.get('search') ? 
+    `Search Results for "${searchParams.get('q') || searchParams.get('search')}" - SkyElectroTech` :
+    'All Products - SkyElectroTech';
+  
+  const pageDescription = categoryId ?
+    `Browse our ${currentCategory?.name || 'category'} products. Quality electronics and components at competitive prices.` :
+    searchParams.get('q') || searchParams.get('search') ?
+    `Search results for "${searchParams.get('q') || searchParams.get('search')}" - Find electronics and components at SkyElectroTech.` :
+    'Browse our complete range of electronic components, development boards, and tools. Quality products at competitive prices.';
+
   return (
-    <main className="min-h-screen bg-gray-50">
+    <>
+      <SEO 
+        title={pageTitle}
+        description={pageDescription}
+        keywords={`electronics, components, ${currentCategory?.name || 'products'}, SkyElectroTech`}
+        category={currentCategory}
+        url={`https://skyelectrotech.in${window.location.pathname}${window.location.search}`}
+      />
+      <main className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="text-center mb-8">
@@ -402,6 +425,7 @@ const ProductList = () => {
         </div>
       </div>
     </main>
+    </>
   );
 };
 

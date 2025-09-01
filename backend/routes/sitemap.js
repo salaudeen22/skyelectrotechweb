@@ -6,7 +6,7 @@ const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 
 // Generate sitemap XML
 const generateSitemap = async () => {
-  const baseUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL || 'https://sweet-hamster-f11198.netlify.app';
+  const baseUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL || 'https://skyelectrotech.in';
   const currentDate = new Date().toISOString();
 
   let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -27,6 +27,16 @@ const generateSitemap = async () => {
     { url: '/terms-of-service', priority: '0.3', changefreq: 'yearly' }
   ];
 
+  // Helper function to create SEO-friendly slug from product name
+  const createSlug = (name) => {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+  };
+
   // Add static pages
   staticPages.forEach(page => {
     sitemap += `
@@ -42,9 +52,10 @@ const generateSitemap = async () => {
   try {
     const categories = await Category.find({ isActive: true }).select('_id name updatedAt');
     categories.forEach(category => {
+      const categorySlug = createSlug(category.name);
       sitemap += `
   <url>
-    <loc>${baseUrl}/category/${category._id}</loc>
+    <loc>${baseUrl}/category/${categorySlug}-${category._id}</loc>
     <lastmod>${category.updatedAt.toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -62,9 +73,10 @@ const generateSitemap = async () => {
       .limit(1000);
 
     products.forEach(product => {
+      const productSlug = createSlug(product.name);
       sitemap += `
   <url>
-    <loc>${baseUrl}/products/${product._id}</loc>
+    <loc>${baseUrl}/product/${productSlug}-${product._id}</loc>
     <lastmod>${product.updatedAt.toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -82,6 +94,20 @@ const generateSitemap = async () => {
 
 // GET /api/sitemap.xml
 router.get('/sitemap.xml', asyncHandler(async (req, res) => {
+  try {
+    const sitemap = await generateSitemap();
+    
+    res.setHeader('Content-Type', 'application/xml');
+    res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+    res.send(sitemap);
+  } catch (error) {
+    console.error('Error generating sitemap:', error);
+    sendError(res, 500, 'Error generating sitemap');
+  }
+}));
+
+// GET /api/sitemap (redirect for convenience)
+router.get('/sitemap', asyncHandler(async (req, res) => {
   try {
     const sitemap = await generateSitemap();
     
