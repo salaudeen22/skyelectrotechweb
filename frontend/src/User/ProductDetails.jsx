@@ -47,18 +47,28 @@ const ProductDetails = () => {
     return null;
   }, [id, slugWithId]);
 
+  // Check if we need to redirect from old URL format
+  const shouldRedirect = useMemo(() => {
+    return id && !slugWithId && productId;
+  }, [id, slugWithId, productId]);
+
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
 
-  // Temporary simple state management to test
+  // State management
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Simple fetch function
   const fetchProduct = useCallback(async () => {
-    if (!productId) return;
+    if (!productId) {
+      setLoading(false);
+      setError(new Error('Product not found'));
+      return;
+    }
     
     try {
       setLoading(true);
@@ -75,19 +85,24 @@ const ProductDetails = () => {
       setProduct(response.data.product);
       
       // If we're on the old URL format, redirect to SEO-friendly URL
-      if (id && !slugWithId && response.data.product) {
+      if (shouldRedirect && response.data.product) {
+        setIsRedirecting(true);
         const seoUrl = generateProductUrl(response.data.product);
         // Use replace: true to avoid creating browser history entry
         navigate(seoUrl, { replace: true });
         return; // Exit early to prevent unnecessary processing
       }
     } catch (err) {
-      setError(err);
-      console.error('Error fetching product:', err);
+      if (!isRedirecting) {
+        setError(err);
+        console.error('Error fetching product:', err);
+      }
     } finally {
-      setLoading(false);
+      if (!isRedirecting && !shouldRedirect) {
+        setLoading(false);
+      }
     }
-  }, [productId, id, slugWithId, navigate]);
+  }, [productId, shouldRedirect, navigate, isRedirecting]);
 
   // Fetch product on mount and when id changes
   useEffect(() => {
@@ -253,7 +268,15 @@ const ProductDetails = () => {
     category: product?.category
   }), [product]);
 
-  if (loading && !id) {
+  if (shouldRedirect || isRedirecting) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!productId && !loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

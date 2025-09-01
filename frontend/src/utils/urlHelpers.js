@@ -46,13 +46,13 @@ export const generateCategoryUrl = (category) => {
  * @returns {string|null} - Extracted ID or null if not found
  */
 export const extractIdFromSlug = (slugWithId) => {
-  if (!slugWithId) return null;
+  if (!slugWithId || typeof slugWithId !== 'string') return null;
   
   const parts = slugWithId.split('-');
   const lastPart = parts[parts.length - 1];
   
-  // Check if it's a valid MongoDB ObjectId (24 characters)
-  if (lastPart && lastPart.length === 24) {
+  // Check if it's a valid MongoDB ObjectId (24 characters, alphanumeric)
+  if (lastPart && lastPart.length === 24 && /^[a-fA-F0-9]{24}$/.test(lastPart)) {
     return lastPart;
   }
   
