@@ -1,41 +1,87 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { heroSliderService } from '../../services/heroSliderService';
 
-const slides = [
+// Default slides as fallback
+const defaultSlides = [
   {
     id: 1,
-    img: 'https://computronicslab.com/wp-content/uploads/2024/10/WhatsApp-Image-2024-10-21-at-10.50.19-AM-1-1600x700.jpeg',
+    image: 'https://computronicslab.com/wp-content/uploads/2024/10/WhatsApp-Image-2024-10-21-at-10.50.19-AM-1-1600x700.jpeg',
     title: 'Arduino Boards & Accessories',
     subtitle: 'Build IoT & embedded projects with ease',
-    cta: 'Shop Arduino',
-    color: 'from-blue-900/80 to-blue-700/60',
-    link: '/products?category=arduino'
+    buttonText: 'Shop Arduino',
+    gradientColor: 'from-blue-900/80 to-blue-700/60',
+    buttonLink: '/products?category=arduino'
   },
   {
     id: 2,
-    img: 'https://bannerengineering-h.assetsadobe.com/is/image//content/dam/banner-engineering/3d-renders/product-group/divisionimages2024/updated/Div-Main-product-grouping-2024-ctr.psd?wid=1200&hei=630&fit=crop&qlt=60&fmt=png',
+    image: 'https://bannerengineering-h.assetsadobe.com/is/image//content/dam/banner-engineering/3d-renders/product-group/divisionimages2024/updated/Div-Main-product-grouping-2024-ctr.psd?wid=1200&hei=630&fit=crop&qlt=60&fmt=png',
     title: 'Top Quality Sensors',
     subtitle: 'Wide range of sensors for all applications',
-    cta: 'Explore Sensors',
-    color: 'from-emerald-900/80 to-emerald-700/60',
-    link: '/products?category=sensors'
+    buttonText: 'Explore Sensors',
+    gradientColor: 'from-emerald-900/80 to-emerald-700/60',
+    buttonLink: '/products?category=sensors'
   },
   {
     id: 3,
-    img: 'https://cpc.farnell.com/wcsstore/ExtendedSitesCatalogAssetStore/cms/asset/images/europe/cpc/storefronts/raspberry-pi/rpi-5-banner-v4.png',
+    image: 'https://cpc.farnell.com/wcsstore/ExtendedSitesCatalogAssetStore/cms/asset/images/europe/cpc/storefronts/raspberry-pi/rpi-5-banner-v4.png',
     title: 'Raspberry Pi & Kits',
     subtitle: 'Perfect boards for prototyping & learning',
-    cta: 'View Pi Boards',
-    color: 'from-purple-900/80 to-purple-700/60',
-    link: '/products?category=raspberry-pi'
+    buttonText: 'View Pi Boards',
+    gradientColor: 'from-purple-900/80 to-purple-700/60',
+    buttonLink: '/products?category=raspberry-pi'
   },
 ];
 
 const HeroSlider = () => {
   const [current, setCurrent] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [slides, setSlides] = useState(defaultSlides);
+  const [sliderSettings, setSliderSettings] = useState({
+    enabled: true,
+    autoSlide: true,
+    slideInterval: 7000
+  });
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Fetch slides from backend
+  useEffect(() => {
+    const fetchSlides = async () => {
+      try {
+        setLoading(true);
+        const response = await heroSliderService.getHeroSlides();
+        
+        if (response.success && response.data.slides && response.data.slides.length > 0) {
+          // Map backend data to component format
+          const mappedSlides = response.data.slides.map(slide => ({
+            id: slide.id,
+            image: slide.image,
+            title: slide.title,
+            subtitle: slide.subtitle,
+            buttonText: slide.buttonText,
+            gradientColor: slide.gradientColor,
+            buttonLink: slide.buttonLink
+          }));
+          
+          setSlides(mappedSlides);
+          setSliderSettings({
+            enabled: response.data.enabled,
+            autoSlide: response.data.autoSlide,
+            slideInterval: response.data.slideInterval
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching hero slides:', error);
+        // Keep default slides on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSlides();
+  }, []);
 
   const prevSlide = () => {
     const isFirstSlide = current === 0;
@@ -47,21 +93,37 @@ const HeroSlider = () => {
     const isLastSlide = current === slides.length - 1;
     const newIndex = isLastSlide ? 0 : current + 1;
     setCurrent(newIndex);
-  }, [current]);
+  }, [current, slides.length]);
 
   const handleSlideClick = (slide) => {
-    if (slide.link) {
-      navigate(slide.link);
+    if (slide.buttonLink) {
+      navigate(slide.buttonLink);
     }
   };
 
   useEffect(() => {
-    // Only auto-slide when not hovered
-    if (!isHovered) {
-      const slideInterval = setInterval(nextSlide, 7000);
+    // Only auto-slide when not hovered and settings allow it
+    if (!isHovered && sliderSettings.autoSlide && sliderSettings.enabled) {
+      const slideInterval = setInterval(nextSlide, sliderSettings.slideInterval);
       return () => clearInterval(slideInterval);
     }
-  }, [nextSlide, isHovered]);
+  }, [nextSlide, isHovered, sliderSettings]);
+
+  // Don't render if slider is disabled or no slides
+  if (!sliderSettings.enabled || slides.length === 0) {
+    return null;
+  }
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="relative w-full h-full overflow-hidden rounded-xl shadow-2xl bg-gray-200 animate-pulse">
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="text-gray-400">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div 
@@ -82,7 +144,7 @@ const HeroSlider = () => {
           >
             {/* Background Image with Ken Burns Effect */}
             <img
-              src={slide.img}
+              src={slide.image}
               alt={slide.title}
               className={`w-full h-full object-cover transition-all duration-[10000ms] ease-linear ${
                 current === index ? 'scale-110' : 'scale-100'
@@ -90,7 +152,7 @@ const HeroSlider = () => {
             />
             
             {/* Gradient Overlay */}
-            <div className={`absolute inset-0 bg-gradient-to-r ${slide.color}`} />
+            <div className={`absolute inset-0 bg-gradient-to-r ${slide.gradientColor}`} />
             
             {/* Floating electronics decoration */}
             <div className="absolute inset-0 opacity-20">
@@ -129,7 +191,7 @@ const HeroSlider = () => {
                       handleSlideClick(slide);
                     }}
                   >
-                    {slide.cta}
+                    {slide.buttonText}
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>

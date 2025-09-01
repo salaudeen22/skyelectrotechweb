@@ -11,7 +11,12 @@ const {
   addShippingZone,
   updateShippingZone,
   deleteShippingZone,
-  calculateShippingCost
+  calculateShippingCost,
+  getHeroSlides,
+  addHeroSlide,
+  updateHeroSlide,
+  deleteHeroSlide,
+  updateHeroSliderSettings
 } = require('../controllers/settings');
 const { auth, authorize } = require('../middleware/auth');
 
@@ -45,9 +50,24 @@ const shippingMethodValidation = [
 
 const shippingZoneValidation = [
   body('name').trim().notEmpty().withMessage('Zone name is required'),
-  body('cost').isNumeric().withMessage('Cost must be a number'),
-  body('countries').optional().isArray().withMessage('Countries must be an array'),
-  body('states').optional().isArray().withMessage('States must be an array')
+  body('cost').isNumeric().withMessage('Zone cost must be a number')
+];
+
+// Hero slide validation
+const heroSlideValidation = [
+  body('title').trim().isLength({ min: 1, max: 100 }).withMessage('Title is required and must be max 100 characters'),
+  body('subtitle').trim().isLength({ min: 1, max: 200 }).withMessage('Subtitle is required and must be max 200 characters'),
+  body('image').trim().notEmpty().withMessage('Image URL is required'),
+  body('buttonText').trim().isLength({ min: 1, max: 50 }).withMessage('Button text is required and must be max 50 characters'),
+  body('buttonLink').trim().notEmpty().withMessage('Button link is required'),
+  body('gradientColor').optional().trim(),
+  body('order').optional().isInt({ min: 0 }).withMessage('Order must be a non-negative integer')
+];
+
+const heroSliderSettingsValidation = [
+  body('enabled').optional().isBoolean().withMessage('Enabled must be a boolean'),
+  body('autoSlide').optional().isBoolean().withMessage('Auto slide must be a boolean'),
+  body('slideInterval').optional().isInt({ min: 1000, max: 30000 }).withMessage('Slide interval must be between 1000 and 30000 milliseconds')
 ];
 
 const settingsValidation = [
@@ -68,6 +88,7 @@ const settingsValidation = [
 // Public routes
 router.get('/public', getPublicSettings);
 router.post('/calculate-shipping', calculateShippingCost);
+router.get('/hero-slides', getHeroSlides);
 
 // Protected routes (Admin only)
 router.use(auth, authorize('admin'));
@@ -75,6 +96,12 @@ router.use(auth, authorize('admin'));
 // Main settings routes
 router.get('/', getSettings);
 router.put('/', settingsValidation, validate, updateSettings);
+
+// Hero slider routes
+router.post('/hero-slides', heroSlideValidation, validate, addHeroSlide);
+router.put('/hero-slides/:id', heroSlideValidation, validate, updateHeroSlide);
+router.delete('/hero-slides/:id', deleteHeroSlide);
+router.put('/hero-slider', heroSliderSettingsValidation, validate, updateHeroSliderSettings);
 
 // Shipping methods routes
 router.post('/shipping-methods', shippingMethodValidation, validate, addShippingMethod);

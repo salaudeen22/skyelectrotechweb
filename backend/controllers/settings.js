@@ -130,6 +130,13 @@ const getPublicSettings = asyncHandler(async (req, res) => {
     },
     seo: settings.seo,
     socialMedia: settings.socialMedia,
+    heroSlider: {
+      enabled: settings.heroSlider?.enabled || true,
+      autoSlide: settings.heroSlider?.autoSlide || true,
+      slideInterval: settings.heroSlider?.slideInterval || 7000,
+      slides: settings.heroSlider?.slides?.filter(slide => slide.isActive)
+        .sort((a, b) => a.order - b.order) || []
+    },
     maintenance: {
       enabled: settings.maintenance.enabled,
       message: settings.maintenance.message
@@ -378,6 +385,180 @@ const calculateShippingCost = asyncHandler(async (req, res) => {
   }, 'Shipping cost calculated successfully');
 });
 
+// @desc    Get hero slides
+// @route   GET /api/settings/hero-slides
+// @access  Public
+const getHeroSlides = asyncHandler(async (req, res) => {
+  const settings = await Settings.findOne().sort('-createdAt');
+  
+  if (!settings) {
+    return sendResponse(res, 200, { slides: [], enabled: true }, 'No slides found');
+  }
+
+  // Return only active slides, sorted by order
+  const slides = settings.heroSlider?.slides?.filter(slide => slide.isActive)
+    .sort((a, b) => a.order - b.order) || [];
+
+  sendResponse(res, 200, { 
+    slides,
+    enabled: settings.heroSlider?.enabled || true,
+    autoSlide: settings.heroSlider?.autoSlide || true,
+    slideInterval: settings.heroSlider?.slideInterval || 7000
+  }, 'Hero slides retrieved successfully');
+});
+
+// @desc    Add hero slide
+// @route   POST /api/settings/hero-slides
+// @access  Private (Admin)
+const addHeroSlide = asyncHandler(async (req, res) => {
+  const { title, subtitle, image, buttonText, buttonLink, gradientColor, order } = req.body;
+
+  if (!title || !subtitle || !image || !buttonText || !buttonLink) {
+    return sendError(res, 400, 'Title, subtitle, image, button text, and button link are required');
+  }
+
+  let settings = await Settings.findOne().sort('-createdAt');
+  
+  if (!settings) {
+    settings = new Settings({
+      updatedBy: req.user._id
+    });
+  }
+
+  // Initialize heroSlider if it doesn't exist
+  if (!settings.heroSlider) {
+    settings.heroSlider = {
+      enabled: true,
+      autoSlide: true,
+      slideInterval: 7000,
+      slides: []
+    };
+  }
+
+  // Generate unique ID for the slide
+  const slideId = Date.now().toString();
+
+  // Create new slide
+  const newSlide = {
+    id: slideId,
+    title,
+    subtitle,
+    image,
+    buttonText,
+    buttonLink,
+    gradientColor: gradientColor || 'from-blue-900/80 to-blue-700/60',
+    isActive: true,
+    order: order !== undefined ? order : (settings.heroSlider.slides.length > 0 ? 
+      Math.max(...settings.heroSlider.slides.map(s => s.order || 0)) + 1 : 0),
+    createdAt: new Date()
+  };
+
+  settings.heroSlider.slides.push(newSlide);
+  settings.updatedBy = req.user._id;
+  await settings.save();
+
+  sendResponse(res, 201, { slide: newSlide }, 'Hero slide added successfully');
+});
+
+// @desc    Update hero slide
+// @route   PUT /api/settings/hero-slides/:id
+// @access  Private (Admin)
+const updateHeroSlide = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { title, subtitle, image, buttonText, buttonLink, gradientColor, isActive, order } = req.body;
+
+  const settings = await Settings.findOne().sort('-createdAt');
+  
+  if (!settings || !settings.heroSlider?.slides) {
+    return sendError(res, 404, 'No slides found');
+  }
+
+  const slideIndex = settings.heroSlider.slides.findIndex(slide => slide.id === id);
+
+  if (slideIndex === -1) {
+    return sendError(res, 404, 'Slide not found');
+  }
+
+  // Update slide fields
+  if (title !== undefined) settings.heroSlider.slides[slideIndex].title = title;
+  if (subtitle !== undefined) settings.heroSlider.slides[slideIndex].subtitle = subtitle;
+  if (image !== undefined) settings.heroSlider.slides[slideIndex].image = image;
+  if (buttonText !== undefined) settings.heroSlider.slides[slideIndex].buttonText = buttonText;
+  if (buttonLink !== undefined) settings.heroSlider.slides[slideIndex].buttonLink = buttonLink;
+  if (gradientColor !== undefined) settings.heroSlider.slides[slideIndex].gradientColor = gradientColor;
+  if (isActive !== undefined) settings.heroSlider.slides[slideIndex].isActive = isActive;
+  if (order !== undefined) settings.heroSlider.slides[slideIndex].order = order;
+
+  settings.updatedBy = req.user._id;
+  await settings.save();
+
+  sendResponse(res, 200, { 
+    slide: settings.heroSlider.slides[slideIndex] 
+  }, 'Hero slide updated successfully');
+});
+
+// @desc    Delete hero slide
+// @route   DELETE /api/settings/hero-slides/:id
+// @access  Private (Admin)
+const deleteHeroSlide = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const settings = await Settings.findOne().sort('-createdAt');
+  
+  if (!settings || !settings.heroSlider?.slides) {
+    return sendError(res, 404, 'No slides found');
+  }
+
+  const slideIndex = settings.heroSlider.slides.findIndex(slide => slide.id === id);
+
+  if (slideIndex === -1) {
+    return sendError(res, 404, 'Slide not found');
+  }
+
+  settings.heroSlider.slides.splice(slideIndex, 1);
+  settings.updatedBy = req.user._id;
+  await settings.save();
+
+  sendResponse(res, 200, {}, 'Hero slide deleted successfully');
+});
+
+// @desc    Update hero slider settings
+// @route   PUT /api/settings/hero-slider
+// @access  Private (Admin)
+const updateHeroSliderSettings = asyncHandler(async (req, res) => {
+  const { enabled, autoSlide, slideInterval } = req.body;
+
+  let settings = await Settings.findOne().sort('-createdAt');
+  
+  if (!settings) {
+    settings = new Settings({
+      updatedBy: req.user._id
+    });
+  }
+
+  // Initialize heroSlider if it doesn't exist
+  if (!settings.heroSlider) {
+    settings.heroSlider = {
+      enabled: true,
+      autoSlide: true,
+      slideInterval: 7000,
+      slides: []
+    };
+  }
+
+  // Update settings
+  if (enabled !== undefined) settings.heroSlider.enabled = enabled;
+  if (autoSlide !== undefined) settings.heroSlider.autoSlide = autoSlide;
+  if (slideInterval !== undefined) settings.heroSlider.slideInterval = slideInterval;
+
+  settings.updatedBy = req.user._id;
+  await settings.save();
+
+  sendResponse(res, 200, { 
+    heroSlider: settings.heroSlider 
+  }, 'Hero slider settings updated successfully');
+});
+
 module.exports = {
   getSettings,
   updateSettings,
@@ -388,5 +569,10 @@ module.exports = {
   addShippingZone,
   updateShippingZone,
   deleteShippingZone,
-  calculateShippingCost
+  calculateShippingCost,
+  getHeroSlides,
+  addHeroSlide,
+  updateHeroSlide,
+  deleteHeroSlide,
+  updateHeroSliderSettings
 }; 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FaCog, FaStore, FaTruck, FaCreditCard, FaEnvelope, FaGlobe, FaShareAlt, FaTools, FaDatabase, FaSave, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
-import { settingsAPI } from '../services/apiServices';
+import { FaCog, FaStore, FaTruck, FaCreditCard, FaEnvelope, FaGlobe, FaShareAlt, FaTools, FaDatabase, FaSave, FaPlus, FaEdit, FaTrash, FaImage, FaUpload } from 'react-icons/fa';
+import { settingsAPI, uploadAPI } from '../services/apiServices';
+import { heroSliderService } from '../services/heroSliderService';
 import { useSettings } from '../contexts/SettingsContext';
 import toast from 'react-hot-toast';
 
@@ -10,6 +11,28 @@ const Settings = () => {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('store');
   const { refreshSettings } = useSettings();
+
+  // Hero slider states
+  const [heroSlides, setHeroSlides] = useState([]);
+  const [heroSliderSettings, setHeroSliderSettings] = useState({
+    enabled: true,
+    autoSlide: true,
+    slideInterval: 7000
+  });
+  const [showSlideForm, setShowSlideForm] = useState(false);
+  const [editingSlide, setEditingSlide] = useState(null);
+  const [slideForm, setSlideForm] = useState({
+    title: '',
+    subtitle: '',
+    image: '',
+    buttonText: '',
+    buttonLink: '',
+    gradientColor: 'from-blue-900/80 to-blue-700/60',
+    order: 0
+  });
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
 
   const [formData, setFormData] = useState({
     storeInfo: {
@@ -92,7 +115,24 @@ const Settings = () => {
 
   useEffect(() => {
     fetchSettings();
+    fetchHeroSlides();
   }, []);
+
+  const fetchHeroSlides = async () => {
+    try {
+      const response = await heroSliderService.getHeroSlides();
+      if (response.success) {
+        setHeroSlides(response.data.slides || []);
+        setHeroSliderSettings({
+          enabled: response.data.enabled,
+          autoSlide: response.data.autoSlide,
+          slideInterval: response.data.slideInterval
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching hero slides:', error);
+    }
+  };
 
   const fetchSettings = async () => {
     try {
@@ -206,8 +246,171 @@ const Settings = () => {
     }
   };
 
+  // Hero Slider Management Functions
+  const handleAddSlide = async () => {
+    try {
+      // Upload image first if there's a new image file
+      let imageUrl = slideForm.image;
+      if (imageFile) {
+        imageUrl = await uploadSlideImage();
+      }
+
+      if (!imageUrl) {
+        toast.error('Please provide an image for the slide');
+        return;
+      }
+
+      const slideData = {
+        ...slideForm,
+        image: imageUrl
+      };
+
+      const response = await heroSliderService.addHeroSlide(slideData);
+      if (response.success) {
+        toast.success('Slide added successfully!');
+        resetSlideForm();
+        await fetchHeroSlides();
+      }
+    } catch (error) {
+      console.error('Error adding slide:', error);
+      toast.error('Failed to add slide');
+    }
+  };
+
+  const handleUpdateSlide = async () => {
+    try {
+      // Upload image first if there's a new image file
+      let imageUrl = slideForm.image;
+      if (imageFile) {
+        imageUrl = await uploadSlideImage();
+      }
+
+      const slideData = {
+        ...slideForm,
+        image: imageUrl
+      };
+
+      const response = await heroSliderService.updateHeroSlide(editingSlide.id, slideData);
+      if (response.success) {
+        toast.success('Slide updated successfully!');
+        resetSlideForm();
+        await fetchHeroSlides();
+      }
+    } catch (error) {
+      console.error('Error updating slide:', error);
+      toast.error('Failed to update slide');
+    }
+  };
+
+  const handleDeleteSlide = async (slideId) => {
+    if (window.confirm('Are you sure you want to delete this slide?')) {
+      try {
+        const response = await heroSliderService.deleteHeroSlide(slideId);
+        if (response.success) {
+          toast.success('Slide deleted successfully!');
+          await fetchHeroSlides();
+        }
+      } catch (error) {
+        console.error('Error deleting slide:', error);
+        toast.error('Failed to delete slide');
+      }
+    }
+  };
+
+  const handleEditSlide = (slide) => {
+    setEditingSlide(slide);
+    setSlideForm({
+      title: slide.title,
+      subtitle: slide.subtitle,
+      image: slide.image,
+      buttonText: slide.buttonText,
+      buttonLink: slide.buttonLink,
+      gradientColor: slide.gradientColor,
+      order: slide.order
+    });
+    setImagePreview(slide.image);
+    setImageFile(null);
+    setShowSlideForm(true);
+  };
+
+  // Image handling functions
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select a valid image file');
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB');
+        return;
+      }
+
+      setImageFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadSlideImage = async () => {
+    if (!imageFile) return slideForm.image;
+
+    try {
+      setUploadingImage(true);
+      const response = await uploadAPI.uploadSingle(imageFile, 'hero-slides');
+      if (response.success) {
+        return response.data.url;
+      } else {
+        throw new Error(response.message || 'Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image: ' + error.message);
+      throw error;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const resetSlideForm = () => {
+    setSlideForm({
+      title: '',
+      subtitle: '',
+      image: '',
+      buttonText: '',
+      buttonLink: '',
+      gradientColor: 'from-blue-900/80 to-blue-700/60',
+      order: 0
+    });
+    setImageFile(null);
+    setImagePreview('');
+    setEditingSlide(null);
+    setShowSlideForm(false);
+  };
+
+  const handleSliderSettingsUpdate = async () => {
+    try {
+      const response = await heroSliderService.updateHeroSliderSettings(heroSliderSettings);
+      if (response.success) {
+        toast.success('Slider settings updated successfully!');
+      }
+    } catch (error) {
+      console.error('Error updating slider settings:', error);
+      toast.error('Failed to update slider settings');
+    }
+  };
+
   const tabs = [
     { id: 'store', name: 'Store Info', icon: <FaStore /> },
+    { id: 'hero', name: 'Hero Slider', icon: <FaImage /> },
     { id: 'shipping', name: 'Shipping', icon: <FaTruck /> },
     { id: 'payment', name: 'Payment', icon: <FaCreditCard /> },
     { id: 'order', name: 'Orders', icon: <FaCog /> },
@@ -366,6 +569,298 @@ const Settings = () => {
                   />
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Hero Slider Tab */}
+          {activeTab === 'hero' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-gray-900">Hero Slider Management</h3>
+                <button
+                  onClick={() => {
+                    // Set the next available order number
+                    const nextOrder = heroSlides.length > 0 ? 
+                      Math.max(...heroSlides.map(s => s.order || 0)) + 1 : 0;
+                    setSlideForm(prev => ({ ...prev, order: nextOrder }));
+                    setShowSlideForm(true);
+                  }}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                >
+                  <FaPlus /> Add New Slide
+                </button>
+              </div>
+
+              {/* Slider Settings */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-4">Slider Settings</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={heroSliderSettings.enabled}
+                      onChange={(e) => setHeroSliderSettings(prev => ({ ...prev, enabled: e.target.checked }))}
+                      className="mr-2"
+                    />
+                    <label>Enable Slider</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={heroSliderSettings.autoSlide}
+                      onChange={(e) => setHeroSliderSettings(prev => ({ ...prev, autoSlide: e.target.checked }))}
+                      className="mr-2"
+                    />
+                    <label>Auto Slide</label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Slide Interval (ms)</label>
+                    <input
+                      type="number"
+                      value={heroSliderSettings.slideInterval}
+                      onChange={(e) => setHeroSliderSettings(prev => ({ ...prev, slideInterval: parseInt(e.target.value) }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      min="1000"
+                      max="30000"
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={handleSliderSettingsUpdate}
+                  className="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2"
+                >
+                  <FaSave /> Save Settings
+                </button>
+              </div>
+
+              {/* Slides List */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900">Current Slides</h4>
+                {heroSlides.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <FaImage className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                    <p>No slides added yet. Click "Add New Slide" to get started.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {heroSlides.map((slide) => (
+                      <div key={slide.id} className="border rounded-lg p-4 bg-white shadow-sm">
+                        <div className="aspect-video mb-3 overflow-hidden rounded-lg">
+                          <img
+                            src={slide.image}
+                            alt={slide.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <h5 className="font-medium text-gray-900 mb-1">{slide.title}</h5>
+                        <p className="text-sm text-gray-600 mb-2">{slide.subtitle}</p>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                            Order: {slide.order}
+                          </span>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleEditSlide(slide)}
+                              className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+                            >
+                              <FaEdit /> Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteSlide(slide.id)}
+                              className="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
+                            >
+                              <FaTrash /> Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Slide Form Modal */}
+              {showSlideForm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                  <div className="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
+                    <div className="p-6">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold">
+                          {editingSlide ? 'Edit Slide' : 'Add New Slide'}
+                        </h3>
+                        <button
+                          onClick={resetSlideForm}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                          <input
+                            type="text"
+                            value={slideForm.title}
+                            onChange={(e) => setSlideForm(prev => ({ ...prev, title: e.target.value }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Enter slide title"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
+                          <textarea
+                            value={slideForm.subtitle}
+                            onChange={(e) => setSlideForm(prev => ({ ...prev, subtitle: e.target.value }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            rows="2"
+                            placeholder="Enter slide subtitle"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Slide Image</label>
+                          
+                          {/* Image Upload */}
+                          <div className="space-y-4">
+                            {/* Current/Preview Image */}
+                            {(imagePreview || slideForm.image) && (
+                              <div className="relative">
+                                <img
+                                  src={imagePreview || slideForm.image}
+                                  alt="Slide preview"
+                                  className="w-full h-48 object-cover rounded-lg border"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setImagePreview('');
+                                    setImageFile(null);
+                                    setSlideForm(prev => ({ ...prev, image: '' }));
+                                  }}
+                                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            )}
+
+                            {/* Upload Button */}
+                            <div className="flex items-center gap-4">
+                              <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                                <FaUpload />
+                                {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleImageChange}
+                                  className="hidden"
+                                  disabled={uploadingImage}
+                                />
+                              </label>
+                              
+                              {/* Manual URL Input */}
+                              <span className="text-gray-500">or</span>
+                              <div className="flex-1">
+                                <input
+                                  type="url"
+                                  value={slideForm.image}
+                                  onChange={(e) => {
+                                    const url = e.target.value;
+                                    setSlideForm(prev => ({ ...prev, image: url }));
+                                    if (url && !imageFile) {
+                                      setImagePreview(url);
+                                    }
+                                  }}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="Or paste image URL"
+                                />
+                              </div>
+                            </div>
+                            
+                            <div className="text-sm text-gray-500">
+                              Upload a high-quality image (max 5MB) or provide a direct image URL
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
+                            <input
+                              type="text"
+                              value={slideForm.buttonText}
+                              onChange={(e) => setSlideForm(prev => ({ ...prev, buttonText: e.target.value }))}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Shop Now"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Button Link</label>
+                            <input
+                              type="text"
+                              value={slideForm.buttonLink}
+                              onChange={(e) => setSlideForm(prev => ({ ...prev, buttonLink: e.target.value }))}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="/products"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Gradient Color</label>
+                            <select
+                              value={slideForm.gradientColor}
+                              onChange={(e) => setSlideForm(prev => ({ ...prev, gradientColor: e.target.value }))}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                              <option value="from-blue-900/80 to-blue-700/60">Blue</option>
+                              <option value="from-emerald-900/80 to-emerald-700/60">Green</option>
+                              <option value="from-purple-900/80 to-purple-700/60">Purple</option>
+                              <option value="from-red-900/80 to-red-700/60">Red</option>
+                              <option value="from-amber-900/80 to-amber-700/60">Amber</option>
+                              <option value="from-gray-900/80 to-gray-700/60">Gray</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
+                            <input
+                              type="number"
+                              value={slideForm.order}
+                              onChange={(e) => setSlideForm(prev => ({ ...prev, order: parseInt(e.target.value) || 0 }))}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              min="0"
+                              placeholder="0"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Lower numbers appear first (0, 1, 2...)
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end gap-3 pt-4">
+                          <button
+                            onClick={resetSlideForm}
+                            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={editingSlide ? handleUpdateSlide : handleAddSlide}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                          >
+                            {editingSlide ? 'Update' : 'Add'} Slide
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

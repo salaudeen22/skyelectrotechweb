@@ -320,6 +320,67 @@ const settingsSchema = new mongoose.Schema({
     }
   },
 
+  // Hero Slider Settings
+  heroSlider: {
+    enabled: {
+      type: Boolean,
+      default: true
+    },
+    autoSlide: {
+      type: Boolean,
+      default: true
+    },
+    slideInterval: {
+      type: Number,
+      default: 7000 // milliseconds
+    },
+    slides: [{
+      id: {
+        type: String,
+        required: true
+      },
+      title: {
+        type: String,
+        required: true,
+        maxlength: 100
+      },
+      subtitle: {
+        type: String,
+        required: true,
+        maxlength: 200
+      },
+      image: {
+        type: String,
+        required: true
+      },
+      buttonText: {
+        type: String,
+        required: true,
+        maxlength: 50
+      },
+      buttonLink: {
+        type: String,
+        required: true
+      },
+      gradientColor: {
+        type: String,
+        default: 'from-blue-900/80 to-blue-700/60'
+      },
+      isActive: {
+        type: Boolean,
+        default: true
+      },
+      order: {
+        type: Number,
+        default: 0
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now
+      }
+    }]
+  },
+
   updatedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
