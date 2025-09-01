@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { wishlistAPI, recommendationsAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
 import { getPrimaryImage } from '../utils/imageUtils';
+import { generateProductUrl } from '../utils/urlHelpers';
 import OptimizedImage from './OptimizedImage';
 
 const ProductCard = ({ product, showWishlistButton = true }) => {
@@ -120,7 +121,7 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
 
       {/* Product Image Section */}
       <Link 
-        to={`/products/${product._id}`} 
+        to={generateProductUrl(product)} 
         className="block overflow-hidden"
         aria-label={`View details for ${product.name}`}
       >
@@ -141,7 +142,7 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
             {product.category?.name || 'Electronics'}
           </p>
           <Link 
-            to={`/products/${product._id}`}
+            to={generateProductUrl(product)}
             aria-label={`View details for ${product.name}`}
           >
             <h3 className="text-sm sm:text-lg font-bold text-gray-900 mt-2 hover:text-blue-600 transition-colors line-clamp-2" title={product.name}>

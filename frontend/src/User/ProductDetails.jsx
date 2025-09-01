@@ -12,6 +12,7 @@ import LoadingErrorHandler from '../Components/LoadingErrorHandler';
 import ProductRecommendations from '../Components/ProductRecommendations';
 import ShareSheet from '../Components/ShareSheet';
 import { buildProductUrl } from '../utils/env';
+import { extractIdFromSlug } from '../utils/urlHelpers';
 
 
 // Development-only render counter
@@ -30,11 +31,21 @@ const ProductDetails = () => {
   // Development-only render counter
   const renderCount = useRenderCounter();
   
-  const { id } = useParams();
+  const { id, slugWithId } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { addToCart, addingToCart } = useCart();
   const { trackProduct, trackCartAdd, trackWishlistAdd, trackClick } = useAnalytics();
+
+  // Extract ID from either direct ID param or slug-with-id format
+  const productId = useMemo(() => {
+    if (id) return id; // Old format: /products/:id
+    if (slugWithId) {
+      // New format: /product/:slugWithId (e.g., "arduino-uno-r3-68b2cd5f712bfd6a19ff7a15")
+      return extractIdFromSlug(slugWithId);
+    }
+    return null;
+  }, [id, slugWithId]);
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -47,7 +58,7 @@ const ProductDetails = () => {
 
   // Simple fetch function
   const fetchProduct = useCallback(async () => {
-    if (!id) return;
+    if (!productId) return;
     
     try {
       setLoading(true);
@@ -58,7 +69,7 @@ const ProductDetails = () => {
         setTimeout(() => reject(new Error('Request timeout')), 10000); // 10 second timeout
       });
       
-      const apiPromise = productsAPI.getProduct(id);
+      const apiPromise = productsAPI.getProduct(productId);
       const response = await Promise.race([apiPromise, timeoutPromise]);
       
       setProduct(response.data.product);
@@ -68,7 +79,7 @@ const ProductDetails = () => {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [productId]);
 
   // Fetch product on mount and when id changes
   useEffect(() => {

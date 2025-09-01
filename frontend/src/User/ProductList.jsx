@@ -7,10 +7,21 @@ import { productsAPI, categoriesAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
 import LoadingSpinner, { SkeletonLoader } from '../Components/LoadingSpinner';
 import LoadingErrorHandler from '../Components/LoadingErrorHandler';
+import { extractIdFromSlug } from '../utils/urlHelpers';
 
 const ProductList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { categoryId } = useParams();
+  const { categoryId, slugWithId } = useParams();
+  
+  // Extract category ID from either direct categoryId param or slug-with-id format
+  const actualCategoryId = useMemo(() => {
+    if (categoryId) return categoryId; // Old format: /category/:categoryId
+    if (slugWithId) {
+      // New format: /category/:slugWithId (e.g., "electronics-68b1ce31ad88a62e23c699cc")
+      return extractIdFromSlug(slugWithId);
+    }
+    return null;
+  }, [categoryId, slugWithId]);
   
   // State
   const [products, setProducts] = useState([]);
@@ -24,7 +35,7 @@ const ProductList = () => {
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || searchParams.get('search') || '');
-  const [selectedCategories, setSelectedCategories] = useState(categoryId ? [categoryId] : []);
+  const [selectedCategories, setSelectedCategories] = useState(actualCategoryId ? [actualCategoryId] : []);
   const [priceRange, setPriceRange] = useState({ 
     min: searchParams.get('minPrice') || '', 
     max: searchParams.get('maxPrice') || '' 
@@ -174,14 +185,14 @@ const ProductList = () => {
   const totalPages = Math.ceil(totalProducts / 12);
 
   // SEO data
-  const currentCategory = categories.find(c => c._id === categoryId);
-  const pageTitle = categoryId ? 
+  const currentCategory = categories.find(c => c._id === actualCategoryId);
+  const pageTitle = actualCategoryId ? 
     `${currentCategory?.name || 'Category'} Products - SkyElectroTech` :
     searchParams.get('q') || searchParams.get('search') ? 
     `Search Results for "${searchParams.get('q') || searchParams.get('search')}" - SkyElectroTech` :
     'All Products - SkyElectroTech';
   
-  const pageDescription = categoryId ?
+  const pageDescription = actualCategoryId ?
     `Browse our ${currentCategory?.name || 'category'} products. Quality electronics and components at competitive prices.` :
     searchParams.get('q') || searchParams.get('search') ?
     `Search results for "${searchParams.get('q') || searchParams.get('search')}" - Find electronics and components at SkyElectroTech.` :
@@ -201,8 +212,8 @@ const ProductList = () => {
         {/* Page Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-            {categoryId ? 
-              categories.find(c => c._id === categoryId)?.name + ' Products' || 'Products' 
+            {actualCategoryId ? 
+              categories.find(c => c._id === actualCategoryId)?.name + ' Products' || 'Products' 
               : searchParams.get('q') || searchParams.get('search') ? 
               `Search Results for "${searchParams.get('q') || searchParams.get('search')}"` 
               : 'All Products'

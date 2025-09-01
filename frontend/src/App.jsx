@@ -149,7 +149,11 @@ const App = () => {
                   <Route path="terms-of-service" element={<TermsOfService />} />
                   <Route path="products" element={<ProductList />} />
                   <Route path="products/:id" element={<ProductDetails />} />
+                  {/* SEO-friendly product URLs with slug-id format */}
+                  <Route path="product/:slugWithId" element={<ProductDetails />} />
                   <Route path="category/:categoryId" element={<ProductList />} />
+                  {/* SEO-friendly category URLs with slug-id format */}
+                  <Route path="category/:slugWithId" element={<ProductList />} />
                   <Route path="search" element={<ProductList />} />
                 </Route>
 

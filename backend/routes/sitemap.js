@@ -122,7 +122,7 @@ router.get('/sitemap', asyncHandler(async (req, res) => {
 
 // GET /api/robots.txt
 router.get('/robots.txt', asyncHandler(async (req, res) => {
-  const baseUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL || 'https://sweet-hamster-f11198.netlify.app';
+  const baseUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL || 'https://skyelectrotech.in';
   
   const robotsTxt = `User-agent: *
 Allow: /
@@ -135,11 +135,13 @@ Disallow: /auth/
 
 # Allow important pages
 Allow: /products
+Allow: /product/
 Allow: /category/
 Allow: /search
 
-# Sitemap
+# Sitemaps
 Sitemap: ${baseUrl}/sitemap.xml
+Sitemap: ${baseUrl}/api/sitemap.xml
 
 # Crawl-delay
 Crawl-delay: 1`;
