@@ -117,8 +117,19 @@ const Login = () => {
                 {/* Right Panel - Form */}
                 <div className="w-full lg:w-1/2 p-6 sm:p-12 flex flex-col justify-center">
                     <div className="w-full max-w-md mx-auto">
-                        <div className="text-center lg:text-left mb-8">
-                            <h2 className="text-3xl font-bold text-gray-800">Sign In</h2>
+                        <div className="mb-8">
+                            <div className="flex items-center justify-between">
+                                <div className="text-center lg:text-left">
+                                    <h2 className="text-3xl font-bold text-gray-800">Sign In</h2>
+                                </div>
+                                <Link 
+                                    to="/" 
+                                    className="flex items-center px-4 py-2 text-gray-700 hover:text-indigo-600 rounded-lg transition-colors"
+                                    onClick={() => trackClick('home_button', 'login_page')}
+                                >
+                                    <span className="text-sm font-medium">Home</span>
+                                </Link>
+                            </div>
                             <p className="text-gray-600 mt-2">
                                 New to {settings.storeInfo.name}?{' '}
                                 <Link to="/auth/register" className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
