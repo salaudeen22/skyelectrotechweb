@@ -27,6 +27,7 @@ import ProductList from './User/ProductList';
 import ProductDetails from './User/ProductDetails';
 import Cart from './User/Cart';
 import ShippingInfo from './User/ShippingInfo';
+import ShippingMethod from './User/ShippingMethod';
 import Payment from './User/Payment';
 import Checkout from './User/Checkout';
 import OrderHistory from './User/OrderHistory';
@@ -174,6 +175,7 @@ const App = () => {
                 }>
                   <Route path="cart" element={<Cart />} />
                   <Route path="shipping" element={<ShippingInfo />} />
+                  <Route path="shipping-method" element={<ShippingMethod />} />
                   <Route path="payment" element={<Payment />} />
                   <Route path="checkout" element={<Checkout />} />
                   <Route path="orders" element={<OrderHistory />} />

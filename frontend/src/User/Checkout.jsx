@@ -309,7 +309,7 @@ const Checkout = () => {
   // --- Calculations ---
   const totals = {
     subtotal: cartTotal,
-    shipping: cartTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.defaultShippingCost,
+    shipping: settings.shipping.defaultShippingCost,
     tax: Math.round(cartTotal * (settings.payment.taxRate / 100)), // Dynamic tax rate
     get total() { return this.subtotal + this.shipping + this.tax }
   };

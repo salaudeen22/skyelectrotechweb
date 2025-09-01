@@ -519,8 +519,8 @@ const ShippingInfo = () => {
     // Track the shipping step
     trackClick('shipping_info_completed', 'shipping');
 
-    // Navigate to payment page
-    navigate('/user/payment');
+    // Navigate to shipping method selection page
+    navigate('/user/shipping-method');
   };
 
   // Clear all checkout data
@@ -577,6 +577,11 @@ const ShippingInfo = () => {
             <div className="w-8 h-1 bg-gray-300"></div>
             <div className="flex items-center">
               <div className="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">2</div>
+              <span className="ml-2 text-sm font-medium text-gray-500">Shipping Method</span>
+            </div>
+            <div className="w-8 h-1 bg-gray-300"></div>
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">3</div>
               <span className="ml-2 text-sm font-medium text-gray-500">Payment</span>
             </div>
           </div>
@@ -675,12 +680,11 @@ const ShippingInfo = () => {
               </div>
               <div className="p-6 border-t space-y-3">
                 <div className="flex justify-between text-slate-600"><span>Subtotal</span><span>{formatAmount(cartTotal)}</span></div>
-                <div className="flex justify-between text-slate-600"><span>Shipping</span><span>{formatAmount(cartTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.defaultShippingCost)}</span></div>
                 <div className="flex justify-between text-slate-600 mb-4"><span>Tax ({settings.payment.taxRate}%)</span><span>{formatAmount(Math.round(cartTotal * (settings.payment.taxRate / 100)))}</span></div>
                 <div className="border-t-2 border-dashed pt-4">
                   <div className="flex justify-between font-bold text-xl text-slate-900">
                     <span>Total</span>
-                    <span>{formatAmount(cartTotal + (cartTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.defaultShippingCost) + Math.round(cartTotal * (settings.payment.taxRate / 100)))}</span>
+                    <span>{formatAmount(cartTotal + Math.round(cartTotal * (settings.payment.taxRate / 100)))}</span>
                   </div>
                 </div>
               </div>
@@ -699,7 +703,7 @@ const ShippingInfo = () => {
                     </>
                   ) : (
                     <>
-                      Proceed to Payment
+                      Continue to Shipping Method
                       <FiArrowRight className="ml-2 w-5 h-5" />
                     </>
                   )}

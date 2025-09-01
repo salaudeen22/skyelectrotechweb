@@ -31,6 +31,16 @@ const Settings = () => {
     order: 0
   });
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  // Shipping method states
+  const [showShippingMethodForm, setShowShippingMethodForm] = useState(false);
+  const [editingShippingMethod, setEditingShippingMethod] = useState(null);
+  const [shippingMethodForm, setShippingMethodForm] = useState({
+    name: '',
+    cost: 0,
+    estimatedDays: '',
+    isActive: true
+  });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
 
@@ -405,6 +415,57 @@ const Settings = () => {
     } catch (error) {
       console.error('Error updating slider settings:', error);
       toast.error('Failed to update slider settings');
+    }
+  };
+
+  // Shipping method handlers
+  const handleAddOrUpdateShippingMethod = async () => {
+    try {
+      if (!shippingMethodForm.name.trim()) {
+        toast.error('Please enter a method name');
+        return;
+      }
+
+      if (editingShippingMethod) {
+        // Update existing method
+        const response = await settingsAPI.updateShippingMethod(editingShippingMethod._id, shippingMethodForm);
+        if (response.success) {
+          toast.success('Shipping method updated successfully!');
+          await fetchSettings(); // Refresh settings
+        }
+      } else {
+        // Add new method
+        const response = await settingsAPI.addShippingMethod(shippingMethodForm);
+        if (response.success) {
+          toast.success('Shipping method added successfully!');
+          await fetchSettings(); // Refresh settings
+        }
+      }
+
+      // Reset form
+      setShowShippingMethodForm(false);
+      setEditingShippingMethod(null);
+      setShippingMethodForm({ name: '', cost: 0, estimatedDays: '', isActive: true });
+    } catch (error) {
+      console.error('Error managing shipping method:', error);
+      toast.error('Failed to save shipping method');
+    }
+  };
+
+  const handleDeleteShippingMethod = async (methodId) => {
+    if (!window.confirm('Are you sure you want to delete this shipping method?')) {
+      return;
+    }
+
+    try {
+      const response = await settingsAPI.deleteShippingMethod(methodId);
+      if (response.success) {
+        toast.success('Shipping method deleted successfully!');
+        await fetchSettings(); // Refresh settings
+      }
+    } catch (error) {
+      console.error('Error deleting shipping method:', error);
+      toast.error('Failed to delete shipping method');
     }
   };
 
@@ -904,7 +965,17 @@ const Settings = () => {
 
               {/* Shipping Methods */}
               <div className="border-t pt-6">
-                <h4 className="text-md font-semibold text-gray-900 mb-4">Shipping Methods</h4>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-md font-semibold text-gray-900">Shipping Methods</h4>
+                  <button
+                    onClick={() => setShowShippingMethodForm(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                  >
+                    Add Method
+                  </button>
+                </div>
+                
+                {/* Shipping Methods List */}
                 {settings?.shipping?.shippingMethods?.map((method) => (
                   <div key={method._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
                     <div>
@@ -915,9 +986,100 @@ const Settings = () => {
                       <span className={`px-2 py-1 text-xs rounded-full ${method.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                         {method.isActive ? 'Active' : 'Inactive'}
                       </span>
+                      <button
+                        onClick={() => {
+                          setEditingShippingMethod(method);
+                          setShippingMethodForm({
+                            name: method.name,
+                            cost: method.cost,
+                            estimatedDays: method.estimatedDays,
+                            isActive: method.isActive
+                          });
+                          setShowShippingMethodForm(true);
+                        }}
+                        className="px-2 py-1 text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteShippingMethod(method._id)}
+                        className="px-2 py-1 text-xs text-red-600 hover:text-red-800"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
                 ))}
+
+                {/* Add/Edit Shipping Method Form */}
+                {showShippingMethodForm && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+                      <h3 className="text-lg font-semibold mb-4">
+                        {editingShippingMethod ? 'Edit Shipping Method' : 'Add Shipping Method'}
+                      </h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Method Name</label>
+                          <input
+                            type="text"
+                            value={shippingMethodForm.name}
+                            onChange={(e) => setShippingMethodForm(prev => ({...prev, name: e.target.value}))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="e.g., Standard Delivery"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Cost (₹)</label>
+                          <input
+                            type="number"
+                            value={shippingMethodForm.cost}
+                            onChange={(e) => setShippingMethodForm(prev => ({...prev, cost: Number(e.target.value)}))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Estimated Delivery</label>
+                          <input
+                            type="text"
+                            value={shippingMethodForm.estimatedDays}
+                            onChange={(e) => setShippingMethodForm(prev => ({...prev, estimatedDays: e.target.value}))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="e.g., 3-5 business days"
+                          />
+                        </div>
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={shippingMethodForm.isActive}
+                            onChange={(e) => setShippingMethodForm(prev => ({...prev, isActive: e.target.checked}))}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="ml-2 text-sm text-gray-700">Active</span>
+                        </div>
+                      </div>
+                      <div className="flex space-x-3 mt-6">
+                        <button
+                          onClick={() => {
+                            setShowShippingMethodForm(false);
+                            setEditingShippingMethod(null);
+                            setShippingMethodForm({ name: '', cost: 0, estimatedDays: '', isActive: true });
+                          }}
+                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleAddOrUpdateShippingMethod}
+                          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        >
+                          {editingShippingMethod ? 'Update' : 'Add'} Method
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

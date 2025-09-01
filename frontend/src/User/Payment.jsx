@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FiShoppingCart, 
@@ -30,16 +30,34 @@ const Payment = () => {
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedMethod, setSelectedMethod] = useState('card');
   const [shippingInfo, setShippingInfo] = useState(null);
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
 
   const paymentSectionRef = useRef(null);
 
   // --- Calculations ---
   const totals = {
     subtotal: cartTotal,
-    shipping: cartTotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.defaultShippingCost,
+    shipping: selectedShippingMethod?.cost || settings.shipping.defaultShippingCost,
     tax: Math.round(cartTotal * (settings.payment.taxRate / 100)), // Dynamic tax rate
     get total() { return this.subtotal + this.shipping + this.tax }
   };
+
+  // --- Payment Logic ---
+  const loadPaymentMethods = useCallback(async () => {
+    try {
+      const response = await paymentAPI.getPaymentMethods();
+      const methods = response.data.paymentMethods || [];
+      setPaymentMethods(methods);
+      
+      // Set default payment method if available
+      if (methods.length > 0) {
+        setSelectedMethod(methods[0].id);
+      }
+    } catch (error) {
+      console.error('Error loading payment methods:', error);
+      toast.error('Failed to load payment methods');
+    }
+  }, []);
 
   // --- Effects ---
   useEffect(() => {
@@ -57,9 +75,18 @@ const Payment = () => {
       return;
     }
 
+    // Check if shipping method is selected
+    const storedShippingMethod = localStorage.getItem('selectedShippingMethod');
+    if (!storedShippingMethod) {
+      toast.error("Please select a shipping method first.");
+      navigate('/user/shipping-method');
+      return;
+    }
+
     setShippingInfo(JSON.parse(storedShippingInfo));
+    setSelectedShippingMethod(JSON.parse(storedShippingMethod));
     loadPaymentMethods();
-  }, [cart, navigate]);
+  }, [cart, navigate, loadPaymentMethods]);
 
   // Clear checkout data when component unmounts (after successful payment)
   useEffect(() => {
@@ -68,27 +95,6 @@ const Payment = () => {
       // For now, we'll keep the data until explicitly cleared
     };
   }, []);
-
-  // --- Payment Logic ---
-  const loadPaymentMethods = async () => {
-    try {
-      const response = await paymentAPI.getPaymentMethods();
-      const methods = response.data.paymentMethods || [];
-      setPaymentMethods(methods);
-      // If current selection is not available, default to first method
-      if (!methods.find(m => m.id === selectedMethod)) {
-        setSelectedMethod(methods[0]?.id || 'card');
-      }
-    } catch (err) {
-      console.error('Error loading payment methods:', err);
-      // Fallback to basic methods
-      setPaymentMethods([
-        { id: 'card', name: 'Credit & Debit Cards', description: 'Visa, MasterCard, RuPay & more' },
-        { id: 'upi', name: 'UPI', description: 'Google Pay, PhonePe, Paytm & more' },
-        { id: 'netbanking', name: 'Netbanking', description: 'All major banks supported' },
-      ]);
-    }
-  };
 
   const getMethodIcon = (methodId) => {
     const iconProps = { className: "w-6 h-6" };
@@ -122,6 +128,12 @@ const Payment = () => {
         quantity: item.quantity,
       })),
       shippingInfo: shippingInfo,
+      shippingMethod: selectedShippingMethod ? {
+        methodId: selectedShippingMethod._id,
+        name: selectedShippingMethod.name,
+        estimatedDays: selectedShippingMethod.estimatedDays,
+        cost: selectedShippingMethod.cost
+      } : undefined,
       itemsPrice: totals.subtotal,
       taxPrice: totals.tax,
       shippingPrice: totals.shipping,
@@ -334,7 +346,7 @@ const Payment = () => {
   };
 
   const handleBackToShipping = () => {
-    navigate('/user/shipping');
+    navigate('/user/shipping-method');
   };
 
   // Clear all checkout data
@@ -343,6 +355,7 @@ const Payment = () => {
     localStorage.removeItem('checkout_selected_address');
     localStorage.removeItem('shippingInfo');
     localStorage.removeItem('selectedAddress');
+    localStorage.removeItem('selectedShippingMethod');
   };
 
   if (!cart || cart.length === 0 || !shippingInfo) return null;
@@ -361,7 +374,14 @@ const Payment = () => {
             </div>
             <div className="w-8 h-1 bg-green-600"></div>
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+              <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <FiCheck className="w-4 h-4" />
+              </div>
+              <span className="ml-2 text-sm font-medium text-green-600">Shipping Method</span>
+            </div>
+            <div className="w-8 h-1 bg-green-600"></div>
+            <div className="flex items-center">
+              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
               <span className="ml-2 text-sm font-medium text-blue-600">Payment</span>
             </div>
           </div>
@@ -404,12 +424,39 @@ const Payment = () => {
                     <p className="text-slate-900">{shippingInfo.city}, {shippingInfo.state} {shippingInfo.zipCode}</p>
                   </div>
                 </div>
+                
+                {/* Shipping Method Info */}
+                {selectedShippingMethod && (
+                  <div className="mt-4 pt-4 border-t border-green-300">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-green-800 font-medium">Delivery Method</p>
+                        <p className="text-slate-900 font-semibold">{selectedShippingMethod.name}</p>
+                        <p className="text-sm text-slate-600 flex items-center mt-1">
+                          <FiTruck className="w-4 h-4 mr-1" />
+                          {selectedShippingMethod.estimatedDays}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-green-800 font-medium">Shipping Cost</p>
+                        <p className="text-slate-900 font-semibold">
+                          {totals.shipping === 0 ? (
+                            <span className="text-green-600">FREE</span>
+                          ) : (
+                            `₹${selectedShippingMethod.cost}`
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 <button
                   onClick={handleBackToShipping}
                   className="mt-4 text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
                 >
                   <FiArrowLeft className="w-4 h-4 mr-1" />
-                  Edit Shipping Information
+                  Back to Shipping Method
                 </button>
               </div>
             </div>

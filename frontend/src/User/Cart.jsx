@@ -22,8 +22,8 @@ const Cart = () => {
   }, [cartItems]);
   
   const shipping = useMemo(() => {
-    return subtotal >= settings.shipping.freeShippingThreshold ? 0 : settings.shipping.defaultShippingCost;
-  }, [subtotal, settings.shipping.freeShippingThreshold, settings.shipping.defaultShippingCost]);
+    return settings.shipping.defaultShippingCost;
+  }, [settings.shipping.defaultShippingCost]);
   
   const total = useMemo(() => {
     return subtotal + shipping;
@@ -33,8 +33,9 @@ const Cart = () => {
   useEffect(() => {
     const shippingInfo = localStorage.getItem('shippingInfo');
     const checkoutShippingInfo = localStorage.getItem('checkout_shipping_info');
+    const selectedShippingMethod = localStorage.getItem('selectedShippingMethod');
     
-    if (shippingInfo || checkoutShippingInfo) {
+    if (shippingInfo || checkoutShippingInfo || selectedShippingMethod) {
       setHasIncompleteCheckout(true);
     }
   }, []);
@@ -54,6 +55,7 @@ const Cart = () => {
       localStorage.removeItem('checkout_selected_address');
       localStorage.removeItem('shippingInfo');
       localStorage.removeItem('selectedAddress');
+      localStorage.removeItem('selectedShippingMethod');
       setHasIncompleteCheckout(false);
       toast.success('Checkout data cleared!');
     }
@@ -187,21 +189,7 @@ const Cart = () => {
                             <span>Subtotal ({cartItems.length} items)</span>
                             <span>₹{subtotal.toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between text-slate-600 text-sm sm:text-base">
-                            <span>Shipping</span>
-                            <span>
-                                {shipping === 0 ? (
-                                    <span className="text-green-600 font-medium">FREE</span>
-                                ) : (
-                                    `₹${shipping.toFixed(2)}`
-                                )}
-                            </span>
-                        </div>
-                        {shipping > 0 && (
-                            <div className="text-xs text-slate-500 bg-blue-50 p-2 rounded">
-                                Add ₹{(settings.shipping.freeShippingThreshold - subtotal).toFixed(2)} more for free shipping!
-                            </div>
-                        )}
+                
                         <div className="flex justify-between font-bold text-slate-900 text-base sm:text-lg border-t pt-3 mt-3">
                             <span>Total</span>
                             <span>₹{total.toFixed(2)}</span>
