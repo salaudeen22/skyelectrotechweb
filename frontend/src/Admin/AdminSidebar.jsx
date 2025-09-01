@@ -1,5 +1,5 @@
-import React from 'react';
-import { NavLink, Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSettings } from '../contexts/SettingsContext';
 import { useAuth } from '../hooks/useAuth';
 import { 
@@ -17,7 +17,11 @@ import {
     FaCog,
     FaClipboardList, // Icon for order management
     FaUndo, // Icon for return requests
-    FaTools // Icon for services
+    FaTools, // Icon for services
+    FaChevronDown,
+    FaChevronRight,
+    FaStore, // Icon for store management
+    FaShoppingCart // Icon for commerce
 } from 'react-icons/fa';
 // import { toast } from 'react-hot-toast';
 
@@ -25,6 +29,32 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
     const { settings } = useSettings();
     const navigate = useNavigate();
     const { logout } = useAuth();
+    const location = useLocation();
+    
+    // State for collapsible sections
+    const [collapsedSections, setCollapsedSections] = useState(() => {
+        // Auto-expand sections based on current route
+        const currentPath = window.location.pathname;
+        return {
+            catalog: !(['/admin/products', '/admin/categories'].some(route => currentPath.startsWith(route))),
+            sales: !(['/admin/orders', '/admin/return-requests'].some(route => currentPath.startsWith(route))),
+            customers: !(['/admin/employees', '/admin/comments', '/admin/services'].some(route => currentPath.startsWith(route))),
+            system: false
+        };
+    });
+    
+    // Toggle collapsed state for a section
+    const toggleSection = (section) => {
+        setCollapsedSections(prev => ({
+            ...prev,
+            [section]: !prev[section]
+        }));
+    };
+
+    // Check if any route in a group is active
+    const isGroupActive = (routes) => {
+        return routes.some(route => location.pathname.startsWith(route));
+    };
     
     // --- Style Definitions for NavLinks ---
     const commonLinkStyles = "flex items-center w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base font-medium rounded-lg transition-all duration-200 group";
@@ -34,6 +64,12 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
 
     // Style for inactive links
     const inactiveLinkStyle = "text-gray-600 hover:bg-blue-50 hover:text-blue-600";
+
+    // Style for group headers
+    const groupHeaderStyle = "flex items-center justify-between w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base font-medium rounded-lg transition-all duration-200 cursor-pointer hover:bg-gray-50";
+
+    // Style for sub-items
+    const subItemStyle = "flex items-center w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 group";
 
     // Handle mobile menu close when clicking on a link
     const handleLinkClick = () => {
@@ -100,6 +136,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
 
             {/* Main Navigation */}
             <nav className="flex-1 px-3 sm:px-4 py-4 sm:py-6 space-y-1 sm:space-y-2 overflow-y-auto">
+                {/* Dashboard - Always visible */}
                 <NavLink 
                     to="/admin" 
                     end 
@@ -109,62 +146,127 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                     <FaTachometerAlt className="mr-3 sm:mr-4 h-4 w-4 sm:h-5 sm:w-5" />
                     <span>Dashboard</span>
                 </NavLink>
-                <NavLink 
-                    to="/admin/products" 
-                    onClick={handleLinkClick}
-                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
-                > 
-                    <FaBoxOpen className="mr-3 sm:mr-4 h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>Products</span>
-                </NavLink>
-                <NavLink 
-                    to="/admin/categories" 
-                    onClick={handleLinkClick}
-                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
-                > 
-                    <FaTags className="mr-3 sm:mr-4 h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>Categories</span>
-                </NavLink>
-                <NavLink 
-                    to="/admin/comments" 
-                    onClick={handleLinkClick}
-                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
-                > 
-                    <FaComments className="mr-3 sm:mr-4 h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>Comments</span>
-                </NavLink>
-                <NavLink 
-                    to="/admin/orders" 
-                    onClick={handleLinkClick}
-                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
-                > 
-                    <FaClipboardList className="mr-3 sm:mr-4 h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>Orders & Sales</span>
-                </NavLink>
-                <NavLink 
-                    to="/admin/return-requests" 
-                    onClick={handleLinkClick}
-                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
-                > 
-                    <FaUndo className="mr-3 sm:mr-4 h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>Return Requests</span>
-                </NavLink>
-                <NavLink 
-                    to="/admin/services" 
-                    onClick={handleLinkClick}
-                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
-                > 
-                    <FaTools className="mr-3 sm:mr-4 h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>Service Requests</span>
-                </NavLink>
-                <NavLink 
-                    to="/admin/employees" 
-                    onClick={handleLinkClick}
-                    className={({isActive}) => `${commonLinkStyles} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
-                > 
-                    <FaUsers className="mr-3 sm:mr-4 h-4 w-4 sm:h-5 sm:w-5" />
-                    <span>Employees</span>
-                </NavLink>
+
+                {/* Catalog Management Group */}
+                <div className="space-y-1">
+                    <button
+                        onClick={() => toggleSection('catalog')}
+                        className={`${groupHeaderStyle} ${isGroupActive(['/admin/products', '/admin/categories']) ? 'text-blue-600 bg-blue-50' : 'text-gray-700'}`}
+                    >
+                        <div className="flex items-center">
+                            <FaStore className="mr-3 sm:mr-4 h-4 w-4 sm:h-5 sm:w-5" />
+                            <span>Catalog</span>
+                        </div>
+                        {collapsedSections.catalog ? 
+                            <FaChevronRight className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200" /> : 
+                            <FaChevronDown className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200" />
+                        }
+                    </button>
+                    {!collapsedSections.catalog && (
+                        <div className="space-y-1 transition-all duration-200 ease-in-out">
+                            <NavLink 
+                                to="/admin/products" 
+                                onClick={handleLinkClick}
+                                className={({isActive}) => `${subItemStyle} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
+                            > 
+                                <FaBoxOpen className="mr-3 sm:mr-4 h-3 w-3 sm:h-4 sm:w-4" />
+                                <span>Products</span>
+                            </NavLink>
+                            <NavLink 
+                                to="/admin/categories" 
+                                onClick={handleLinkClick}
+                                className={({isActive}) => `${subItemStyle} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
+                            > 
+                                <FaTags className="mr-3 sm:mr-4 h-3 w-3 sm:h-4 sm:w-4" />
+                                <span>Categories</span>
+                            </NavLink>
+                        </div>
+                    )}
+                </div>
+
+                {/* Sales & Orders Group */}
+                <div className="space-y-1">
+                    <button
+                        onClick={() => toggleSection('sales')}
+                        className={`${groupHeaderStyle} ${isGroupActive(['/admin/orders', '/admin/return-requests']) ? 'text-blue-600 bg-blue-50' : 'text-gray-700'}`}
+                    >
+                        <div className="flex items-center">
+                            <FaShoppingCart className="mr-3 sm:mr-4 h-4 w-4 sm:h-5 sm:w-5" />
+                            <span>Sales</span>
+                        </div>
+                        {collapsedSections.sales ? 
+                            <FaChevronRight className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200" /> : 
+                            <FaChevronDown className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200" />
+                        }
+                    </button>
+                    {!collapsedSections.sales && (
+                        <div className="space-y-1 transition-all duration-200 ease-in-out">
+                            <NavLink 
+                                to="/admin/orders" 
+                                onClick={handleLinkClick}
+                                className={({isActive}) => `${subItemStyle} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
+                            > 
+                                <FaClipboardList className="mr-3 sm:mr-4 h-3 w-3 sm:h-4 sm:w-4" />
+                                <span>Orders & Sales</span>
+                            </NavLink>
+                            <NavLink 
+                                to="/admin/return-requests" 
+                                onClick={handleLinkClick}
+                                className={({isActive}) => `${subItemStyle} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
+                            > 
+                                <FaUndo className="mr-3 sm:mr-4 h-3 w-3 sm:h-4 sm:w-4" />
+                                <span>Return Requests</span>
+                            </NavLink>
+                        </div>
+                    )}
+                </div>
+
+                {/* Customer Management Group */}
+                <div className="space-y-1">
+                    <button
+                        onClick={() => toggleSection('customers')}
+                        className={`${groupHeaderStyle} ${isGroupActive(['/admin/employees', '/admin/comments', '/admin/services']) ? 'text-blue-600 bg-blue-50' : 'text-gray-700'}`}
+                    >
+                        <div className="flex items-center">
+                            <FaUsers className="mr-3 sm:mr-4 h-4 w-4 sm:h-5 sm:w-5" />
+                            <span>Customer Care</span>
+                        </div>
+                        {collapsedSections.customers ? 
+                            <FaChevronRight className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200" /> : 
+                            <FaChevronDown className="h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-200" />
+                        }
+                    </button>
+                    {!collapsedSections.customers && (
+                        <div className="space-y-1 transition-all duration-200 ease-in-out">
+                            <NavLink 
+                                to="/admin/employees" 
+                                onClick={handleLinkClick}
+                                className={({isActive}) => `${subItemStyle} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
+                            > 
+                                <FaUsers className="mr-3 sm:mr-4 h-3 w-3 sm:h-4 sm:w-4" />
+                                <span>Employees</span>
+                            </NavLink>
+                            <NavLink 
+                                to="/admin/comments" 
+                                onClick={handleLinkClick}
+                                className={({isActive}) => `${subItemStyle} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
+                            > 
+                                <FaComments className="mr-3 sm:mr-4 h-3 w-3 sm:h-4 sm:w-4" />
+                                <span>Comments</span>
+                            </NavLink>
+                            <NavLink 
+                                to="/admin/services" 
+                                onClick={handleLinkClick}
+                                className={({isActive}) => `${subItemStyle} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
+                            > 
+                                <FaTools className="mr-3 sm:mr-4 h-3 w-3 sm:h-4 sm:w-4" />
+                                <span>Service Requests</span>
+                            </NavLink>
+                        </div>
+                    )}
+                </div>
+
+                {/* System Settings - Always visible */}
                 <NavLink 
                     to="/admin/settings" 
                     onClick={handleLinkClick}
