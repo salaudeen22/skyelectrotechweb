@@ -168,7 +168,7 @@ const Navbar = () => {
                         className="relative"
                       >
                         <Link
-                          to={`/products?category=${category.slug}`}
+                          to={`/products?category=${category._id}`}
                           className="flex items-center justify-between px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                         >
                           <span>{category.name}</span>
@@ -191,7 +191,7 @@ const Navbar = () => {
                             {category.subcategories.map((subcategory) => (
                               <Link
                                 key={subcategory._id}
-                                to={`/products?category=${subcategory.slug}`}
+                                to={`/products?category=${subcategory._id}`}
                                 className="block px-3 py-1 text-xs text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
                               >
                                 {subcategory.name}
@@ -445,7 +445,7 @@ const Navbar = () => {
                         <div key={category._id} className="border-l-2 border-gray-200 ml-2">
                           <div className="flex items-center justify-between">
                             <Link
-                              to={`/products?category=${category.slug}`}
+                              to={`/products?category=${category._id}`}
                               className="flex-1 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
                               onClick={resetMobileStates}
                             >
@@ -478,7 +478,7 @@ const Navbar = () => {
                               {category.subcategories.map((subcategory) => (
                                 <div key={subcategory._id}>
                                   <Link
-                                    to={`/products?category=${subcategory.slug}`}
+                                    to={`/products?category=${subcategory._id}`}
                                     className="block px-3 py-1.5 rounded-md text-xs font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
                                     onClick={resetMobileStates}
                                   >
@@ -491,7 +491,7 @@ const Navbar = () => {
                                       {subcategory.subcategories.map((subSubcategory) => (
                                         <Link
                                           key={subSubcategory._id}
-                                          to={`/products?category=${subSubcategory.slug}`}
+                                          to={`/products?category=${subSubcategory._id}`}
                                           className="block px-3 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-blue-600 hover:bg-gray-50"
                                           onClick={resetMobileStates}
                                         >

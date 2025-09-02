@@ -14,7 +14,8 @@ import {
     FiCpu,
     FiTruck,
     FiShield,
-    FiAlertCircle
+    FiAlertCircle,
+    FiHome
 } from 'react-icons/fi';
 import { FaGoogle, FaApple } from 'react-icons/fa';
 
@@ -115,22 +116,56 @@ const Login = () => {
                 </div>
 
                 {/* Right Panel - Form */}
-                <div className="w-full lg:w-1/2 p-6 sm:p-12 flex flex-col justify-center">
+                <div className="w-full lg:w-1/2 p-4 sm:p-6 lg:p-12 flex flex-col justify-center">
                     <div className="w-full max-w-md mx-auto">
                         <div className="mb-8">
-                            <div className="flex items-center justify-between">
+                            {/* Mobile Header with Home Button */}
+                            <div className="block sm:hidden mb-4">
+                                <div className="flex items-center justify-between">
+                                    <Link 
+                                        to="/" 
+                                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-indigo-600 bg-gray-50 hover:bg-indigo-50 rounded-md transition-all duration-200"
+                                        onClick={() => trackClick('home_button', 'login_page')}
+                                    >
+                                        <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                        </svg>
+                                        Home
+                                    </Link>
+                                    <div className="flex items-center">
+                                        <img 
+                                            src="/favicon_io (1)/android-chrome-192x192.png" 
+                                            alt={settings.storeInfo.name} 
+                                            className="h-8 w-8 object-contain"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Desktop Header */}
+                            <div className="hidden sm:flex sm:items-center sm:justify-between mb-4">
                                 <div className="text-center lg:text-left">
                                     <h2 className="text-3xl font-bold text-gray-800">Sign In</h2>
                                 </div>
                                 <Link 
                                     to="/" 
-                                    className="flex items-center px-4 py-2 text-gray-700 hover:text-indigo-600 rounded-lg transition-colors"
+                                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 bg-gray-50 hover:bg-indigo-50 rounded-lg transition-all duration-200"
                                     onClick={() => trackClick('home_button', 'login_page')}
                                 >
-                                    <span className="text-sm font-medium">Home</span>
+                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                    </svg>
+                                    Home
                                 </Link>
                             </div>
-                            <p className="text-gray-600 mt-2">
+
+                            {/* Mobile Title */}
+                            <div className="block sm:hidden text-center mb-4">
+                                <h2 className="text-2xl font-bold text-gray-800">Welcome Back</h2>
+                                <p className="text-sm text-gray-500 mt-1">Sign in to your account</p>
+                            </div>
+
+                            <p className="text-gray-600 text-center lg:text-left">
                                 New to {settings.storeInfo.name}?{' '}
                                 <Link to="/auth/register" className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
                                     Create an account
@@ -138,7 +173,7 @@ const Login = () => {
                             </p>
                         </div>
 
-                        <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+                        <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit} noValidate>
                             <InputField icon={<FiMail />} name="email" type="email" placeholder="your.email@example.com" value={formData.email} onChange={handleChange} error={errors.email} />
                             <InputField icon={<FiLock />} name="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={formData.password} onChange={handleChange} error={errors.password}>
                                 <PasswordToggle isVisible={showPassword} onToggle={() => setShowPassword(!showPassword)} />
@@ -173,7 +208,7 @@ const Login = () => {
                             </button>
                         </form>
                         
-                        <div className="mt-8">
+                        <div className="mt-6 sm:mt-8">
                             <div className="relative">
                                 <div className="absolute inset-0 flex items-center">
                                     <div className="w-full border-t border-gray-300"></div>
@@ -182,7 +217,7 @@ const Login = () => {
                                     <span className="px-2 bg-white text-gray-500">Or continue with</span>
                                 </div>
                             </div>
-                            <div className="mt-6">
+                            <div className="mt-4 sm:mt-6">
                                 <GoogleOAuthButton 
                                     text="Sign in with Google"
                                     disabled={isLoading}

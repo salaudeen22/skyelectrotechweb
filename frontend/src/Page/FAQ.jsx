@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import SEO from '../Components/SEO';
 
 const FAQ = () => {
   const [openItems, setOpenItems] = useState(new Set());
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const toggleItem = (index) => {
     const newOpenItems = new Set(openItems);
