@@ -3,7 +3,7 @@ const crypto = require('crypto');
 
 // Check if Razorpay credentials are configured
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-  console.error('Razorpay credentials not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables.');
+  console.error('Razorpay credentials not configured Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables.');
 }
 
 // Initialize Razorpay instance

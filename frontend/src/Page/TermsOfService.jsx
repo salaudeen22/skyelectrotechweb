@@ -10,7 +10,7 @@ const TermsOfService = () => {
   return (
     <>
       <SEO 
-        title="Terms of Service - SkyElectroTech"
+        title="Terms of Service - SkyElectroTech "
         description="Read SkyElectroTech's terms of service covering website usage, product purchases, returns, and customer obligations."
         keywords="terms of service, terms and conditions, SkyElectroTech terms, website usage terms"
       />
