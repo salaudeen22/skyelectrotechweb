@@ -24,7 +24,9 @@ const generateSitemap = async () => {
     { url: '/about', priority: '0.7', changefreq: 'monthly' },
     { url: '/contact', priority: '0.7', changefreq: 'monthly' },
     { url: '/privacy-policy', priority: '0.3', changefreq: 'yearly' },
-    { url: '/terms-of-service', priority: '0.3', changefreq: 'yearly' }
+    { url: '/terms-of-service', priority: '0.3', changefreq: 'yearly' },
+    { url: '/shipping-policy', priority: '0.3', changefreq: 'yearly' },
+    { url: '/cancellation-refunds', priority: '0.3', changefreq: 'yearly' }
   ];
 
   // Helper function to create SEO-friendly slug from product name

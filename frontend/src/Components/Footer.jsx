@@ -43,6 +43,8 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><Link to="/privacy-policy" className="text-base text-gray-600 hover:text-blue-600">Privacy Policy</Link></li>
               <li><Link to="/terms-of-service" className="text-base text-gray-600 hover:text-blue-600">Terms of Service</Link></li>
+              <li><Link to="/shipping-policy" className="text-base text-gray-600 hover:text-blue-600">Shipping Policy</Link></li>
+              <li><Link to="/cancellation-refunds" className="text-base text-gray-600 hover:text-blue-600">Cancellation & Refunds</Link></li>
             </ul>
           </div>
           {/* Google Maps Location */}

@@ -23,6 +23,8 @@ import Contact from './Page/Contact';
 import FAQ from './Page/FAQ';
 import PrivacyPolicy from './Page/PrivacyPolicy';
 import TermsOfService from './Page/TermsOfService';
+import ShippingPolicy from './Page/ShippingPolicy';
+import CancellationRefunds from './Page/CancellationRefunds';
 import ProductList from './User/ProductList';
 import ProductDetails from './User/ProductDetails';
 import Cart from './User/Cart';
@@ -147,6 +149,8 @@ const App = () => {
                   <Route path="faq" element={<FAQ />} />
                   <Route path="privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="terms-of-service" element={<TermsOfService />} />
+                  <Route path="shipping-policy" element={<ShippingPolicy />} />
+                  <Route path="cancellation-refunds" element={<CancellationRefunds />} />
                   <Route path="products" element={<ProductList />} />
                   <Route path="products/:id" element={<ProductDetails />} />
                   {/* SEO-friendly product URLs with slug-id format */}
