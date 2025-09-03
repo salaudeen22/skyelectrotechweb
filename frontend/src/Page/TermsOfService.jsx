@@ -71,7 +71,7 @@ const TermsOfService = () => {
 
               <h2 className="text-2xl font-bold text-gray-900 mb-6">6. Returns and Refunds</h2>
               <p className="text-gray-700 mb-4">
-                We accept returns within 7 days of delivery for most products. Items must be in original 
+                We accept returns within 24 hours of delivery for most products. Items must be in original 
                 packaging and unused condition. Some products are non-returnable. Return shipping costs 
                 are the responsibility of the customer unless the item is defective.
               </p>

@@ -32,7 +32,7 @@ const CancellationRefunds = () => {
                 <h2 className="text-xl font-bold text-green-900 mb-4">Quick Summary</h2>
                 <ul className="list-disc pl-6 text-green-800 space-y-2">
                   <li><strong>Order Cancellation:</strong> Free cancellation before shipping</li>
-                  <li><strong>Return Window:</strong> 7 days from delivery date</li>
+                  <li><strong>Return Window:</strong> 24 hours from delivery date</li>
                   <li><strong>Refund Processing:</strong> 3-7 business days after return</li>
                   <li><strong>Return Shipping:</strong> ₹100-200 (customer responsibility unless defective)</li>
                 </ul>
@@ -61,8 +61,8 @@ const CancellationRefunds = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Return Window</h3>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <p className="text-blue-800">
-                  <strong>7 Days Return Policy:</strong> You can return most items within 7 days of delivery. 
-                  Some categories may have different return windows as specified below.
+                  <strong>24 Hours Return Policy:</strong> You can return most items within 24 hours of delivery. 
+                  This policy ensures quick resolution and product freshness for our small business operations.
                 </p>
               </div>
 
@@ -200,7 +200,7 @@ const CancellationRefunds = () => {
               
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Electronics & Gadgets</h3>
               <ul className="list-disc pl-6 text-gray-700 mb-6">
-                <li>7 days return window for electronics</li>
+                <li>24 hours return window for electronics</li>
                 <li>Must include original packaging, accessories, and warranty cards</li>
                 <li>Serial numbers and warranty stickers must be intact</li>
                 <li>Software licenses cannot be transferred back</li>
@@ -219,7 +219,7 @@ const CancellationRefunds = () => {
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                 <h3 className="text-lg font-semibold text-yellow-900 mb-3">Important Distinction</h3>
                 <ul className="list-disc pl-6 text-yellow-800 space-y-2">
-                  <li><strong>Returns:</strong> For items you want to send back for refund (7 days)</li>
+                  <li><strong>Returns:</strong> For items you want to send back for refund (24 hours)</li>
                   <li><strong>Warranty:</strong> For defective items after the return period (varies by product)</li>
                   <li><strong>Replacement:</strong> Available for defective items within return period</li>
                 </ul>

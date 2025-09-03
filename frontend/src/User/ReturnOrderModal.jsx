@@ -262,12 +262,12 @@ const ReturnOrderModal = ({ order, isOpen, onClose, onReturnSubmit }) => {
               <div className="text-sm text-blue-800">
                 <p className="font-medium mb-1">Return Policy (Small Business)</p>
                 <ul className="space-y-1 text-xs">
-                  <li>• Returns must be requested within 48 hours of delivery</li>
+                  <li>• Returns must be requested within 24 hours of delivery</li>
                   <li>• Products must be in original condition with all packaging</li>
                   <li>• Return shipping costs: ₹100-200 (depending on location)</li>
                   <li>• Refunds processed within 3-5 business days after receiving return</li>
                   <li>• We use third-party delivery partners for returns</li>
-                  <li>• After 48 hours, contact support for special cases</li>
+                  <li>• After 24 hours, contact support for special cases</li>
                   <li>• Electronics items require careful handling during return</li>
                   <li>• Return pickup scheduled within 24-48 hours of approval</li>
                 </ul>
