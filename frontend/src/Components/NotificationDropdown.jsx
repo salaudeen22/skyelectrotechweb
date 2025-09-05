@@ -116,11 +116,11 @@ const NotificationDropdown = ({ onClose }) => {
   return (
     <>
       {/* Desktop Dropdown */}
-      <div className="notification-dropdown hidden md:block absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-hidden">
+      <div className="notification-dropdown hidden sm:block absolute right-0 mt-2 w-72 sm:w-80 lg:w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[70vh] sm:max-h-96 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex items-center space-x-2">
-            <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Notifications</h3>
             {unreadCount > 0 && (
               <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full animate-pulse">
                 {unreadCount} new
@@ -157,11 +157,11 @@ const NotificationDropdown = ({ onClose }) => {
 
         {/* Actions */}
         {selectedNotifications.length > 0 && (
-          <div className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200">
-            <span className="text-sm text-gray-600">
+          <div className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 border-b border-gray-200">
+            <span className="text-xs sm:text-sm text-gray-600">
               {selectedNotifications.length} selected
             </span>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 sm:space-x-2">
               <button
                 onClick={handleMarkAsRead}
                 disabled={isMarkingRead}
@@ -183,7 +183,7 @@ const NotificationDropdown = ({ onClose }) => {
         )}
 
         {/* Notifications List */}
-        <div className="max-h-64 overflow-y-auto">
+        <div className="max-h-48 sm:max-h-64 overflow-y-auto">
           {loading ? (
             <div className="p-4 text-center text-gray-500">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
@@ -200,7 +200,7 @@ const NotificationDropdown = ({ onClose }) => {
               {notifications.map((notification) => (
                 <div
                   key={notification._id}
-                  className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
+                  className={`p-3 sm:p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
                     selectedNotifications.includes(notification._id) ? 'bg-blue-50' : ''
                   }`}
                   onClick={() => handleSelectNotification(notification._id)}
@@ -224,7 +224,7 @@ const NotificationDropdown = ({ onClose }) => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <p className={`text-sm font-medium ${
+                          <p className={`text-xs sm:text-sm font-medium ${
                             !notification.isRead ? 'text-gray-900' : 'text-gray-600'
                           }`}>
                             {notification.title}
@@ -279,7 +279,7 @@ const NotificationDropdown = ({ onClose }) => {
       </div>
 
       {/* Mobile Modal */}
-      <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+      <div className="sm:hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
         <div className="bg-white w-full max-h-[80vh] rounded-t-lg shadow-xl overflow-hidden">
           {/* Mobile Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">

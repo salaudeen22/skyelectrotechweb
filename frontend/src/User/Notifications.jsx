@@ -128,30 +128,31 @@ const Notifications = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-              <p className="text-gray-600 mt-1">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+            <div className="mb-3 sm:mb-0">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Notifications</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">
                 {unreadCount} unread • {notifications.length} total
               </p>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAsRead}
                   disabled={isMarkingRead}
-                  className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors text-sm sm:text-base"
                 >
                   <FiCheck className="w-4 h-4" />
-                  <span>{isMarkingRead ? 'Marking...' : 'Mark All as Read'}</span>
+                  <span className="hidden sm:inline">{isMarkingRead ? 'Marking...' : 'Mark All as Read'}</span>
+                  <span className="sm:hidden">{isMarkingRead ? 'Marking...' : 'Mark All'}</span>
                 </button>
               )}
               <Link
                 to="/notifications/settings"
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base"
               >
                 <FiSettings className="w-4 h-4" />
                 <span>Settings</span>
@@ -160,7 +161,7 @@ const Notifications = () => {
           </div>
 
           {/* Search and Filter */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <div className="flex-1 relative">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
@@ -168,7 +169,7 @@ const Notifications = () => {
                 placeholder="Search notifications..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -176,7 +177,7 @@ const Notifications = () => {
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-0 sm:min-w-max"
               >
                 <option value="all">All Notifications</option>
                 <option value="unread">Unread Only</option>
@@ -188,24 +189,25 @@ const Notifications = () => {
 
         {/* Actions */}
         {selectedNotifications.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 mb-4 sm:mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+              <span className="text-xs sm:text-sm text-gray-600">
                 {selectedNotifications.length} notification{selectedNotifications.length !== 1 ? 's' : ''} selected
               </span>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2 sm:space-x-3">
                 <button
                   onClick={handleMarkAsRead}
                   disabled={isMarkingRead}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors text-sm sm:text-base"
                 >
                   <FiCheck className="w-4 h-4" />
-                  <span>{isMarkingRead ? 'Marking...' : 'Mark as Read'}</span>
+                  <span className="hidden sm:inline">{isMarkingRead ? 'Marking...' : 'Mark as Read'}</span>
+                  <span className="sm:hidden">{isMarkingRead ? 'Mark' : 'Read'}</span>
                 </button>
                 <button
                   onClick={handleDeleteSelected}
                   disabled={isDeleting}
-                  className="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 transition-colors text-sm sm:text-base"
                 >
                   <FiTrash2 className="w-4 h-4" />
                   <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
@@ -251,11 +253,11 @@ const Notifications = () => {
               {filteredNotifications.map((notification) => (
                 <div
                   key={notification._id}
-                  className={`p-6 hover:bg-gray-50 transition-colors ${
+                  className={`p-4 sm:p-6 hover:bg-gray-50 transition-colors ${
                     selectedNotifications.includes(notification._id) ? 'bg-blue-50' : ''
                   } ${!notification.isRead ? 'bg-blue-50/50 border-l-4 border-blue-500' : ''}`}
                 >
-                  <div className="flex items-start space-x-4">
+                  <div className="flex items-start space-x-3 sm:space-x-4">
                     {/* Checkbox */}
                     <input
                       type="checkbox"
@@ -266,31 +268,31 @@ const Notifications = () => {
                     
                     {/* Notification Icon */}
                     <div className="flex-shrink-0">
-                      <span className="text-3xl">{getNotificationIcon(notification.type)}</span>
+                      <span className="text-2xl sm:text-3xl">{getNotificationIcon(notification.type)}</span>
                     </div>
                     
                     {/* Notification Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <h3 className={`text-lg font-semibold ${
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 mb-2">
+                            <h3 className={`text-base sm:text-lg font-semibold ${
                               !notification.isRead ? 'text-gray-900' : 'text-gray-700'
                             }`}>
                               {notification.title}
                             </h3>
                             {!notification.isRead && (
-                              <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                              <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full w-fit">
                                 New
                               </span>
                             )}
                           </div>
-                          <p className="text-gray-600 mb-3 leading-relaxed">
+                          <p className="text-sm sm:text-base text-gray-600 mb-3 leading-relaxed">
                             {notification.message}
                           </p>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4">
-                              <span className="text-sm text-gray-400">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0">
+                            <div className="flex items-center space-x-3 sm:space-x-4">
+                              <span className="text-xs sm:text-sm text-gray-400">
                                 {notification.timeAgo}
                               </span>
                               <span className={`text-xs px-2 py-1 rounded-full ${
@@ -304,7 +306,7 @@ const Notifications = () => {
                             {notification.actionUrl && (
                               <Link
                                 to={notification.actionUrl}
-                                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                                className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 font-medium self-start sm:self-auto"
                               >
                                 View Details →
                               </Link>
