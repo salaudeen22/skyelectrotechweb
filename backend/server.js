@@ -240,6 +240,7 @@ app.use('/api/comments', require('./routes/comments'));
 app.use('/api/services', require('./routes/services'));
 app.use('/api/recommendations', require('./routes/recommendations'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/coupons', require('./routes/coupons'));
 app.use('/api', require('./routes/sitemap'));
 
 // Health check endpoint

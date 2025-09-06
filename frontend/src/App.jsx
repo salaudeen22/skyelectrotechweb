@@ -59,6 +59,7 @@ import Settings from './Admin/Settings';
 import OrdersAndSales from './Admin/OrderManagement';
 import ReturnRequests from './Admin/ReturnRequests';
 import ServiceRequests from './Admin/ServiceRequests';
+import CouponManagement from './Admin/CouponManagement';
 
 // Components
 import ProtectedRoute from './Components/ProtectedRoute';
@@ -254,6 +255,11 @@ const App = () => {
                   <Route path="return-requests" element={
                     <ProtectedRoute allowedRoles={['admin']}>
                       <ReturnRequests />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="coupons" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <CouponManagement />
                     </ProtectedRoute>
                   } />
                   <Route path="services" element={

@@ -21,7 +21,8 @@ import {
     FaChevronDown,
     FaChevronRight,
     FaStore, // Icon for store management
-    FaShoppingCart // Icon for commerce
+    FaShoppingCart, // Icon for commerce
+    FaTicketAlt // Icon for coupons
 } from 'react-icons/fa';
 // import { toast } from 'react-hot-toast';
 
@@ -37,7 +38,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
         const currentPath = window.location.pathname;
         return {
             catalog: !(['/admin/products', '/admin/categories'].some(route => currentPath.startsWith(route))),
-            sales: !(['/admin/orders', '/admin/return-requests'].some(route => currentPath.startsWith(route))),
+            sales: !(['/admin/orders', '/admin/return-requests', '/admin/coupons'].some(route => currentPath.startsWith(route))),
             customers: !(['/admin/employees', '/admin/comments', '/admin/services'].some(route => currentPath.startsWith(route))),
             system: false
         };
@@ -188,7 +189,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                 <div className="space-y-1">
                     <button
                         onClick={() => toggleSection('sales')}
-                        className={`${groupHeaderStyle} ${isGroupActive(['/admin/orders', '/admin/return-requests']) ? 'text-blue-600 bg-blue-50' : 'text-gray-700'}`}
+                        className={`${groupHeaderStyle} ${isGroupActive(['/admin/orders', '/admin/return-requests', '/admin/coupons']) ? 'text-blue-600 bg-blue-50' : 'text-gray-700'}`}
                     >
                         <div className="flex items-center">
                             <FaShoppingCart className="mr-3 sm:mr-4 h-4 w-4 sm:h-5 sm:w-5" />
@@ -216,6 +217,14 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                             > 
                                 <FaUndo className="mr-3 sm:mr-4 h-3 w-3 sm:h-4 sm:w-4" />
                                 <span>Return Requests</span>
+                            </NavLink>
+                            <NavLink 
+                                to="/admin/coupons" 
+                                onClick={handleLinkClick}
+                                className={({isActive}) => `${subItemStyle} ${isActive ? activeLinkStyle : inactiveLinkStyle}`}
+                            > 
+                                <FaTicketAlt className="mr-3 sm:mr-4 h-3 w-3 sm:h-4 sm:w-4" />
+                                <span>Coupons</span>
                             </NavLink>
                         </div>
                     )}

@@ -3,6 +3,7 @@ const Product = require('../models/Product');
 const Cart = require('../models/Cart');
 const User = require('../models/User');
 const ReturnRequest = require('../models/ReturnRequest');
+const { applyCouponToOrder } = require('./coupons');
 const { sendResponse, sendError, asyncHandler, paginate, getPaginationMeta } = require('../utils/helpers');
 const { refundPayment } = require('../config/razorpay');
 const { sendOrderConfirmationEmail, sendOrderNotificationEmail, sendOrderStatusUpdateEmail, sendReturnRequestEmail, sendReturnApprovedEmail, sendReturnRejectedEmail, sendReturnPickupScheduledEmail, sendReturnUserHandedOverEmail } = require('../utils/email');
@@ -25,7 +26,8 @@ const createOrder = asyncHandler(async (req, res) => {
     paymentMethod,
     paymentStatus,
     razorpayPaymentId,
-    razorpayOrderId
+    razorpayOrderId,
+    couponCode
   } = req.body;
 
   // Validate and process order items
@@ -52,8 +54,51 @@ const createOrder = asyncHandler(async (req, res) => {
     });
   }
 
-  // Calculate total price
-  const totalPrice = calculatedItemsPrice + taxPrice + shippingPrice;
+  // Validate coupon if provided (don't apply yet, just validate)
+  let couponData = null;
+  let discountAmount = 0;
+  const originalTotal = calculatedItemsPrice + taxPrice + shippingPrice;
+  
+  if (couponCode) {
+    try {
+      // Import Coupon model for validation
+      const Coupon = require('../models/Coupon');
+      const coupon = await Coupon.findByCode(couponCode);
+      
+      if (!coupon || !coupon.isValid()) {
+        return sendError(res, 400, 'Invalid or expired coupon');
+      }
+      
+      const userValidation = coupon.canUserUseCoupon(req.user._id);
+      if (!userValidation.canUse) {
+        return sendError(res, 400, userValidation.reason);
+      }
+      
+      if (originalTotal < coupon.minimumOrderAmount) {
+        return sendError(res, 400, `Minimum order amount of ₹${coupon.minimumOrderAmount} is required for this coupon`);
+      }
+      
+      // Calculate discount amount
+      discountAmount = coupon.calculateDiscount(originalTotal, originalTotal);
+      
+      couponData = {
+        coupon,
+        discountAmount,
+        couponDetails: {
+          code: coupon.code,
+          name: coupon.name,
+          discountType: coupon.discountType,
+          discountValue: coupon.discountValue
+        }
+      };
+    } catch (couponError) {
+      console.error('Coupon validation error:', couponError);
+      return sendError(res, 400, couponError.message);
+    }
+  }
+
+  // Calculate final total price after discount
+  const totalPrice = originalTotal - discountAmount;
 
   // Create order
   const orderData = {
@@ -72,6 +117,13 @@ const createOrder = asyncHandler(async (req, res) => {
     taxPrice,
     shippingPrice,
     totalPrice,
+    coupon: couponData ? {
+      code: couponData.couponDetails.code,
+      name: couponData.couponDetails.name,
+      discountType: couponData.couponDetails.discountType,
+      discountValue: couponData.couponDetails.discountValue,
+      discountAmount: discountAmount
+    } : undefined,
     orderStatus: paymentStatus === 'paid' ? 'confirmed' : 'pending'
   };
   
@@ -99,6 +151,17 @@ const createOrder = asyncHandler(async (req, res) => {
 
     const order = await Order.create(orderData);
     console.log('Order created successfully:', order._id);
+
+    // Apply coupon usage tracking if coupon was used
+    if (couponData && couponData.coupon) {
+      try {
+        await couponData.coupon.applyCoupon(req.user._id, order._id, discountAmount);
+        console.log('Coupon applied successfully:', couponCode);
+      } catch (couponError) {
+        console.error('Failed to track coupon usage:', couponError);
+        // Don't fail the order creation if coupon tracking fails
+      }
+    }
 
     // Clear user's cart
     await Cart.findOneAndDelete({ user: req.user._id });

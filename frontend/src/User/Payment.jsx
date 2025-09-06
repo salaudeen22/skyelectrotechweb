@@ -13,6 +13,7 @@ import {
   FiMapPin
 } from 'react-icons/fi';
 import { useCart } from '../hooks/useCart';
+import CouponInput from '../Components/CouponInput';
 
 import { paymentAPI, ordersAPI } from '../services/apiServices';
 import { useAnalytics } from '../hooks/useAnalytics';
@@ -31,6 +32,7 @@ const Payment = () => {
   const [selectedMethod, setSelectedMethod] = useState('online');
   const [shippingInfo, setShippingInfo] = useState(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
 
   const paymentSectionRef = useRef(null);
 
@@ -39,7 +41,8 @@ const Payment = () => {
     subtotal: cartTotal,
     shipping: selectedShippingMethod?.cost || settings.shipping.defaultShippingCost,
     tax: Math.round(cartTotal * (settings.payment.taxRate / 100)), // Dynamic tax rate
-    get total() { return this.subtotal + this.shipping + this.tax }
+    discount: appliedCoupon?.discountAmount || 0,
+    get total() { return Math.max(0, this.subtotal + this.shipping + this.tax - this.discount) }
   };
 
   // --- Payment Logic ---
@@ -135,6 +138,7 @@ const Payment = () => {
       taxPrice: totals.tax,
       shippingPrice: totals.shipping,
       totalPrice: totals.total,
+      couponCode: appliedCoupon?.code || undefined,
     };
     
     try {
@@ -353,6 +357,14 @@ const Payment = () => {
     navigate('/user/shipping-method');
   };
 
+  const handleCouponApplied = (couponData) => {
+    setAppliedCoupon(couponData);
+  };
+
+  const handleCouponRemoved = () => {
+    setAppliedCoupon(null);
+  };
+
   // Clear all checkout data
   const clearAllCheckoutData = () => {
     localStorage.removeItem('checkout_shipping_info');
@@ -497,6 +509,16 @@ const Payment = () => {
                 </div>
               )}
             </div>
+
+            {/* Coupon Section */}
+            <CouponInput
+              onCouponApplied={handleCouponApplied}
+              onCouponRemoved={handleCouponRemoved}
+              orderAmount={totals.subtotal + totals.tax + totals.shipping}
+              cartItems={cart}
+              appliedCoupon={appliedCoupon}
+              disabled={isSubmitting}
+            />
           </div>
 
           {/* Right Side: Order Summary */}
@@ -527,7 +549,13 @@ const Payment = () => {
               <div className="p-6 border-t space-y-3">
                 <div className="flex justify-between text-slate-600"><span>Subtotal</span><span>{formatAmount(totals.subtotal)}</span></div>
                 <div className="flex justify-between text-slate-600"><span>Shipping</span><span>{formatAmount(totals.shipping)}</span></div>
-                <div className="flex justify-between text-slate-600 mb-4"><span>Tax (18%)</span><span>{formatAmount(totals.tax)}</span></div>
+                <div className="flex justify-between text-slate-600"><span>Tax (18%)</span><span>{formatAmount(totals.tax)}</span></div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-green-600 font-medium">
+                    <span>Discount ({appliedCoupon.code})</span>
+                    <span>-{formatAmount(totals.discount)}</span>
+                  </div>
+                )}
                 <div className="border-t-2 border-dashed pt-4">
                   <div className="flex justify-between font-bold text-xl text-slate-900">
                     <span>Total</span>

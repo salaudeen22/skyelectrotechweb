@@ -819,6 +819,68 @@ export const recommendationsAPI = {
   }
 };
 
+// Coupon API calls
+export const couponsAPI = {
+  // Validate coupon code (User)
+  validateCoupon: async (couponCode, orderData) => {
+    const response = await api.post(`/coupons/validate/${couponCode}`, orderData);
+    return response.data;
+  },
+
+  // Get available coupons for user (User)
+  getAvailableCoupons: async (orderAmount) => {
+    const response = await api.get('/coupons/user/available', {
+      params: orderAmount ? { orderAmount } : {}
+    });
+    return response.data;
+  },
+
+  // Admin coupon management
+  getAllCoupons: async (params = {}) => {
+    const response = await api.get('/coupons', { params });
+    return response.data;
+  },
+
+  getCouponById: async (couponId) => {
+    const response = await api.get(`/coupons/${couponId}`);
+    return response.data;
+  },
+
+  createCoupon: async (couponData) => {
+    const response = await api.post('/coupons', couponData);
+    return response.data;
+  },
+
+  updateCoupon: async (couponId, couponData) => {
+    const response = await api.put(`/coupons/${couponId}`, couponData);
+    return response.data;
+  },
+
+  deleteCoupon: async (couponId) => {
+    const response = await api.delete(`/coupons/${couponId}`);
+    return response.data;
+  },
+
+  getCouponStats: async (couponId) => {
+    const response = await api.get(`/coupons/${couponId}/stats`);
+    return response.data;
+  },
+
+  // Coupon issuance
+  issueCoupon: async (couponId, userIds, channel = 'admin') => {
+    const response = await api.post(`/coupons/${couponId}/issue`, {
+      userIds,
+      channel
+    });
+    return response.data;
+  },
+
+  getCouponIssuanceStats: async (couponId) => {
+    const response = await api.get(`/coupons/${couponId}/issuance-stats`);
+    return response.data;
+  }
+};
+
 // Export aliases for backward compatibility
 export const authServices = authAPI;
 export const productServices = productsAPI;
@@ -833,3 +895,4 @@ export const bulkUploadServices = bulkUploadAPI;
 export const commentServices = commentsAPI;
 export const serviceServices = servicesAPI;
 export const recommendationServices = recommendationsAPI;
+export const couponServices = couponsAPI;
