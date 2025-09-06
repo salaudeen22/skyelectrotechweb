@@ -40,6 +40,20 @@ const generateSitemap = async () => {
       .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
   };
 
+  // Helper function to escape XML special characters
+  const escapeXml = (text) => {
+    if (!text) return '';
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;')
+      .replace(/°/g, '&#176;') // Degree symbol
+      .replace(/×/g, '&#215;') // Multiplication symbol
+      .replace(/±/g, '&#177;'); // Plus-minus symbol
+  };
+
   // Add static pages
   staticPages.forEach(page => {
     sitemap += `
@@ -58,7 +72,7 @@ const generateSitemap = async () => {
       const categorySlug = createSlug(category.name);
       sitemap += `
   <url>
-    <loc>${baseUrl}/category/${categorySlug}-${category._id}</loc>
+    <loc>${escapeXml(`${baseUrl}/category/${categorySlug}-${category._id}`)}</loc>
     <lastmod>${category.updatedAt.toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -79,7 +93,7 @@ const generateSitemap = async () => {
       const productSlug = createSlug(product.name);
       sitemap += `
   <url>
-    <loc>${baseUrl}/product/${productSlug}-${product._id}</loc>
+    <loc>${escapeXml(`${baseUrl}/product/${productSlug}-${product._id}`)}</loc>
     <lastmod>${product.updatedAt.toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>`;
@@ -91,9 +105,9 @@ const generateSitemap = async () => {
           if (imageUrl) {
             sitemap += `
     <image:image>
-      <image:loc>${imageUrl}</image:loc>
-      <image:caption>${product.name}</image:caption>
-      <image:title>${product.name}</image:title>
+      <image:loc>${escapeXml(imageUrl)}</image:loc>
+      <image:caption>${escapeXml(product.name)}</image:caption>
+      <image:title>${escapeXml(product.name)}</image:title>
     </image:image>`;
           }
         });

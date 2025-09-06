@@ -66,4 +66,4 @@ Host: https://skyelectrotech.in
 
 # Sitemaps
 Sitemap: https://skyelectrotech.in/sitemap.xml
-Sitemap: https://skyelectrotech.in/api/sitemap.xml
+Sitemap: https://api.skyelectrotech.in/api/sitemap.xml
