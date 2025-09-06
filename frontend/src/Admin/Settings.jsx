@@ -1149,7 +1149,7 @@ const Settings = () => {
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div>
                       <h5 className="font-medium">Online Payment</h5>
-                      <p className="text-sm text-gray-600">Credit/Debit cards, UPI, Net Banking</p>
+                      <p className="text-sm text-gray-600">Razorpay - Cards, UPI, Net Banking & Digital Wallets</p>
                     </div>
                     <div className="flex items-center">
                       <input

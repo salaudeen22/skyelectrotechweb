@@ -16,7 +16,7 @@ const RazorpayPayment = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState([]);
-  const [selectedMethod, setSelectedMethod] = useState('card');
+  const [selectedMethod, setSelectedMethod] = useState('online');
   const [orderId, setOrderId] = useState(null);
   const navigate = useNavigate();
   const { trackCheckout, trackOrderPurchase, trackClick } = useAnalytics();
@@ -189,14 +189,8 @@ const RazorpayPayment = ({
 
   const getMethodIcon = (methodId) => {
     switch (methodId) {
-      case 'card':
+      case 'online':
         return <FiCreditCard className="w-5 h-5" />;
-      case 'upi':
-        return <FiSmartphone className="w-5 h-5" />;
-      case 'netbanking':
-        return <FiHome className="w-5 h-5" />;
-      case 'wallet':
-        return <FiPocket className="w-5 h-5" />;
       case 'cod':
         return <FiTruck className="w-5 h-5" />;
       default:

@@ -29,7 +29,7 @@ const createPaymentOrder = asyncHandler(async (req, res) => {
       req.user._id,
       amount,
       currency,
-      'card'
+      'online'
     );
 
     console.log('Payment record created:', payment._id);
@@ -234,63 +234,36 @@ const getPaymentMethods = asyncHandler(async (req, res) => {
   }
 
   const onlineEnabled = settings?.payment?.paymentMethods?.online?.enabled ?? true;
-  const configuredOnlineList = settings?.payment?.paymentMethods?.online?.methods;
-  const defaultOnlineList = ['card', 'upi', 'netbanking', 'wallet'];
-  const onlineList = Array.isArray(configuredOnlineList) && configuredOnlineList.length > 0
-    ? configuredOnlineList
-    : defaultOnlineList;
   const codEnabledFromSettings = settings?.payment?.paymentMethods?.cod?.enabled;
   const codEnabled = codEnabledFromSettings !== undefined ? codEnabledFromSettings : (process.env.ENABLE_COD === 'true');
 
-  const methodMetaMap = {
-    card: {
-      id: 'card',
-      name: 'Credit / Debit Card',
-      description: 'Pay with Visa, MasterCard, RuPay',
-      icon: 'credit-card'
-    },
-    upi: {
-      id: 'upi',
-      name: 'UPI',
-      description: 'Pay with any UPI app',
-      icon: 'smartphone'
-    },
-    netbanking: {
-      id: 'netbanking',
-      name: 'Net Banking',
-      description: 'Pay with your bank account',
-      icon: 'bank'
-    },
-    wallet: {
-      id: 'wallet',
-      name: 'Digital Wallets',
-      description: 'Pay with Paytm, PhonePe, etc.',
-      icon: 'wallet'
-    },
-    cod: {
-      id: 'cod',
-      name: 'Cash on Delivery',
-      description: 'Pay when you receive your order',
-      icon: 'cash'
-    }
-  };
-
   const paymentMethods = [];
 
+  // Add online payment option (Razorpay handles all payment methods internally)
   if (onlineEnabled) {
-    for (const methodId of onlineList) {
-      if (methodMetaMap[methodId]) {
-        paymentMethods.push({ ...methodMetaMap[methodId], enabled: true });
-      }
-    }
+    paymentMethods.push({
+      id: 'online',
+      name: 'Online Payment',
+      description: 'Pay securely with Credit/Debit Card, UPI, Net Banking & Wallets',
+      icon: 'credit-card',
+      enabled: true
+    });
   }
 
+  // Add COD option if enabled
   if (codEnabled) {
     const codLimits = {
       minOrderAmount: settings?.payment?.paymentMethods?.cod?.minOrderAmount ?? 0,
       maxOrderAmount: settings?.payment?.paymentMethods?.cod?.maxOrderAmount ?? 5000
     };
-    paymentMethods.push({ ...methodMetaMap.cod, enabled: true, ...codLimits });
+    paymentMethods.push({
+      id: 'cod',
+      name: 'Cash on Delivery',
+      description: 'Pay when you receive your order',
+      icon: 'cash',
+      enabled: true,
+      ...codLimits
+    });
   }
 
   sendResponse(res, 200, { paymentMethods }, 'Payment methods retrieved successfully');

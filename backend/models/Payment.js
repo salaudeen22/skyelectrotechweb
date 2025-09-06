@@ -31,8 +31,8 @@ const paymentSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['card', 'upi', 'netbanking', 'wallet', 'cod'],
-    default: 'card'
+    enum: ['card', 'upi', 'netbanking', 'wallet', 'cod', 'online'],
+    default: 'online'
   },
   verificationAttempts: {
     type: Number,

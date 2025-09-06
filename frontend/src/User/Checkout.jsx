@@ -302,7 +302,7 @@ const Checkout = () => {
    
   // Payment related state
   const [paymentMethods, setPaymentMethods] = useState([]);
-  const [selectedMethod, setSelectedMethod] = useState('card');
+  const [selectedMethod, setSelectedMethod] = useState('online');
 
   const paymentSectionRef = useRef(null);
 
@@ -445,9 +445,8 @@ const Checkout = () => {
        console.error('Error loading payment methods:', err);
        // Fallback to basic methods
        setPaymentMethods([
-         { id: 'card', name: 'Credit & Debit Cards', description: 'Visa, MasterCard, RuPay & more' },
-         { id: 'upi', name: 'UPI', description: 'Google Pay, PhonePe, Paytm & more' },
-         { id: 'netbanking', name: 'Netbanking', description: 'All major banks supported' },
+         { id: 'online', name: 'Online Payment', description: 'Pay securely with Card, UPI, Net Banking & Wallets' },
+         { id: 'cod', name: 'Cash on Delivery', description: 'Pay when you receive your order' },
        ]);
      }
    };
@@ -455,10 +454,7 @@ const Checkout = () => {
   const getMethodIcon = (methodId) => {
     const iconProps = { className: "w-6 h-6" };
     switch (methodId) {
-      case 'card': return <FiCreditCard {...iconProps} />;
-      case 'upi': return <FiSmartphone {...iconProps} />;
-      case 'netbanking': return <FiHome {...iconProps} />;
-      case 'wallet': return <FiPocket {...iconProps} />;
+      case 'online': return <FiCreditCard {...iconProps} />;
       case 'cod': return <FiTruck {...iconProps} />;
       default: return <FiCreditCard {...iconProps} />;
     }

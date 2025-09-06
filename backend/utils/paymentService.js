@@ -18,7 +18,7 @@ class PaymentService {
   /**
    * Create a new payment record with timeout
    */
-  async createPayment(orderId, userId, amount, currency = 'INR', paymentMethod = 'card') {
+  async createPayment(orderId, userId, amount, currency = 'INR', paymentMethod = 'online') {
     let paymentData = null;
     try {
       const timeoutAt = new Date(Date.now() + this.timeoutMinutes * 60 * 1000);

@@ -70,8 +70,8 @@ const orderSchema = new mongoose.Schema({
   paymentInfo: {
     method: {
       type: String,
-      enum: ['card', 'upi', 'netbanking', 'wallet', 'cod'],
-      default: 'cod'
+      enum: ['card', 'upi', 'netbanking', 'wallet', 'cod', 'online'],
+      default: 'online'
     },
     status: {
       type: String,

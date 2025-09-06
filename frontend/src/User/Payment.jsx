@@ -28,7 +28,7 @@ const Payment = () => {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState([]);
-  const [selectedMethod, setSelectedMethod] = useState('card');
+  const [selectedMethod, setSelectedMethod] = useState('online');
   const [shippingInfo, setShippingInfo] = useState(null);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
 
@@ -99,10 +99,7 @@ const Payment = () => {
   const getMethodIcon = (methodId) => {
     const iconProps = { className: "w-6 h-6" };
     switch (methodId) {
-      case 'card': return <FiCreditCard {...iconProps} />;
-      case 'upi': return <FiSmartphone {...iconProps} />;
-      case 'netbanking': return <FiHome {...iconProps} />;
-      case 'wallet': return <FiPocket {...iconProps} />;
+      case 'online': return <FiCreditCard {...iconProps} />;
       case 'cod': return <FiTruck {...iconProps} />;
       default: return <FiCreditCard {...iconProps} />;
     }
@@ -144,6 +141,7 @@ const Payment = () => {
       if (selectedMethod === 'cod') {
         await handleCOD(orderPayload);
       } else {
+        // Handle all online payments through Razorpay (online method)
         await handleOnlinePayment(orderPayload);
       }
     } catch (error) {
@@ -160,7 +158,7 @@ const Payment = () => {
       const paymentResponse = await paymentAPI.createPaymentOrder({
         amount: orderPayload.totalPrice,
         currency: 'INR',
-        method: selectedMethod,
+        method: 'online', // Always use 'online' for Razorpay payments
         orderId: `temp_${Date.now()}`, // Temporary order ID for payment tracking
         customerName: shippingInfo.name,
         customerEmail: shippingInfo.email,
@@ -274,8 +272,12 @@ const Payment = () => {
         // Create order only after payment is verified
         const finalOrderPayload = {
           ...orderPayload,
-          paymentMethod: selectedMethod,
-          paymentStatus: 'paid',
+          paymentInfo: {
+            method: selectedMethod,
+            status: 'completed',
+            transactionId: response.razorpay_payment_id,
+            paidAt: new Date()
+          },
           razorpayPaymentId: response.razorpay_payment_id,
           razorpayOrderId: response.razorpay_order_id,
         };
@@ -318,8 +320,10 @@ const Payment = () => {
     try {
       const response = await ordersAPI.createOrder({
         ...orderPayload,
-        paymentMethod: 'cod',
-        paymentStatus: 'pending'
+        paymentInfo: {
+          method: 'cod',
+          status: 'pending'
+        }
       });
       
       const order = response.data.order;
