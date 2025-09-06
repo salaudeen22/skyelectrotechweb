@@ -28,7 +28,7 @@ import {
 const AdminSidebar = ({ isOpen, onToggle }) => {
     const { settings } = useSettings();
     const navigate = useNavigate();
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
     const location = useLocation();
     
     // State for collapsible sections
@@ -280,10 +280,29 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
             {/* Footer / User & Logout Section */}
             <div className="px-3 sm:px-4 py-3 sm:py-4 border-t border-gray-200 mt-auto">
                 <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
-                    <FaUserCircle className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400"/>
+                    {user?.avatar?.url ? (
+                        <img
+                            src={user.avatar.url}
+                            alt={user.name}
+                            className="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover border-2 border-gray-200"
+                            onError={(e) => {
+                                // Fallback to default icon if image fails to load
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'block';
+                            }}
+                        />
+                    ) : null}
+                    <FaUserCircle 
+                        className={`h-8 w-8 sm:h-10 sm:w-10 text-gray-400 ${user?.avatar?.url ? 'hidden' : ''}`}
+                        style={{ display: user?.avatar?.url ? 'none' : 'block' }}
+                    />
                     <div className="min-w-0 flex-1">
-                        <p className="text-xs sm:text-sm font-semibold text-gray-800 truncate">Admin User</p>
-                        <p className="text-xs text-gray-500 truncate">admin@skyelectro.tech</p>
+                        <p className="text-xs sm:text-sm font-semibold text-gray-800 truncate">
+                            {user?.name || 'Admin User'}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                            {user?.email || 'admin@skyelectro.tech'}
+                        </p>
                     </div>
                 </div>
                 <button
