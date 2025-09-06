@@ -4,12 +4,12 @@ const couponSchema = new mongoose.Schema({
   code: {
     type: String,
     required: true,
-    unique: true,
     uppercase: true,
     trim: true,
     minlength: 3,
     maxlength: 20,
     match: [/^[A-Z0-9]+$/, 'Coupon code can only contain letters and numbers']
+    // unique: true - removed to avoid duplicate index warning, handled in schema.index()
   },
   name: {
     type: String,

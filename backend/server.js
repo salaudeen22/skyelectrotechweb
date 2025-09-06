@@ -78,7 +78,22 @@ app.set('trust proxy', 1);
 
 // Security middleware
 app.use(helmet());
-app.use(compression());
+
+// Advanced compression for better performance
+app.use(compression({
+  level: 6, // Compression level (0-9, 6 is good balance of speed/compression)
+  threshold: 1024, // Only compress if response is larger than 1KB
+  filter: (req, res) => {
+    // Don't compress if client doesn't support it
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    // Compress everything else that compression supports
+    return compression.filter(req, res);
+  },
+  // Better compression for JSON/text
+  chunkSize: 16 * 1024, // 16KB chunks for better performance
+}));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -178,8 +193,13 @@ console.log('Google Client Secret:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 
 const connectWithRetry = async (retries = 5, delayMs = 5000) => {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
+      // Connection Pool Optimization
+      maxPoolSize: 10, // Maintain up to 10 socket connections
+      serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      // Performance optimizations
+      maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
+      family: 4, // Use IPv4, skip trying IPv6
     });
     console.log('MongoDB connected successfully');
   } catch (err) {

@@ -53,12 +53,12 @@ const reviewValidation = [
     .withMessage('Comment cannot exceed 500 characters')
 ];
 
-// Public routes
-router.get('/', cacheSearchResults(300), getProducts);
-router.get('/featured', getFeaturedProducts);
-router.get('/search', cacheSearchResults(180), searchProducts);
-router.get('/category/:categoryId', getProductsByCategory);
-router.get('/:id', getProduct);
+// Public routes with optimized caching
+router.get('/', cacheSearchResults(600), getProducts); // 10 min cache
+router.get('/featured', cacheSearchResults(900), getFeaturedProducts); // 15 min cache - changes less frequently
+router.get('/search', cacheSearchResults(300), searchProducts); // 5 min cache for search
+router.get('/category/:categoryId', cacheSearchResults(600), getProductsByCategory); // 10 min cache
+router.get('/:id', getProduct); // Individual products don't use search cache middleware
 
 // Protected routes - Users can add reviews
 router.post('/:id/reviews', auth, reviewValidation, validate, addProductReview);

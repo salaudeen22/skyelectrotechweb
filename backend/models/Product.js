@@ -38,8 +38,8 @@ const productSchema = new mongoose.Schema({
   },
   sku: {
     type: String,
-    unique: true,
     required: [true, 'SKU is required']
+    // unique: true - removed to avoid duplicate index warning, handled in schema.index()
   },
   images: [{
     public_id: {
@@ -145,11 +145,17 @@ productSchema.virtual('discountPrice').get(function() {
 productSchema.set('toJSON', { virtuals: true });
 productSchema.set('toObject', { virtuals: true });
 
-// Index for search functionality
+// Optimized compound indexes for better query performance
 productSchema.index({ name: 'text', description: 'text', brand: 'text' });
-productSchema.index({ category: 1 });
-productSchema.index({ price: 1 });
-productSchema.index({ 'ratings.average': -1 });
-productSchema.index({ createdAt: -1 });
+
+// High-performance compound indexes
+productSchema.index({ isActive: 1, category: 1, price: 1 }); // Main product queries
+productSchema.index({ isActive: 1, isFeatured: 1, 'ratings.average': -1 }); // Featured products
+productSchema.index({ isActive: 1, category: 1, 'ratings.average': -1, createdAt: -1 }); // Category sorting
+productSchema.index({ isActive: 1, price: 1, 'ratings.average': -1 }); // Price range + rating
+productSchema.index({ isActive: 1, brand: 1, createdAt: -1 }); // Brand filtering
+productSchema.index({ sku: 1 }, { unique: true }); // Unique SKU lookup
+productSchema.index({ createdAt: -1, isActive: 1 }); // Recent products
+productSchema.index({ 'ratings.average': -1, 'ratings.count': -1 }); // Top-rated products
 
 module.exports = mongoose.model('Product', productSchema);

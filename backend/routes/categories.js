@@ -10,6 +10,7 @@ const {
 const { auth, adminOnly } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 const logActivity = require('../middleware/activityLogger');
+const { cacheSearchResults } = require('../utils/cache');
 
 const router = express.Router();
 
@@ -26,9 +27,9 @@ const categoryValidation = [
     .withMessage('Description cannot exceed 500 characters')
 ];
 
-// Public routes
-router.get('/', getCategories);
-router.get('/:id', getCategory);
+// Public routes with caching (categories change infrequently)
+router.get('/', cacheSearchResults(1800), getCategories); // 30 min cache
+router.get('/:id', getCategory); // Individual categories cached in controller
 
 // Admin only routes
 router.post('/', 
