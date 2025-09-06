@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -11,61 +11,63 @@ import { CartProvider } from './contexts/CartContext';
 import { CategoriesProvider } from './contexts/CategoriesContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 
-// Layouts
+// Layouts (keep these eager loaded)
 import MainLayout from './Layouts/MainLayout';
 import AdminLayout from './Layouts/AdminLayout';
 import AuthLayout from './Layouts/AuthLayout';
 
-// Pages
-import Home from './Page/Home';
-import About from './Page/About';
-import Contact from './Page/Contact';
-import FAQ from './Page/FAQ';
-import PrivacyPolicy from './Page/PrivacyPolicy';
-import TermsOfService from './Page/TermsOfService';
-import ShippingPolicy from './Page/ShippingPolicy';
-import CancellationRefunds from './Page/CancellationRefunds';
-import ProductList from './User/ProductList';
-import ProductDetails from './User/ProductDetails';
-import Cart from './User/Cart';
-import ShippingInfo from './User/ShippingInfo';
-import ShippingMethod from './User/ShippingMethod';
-import Payment from './User/Payment';
-import Checkout from './User/Checkout';
-import OrderHistory from './User/OrderHistory';
-import OrderDetails from './User/OrderDetails';
-import Profile from './User/Profile';
-
-// Auth Pages
-import Login from './Auth/Login';
-import Register from './Auth/Register';
-import AuthCallback from './Auth/AuthCallback';
-import ForgotPassword from './Auth/ForgotPassword';
-import ResetPassword from './Auth/ResetPassword';
-import ChangePassword from './Auth/ChangePassword';
-
-// User Pages
-import Wishlist from './User/Wishlist';
-import Notifications from './User/Notifications';
-import NotificationSettings from './User/NotificationSettings';
-
-// Admin Pages
-import AdminDashboard from './Admin/AdminDashboard';
-import ProductManagement from './Admin/ProductManagement';
-import CategoriesManagement from './Admin/CategoriesManagement';
-import CommentsManagement from './Admin/CommentsManagement';
-import Employees from './Admin/Employees';
-import Settings from './Admin/Settings';
-import OrdersAndSales from './Admin/OrderManagement';
-import ReturnRequests from './Admin/ReturnRequests';
-import ServiceRequests from './Admin/ServiceRequests';
-import CouponManagement from './Admin/CouponManagement';
-
 // Components
 import ProtectedRoute from './Components/ProtectedRoute';
-import NotFound from './Components/NotFound';
 import AnalyticsTracker from './Components/AnalyticsTracker';
 import ErrorBoundary from './Components/ErrorBoundary';
+import LoadingSpinner from './Components/LoadingSpinner';
+
+// Lazy loaded components
+const Home = React.lazy(() => import('./Page/Home'));
+const About = React.lazy(() => import('./Page/About'));
+const Contact = React.lazy(() => import('./Page/Contact'));
+const FAQ = React.lazy(() => import('./Page/FAQ'));
+const PrivacyPolicy = React.lazy(() => import('./Page/PrivacyPolicy'));
+const TermsOfService = React.lazy(() => import('./Page/TermsOfService'));
+const ShippingPolicy = React.lazy(() => import('./Page/ShippingPolicy'));
+const CancellationRefunds = React.lazy(() => import('./Page/CancellationRefunds'));
+const ProductList = React.lazy(() => import('./User/ProductList'));
+const ProductDetails = React.lazy(() => import('./User/ProductDetails'));
+const Cart = React.lazy(() => import('./User/Cart'));
+const ShippingInfo = React.lazy(() => import('./User/ShippingInfo'));
+const ShippingMethod = React.lazy(() => import('./User/ShippingMethod'));
+const Payment = React.lazy(() => import('./User/Payment'));
+const Checkout = React.lazy(() => import('./User/Checkout'));
+const OrderHistory = React.lazy(() => import('./User/OrderHistory'));
+const OrderDetails = React.lazy(() => import('./User/OrderDetails'));
+const Profile = React.lazy(() => import('./User/Profile'));
+
+// Auth Pages
+const Login = React.lazy(() => import('./Auth/Login'));
+const Register = React.lazy(() => import('./Auth/Register'));
+const AuthCallback = React.lazy(() => import('./Auth/AuthCallback'));
+const ForgotPassword = React.lazy(() => import('./Auth/ForgotPassword'));
+const ResetPassword = React.lazy(() => import('./Auth/ResetPassword'));
+const ChangePassword = React.lazy(() => import('./Auth/ChangePassword'));
+
+// User Pages
+const Wishlist = React.lazy(() => import('./User/Wishlist'));
+const Notifications = React.lazy(() => import('./User/Notifications'));
+const NotificationSettings = React.lazy(() => import('./User/NotificationSettings'));
+
+// Admin Pages
+const AdminDashboard = React.lazy(() => import('./Admin/AdminDashboard'));
+const ProductManagement = React.lazy(() => import('./Admin/ProductManagement'));
+const CategoriesManagement = React.lazy(() => import('./Admin/CategoriesManagement'));
+const CommentsManagement = React.lazy(() => import('./Admin/CommentsManagement'));
+const Employees = React.lazy(() => import('./Admin/Employees'));
+const Settings = React.lazy(() => import('./Admin/Settings'));
+const OrdersAndSales = React.lazy(() => import('./Admin/OrderManagement'));
+const ReturnRequests = React.lazy(() => import('./Admin/ReturnRequests'));
+const ServiceRequests = React.lazy(() => import('./Admin/ServiceRequests'));
+const CouponManagement = React.lazy(() => import('./Admin/CouponManagement'));
+
+const NotFound = React.lazy(() => import('./Components/NotFound'));
 
 
 // Create a query client
@@ -141,7 +143,8 @@ const App = () => {
                       }}
                     />
                     
-                    <Routes>
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<MainLayout />}>
                   <Route index element={<Home />} />
@@ -289,6 +292,7 @@ const App = () => {
                 {/* 404 Route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+                    </Suspense>
             </div>
                   </ErrorBoundary>
                 </Router>

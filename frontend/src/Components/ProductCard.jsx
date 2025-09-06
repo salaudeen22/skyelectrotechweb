@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { FiShoppingCart, FiHeart } from 'react-icons/fi';
 import { useCart } from '../hooks/useCart';
@@ -9,13 +9,13 @@ import { getPrimaryImage } from '../utils/imageUtils';
 import { generateProductUrl } from '../utils/urlHelpers';
 import OptimizedImage from './OptimizedImage';
 
-const ProductCard = ({ product, showWishlistButton = true }) => {
+const ProductCard = memo(({ product, showWishlistButton = true }) => {
   const { addToCart, addingToCart } = useCart();
   const { isAuthenticated, user } = useAuth();
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
 
-  const handleAddToCart = async (e) => {
+  const handleAddToCart = useCallback(async (e) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -49,9 +49,9 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
       console.error('Add to cart error:', err);
       // Toast notification is already handled in CartContext
     }
-  };
+  }, [addToCart, product._id, isAuthenticated, user?.role]);
 
-  const handleAddToWishlist = async (e) => {
+  const handleAddToWishlist = useCallback(async (e) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -97,7 +97,7 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
     } finally {
       setIsAddingToWishlist(false);
     }
-  };
+  }, [product._id, isAuthenticated, user?.role, isInWishlist]);
 
   return (
     <div className="group relative bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 flex flex-col">
@@ -230,6 +230,8 @@ const ProductCard = ({ product, showWishlistButton = true }) => {
       </div>
     </div>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;

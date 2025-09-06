@@ -14,6 +14,14 @@ export default defineConfig({
         manualChunks: {
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
+          query: ['@tanstack/react-query'],
+          icons: ['react-icons', 'react-icons/fa', 'react-icons/fi'],
+          charts: ['recharts'],
+          utils: ['axios', 'js-cookie'],
+          ui: ['react-hot-toast', 'react-helmet', 'socket.io-client'],
+          forms: ['react-hook-form'],
+          payments: ['razorpay'],
+          media: ['swiper', 'react-loading-skeleton']
         }
       }
     }

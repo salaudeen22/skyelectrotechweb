@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiSearch, FiShoppingCart, FiPrinter, FiCamera, FiTool } from 'react-icons/fi';
+import { FiSearch, FiPrinter, FiCamera, FiTool } from 'react-icons/fi';
 import HeroSlider from '../Components/Subcompo/HeroSlider';
 import ProductCard from '../Components/ProductCard'; 
 import { FaShippingFast, FaShieldAlt, FaHeadset } from 'react-icons/fa';
@@ -8,7 +8,7 @@ import { productsAPI, categoriesAPI, servicesAPI } from '../services/apiServices
 import { toast } from 'react-hot-toast';
 import ProductRecommendations from '../Components/ProductRecommendations';
 
-const Home = () => {
+const Home = memo(() => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +70,7 @@ const Home = () => {
     fetchData();
   }, []);
 
-  const handleSearch = (e) => {
+  const handleSearch = useCallback((e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
       console.log('Searching for:', searchTerm.trim());
@@ -78,7 +78,7 @@ const Home = () => {
     } else {
       toast.error('Please enter a search term');
     }
-  };
+  }, [searchTerm, navigate]);
 
   const handleServiceFormChange = (e) => {
     const { name, value } = e.target;
@@ -525,6 +525,8 @@ const Home = () => {
       </main>
     </div>
   );
-};
+});
+
+Home.displayName = 'Home';
 
 export default Home;
