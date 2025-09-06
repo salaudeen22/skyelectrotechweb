@@ -4,13 +4,14 @@ const Product = require('../models/Product');
 const Category = require('../models/Category');
 const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 
-// Generate sitemap XML
+// Generate enhanced sitemap XML with images
 const generateSitemap = async () => {
   const baseUrl = process.env.CLIENT_URL || process.env.FRONTEND_URL || 'https://skyelectrotech.in';
   const currentDate = new Date().toISOString();
 
   let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">`;
@@ -67,10 +68,10 @@ const generateSitemap = async () => {
     console.error('Error fetching categories for sitemap:', error);
   }
 
-  // Add products (limit to 1000 for performance)
+  // Add products with images (limit to 1000 for performance)
   try {
     const products = await Product.find({ isActive: true })
-      .select('_id name updatedAt')
+      .select('_id name updatedAt images')
       .sort({ updatedAt: -1 })
       .limit(1000);
 
@@ -81,7 +82,24 @@ const generateSitemap = async () => {
     <loc>${baseUrl}/product/${productSlug}-${product._id}</loc>
     <lastmod>${product.updatedAt.toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.7</priority>`;
+    
+      // Add product images for better Google Images indexing
+      if (product.images && product.images.length > 0) {
+        product.images.slice(0, 5).forEach(image => { // Limit to 5 images per product
+          const imageUrl = image.url || image;
+          if (imageUrl) {
+            sitemap += `
+    <image:image>
+      <image:loc>${imageUrl}</image:loc>
+      <image:caption>${product.name}</image:caption>
+      <image:title>${product.name}</image:title>
+    </image:image>`;
+          }
+        });
+      }
+      
+      sitemap += `
   </url>`;
     });
   } catch (error) {

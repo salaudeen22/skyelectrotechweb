@@ -151,28 +151,56 @@ const SEO = ({
         }
       };
     } else {
-      // Organization structured data
+      // Enhanced Organization structured data
       structuredData = {
         "@context": "https://schema.org",
-        "@type": "Organization",
+        "@type": ["Organization", "OnlineStore"],
         "name": "SkyElectroTech",
         "url": "https://skyelectrotech.in",
-        "logo": "https://skyelectrotech.in/logo-large.svg",
-        "description": "Premium electronics and components store",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://skyelectrotech.in/logo-large.svg",
+          "width": 400,
+          "height": 100
+        },
+        "description": "Premium electronics and components store offering quality electrical products, components, and accessories with reliable customer service.",
+        "foundingDate": "2020",
         "address": {
           "@type": "PostalAddress",
-          "addressCountry": "IN"
+          "addressCountry": "IN",
+          "addressRegion": "India"
         },
-        "contactPoint": {
+        "contactPoint": [{
           "@type": "ContactPoint",
           "contactType": "customer service",
-          "availableLanguage": "English"
-        },
+          "availableLanguage": ["English", "Hindi"],
+          "areaServed": "IN"
+        }],
         "sameAs": [
           "https://facebook.com/skyelectrotech",
-          "https://twitter.com/skyelectrotech",
+          "https://twitter.com/skyelectrotech", 
           "https://instagram.com/skyelectrotech"
-        ]
+        ],
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://skyelectrotech.in/products?search={search_term_string}",
+          "query-input": "required name=search_term_string"
+        },
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Electronics & Components",
+          "itemListElement": [{
+            "@type": "OfferCatalog",
+            "name": "Electronic Components",
+            "itemListElement": [{
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Product",
+                "name": "Electronic Components"
+              }
+            }]
+          }]
+        }
       };
     }
 
@@ -190,18 +218,42 @@ const SEO = ({
       document.title = title;
     }
 
-    // Update meta tags
+    // Enhanced meta tags for better SEO
     updateMetaTag('name', 'description', description);
     updateMetaTag('name', 'keywords', keywords);
+    updateMetaTag('name', 'author', 'SkyElectroTech');
+    updateMetaTag('name', 'viewport', 'width=device-width, initial-scale=1.0');
+    updateMetaTag('name', 'robots', 'index, follow, max-snippet:-1, max-image-preview:large');
+    updateMetaTag('name', 'googlebot', 'index, follow, max-snippet:-1, max-image-preview:large');
+    
+    // Open Graph enhanced
     updateMetaTag('property', 'og:title', title);
     updateMetaTag('property', 'og:description', description);
     updateMetaTag('property', 'og:url', url || window.location.href);
     updateMetaTag('property', 'og:type', type);
     updateMetaTag('property', 'og:image', image);
+    updateMetaTag('property', 'og:image:width', '1200');
+    updateMetaTag('property', 'og:image:height', '630');
+    updateMetaTag('property', 'og:site_name', 'SkyElectroTech');
+    updateMetaTag('property', 'og:locale', 'en_US');
+    
+    // Twitter Cards enhanced
+    updateMetaTag('name', 'twitter:card', 'summary_large_image');
+    updateMetaTag('name', 'twitter:site', '@skyelectrotech');
+    updateMetaTag('name', 'twitter:creator', '@skyelectrotech');
     updateMetaTag('name', 'twitter:title', title);
     updateMetaTag('name', 'twitter:description', description);
     updateMetaTag('name', 'twitter:image', image);
-    updateMetaTag('property', 'og:site_name', 'SkyElectroTech');
+    
+    // Additional SEO meta tags
+    updateMetaTag('name', 'theme-color', '#2563eb');
+    updateMetaTag('name', 'msapplication-TileColor', '#2563eb');
+    updateMetaTag('name', 'application-name', 'SkyElectroTech');
+    
+    // Mobile optimization
+    updateMetaTag('name', 'mobile-web-app-capable', 'yes');
+    updateMetaTag('name', 'apple-mobile-web-app-capable', 'yes');
+    updateMetaTag('name', 'apple-mobile-web-app-status-bar-style', 'default');
 
     // Update canonical URL
     updateCanonical(url || window.location.href);
