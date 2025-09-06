@@ -17,7 +17,7 @@ export const requestNotificationPermission = async () => {
   }
 
   if (currentPermission === 'denied') {
-    throw new Error('Notification permission was previously denied. Please enable it in your browser settings.');
+    throw new Error('Notification permission was previously denied. Please enable it in your browser setting.');
   }
 
   // Check if we're on HTTPS or localhost
