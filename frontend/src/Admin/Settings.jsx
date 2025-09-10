@@ -878,6 +878,7 @@ const Settings = () => {
                               onChange={(e) => setSlideForm(prev => ({ ...prev, gradientColor: e.target.value }))}
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             >
+                              <option value="">Transparent / No Color</option>
                               <option value="from-blue-900/80 to-blue-700/60">Blue</option>
                               <option value="from-emerald-900/80 to-emerald-700/60">Green</option>
                               <option value="from-purple-900/80 to-purple-700/60">Purple</option>
