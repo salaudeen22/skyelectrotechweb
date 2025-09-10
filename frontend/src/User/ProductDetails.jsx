@@ -39,17 +39,18 @@ const ProductDetails = () => {
 
   // Extract ID from either direct ID param or slug-with-id format
   const productId = useMemo(() => {
-    if (id) return id; // Old format: /products/:id
-    if (slugWithId) {
+    // Add safety checks for undefined params
+    if (id && typeof id === 'string' && id.length > 0) return id; // Old format: /products/:id
+    if (slugWithId && typeof slugWithId === 'string' && slugWithId.length > 0) {
       // New format: /product/:slugWithId (e.g., "arduino-uno-r3-68b2cd5f712bfd6a19ff7a15")
       return extractIdFromSlug(slugWithId);
     }
     return null;
   }, [id, slugWithId]);
 
-  // Check if we need to redirect from old URL format
+  // Check if we need to redirect from old URL format - only after params are stable
   const shouldRedirect = useMemo(() => {
-    return id && !slugWithId && productId;
+    return id && !slugWithId && productId && typeof id === 'string';
   }, [id, slugWithId, productId]);
 
   const [selectedImage, setSelectedImage] = useState(0);
@@ -64,9 +65,12 @@ const ProductDetails = () => {
 
   // Simple fetch function
   const fetchProduct = useCallback(async () => {
-    if (!productId) {
-      setLoading(false);
-      setError(new Error('Product not found'));
+    // Don't fetch if no productId or if we're about to redirect
+    if (!productId || isRedirecting) {
+      if (!productId) {
+        setLoading(false);
+        setError(new Error('Product not found'));
+      }
       return;
     }
     
@@ -82,10 +86,13 @@ const ProductDetails = () => {
       const apiPromise = productsAPI.getProduct(productId);
       const response = await Promise.race([apiPromise, timeoutPromise]);
       
+      // Check if component is still mounted and not redirecting
+      if (isRedirecting) return;
+      
       setProduct(response.data.product);
       
       // If we're on the old URL format, redirect to SEO-friendly URL
-      if (shouldRedirect && response.data.product) {
+      if (shouldRedirect && response.data.product && !isRedirecting) {
         setIsRedirecting(true);
         const seoUrl = generateProductUrl(response.data.product);
         // Use replace: true to avoid creating browser history entry
@@ -104,9 +111,14 @@ const ProductDetails = () => {
     }
   }, [productId, shouldRedirect, navigate, isRedirecting]);
 
-  // Fetch product on mount and when id changes
+  // Fetch product on mount and when id changes - with debounce to prevent race conditions
   useEffect(() => {
-    fetchProduct();
+    // Small delay to ensure router params are stable
+    const timeoutId = setTimeout(() => {
+      fetchProduct();
+    }, 10);
+    
+    return () => clearTimeout(timeoutId);
   }, [fetchProduct]);
 
   // Debug logging removed for cleaner console
