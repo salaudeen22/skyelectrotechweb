@@ -7,6 +7,8 @@ import { FaShippingFast, FaShieldAlt, FaHeadset } from 'react-icons/fa';
 import { productsAPI, categoriesAPI, servicesAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
 import ProductRecommendations from '../Components/ProductRecommendations';
+import FAQSchema, { defaultElectronicsFAQs } from '../Components/FAQSchema';
+import SEO from '../Components/SEO';
 
 const Home = memo(() => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -168,6 +170,19 @@ const Home = memo(() => {
 
   return (
     <div className="bg-gray-50">
+      {/* Enhanced SEO for Homepage */}
+      <SEO 
+        title="SkyElectroTech - Premier Electronics Store in Bangalore | Arduino, Raspberry Pi, Industrial Automation"
+        description="Leading electronic components shop in Bangalore. Arduino, Raspberry Pi, sensors, PLCs, industrial automation components. Expert technical support, genuine products, same-day delivery. Visit us at Nagarathpete, Bengaluru."
+        keywords="electronic components shop bangalore, arduino supplier, raspberry pi dealer, industrial automation, electronic parts SP road, PLCs sensors, SkyElectroTech, electronic components store bangalore, microcontroller boards, robotics components"
+        image="https://skyelectrotech.in/og-image.jpg"
+        url="https://skyelectrotech.in"
+        type="website"
+      />
+      
+      {/* FAQ Schema for better search visibility */}
+      <FAQSchema faqs={defaultElectronicsFAQs} />
+      
       <main className="pt-0"> 
         
         {/* Hero Section */}

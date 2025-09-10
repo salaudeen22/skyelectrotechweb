@@ -20,13 +20,18 @@ const Breadcrumb = ({ customItems = [] }) => {
       
       // Convert path segments to readable names
       let displayName = name;
-      if (name === 'products') displayName = 'Products';
+      if (name === 'products') displayName = 'Electronic Components';
       else if (name === 'product') displayName = 'Product';
       else if (name === 'category') displayName = 'Category';
       else if (name === 'auth') displayName = 'Authentication';
-      else if (name === 'about') displayName = 'About Us';
-      else if (name === 'contact') displayName = 'Contact Us';
+      else if (name === 'about') displayName = 'About SkyElectroTech';
+      else if (name === 'contact') displayName = 'Contact Electronics Store';
       else if (name === 'admin') displayName = 'Admin Panel';
+      else if (name === 'arduino') displayName = 'Arduino Boards & Components';
+      else if (name === 'raspberry-pi') displayName = 'Raspberry Pi Products';
+      else if (name === 'sensors') displayName = 'Electronic Sensors';
+      else if (name === 'automation') displayName = 'Industrial Automation';
+      else if (name === 'plc') displayName = 'PLC & Control Systems';
       else if (name.includes('-')) {
         // Convert kebab-case to title case
         displayName = name.split('-').map(word => 
