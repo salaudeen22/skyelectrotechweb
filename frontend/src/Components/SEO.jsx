@@ -49,6 +49,7 @@ const SEO = ({
           "price": product.price.toString(),
           "lowPrice": product.price.toString(),
           "highPrice": product.originalPrice ? product.originalPrice.toString() : product.price.toString(),
+          "offerCount": 1,
           "priceCurrency": "INR",
           "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
           "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
