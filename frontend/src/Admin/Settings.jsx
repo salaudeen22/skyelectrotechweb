@@ -101,30 +101,12 @@ const Settings = () => {
       shippingUpdates: true,
       marketingEmails: false
     },
-    seo: {
-      metaTitle: 'SkyElectroTech - Your Electronics Store',
-      metaDescription: 'Find the best electronics at great prices',
-      metaKeywords: 'electronics, gadgets, tech, online store',
-      googleAnalytics: '',
-      facebookPixel: '',
-      googleAnalyticsId: '',
-      facebookPixelId: ''
-    },
     socialMedia: {
       facebook: '',
       twitter: '',
       instagram: '',
       linkedin: '',
       youtube: ''
-    },
-    maintenance: {
-      enabled: false,
-      message: 'We are currently under maintenance. Please check back soon.',
-      allowedIPs: []
-    },
-    cache: {
-      enabled: true,
-      duration: 3600
     },
     notifications: {
       adminRecipients: [],
@@ -214,10 +196,7 @@ const Settings = () => {
         payment: { ...prev.payment, ...fetchedSettings.payment },
         order: { ...prev.order, ...fetchedSettings.order },
         email: safeEmailSettings,
-        seo: { ...prev.seo, ...fetchedSettings.seo },
         socialMedia: { ...prev.socialMedia, ...fetchedSettings.socialMedia },
-        maintenance: { ...prev.maintenance, ...fetchedSettings.maintenance },
-        cache: { ...prev.cache, ...fetchedSettings.cache },
         notifications: { ...prev.notifications, ...fetchedSettings.notifications }
       }));
     } catch (error) {
@@ -514,10 +493,7 @@ const Settings = () => {
     { id: 'order', name: 'Orders', icon: <FaCog /> },
     { id: 'email', name: 'Email', icon: <FaEnvelope /> },
     { id: 'notifications', name: 'Notifications', icon: <FaBell /> },
-    { id: 'seo', name: 'SEO', icon: <FaGlobe /> },
     { id: 'social', name: 'Social Media', icon: <FaShareAlt /> },
-    { id: 'maintenance', name: 'Maintenance', icon: <FaTools /> },
-    { id: 'cache', name: 'Cache', icon: <FaDatabase /> }
   ];
 
   if (loading) {
@@ -1443,63 +1419,6 @@ const Settings = () => {
             </div>
           )}
 
-          {/* SEO Tab */}
-          {activeTab === 'seo' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900">SEO Configuration</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Meta Title</label>
-                  <input
-                    type="text"
-                    value={formData.seo.metaTitle}
-                    onChange={(e) => handleInputChange('seo', 'metaTitle', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Meta Description</label>
-                  <textarea
-                    value={formData.seo.metaDescription}
-                    onChange={(e) => handleInputChange('seo', 'metaDescription', e.target.value)}
-                    rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Meta Keywords</label>
-                  <input
-                    type="text"
-                    value={formData.seo.metaKeywords}
-                    onChange={(e) => handleInputChange('seo', 'metaKeywords', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="keyword1, keyword2, keyword3"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Google Analytics ID</label>
-                  <input
-                    type="text"
-                    value={formData.seo.googleAnalytics}
-                    onChange={(e) => handleInputChange('seo', 'googleAnalytics', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="G-XXXXXXXXXX"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Facebook Pixel ID</label>
-                  <input
-                    type="text"
-                    value={formData.seo.facebookPixel}
-                    onChange={(e) => handleInputChange('seo', 'facebookPixel', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="XXXXXXXXXX"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Social Media Tab */}
           {activeTab === 'social' && (
@@ -1561,64 +1480,7 @@ const Settings = () => {
             </div>
           )}
 
-          {/* Maintenance Tab */}
-          {activeTab === 'maintenance' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900">Maintenance Mode</h3>
-              
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.maintenance.enabled}
-                    onChange={(e) => handleInputChange('maintenance', 'enabled', e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">Enable maintenance mode</span>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Maintenance Message</label>
-                  <textarea
-                    value={formData.maintenance.message}
-                    onChange={(e) => handleInputChange('maintenance', 'message', e.target.value)}
-                    rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Message to display during maintenance"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
 
-          {/* Cache Tab */}
-          {activeTab === 'cache' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900">Cache Configuration</h3>
-              
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.cache.enabled}
-                    onChange={(e) => handleInputChange('cache', 'enabled', e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">Enable caching</span>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Cache Duration (seconds)</label>
-                  <input
-                    type="number"
-                    value={formData.cache.duration}
-                    onChange={(e) => handleInputChange('cache', 'duration', Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

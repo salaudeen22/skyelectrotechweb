@@ -49,13 +49,6 @@ export const SettingsProvider = ({ children }) => {
       maxOrderQuantity: 10,
       orderPrefix: 'SKY'
     },
-    seo: {
-      metaTitle: 'SkyElectroTech - Your Electronics Store',
-      metaDescription: 'Find the best electronics at great prices',
-      metaKeywords: 'electronics, gadgets, tech, online store',
-      googleAnalytics: '',
-      facebookPixel: ''
-    },
     socialMedia: {
       facebook: '',
       twitter: '',
@@ -63,11 +56,6 @@ export const SettingsProvider = ({ children }) => {
       linkedin: '',
       youtube: ''
     },
-    maintenance: {
-      enabled: false,
-      message: 'We are currently under maintenance. Please check back soon.',
-      allowedIPs: []
-    }
   };
 
   const fetchSettings = async () => {

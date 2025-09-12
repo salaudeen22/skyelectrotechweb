@@ -32,8 +32,6 @@ const updateSettings = asyncHandler(async (req, res) => {
       email,
       seo,
       socialMedia,
-      maintenance,
-      cache,
       notifications
     } = req.body;
 
@@ -74,14 +72,6 @@ const updateSettings = asyncHandler(async (req, res) => {
     if (socialMedia) {
       console.log('Updating socialMedia:', socialMedia);
       settings.socialMedia = { ...settings.socialMedia, ...socialMedia };
-    }
-    if (maintenance) {
-      console.log('Updating maintenance:', maintenance);
-      settings.maintenance = { ...settings.maintenance, ...maintenance };
-    }
-    if (cache) {
-      console.log('Updating cache:', cache);
-      settings.cache = { ...settings.cache, ...cache };
     }
     if (notifications) {
       console.log('Updating notifications:', notifications);
@@ -146,10 +136,6 @@ const getPublicSettings = asyncHandler(async (req, res) => {
       slides: settings.heroSlider?.slides?.filter(slide => slide.isActive)
         .sort((a, b) => a.order - b.order) || []
     },
-    maintenance: {
-      enabled: settings.maintenance.enabled,
-      message: settings.maintenance.message
-    }
   };
 
   sendResponse(res, 200, { settings: publicSettings }, 'Public settings retrieved successfully');

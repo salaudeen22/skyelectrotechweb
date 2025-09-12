@@ -239,37 +239,6 @@ const settingsSchema = new mongoose.Schema({
     }
   },
 
-  // SEO Settings
-  seo: {
-    metaTitle: {
-      type: String,
-      default: 'SkyElectroTech - Your Electronics Store'
-    },
-    metaDescription: {
-      type: String,
-      default: 'Find the best electronics at great prices'
-    },
-    metaKeywords: {
-      type: String,
-      default: 'electronics, gadgets, tech, online store'
-    },
-    googleAnalytics: {
-      type: String,
-      default: ''
-    },
-    facebookPixel: {
-      type: String,
-      default: ''
-    },
-    googleAnalyticsId: {
-      type: String,
-      default: ''
-    },
-    facebookPixelId: {
-      type: String,
-      default: ''
-    }
-  },
 
   // Social Media
   socialMedia: {
@@ -295,30 +264,7 @@ const settingsSchema = new mongoose.Schema({
     }
   },
 
-  // Maintenance Mode
-  maintenance: {
-    enabled: {
-      type: Boolean,
-      default: false
-    },
-    message: {
-      type: String,
-      default: 'We are currently under maintenance. Please check back soon.'
-    },
-    allowedIPs: [String]
-  },
 
-  // Cache Settings
-  cache: {
-    enabled: {
-      type: Boolean,
-      default: true
-    },
-    duration: {
-      type: Number,
-      default: 3600 // 1 hour in seconds
-    }
-  },
 
   // Hero Slider Settings
   heroSlider: {

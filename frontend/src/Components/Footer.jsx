@@ -1,9 +1,45 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube } from 'react-icons/fa';
 import { useSettings } from '../contexts/SettingsContext';
 
 const Footer = () => {
   const { settings } = useSettings();
+  
+  const socialMediaLinks = [
+    {
+      name: 'Facebook',
+      url: settings?.socialMedia?.facebook,
+      icon: FaFacebookF,
+      color: 'hover:text-blue-600'
+    },
+    {
+      name: 'Twitter',
+      url: settings?.socialMedia?.twitter,
+      icon: FaTwitter,
+      color: 'hover:text-blue-400'
+    },
+    {
+      name: 'Instagram',
+      url: settings?.socialMedia?.instagram,
+      icon: FaInstagram,
+      color: 'hover:text-pink-600'
+    },
+    {
+      name: 'LinkedIn',
+      url: settings?.socialMedia?.linkedin,
+      icon: FaLinkedinIn,
+      color: 'hover:text-blue-700'
+    },
+    {
+      name: 'YouTube',
+      url: settings?.socialMedia?.youtube,
+      icon: FaYoutube,
+      color: 'hover:text-red-600'
+    }
+  ];
+
+  const activeSocialLinks = socialMediaLinks.filter(link => link.url && link.url.trim() !== '');
   
   return (
     <footer className="bg-white border-t">
@@ -11,12 +47,32 @@ const Footer = () => {
         {/* Brand Section */}
         <div className="mb-8 pb-8 border-b border-gray-200">
           <div className="flex items-center justify-center space-x-3">
-           
             <span className="text-3xl font-bold text-blue-600">{settings.storeInfo.name}</span>
           </div>
           <p className="text-center text-gray-600 mt-4 max-w-md mx-auto">
             {settings.storeInfo.description}
           </p>
+          
+          {/* Social Media Icons */}
+          {activeSocialLinks.length > 0 && (
+            <div className="flex justify-center space-x-4 mt-6">
+              {activeSocialLinks.map((social) => {
+                const IconComponent = social.icon;
+                return (
+                  <a
+                    key={social.name}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 transition-all duration-300 transform hover:scale-110 hover:bg-gray-200 ${social.color}`}
+                    aria-label={`Follow us on ${social.name}`}
+                  >
+                    <IconComponent className="w-5 h-5" />
+                  </a>
+                );
+              })}
+            </div>
+          )}
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
