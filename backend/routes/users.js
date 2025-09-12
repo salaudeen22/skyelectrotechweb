@@ -6,7 +6,8 @@ const {
   createEmployee,
   updateUser,
   deleteUser,
-  getUserStats
+  getUserStats,
+  getAdminUsers
 } = require('../controllers/users');
 const { auth, adminOnly } = require('../middleware/auth');
 const validate = require('../middleware/validate');
@@ -65,6 +66,7 @@ router.use(adminOnly);
 // User management routes
 router.get('/', getAllUsers);
 router.get('/stats', getUserStats);
+router.get('/admins', getAdminUsers);
 router.get('/:id', getUser);
 router.post('/employee', 
   createEmployeeValidation, 

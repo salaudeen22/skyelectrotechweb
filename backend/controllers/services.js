@@ -1,5 +1,6 @@
 const ServiceRequest = require('../models/ServiceRequest');
-const { sendServiceRequestEmail, sendServiceRequestNotificationEmail } = require('../utils/email');
+const { sendServiceRequestEmail } = require('../utils/email');
+const adminNotificationService = require('../services/adminNotificationService');
 
 // Submit service request
 const submitServiceRequest = async (req, res) => {
@@ -47,11 +48,19 @@ const submitServiceRequest = async (req, res) => {
       console.error('Failed to send confirmation email to user:', emailError);
     }
 
-    // Send notification email to admin
+    // Send project request notification to configured admin recipients
     try {
-      await sendServiceRequestNotificationEmail(serviceRequest);
-    } catch (emailError) {
-      console.error('Failed to send notification email to admin:', emailError);
+      await adminNotificationService.sendProjectRequestNotification({
+        _id: serviceRequest._id,
+        title: `${serviceRequest.serviceType} - ${serviceRequest.projectType || 'Service Request'}`,
+        customerName: serviceRequest.name,
+        description: serviceRequest.description,
+        serviceType: serviceRequest.serviceType,
+        budget: serviceRequest.budget,
+        timeline: serviceRequest.timeline
+      });
+    } catch (notificationError) {
+      console.error('Failed to send project request notification:', notificationError);
     }
 
     res.status(201).json({

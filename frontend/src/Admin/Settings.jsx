@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FaCog, FaStore, FaTruck, FaCreditCard, FaEnvelope, FaGlobe, FaShareAlt, FaTools, FaDatabase, FaSave, FaPlus, FaEdit, FaTrash, FaImage, FaUpload } from 'react-icons/fa';
+import { FaCog, FaStore, FaTruck, FaCreditCard, FaEnvelope, FaGlobe, FaShareAlt, FaTools, FaDatabase, FaSave, FaPlus, FaEdit, FaTrash, FaImage, FaUpload, FaBell } from 'react-icons/fa';
 import { settingsAPI, uploadAPI } from '../services/apiServices';
+import api from '../services/api';
 import { heroSliderService } from '../services/heroSliderService';
 import { useSettings } from '../contexts/SettingsContext';
 import toast from 'react-hot-toast';
@@ -43,6 +44,10 @@ const Settings = () => {
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
+  
+  // Admin users for notification settings
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [showAdminModal, setShowAdminModal] = useState(false);
 
   const [formData, setFormData] = useState({
     storeInfo: {
@@ -120,13 +125,44 @@ const Settings = () => {
     cache: {
       enabled: true,
       duration: 3600
+    },
+    notifications: {
+      adminRecipients: [],
+      preferences: {
+        newOrder: true,
+        returnRequest: true,
+        projectRequest: true
+      }
     }
   });
 
   useEffect(() => {
     fetchSettings();
     fetchHeroSlides();
+    loadAdminUsersData();
   }, []);
+
+  const loadAdminUsersData = async () => {
+    try {
+      console.log('Loading admin users data...');
+      const response = await api.get('/users/admins');
+      console.log('Admin users API response:', response.data);
+      setAdminUsers(response.data.data?.adminUsers || []);
+    } catch (error) {
+      console.error('Error loading admin users:', error);
+      // Fallback - try to get from regular users endpoint
+      try {
+        const fallbackResponse = await api.get('/users?role=admin');
+        console.log('Fallback users API response:', fallbackResponse.data);
+        if (fallbackResponse.data.users) {
+          setAdminUsers(fallbackResponse.data.users);
+        }
+      } catch (fallbackError) {
+        console.error('Fallback fetch also failed:', fallbackError);
+        toast.error('Failed to load admin users');
+      }
+    }
+  };
 
   const fetchHeroSlides = async () => {
     try {
@@ -181,7 +217,8 @@ const Settings = () => {
         seo: { ...prev.seo, ...fetchedSettings.seo },
         socialMedia: { ...prev.socialMedia, ...fetchedSettings.socialMedia },
         maintenance: { ...prev.maintenance, ...fetchedSettings.maintenance },
-        cache: { ...prev.cache, ...fetchedSettings.cache }
+        cache: { ...prev.cache, ...fetchedSettings.cache },
+        notifications: { ...prev.notifications, ...fetchedSettings.notifications }
       }));
     } catch (error) {
       console.error('Error fetching settings:', error);
@@ -206,7 +243,7 @@ const Settings = () => {
       ...prev,
       [section]: {
         ...prev[section],
-        [subsection]: {
+        [subsection]: field === null ? value : {
           ...prev[section][subsection],
           [field]: value
         }
@@ -476,6 +513,7 @@ const Settings = () => {
     { id: 'payment', name: 'Payment', icon: <FaCreditCard /> },
     { id: 'order', name: 'Orders', icon: <FaCog /> },
     { id: 'email', name: 'Email', icon: <FaEnvelope /> },
+    { id: 'notifications', name: 'Notifications', icon: <FaBell /> },
     { id: 'seo', name: 'SEO', icon: <FaGlobe /> },
     { id: 'social', name: 'Social Media', icon: <FaShareAlt /> },
     { id: 'maintenance', name: 'Maintenance', icon: <FaTools /> },
@@ -1293,6 +1331,118 @@ const Settings = () => {
             </div>
           )}
 
+          {/* Notifications Tab */}
+          {activeTab === 'notifications' && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <FaBell className="text-blue-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Notification Settings</h3>
+              </div>
+              
+              <div className="space-y-6">
+                {/* Admin Recipients Section */}
+                <div className="border rounded-lg p-6 bg-gray-50">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h4 className="font-medium text-gray-900">Admin Recipients</h4>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Up to 2 admin users who will receive notifications
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowAdminModal(true)}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm"
+                    >
+                      <FaPlus className="w-4 h-4" />
+                      Manage Recipients
+                    </button>
+                  </div>
+                  
+                  {/* Selected Recipients Display */}
+                  <div className="space-y-3">
+                    {formData.notifications.adminRecipients.length === 0 ? (
+                      <div className="text-center py-6 bg-white rounded-lg border-2 border-dashed border-gray-300">
+                        <FaBell className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                        <p className="text-gray-500">No admin recipients selected</p>
+                        <p className="text-sm text-gray-400 mt-1">Click "Manage Recipients" to add admin users</p>
+                      </div>
+                    ) : (
+                      formData.notifications.adminRecipients.map((adminId) => {
+                        const admin = adminUsers.find(a => a._id === adminId);
+                        if (!admin) return null;
+                        
+                        return (
+                          <div key={admin._id} className="flex items-center justify-between p-3 bg-white rounded-lg border">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                <span className="text-white font-medium">
+                                  {admin.name.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">{admin.name}</div>
+                                <div className="text-xs text-gray-500">{admin.email}</div>
+                                <div className="text-xs text-blue-600 capitalize">{admin.role}</div>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => {
+                                const newRecipients = formData.notifications.adminRecipients.filter(id => id !== admin._id);
+                                handleNestedInputChange('notifications', 'adminRecipients', null, newRecipients);
+                              }}
+                              className="text-red-600 hover:text-red-800 p-1"
+                              title="Remove recipient"
+                            >
+                              <FaTrash className="w-4 h-4" />
+                            </button>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                  
+                  {formData.notifications.adminRecipients.length > 0 && (
+                    <div className="mt-3 text-xs text-gray-500">
+                      {formData.notifications.adminRecipients.length}/2 recipients selected
+                    </div>
+                  )}
+                </div>
+
+                {/* Notification Preferences Section */}
+                <div className="border rounded-lg p-6">
+                  <h4 className="font-medium text-gray-900 mb-4">Notification Types</h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Choose which types of notifications to send to selected admin recipients
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {[
+                      { key: 'newOrder', label: 'New Orders', description: 'When customers place new orders' },
+                      { key: 'returnRequest', label: 'Return Requests', description: 'When customers request returns' },
+                      { key: 'projectRequest', label: 'Project Requests', description: 'When customers submit project requests' }
+                    ].map((notification) => (
+                      <div key={notification.key} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50">
+                        <input
+                          type="checkbox"
+                          id={`notification-${notification.key}`}
+                          checked={formData.notifications.preferences[notification.key]}
+                          onChange={(e) => handleNestedInputChange('notifications', 'preferences', notification.key, e.target.checked)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
+                        />
+                        <div className="flex-1">
+                          <label htmlFor={`notification-${notification.key}`} className="block text-sm font-medium text-gray-900 cursor-pointer">
+                            {notification.label}
+                          </label>
+                          <p className="text-xs text-gray-500">{notification.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* SEO Tab */}
           {activeTab === 'seo' && (
             <div className="space-y-6">
@@ -1471,6 +1621,249 @@ const Settings = () => {
           )}
         </div>
       </div>
+
+      {/* Admin Recipients Modal */}
+      {showAdminModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Manage Admin Recipients</h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Select up to 2 admin or employee users to receive notifications
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowAdminModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="space-y-6">
+                {/* Add Admin Dropdown Section */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Add Admin to Notifications ({formData.notifications.adminRecipients.length}/2)
+                  </label>
+                  
+                  <div className="space-y-3">
+                    {/* Always show dropdown but disable when full */}
+                    <div className="relative">
+                      <select
+                        className={`w-full px-4 py-3 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                          formData.notifications.adminRecipients.length >= 2
+                            ? 'bg-gray-100 border-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-white border-gray-300'
+                        }`}
+                        value=""
+                        disabled={formData.notifications.adminRecipients.length >= 2}
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            const adminId = e.target.value;
+                            const currentRecipients = formData.notifications.adminRecipients;
+                            
+                            if (!currentRecipients.includes(adminId) && currentRecipients.length < 2) {
+                              handleNestedInputChange('notifications', 'adminRecipients', null, 
+                                [...currentRecipients, adminId]
+                              );
+                              toast.success('Admin added to notification recipients');
+                            }
+                            
+                            // Reset dropdown
+                            e.target.value = '';
+                          }
+                        }}
+                      >
+                        <option value="">
+                          {formData.notifications.adminRecipients.length >= 2 
+                            ? 'Maximum recipients reached (2/2)' 
+                            : 'Select an admin to add...'
+                          }
+                        </option>
+                        {formData.notifications.adminRecipients.length < 2 && 
+                          adminUsers
+                            .filter(admin => !formData.notifications.adminRecipients.includes(admin._id))
+                            .map((admin) => (
+                              <option key={admin._id} value={admin._id}>
+                                {admin.name} ({admin.email}) - {admin.role}
+                              </option>
+                            ))
+                        }
+                      </select>
+                    </div>
+                    
+                    {/* Status messages */}
+                    {formData.notifications.adminRecipients.length >= 2 && (
+                      <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                          <span className="text-sm text-yellow-800">Maximum limit reached. Remove a recipient to add another.</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {formData.notifications.adminRecipients.length < 2 && 
+                     adminUsers.filter(admin => !formData.notifications.adminRecipients.includes(admin._id)).length === 0 && (
+                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <span className="text-sm text-blue-800">All available admin users have been added.</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Selected Recipients List */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Selected Recipients</h4>
+                  
+                  {formData.notifications.adminRecipients.length === 0 ? (
+                    <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                      <FaBell className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                      <p className="text-gray-500">No admin recipients selected</p>
+                      <p className="text-sm text-gray-400 mt-1">Use the dropdown above to add admin users</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {formData.notifications.adminRecipients.map((adminId) => {
+                        const admin = adminUsers.find(a => a._id === adminId);
+                        if (!admin) {
+                          return (
+                            <div key={adminId} className="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+                                  <span className="text-white font-medium text-sm">?</span>
+                                </div>
+                                <div>
+                                  <p className="font-medium text-red-800">Unknown Admin</p>
+                                  <p className="text-sm text-red-600">ID: {adminId}</p>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  const newRecipients = formData.notifications.adminRecipients.filter(id => id !== adminId);
+                                  handleNestedInputChange('notifications', 'adminRecipients', null, newRecipients);
+                                  toast.success('Unknown admin removed from notification recipients');
+                                }}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-100 p-2 rounded-lg transition-colors"
+                                title="Remove unknown admin"
+                              >
+                                <FaTrash className="w-4 h-4" />
+                              </button>
+                            </div>
+                          );
+                        }
+                        
+                        return (
+                          <div key={admin._id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                <span className="text-white font-medium text-sm">
+                                  {admin.name.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              <div>
+                                <div className="text-sm font-semibold text-gray-900">{admin.name}</div>
+                                <div className="text-xs text-gray-600">{admin.email}</div>
+                                <div className="text-xs text-blue-600 capitalize font-medium">
+                                  {admin.role} User
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <button
+                              onClick={() => {
+                                const newRecipients = formData.notifications.adminRecipients.filter(id => id !== admin._id);
+                                handleNestedInputChange('notifications', 'adminRecipients', null, newRecipients);
+                                toast.success('Admin removed from notification recipients');
+                              }}
+                              className="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                              title="Remove recipient"
+                            >
+                              <FaTrash className="w-4 h-4" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {adminUsers.length === 0 && formData.notifications.adminRecipients.length === 0 && (
+                  <div className="text-center py-8">
+                    <FaBell className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                    <p className="text-gray-500 mb-2">No admin users found</p>
+                    <p className="text-sm text-gray-400">Create admin or employee users first in the Users section</p>
+                    <button
+                      onClick={() => {
+                        loadAdminUsersData();
+                        toast('Refreshing admin users...');
+                      }}
+                      className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                    >
+                      Refresh Admin Users
+                    </button>
+                  </div>
+                )}
+
+                {adminUsers.length === 0 && formData.notifications.adminRecipients.length > 0 && (
+                  <div className="text-center py-6 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-yellow-800 mb-2">⚠️ Admin users not loaded properly</p>
+                    <p className="text-sm text-yellow-700 mb-3">
+                      You have {formData.notifications.adminRecipients.length} recipients selected, but their details couldn't be loaded.
+                    </p>
+                    <button
+                      onClick={() => {
+                        loadAdminUsersData();
+                        toast('Refreshing admin users...');
+                      }}
+                      className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 text-sm"
+                    >
+                      Reload Admin Users
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="p-6 border-t border-gray-200 bg-gray-50">
+              <div className="flex justify-between items-center">
+                <div className="text-sm text-gray-600">
+                  {formData.notifications.adminRecipients.length > 0 && (
+                    <span>
+                      {formData.notifications.adminRecipients.length} recipient{formData.notifications.adminRecipients.length !== 1 ? 's' : ''} selected
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowAdminModal(false)}
+                    className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAdminModal(false);
+                      toast.success('Admin recipients updated successfully');
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

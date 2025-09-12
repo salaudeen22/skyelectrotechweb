@@ -381,6 +381,48 @@ const settingsSchema = new mongoose.Schema({
     }]
   },
 
+  // Notification Settings
+  notifications: {
+    adminRecipients: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    preferences: {
+      newOrder: {
+        type: Boolean,
+        default: true
+      },
+      orderStatusUpdate: {
+        type: Boolean,
+        default: true
+      },
+      returnRequest: {
+        type: Boolean,
+        default: true
+      },
+      projectRequest: {
+        type: Boolean,
+        default: true
+      },
+      lowStock: {
+        type: Boolean,
+        default: true
+      },
+      paymentReceived: {
+        type: Boolean,
+        default: true
+      },
+      newUserRegistration: {
+        type: Boolean,
+        default: false
+      },
+      systemAlerts: {
+        type: Boolean,
+        default: true
+      }
+    }
+  },
+
   updatedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
@@ -391,6 +433,14 @@ const settingsSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true
+});
+
+// Validation to ensure max 2 admin recipients
+settingsSchema.pre('save', function(next) {
+  if (this.notifications && this.notifications.adminRecipients && this.notifications.adminRecipients.length > 2) {
+    return next(new Error('Maximum of 2 admin recipients allowed for notifications'));
+  }
+  next();
 });
 
 // Index for efficient queries

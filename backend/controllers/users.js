@@ -104,7 +104,12 @@ const getUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users/employee
 // @access  Private (Admin)
 const createEmployee = asyncHandler(async (req, res) => {
-  const { name, email, password, phone, address } = req.body;
+  const { name, email, password, phone, address, role } = req.body;
+
+  // Validate role
+  if (role && !['admin', 'employee'].includes(role)) {
+    return sendError(res, 400, 'Role must be either admin or employee');
+  }
 
   // Check if user already exists
   const existingUser = await User.findOne({ email });
@@ -112,21 +117,21 @@ const createEmployee = asyncHandler(async (req, res) => {
     return sendError(res, 400, 'User already exists with this email');
   }
 
-  // Create employee
-  const employee = await User.create({
+  // Create user with specified role (default to employee if not provided)
+  const user = await User.create({
     name,
     email,
     password,
     phone,
     address,
-    role: 'employee',
+    role: role || 'employee',
     emailVerified: true // Admin created accounts are pre-verified
   });
 
   // Remove password from response
-  employee.password = undefined;
+  user.password = undefined;
 
-  sendResponse(res, 201, { user: employee }, 'Employee created successfully');
+  sendResponse(res, 201, { user }, `${user.role.charAt(0).toUpperCase() + user.role.slice(1)} created successfully`);
 });
 
 // @desc    Update user
@@ -267,11 +272,24 @@ const getUserStats = asyncHandler(async (req, res) => {
   sendResponse(res, 200, { stats }, 'User statistics retrieved successfully');
 });
 
+// @desc    Get admin users for notifications
+// @route   GET /api/users/admins
+// @access  Private (Admin)
+const getAdminUsers = asyncHandler(async (req, res) => {
+  const adminUsers = await User.find({ 
+    role: { $in: ['admin', 'employee'] },
+    isActive: true 
+  }).select('name email role');
+
+  sendResponse(res, 200, { adminUsers }, 'Admin users retrieved successfully');
+});
+
 module.exports = {
   getAllUsers,
   getUser,
   createEmployee,
   updateUser,
   deleteUser,
-  getUserStats
+  getUserStats,
+  getAdminUsers
 };

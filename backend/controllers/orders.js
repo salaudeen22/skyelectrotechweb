@@ -6,9 +6,10 @@ const ReturnRequest = require('../models/ReturnRequest');
 const { applyCouponToOrder } = require('./coupons');
 const { sendResponse, sendError, asyncHandler, paginate, getPaginationMeta } = require('../utils/helpers');
 const { refundPayment } = require('../config/razorpay');
-const { sendOrderConfirmationEmail, sendOrderNotificationEmail, sendOrderStatusUpdateEmail, sendReturnRequestEmail, sendReturnApprovedEmail, sendReturnRejectedEmail, sendReturnPickupScheduledEmail, sendReturnUserHandedOverEmail } = require('../utils/email');
+const { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail, sendReturnApprovedEmail, sendReturnRejectedEmail, sendReturnPickupScheduledEmail, sendReturnUserHandedOverEmail } = require('../utils/email');
 const { uploadImage } = require('../utils/s3');
 const notificationService = require('../services/notificationService');
+const adminNotificationService = require('../services/adminNotificationService');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -173,8 +174,8 @@ const createOrder = asyncHandler(async (req, res) => {
       // Send order confirmation email to customer
       await sendOrderConfirmationEmail(order, req.user);
       
-      // Send order notification email to admin/owner
-      await sendOrderNotificationEmail(order, req.user);
+      // Send order notification to configured admin recipients
+      await adminNotificationService.sendNewOrderNotification(order);
     } catch (emailError) {
       console.error('Failed to send order emails:', emailError);
       // Don't fail the order creation if emails fail
@@ -683,11 +684,16 @@ const returnOrder = asyncHandler(async (req, res) => {
   // Populate return request with order and user details
   await returnRequest.populate('order user', 'orderId name email');
 
-  // Send email notification to admin
+  // Send return request notification to configured admin recipients
   try {
-    await sendReturnRequestEmail(order, req.user, returnRequest);
-  } catch (emailError) {
-    console.error('Failed to send return request email:', emailError);
+    await adminNotificationService.sendReturnRequestNotification({
+      _id: returnRequest._id,
+      orderNumber: order.orderNumber,
+      reason: returnRequest.reason,
+      user: req.user
+    });
+  } catch (notificationError) {
+    console.error('Failed to send return request notification:', notificationError);
   }
 
   sendResponse(res, 200, { returnRequest }, 'Return request submitted successfully');
@@ -977,11 +983,21 @@ const markUserReturned = asyncHandler(async (req, res) => {
   });
   await order.save();
 
+  // Send admin notification for return handover
   try {
     await order.populate('user', 'name email');
-    await sendReturnUserHandedOverEmail(order, order.user, returnRequest);
+    await adminNotificationService.sendReturnHandoverNotification({
+      _id: returnRequest._id,
+      orderId: order._id,
+      orderNumber: order.orderId,
+      customerName: order.user.name,
+      customerEmail: order.user.email,
+      reason: returnRequest.reason,
+      requestNumber: returnRequest.requestNumber,
+      handedOverAt: returnRequest.handedOverAt
+    });
   } catch (emailError) {
-    console.error('Failed to send user handed over email:', emailError);
+    console.error('Failed to send return handover admin notification:', emailError);
   }
 
   // Notify user: order marked as returned

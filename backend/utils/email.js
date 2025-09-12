@@ -23,24 +23,7 @@ const createTransporter = () => {
   return nodemailer.createTransport(transportConfig);
 };
 
-const sendEmail = async (options) => {
-  try {
-    const transporter = createTransporter();
-    const mailOptions = {
-      from: `${process.env.EMAIL_FROM_NAME || 'SkyElectroTech'} <${process.env.EMAIL_USER}>`,
-      to: options.to,
-      subject: options.subject,
-      html: options.html,
-      text: options.text,
-    };
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', info.messageId);
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    console.error('Error sending email:', error);
-    throw new Error(`Failed to send email: ${error.message}`);
-  }
-};
+
 // --- END OF UNCHANGED SECTION ---
 
 // Helper function to get logo URL
@@ -2194,26 +2177,182 @@ const sendOrderConfirmationEmail = async (order, user) => {
   }
 };
 
-// Send order notification email to admin/owner
-const sendOrderNotificationEmail = async (order, user) => {
-  try {
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
-    if (!adminEmail) {
-      console.warn('Admin email not configured, skipping order notification');
-      return;
-    }
 
-    const emailTemplate = getOrderNotificationEmailTemplate(order, user);
+
+// Send new order email to admin recipients
+const sendNewOrderEmail = async (emailData) => {
+  try {
+    const { to, orderData } = emailData;
+    const emailTemplate = getOrderNotificationEmailTemplate(orderData, orderData.user);
     await sendEmail({
-      to: adminEmail,
+      to: to,
       subject: emailTemplate.subject,
       html: emailTemplate.html,
       text: emailTemplate.text,
     });
-    console.log(`Order notification email sent to admin: ${adminEmail}`);
+    console.log(`New order email sent to: ${to}`);
+    return { success: true };
   } catch (error) {
-    console.error(`Failed to send order notification email to admin:`, error);
-    // Don't re-throw as order creation shouldn't fail due to email issues
+    console.error(`Failed to send new order email to ${emailData.to}:`, error);
+    throw error;
+  }
+};
+
+// Send project request email to admin recipients
+const sendProjectRequestEmail = async (emailData) => {
+  try {
+    const { to, projectData } = emailData;
+    const emailTemplate = getServiceRequestNotificationEmailTemplate(projectData);
+    await sendEmail({
+      to: to,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
+    });
+    console.log(`Project request email sent to: ${to}`);
+    return { success: true };
+  } catch (error) {
+    console.error(`Failed to send project request email to ${emailData.to}:`, error);
+    throw error;
+  }
+};
+
+// Send return user handover email to admin recipients (for admin notification service)
+const sendReturnUserHandoverAdminEmail = async (emailData) => {
+  try {
+    const { to, returnData } = emailData;
+    const logoUrl = getEmailLogoUrl();
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+          .container { max-width: 600px; margin: 0 auto; background: white; }
+          .header { background: #f59e0b; color: white; padding: 30px; text-align: center; }
+          .content { padding: 40px 30px; }
+          .footer { background: #f8fafc; padding: 20px; text-align: center; color: #6b7280; }
+          .info-box { background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 15px; margin: 15px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <img src="${logoUrl}" alt="SkyElectroTech" style="height: 40px; margin-bottom: 15px;">
+            <h1>Return Item Handed Over</h1>
+          </div>
+          <div class="content">
+            <p><strong>A customer has marked their return item as handed over:</strong></p>
+            <div class="info-box">
+              <p><strong>Order:</strong> ${returnData.orderNumber}</p>
+              <p><strong>Customer:</strong> ${returnData.customerName} (${returnData.customerEmail})</p>
+              <p><strong>Return Request #:</strong> ${returnData.requestNumber || 'N/A'}</p>
+              <p><strong>Handed Over Date:</strong> ${new Date(returnData.handedOverAt).toLocaleDateString()}</p>
+              <p><strong>Reason:</strong> ${returnData.reason}</p>
+            </div>
+            <p>Please verify the return item pickup and process accordingly.</p>
+            <p><a href="${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/orders/${returnData.orderId}">View Order Details</a></p>
+          </div>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} SkyElectroTech. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    await sendEmail({
+      to: to,
+      subject: `Return Item Handed Over - ${returnData.orderNumber}`,
+      html: html,
+      text: `Return Item Handed Over - Order: ${returnData.orderNumber}, Customer: ${returnData.customerName}, Request #: ${returnData.requestNumber}, Date: ${new Date(returnData.handedOverAt).toLocaleDateString()}`,
+    });
+    console.log(`Return user handover email sent to: ${to}`);
+    return { success: true };
+  } catch (error) {
+    console.error(`Failed to send return user handover email to ${emailData.to}:`, error);
+    throw error;
+  }
+};
+
+// Send return request email to admin recipients (for admin notification service)
+const sendReturnRequestAdminEmail = async (emailData) => {
+  try {
+    const { to, returnData } = emailData;
+    const logoUrl = getEmailLogoUrl();
+    
+    const formatCurrency = (amount) => {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount);
+    };
+
+    const getReasonLabel = (reason) => {
+      const reasons = {
+        'defective': 'Defective/Damaged Product',
+        'wrong_item': 'Wrong Item Received',
+        'not_as_described': 'Not as Described',
+        'changed_mind': 'Changed Mind',
+        'other': 'Other'
+      };
+      return reasons[reason] || reason;
+    };
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5; }
+          .container { max-width: 600px; margin: 0 auto; background: white; }
+          .header { background: #dc2626; color: white; padding: 30px; text-align: center; }
+          .content { padding: 40px 30px; }
+          .footer { background: #f8fafc; padding: 20px; text-align: center; color: #6b7280; }
+          .info-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 15px; margin: 15px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <img src="${logoUrl}" alt="SkyElectroTech" style="height: 40px; margin-bottom: 15px;">
+            <h1>Return Request Received</h1>
+          </div>
+          <div class="content">
+            <p><strong>A customer has requested a return:</strong></p>
+            <div class="info-box">
+              <p><strong>Order:</strong> ${returnData.orderNumber}</p>
+              <p><strong>Customer:</strong> ${returnData.customerName} (${returnData.customerEmail})</p>
+              <p><strong>Order Total:</strong> ${formatCurrency(returnData.orderTotal)}</p>
+              <p><strong>Reason:</strong> ${getReasonLabel(returnData.reason)}</p>
+              <p><strong>Request Date:</strong> ${new Date(returnData.requestedAt).toLocaleDateString()}</p>
+            </div>
+            <p><strong>Description:</strong> ${returnData.description || 'No additional description provided'}</p>
+            <p>Please review and approve/reject this return request.</p>
+            <p><a href="${process.env.CLIENT_URL || 'http://localhost:3000'}/admin/orders/${returnData.orderId}">Review Return Request</a></p>
+          </div>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} SkyElectroTech. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    await sendEmail({
+      to: to,
+      subject: `Return Request - ${returnData.orderNumber}`,
+      html: html,
+      text: `Return Request - Order: ${returnData.orderNumber}, Customer: ${returnData.customerName}, Reason: ${getReasonLabel(returnData.reason)}`,
+    });
+    console.log(`Return request email sent to: ${to}`);
+    return { success: true };
+  } catch (error) {
+    console.error(`Failed to send return request email to ${emailData.to}:`, error);
+    throw error;
   }
 };
 
@@ -2234,8 +2373,6 @@ const sendOrderStatusUpdateEmail = async (order, user, newStatus) => {
   }
 };
 
-// Low stock alert email removed (no inventory management)
-const sendLowStockAlertEmail = async () => {};
 
 // Send new user registration notification to admin
 const sendNewUserNotificationEmail = async (user) => {
@@ -3344,27 +3481,7 @@ const sendServiceRequestEmail = async (serviceRequest) => {
   }
 };
 
-// Send service request notification email to admin
-const sendServiceRequestNotificationEmail = async (serviceRequest) => {
-  try {
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
-    if (!adminEmail) {
-      console.warn('Admin email not configured, skipping service request notification');
-      return;
-    }
 
-    const emailTemplate = getServiceRequestNotificationEmailTemplate(serviceRequest);
-    await sendEmail({
-      to: adminEmail,
-      subject: emailTemplate.subject,
-      html: emailTemplate.html,
-      text: emailTemplate.text,
-    });
-    console.log(`Service request notification email sent to admin: ${adminEmail}`);
-  } catch (error) {
-    console.error(`Failed to send service request notification email to admin:`, error);
-  }
-};
 
 // Payment timeout email template
 const getPaymentTimeoutEmailTemplate = (data) => {
@@ -3496,23 +3613,25 @@ const sendPaymentTimeoutEmail = async (userEmail, data) => {
 };
 
 module.exports = {
-  sendEmail,
+
   sendWelcomeEmail,
   sendOTPEmail,
   sendForgotPasswordEmail,
   sendOrderConfirmationEmail,
-  sendOrderNotificationEmail,
+  sendNewOrderEmail,
+  sendProjectRequestEmail,
+  sendReturnUserHandoverAdminEmail,
   sendOrderStatusUpdateEmail,
   sendReturnRequestEmail,
   sendReturnApprovedEmail,
   sendReturnRejectedEmail,
   sendReturnPickupScheduledEmail,
+  //
   sendReturnUserHandedOverEmail,
   // new export will be appended below
-  sendLowStockAlertEmail,
+
   sendNewUserNotificationEmail,
   sendServiceRequestEmail,
-  sendServiceRequestNotificationEmail,
   sendPaymentTimeoutEmail,
   getWelcomeEmailTemplate,
   getOTPEmailTemplate,

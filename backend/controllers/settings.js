@@ -33,7 +33,8 @@ const updateSettings = asyncHandler(async (req, res) => {
       seo,
       socialMedia,
       maintenance,
-      cache
+      cache,
+      notifications
     } = req.body;
 
     let settings = await Settings.findOne().sort('-createdAt');
@@ -81,6 +82,14 @@ const updateSettings = asyncHandler(async (req, res) => {
     if (cache) {
       console.log('Updating cache:', cache);
       settings.cache = { ...settings.cache, ...cache };
+    }
+    if (notifications) {
+      console.log('Updating notifications:', notifications);
+      // Validate admin recipients limit before saving
+      if (notifications.adminRecipients && notifications.adminRecipients.length > 2) {
+        return sendError(res, 400, 'Maximum of 2 admin recipients allowed for notifications');
+      }
+      settings.notifications = { ...settings.notifications, ...notifications };
     }
 
     settings.updatedBy = req.user._id;
