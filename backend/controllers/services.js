@@ -54,10 +54,16 @@ const submitServiceRequest = async (req, res) => {
         _id: serviceRequest._id,
         title: `${serviceRequest.serviceType} - ${serviceRequest.projectType || 'Service Request'}`,
         customerName: serviceRequest.name,
+        email: serviceRequest.email,
+        phone: serviceRequest.phone,
+        name: serviceRequest.name,
         description: serviceRequest.description,
         serviceType: serviceRequest.serviceType,
+        projectType: serviceRequest.projectType,
         budget: serviceRequest.budget,
-        timeline: serviceRequest.timeline
+        timeline: serviceRequest.timeline,
+        requirements: serviceRequest.requirements,
+        requestNumber: serviceRequest.requestNumber
       });
     } catch (notificationError) {
       console.error('Failed to send project request notification:', notificationError);
