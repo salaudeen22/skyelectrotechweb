@@ -197,9 +197,9 @@ router.get('/today-sales-invoice', auth, async (req, res) => {
         const companyInfo = settings?.storeInfo || {
             name: 'Sky Electro Tech',
             description: 'Electronics & Components Store',
-            email: 'info@skyelectro.tech',
-            phone: '+91 98765 43210',
-            address: '123 Electronics Street, Mumbai, Maharashtra - 400001',
+            email: 'skyelectrotechblr@gmail.com',
+            phone: '+91 063612 41811',
+            address: '2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002',
             gstin: '27AABCS1234Z1Z5'
         };
         console.log('Company info:', companyInfo);
@@ -412,9 +412,9 @@ router.get('/:id/invoice', auth, async (req, res) => {
         const companyInfo = settings?.storeInfo || {
             name: 'Sky Electro Tech',
             description: 'Electronics & Components Store',
-            email: 'info@skyelectro.tech',
-            phone: '+91 98765 43210',
-            address: '123 Electronics Street, Mumbai, Maharashtra - 400001',
+            email: 'skyelectrotechblr@gmail.com',
+            phone: '+91 063612 41811',
+            address: '2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002',
             gstin: '27AABCS1234Z1Z5'
         };
 
@@ -1014,8 +1014,8 @@ function generateInvoiceHTML(data) {
                     <strong>Company Details:</strong><br>
                     Sky Electro Tech<br>
                     GSTIN: 27AABCS1234Z1Z5<br>
-                    Address: 123 Electronics Street, Mumbai, Maharashtra - 400001<br>
-                    Phone: +91 98765 43210 | Email: info@skyelectro.tech
+                    Address: 2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002<br>
+                    Phone: +91 063612 41811 | Email: skyelectrotechblr@gmail.com
                 </div>
                 
                 <div class="summary">

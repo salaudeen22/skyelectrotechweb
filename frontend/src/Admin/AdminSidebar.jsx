@@ -310,7 +310,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
                             {user?.name || 'Admin User'}
                         </p>
                         <p className="text-xs text-gray-500 truncate">
-                            {user?.email || 'admin@skyelectro.tech'}
+                            {user?.email || 'skyelectrotechblr@gmail.com'}
                         </p>
                     </div>
                 </div>

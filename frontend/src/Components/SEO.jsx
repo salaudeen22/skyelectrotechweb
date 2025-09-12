@@ -95,7 +95,7 @@ const SEO = ({
             "url": "https://skyelectrotech.in",
             "address": {
               "@type": "PostalAddress",
-              "streetAddress": "2nd Floor, No 140, Sadar Patrappa Rd",
+              "streetAddress": "2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete",
               "addressLocality": "Nagarathpete, Bengaluru",
               "addressRegion": "Karnataka",
               "postalCode": "560002",
@@ -240,11 +240,11 @@ const SEO = ({
         "description": "Leading electronic components shop in Bangalore specializing in Arduino, Raspberry Pi, industrial automation, sensors, PLCs, and robotics components. Expert technical support and quality guaranteed.",
         "foundingDate": "2020",
         "priceRange": "₹₹",
-        "telephone": "+91-XXXXXXXXXX",
-        "email": "info@skyelectrotech.in",
+        "telephone": "+91 063612 41811",
+        "email": "skyelectrotechblr@gmail.com",
         "address": {
           "@type": "PostalAddress",
-          "streetAddress": "2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet",
+          "streetAddress": "2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete",
           "addressLocality": "Nagarathpete, Bengaluru",
           "addressRegion": "Karnataka", 
           "postalCode": "560002",

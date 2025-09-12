@@ -499,8 +499,8 @@ const OrderHistory = () => {
                               <p className="text-yellow-800 font-medium">Return period expired</p>
                               <p className="text-yellow-700">
                                 Contact support for assistance: 
-                                <a href="mailto:support@skyelectrotech.com" className="text-blue-600 hover:text-blue-800 ml-1">
-                                  support@skyelectrotech.com
+                                <a href="mailto:skyelectrotechblr@gmail.com" className="text-blue-600 hover:text-blue-800 ml-1">
+                                  skyelectrotechblr@gmail.com
                                 </a>
                               </p>
                             </div>

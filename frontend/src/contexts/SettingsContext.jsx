@@ -21,9 +21,9 @@ export const SettingsProvider = ({ children }) => {
     storeInfo: {
       name: 'SkyElectroTech',
       description: 'Your trusted electronics store',
-      email: 'admin@skyelectro.tech',
+      email: 'skyelectrotechblr@gmail.com',
       phone: '+91 1234567890',
-      address: 'Your store address',
+      address: '2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002',
       logo: '',
       favicon: ''
     },

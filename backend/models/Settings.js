@@ -13,15 +13,15 @@ const settingsSchema = new mongoose.Schema({
     },
     email: {
       type: String,
-      default: 'info@skyelectro.tech'
+      default: 'skyelectrotechblr@gmail.com'
     },
     phone: {
       type: String,
-      default: '+91 98765 43210'
+      default: '+91 063612 41811'
     },
     address: {
       type: String,
-      default: 'No. 123, Electronics Street, Bangalore, Karnataka - 560000'
+      default: '2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002'
     },
     gstin: {
       type: String,
@@ -29,7 +29,7 @@ const settingsSchema = new mongoose.Schema({
     },
     city: {
       type: String,
-      default: 'Bangalore'
+      default: 'Bengaluru'
     },
     state: {
       type: String,
@@ -227,7 +227,7 @@ const settingsSchema = new mongoose.Schema({
     },
     fromEmail: {
       type: String,
-      default: 'noreply@skyelectro.tech'
+      default: 'skyelectrotechblr@gmail.com'
     },
     shippingUpdates: {
       type: Boolean,

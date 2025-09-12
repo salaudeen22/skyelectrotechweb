@@ -13,7 +13,7 @@ const createAdmin = async () => {
     // Admin user data
     const adminData = {
       name: 'Super Admin',
-      email: 'admin@gmail.com',
+      email: 'skyelectrotechblr@gmail.com',
       password: 'admin123',
       role: 'admin',
       isActive: true,

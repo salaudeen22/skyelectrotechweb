@@ -1085,7 +1085,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"siteName\": \"SkyElectroTech\",\n  \"contactEmail\": \"contact@skyelectrotech.com\",\n  \"maintenanceMode\": false\n}"
+              "raw": "{\n  \"siteName\": \"SkyElectroTech\",\n  \"contactEmail\": \"skyelectrotechblr@gmail.com\",\n  \"maintenanceMode\": false\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/settings",

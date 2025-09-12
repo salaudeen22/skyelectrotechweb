@@ -2685,7 +2685,7 @@ const sendReturnPickupScheduledEmail = async (order, user, returnRequest) => {
 
 // Notify admin when user confirms handover
 const sendReturnUserHandedOverEmail = async (order, user, returnRequest) => {
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@skyelectrotech.com';
+  const adminEmail = process.env.ADMIN_EMAIL || 'skyelectrotechblr@gmail.com';
   const subject = `User Marked Return Handed Over - ${order.orderId}`;
   const html = `
     <html>

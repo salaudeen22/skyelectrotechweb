@@ -14,7 +14,7 @@ const checkUsers = async () => {
     });
 
     // Test admin user
-    const adminUser = await User.findOne({ email: 'admin@skyelectrotech.com' }).select('+password');
+    const adminUser = await User.findOne({ email: 'skyelectrotechblr@gmail.com' }).select('+password');
     if (adminUser) {
       console.log('\nAdmin user found:');
       console.log('Email:', adminUser.email);

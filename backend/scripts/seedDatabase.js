@@ -22,7 +22,7 @@ const connectDB = async () => {
 const sampleUsers = [
   {
     name: 'Admin User',
-    email: 'admin@skyelectrotech.com',
+    email: 'skyelectrotechblr@gmail.com',
     password: 'admin123',
     role: 'admin',
     isActive: true,
@@ -292,7 +292,7 @@ const seedDatabase = async () => {
 
     console.log('\n🎉 Database seeded successfully!');
     console.log('\nDefault login credentials:');
-    console.log('Admin: admin@skyelectrotech.com / admin123');
+    console.log('Admin: skyelectrotechblr@gmail.com / admin123');
     console.log('Employee: employee1@skyelectrotech.com / employee123');
     console.log('User: user@example.com / user123');
 

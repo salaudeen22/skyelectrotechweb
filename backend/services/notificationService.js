@@ -5,7 +5,7 @@ const PushSubscription = require('../models/PushSubscription');
 // Configure web-push with VAPID keys
 const vapidKeys = webpush.generateVAPIDKeys();
 webpush.setVapidDetails(
-  'mailto:notifications@skyelectrotech.com',
+  'mailto:skyelectrotechblr@gmail.com',
   process.env.VAPID_PUBLIC_KEY || vapidKeys.publicKey,
   process.env.VAPID_PRIVATE_KEY || vapidKeys.privateKey
 );

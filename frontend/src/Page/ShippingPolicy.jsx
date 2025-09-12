@@ -199,10 +199,10 @@ const ShippingPolicy = () => {
               </p>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-gray-700">
-                  <strong>Email:</strong> shipping@skyelectrotech.com<br />
-                  <strong>Phone:</strong> +91 98765 43210<br />
+                  <strong>Email:</strong> skyelectrotechblr@gmail.com<br />
+                  <strong>Phone:</strong> +91 063612 41811<br />
                   <strong>Customer Support Hours:</strong> 9:00 AM - 7:00 PM (Monday to Saturday)<br />
-                  <strong>Address:</strong> SkyElectroTech, 123 Electronics Street, Tech Park, Bangalore - 560001, Karnataka, India
+                  <strong>Address:</strong> 2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002, India
                 </p>
               </div>
             </div>

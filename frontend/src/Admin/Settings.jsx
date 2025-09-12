@@ -48,13 +48,13 @@ const Settings = () => {
     storeInfo: {
       name: 'Sky Electro Tech',
       description: 'Electronics & Components Store',
-      email: 'info@skyelectro.tech',
-      phone: '+91 98765 43210',
-      address: '123 Electronics Street, Mumbai, Maharashtra - 400001',
+      email: 'skyelectrotechblr@gmail.com',
+      phone: '+91 063612 41811',
+      address: '2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002',
       gstin: '27AABCS1234Z1Z5',
-      city: 'Mumbai',
-      state: 'Maharashtra',
-      pincode: '400001',
+      city: 'Bengaluru',
+      state: 'Karnataka',
+      pincode: '560002',
       logo: '',
       favicon: ''
     },
@@ -92,7 +92,7 @@ const Settings = () => {
       orderStatusUpdate: { enabled: true, subject: 'Order Status Update - {orderId}' },
       welcomeEmail: { enabled: true, subject: 'Welcome to {storeName}' },
       fromName: 'SkyElectroTech',
-      fromEmail: 'noreply@skyelectro.tech',
+      fromEmail: 'skyelectrotechblr@gmail.com',
       shippingUpdates: true,
       marketingEmails: false
     },
@@ -167,7 +167,7 @@ const Settings = () => {
           subject: emailSettings.welcomeEmail?.subject ?? 'Welcome to {storeName}'
         },
         fromName: emailSettings.fromName ?? 'SkyElectroTech',
-        fromEmail: emailSettings.fromEmail ?? 'noreply@skyelectro.tech',
+        fromEmail: emailSettings.fromEmail ?? 'skyelectrotechblr@gmail.com',
         shippingUpdates: emailSettings.shippingUpdates ?? true,
         marketingEmails: emailSettings.marketingEmails ?? false
       };
@@ -235,7 +235,7 @@ const Settings = () => {
             subject: formData.email.welcomeEmail?.subject ?? 'Welcome to {storeName}'
           },
           fromName: formData.email.fromName ?? 'SkyElectroTech',
-          fromEmail: formData.email.fromEmail ?? 'noreply@skyelectro.tech',
+          fromEmail: formData.email.fromEmail ?? 'skyelectrotechblr@gmail.com',
           shippingUpdates: formData.email.shippingUpdates ?? true,
           marketingEmails: formData.email.marketingEmails ?? false
         }

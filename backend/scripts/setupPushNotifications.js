@@ -26,7 +26,7 @@ const vapidConfig = `
 # Push Notification VAPID Keys
 VAPID_PUBLIC_KEY=${vapidKeys.publicKey}
 VAPID_PRIVATE_KEY=${vapidKeys.privateKey}
-VAPID_EMAIL=notifications@skyelectrotech.com
+VAPID_EMAIL=skyelectrotechblr@gmail.com
 `;
 
 if (!envContent.includes('VAPID_PUBLIC_KEY')) {
