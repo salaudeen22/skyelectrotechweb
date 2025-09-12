@@ -75,9 +75,16 @@ const OrderHistory = () => {
     }
   };
 
-  // Check if order can be cancelled (pending or confirmed status)
+  // Check if order can be cancelled (pending or confirmed status within 6 hours)
   const canCancelOrder = (order) => {
-    return ['pending', 'confirmed'].includes(order.orderStatus);
+    if (!['pending', 'confirmed'].includes(order.orderStatus)) return false;
+    
+    const orderTime = new Date(order.createdAt).getTime();
+    const currentTime = new Date().getTime();
+    const elapsed = currentTime - orderTime;
+    const CANCELLATION_WINDOW = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
+    
+    return elapsed < CANCELLATION_WINDOW;
   };
 
   // Check if order can be returned (shipped/delivered within 2 days)

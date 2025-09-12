@@ -28,6 +28,8 @@ const Payment = () => {
   const { settings } = useSettings();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [processingStep, setProcessingStep] = useState('');
+  const [processingProgress, setProcessingProgress] = useState(0);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedMethod, setSelectedMethod] = useState('online');
   const [shippingInfo, setShippingInfo] = useState(null);
@@ -121,6 +123,7 @@ const Payment = () => {
     trackClick(`pay_button_clicked_${selectedMethod}`, 'payment');
     
     setIsSubmitting(true);
+    setProcessingStep('Preparing payment...');
 
     const orderPayload = {
       orderItems: cart.map(item => ({
@@ -153,6 +156,8 @@ const Payment = () => {
       toast.error('Payment failed. Please try again.');
     } finally {
       setIsSubmitting(false);
+      setProcessingStep('');
+      setProcessingProgress(0);
     }
   };
 
@@ -254,6 +259,10 @@ const Payment = () => {
     try {
       console.log('Payment success response:', response);
       
+      setProcessingStep('Verifying payment...');
+      setProcessingProgress(25);
+      toast.loading('Verifying your payment...', { id: 'payment-process' });
+      
       // Verify payment
       const verificationData = {
         razorpay_payment_id: response.razorpay_payment_id,
@@ -273,6 +282,10 @@ const Payment = () => {
       if (verificationResponse.success) {
         console.log('Payment verification successful, creating order...');
         
+        setProcessingStep('Creating your order...');
+        setProcessingProgress(50);
+        toast.loading('Payment verified! Creating your order...', { id: 'payment-process' });
+        
         // Create order only after payment is verified
         const finalOrderPayload = {
           ...orderPayload,
@@ -288,22 +301,96 @@ const Payment = () => {
         
         console.log('Creating order with payload:', finalOrderPayload);
         
-        const orderResponse = await ordersAPI.createOrder(finalOrderPayload);
-        console.log('Order creation response:', orderResponse);
+        // Add progress updates during order creation
+        setTimeout(() => {
+          if (processingStep === 'Creating your order...') {
+            setProcessingStep('Saving order details...');
+            setProcessingProgress(65);
+            toast.loading('Saving your order details...', { id: 'payment-process' });
+          }
+        }, 3000);
         
-        const order = orderResponse.data.order;
+        setTimeout(() => {
+          if (processingStep.includes('Saving order')) {
+            setProcessingStep('Updating inventory...');
+            setProcessingProgress(80);
+            toast.loading('Updating inventory and sending notifications...', { id: 'payment-process' });
+          }
+        }, 6000);
         
-        // Track successful payment
-        trackOrderPurchase(order);
+        // Set a timeout for order creation (30 seconds)
+        const orderCreationTimeout = setTimeout(() => {
+          if (isSubmitting) {
+            setProcessingStep('This is taking longer than expected...');
+            toast.loading('This is taking longer than expected. Please wait while we finalize your order...', { id: 'payment-process' });
+          }
+        }, 10000);
+        
+        try {
+          const orderResponse = await ordersAPI.createOrder(finalOrderPayload);
+          clearTimeout(orderCreationTimeout);
+          console.log('Order creation response:', orderResponse);
+          
+          const order = orderResponse.data.order;
+          
+          setProcessingStep('Finalizing order...');
+          setProcessingProgress(90);
+          toast.loading('Almost done! Finalizing your order...', { id: 'payment-process' });
+          
+          // Track successful payment
+          trackOrderPurchase(order);
 
-        // Clear cart and redirect
-        clearCart();
-        clearAllCheckoutData();
-        
-        console.log('Payment and order creation completed successfully!');
-        setIsSubmitting(false);
-        toast.success('Payment successful! Your order has been placed.');
-        navigate(`/user/orders/${order._id}`);
+          // Clear cart and redirect
+          clearCart();
+          clearAllCheckoutData();
+          
+          console.log('Payment and order creation completed successfully!');
+          setIsSubmitting(false);
+          setProcessingStep('');
+          setProcessingProgress(100);
+          toast.success('Payment successful! Your order has been placed.', { id: 'payment-process' });
+          navigate(`/user/orders/${order._id}`);
+        } catch (orderError) {
+          clearTimeout(orderCreationTimeout);
+          console.error('Order creation failed:', orderError);
+          
+          // If order creation fails after payment, initiate automatic refund
+          setProcessingStep('Processing automatic refund...');
+          toast.loading('Payment successful but order creation failed. Processing automatic refund...', { 
+            id: 'payment-process' 
+          });
+          
+          try {
+            const refundResponse = await paymentAPI.processRefund({
+              paymentId: response.razorpay_payment_id,
+              reason: 'Automatic refund - Order creation failed after successful payment',
+              orderId: null // No order was created
+            });
+            
+            if (refundResponse.success) {
+              setIsSubmitting(false);
+              setProcessingStep('');
+              setProcessingProgress(0);
+              toast.success('Payment refunded successfully! Your money will be credited back in 3-7 business days.', { 
+                id: 'payment-process',
+                duration: 8000
+              });
+            } else {
+              throw new Error('Refund failed');
+            }
+          } catch (refundError) {
+            console.error('Automatic refund failed:', refundError);
+            setIsSubmitting(false);
+            setProcessingStep('');
+            setProcessingProgress(0);
+            toast.error('Payment successful but order creation and refund both failed. Please contact support immediately with payment ID: ' + response.razorpay_payment_id, { 
+              id: 'payment-process',
+              duration: 15000
+            });
+          }
+          
+          throw orderError;
+        }
       } else {
         console.log('Payment verification failed:', verificationResponse);
         throw new Error('Payment verification failed');
@@ -316,12 +403,17 @@ const Payment = () => {
         response: error.response?.data
       });
       setIsSubmitting(false);
-      toast.error('Payment verification failed. Please contact support.');
+      setProcessingStep('');
+      setProcessingProgress(0);
+      toast.error('Payment verification failed. Please contact support.', { id: 'payment-process' });
     }
   };
 
   const handleCOD = async (orderPayload) => {
     try {
+      setProcessingStep('Placing your order...');
+      toast.loading('Placing your order...', { id: 'cod-process' });
+      
       const response = await ordersAPI.createOrder({
         ...orderPayload,
         paymentInfo: {
@@ -343,12 +435,12 @@ const Payment = () => {
       clearCart();
       clearAllCheckoutData();
       
-      toast.success('Order placed successfully! You will pay on delivery.');
+      toast.success('Order placed successfully! You will pay on delivery.', { id: 'cod-process' });
       navigate(`/user/orders/${order._id}`);
       
     } catch (error) {
       console.error('COD order error:', error);
-      toast.error('Failed to place order. Please try again.');
+      toast.error('Failed to place order. Please try again.', { id: 'cod-process' });
       throw error;
     }
   };
@@ -572,9 +664,19 @@ const Payment = () => {
                   }`}
                 >
                   {isSubmitting ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-                      Processing...
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                        {processingStep || 'Processing...'}
+                      </div>
+                      {processingProgress > 0 && (
+                        <div className="w-full bg-white/20 rounded-full h-2">
+                          <div 
+                            className="bg-white h-2 rounded-full transition-all duration-500 ease-out" 
+                            style={{ width: `${processingProgress}%` }}
+                          ></div>
+                        </div>
+                      )}
                     </div>
                   ) : paymentMethods.length === 0 ? (
                     'No payment methods available'
@@ -582,6 +684,11 @@ const Payment = () => {
                     `Pay Securely ${formatAmount(totals.total)}`
                   )}
                 </button>
+                {isSubmitting && processingProgress > 0 && (
+                  <div className="mt-2 text-center text-sm text-gray-600">
+                    {processingProgress}% Complete
+                  </div>
+                )}
                 <div className="mt-4 text-center flex items-center justify-center text-xs text-gray-500">
                   <FiLock className="w-4 h-4 mr-2"/>
                   All transactions are secure and encrypted.
