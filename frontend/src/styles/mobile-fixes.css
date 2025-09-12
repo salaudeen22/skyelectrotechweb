@@ -1,0 +1,67 @@
+/* Mobile-specific fixes to prevent footer showing instead of content */
+
+/* Ensure proper viewport handling on all mobile devices */
+@media screen and (max-width: 768px) {
+  /* Fix for iOS Safari viewport height issues */
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
+  
+  /* Ensure main content area has sufficient height */
+  main {
+    min-height: calc(100vh - 80px);
+    min-height: calc(100svh - 80px); /* Use small viewport height on supported browsers */
+  }
+  
+  /* Force content areas to take full height */
+  .page-content {
+    min-height: calc(100vh - 160px);
+    min-height: calc(100svh - 160px);
+  }
+  
+  /* Prevent content from being too short */
+  .content-wrapper {
+    min-height: 70vh;
+    min-height: 70svh;
+  }
+  
+  /* Footer positioning fixes */
+  footer {
+    margin-top: auto !important;
+    flex-shrink: 0;
+  }
+  
+  /* Ensure proper flexbox behavior */
+  .layout-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+}
+
+/* Fix for very small mobile screens */
+@media screen and (max-height: 600px) {
+  main {
+    min-height: calc(100vh - 60px);
+  }
+  
+  .content-wrapper {
+    min-height: 60vh;
+  }
+  
+  footer {
+    padding: 1rem 0 !important;
+  }
+}
+
+/* Fix for landscape mobile orientation */
+@media screen and (max-width: 768px) and (orientation: landscape) {
+  main {
+    min-height: calc(100vh - 60px);
+  }
+  
+  .content-wrapper {
+    min-height: calc(100vh - 120px);
+  }
+}

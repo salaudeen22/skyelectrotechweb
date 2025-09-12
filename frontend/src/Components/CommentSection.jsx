@@ -149,81 +149,40 @@ const CommentSection = ({ productId }) => {
     <>
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
         {/* Enhanced Header */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-200">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <FaUsers className="w-5 h-5 text-blue-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">
-                  Customer Reviews
-                </h3>
-              </div>
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 sm:p-6 border-b border-gray-200">
+          <div className="w-full">
+            <div className="w-full">
               
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <FaStar
-                        key={star}
-                        className={`w-5 h-5 ${
-                          star <= Math.round(averageRating)
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                    <span className="text-lg font-semibold text-gray-900">
-                      {averageRating.toFixed(1)}
-                    </span>
-                    <span className="text-sm text-gray-600">
-                      out of 5
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      ({ratingStats.totalReviews} reviews)
-                    </span>
-                  </div>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <FaStar
+                      key={star}
+                      className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                        star <= Math.round(averageRating)
+                          ? 'text-yellow-400 fill-current'
+                          : 'text-gray-300'
+                      }`}
+                    />
+                  ))}
                 </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg sm:text-xl font-bold text-gray-900">
+                    {averageRating.toFixed(1)}
+                  </span>
+                  <span className="text-sm sm:text-base text-gray-600">
+                    out of 5
+                  </span>
+                </div>
+                <span className="text-sm sm:text-base text-gray-500">
+                  ({ratingStats.totalReviews} reviews)
+                </span>
               </div>
             </div>
-            
-            {user && (
-              <div className="flex flex-col gap-3">
-                {userComment && (
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      You have already reviewed this product. You can edit your review below.
-                    </p>
-                  </div>
-                )}
-                <button
-                  onClick={() => {
-                    if (userComment) {
-                      // If user has already reviewed, open edit mode
-                      setEditingComment(userComment);
-                      setShowCommentModal(true);
-                    } else {
-                      // If user hasn't reviewed, open new review mode
-                      setEditingComment(null);
-                      setShowCommentModal(true);
-                    }
-                  }}
-                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                >
-                  <FaPen className="w-4 h-4" />
-                  <span className="font-medium">
-                    {userComment ? 'Edit Your Review' : 'Write a Review'}
-                  </span>
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Enhanced Rating Distribution */}
-          <div className="mt-6 grid grid-cols-5 gap-3">
+          <div className="mt-4 sm:mt-6 grid grid-cols-5 gap-2 sm:gap-3">
             {[5, 4, 3, 2, 1].map((rating) => {
               const count = ratingStats.ratingDistribution[rating] || 0;
               const percentage = ratingStats.totalReviews > 0 
@@ -231,14 +190,14 @@ const CommentSection = ({ productId }) => {
                 : 0;
               
               return (
-                <div key={rating} className="text-center group cursor-pointer hover:bg-white hover:rounded-lg hover:shadow-sm p-2 transition-all duration-200">
-                  <div className="flex items-center justify-center mb-2">
-                    <span className="text-sm font-semibold text-gray-900">{rating}</span>
+                <div key={rating} className="text-center group cursor-pointer hover:bg-white hover:rounded-lg hover:shadow-sm p-1 sm:p-2 transition-all duration-200">
+                  <div className="flex items-center justify-center mb-1 sm:mb-2">
+                    <span className="text-xs sm:text-sm font-semibold text-gray-900">{rating}</span>
                     <FaStar className="w-3 h-3 text-yellow-400 fill-current ml-1" />
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3 overflow-hidden">
                     <div
-                      className="bg-gradient-to-r from-yellow-400 to-yellow-500 h-3 rounded-full transition-all duration-300"
+                      className="bg-gradient-to-r from-yellow-400 to-yellow-500 h-2 sm:h-3 rounded-full transition-all duration-300"
                       style={{ width: `${percentage}%` }}
                     ></div>
                   </div>
@@ -247,6 +206,38 @@ const CommentSection = ({ productId }) => {
               );
             })}
           </div>
+
+          {/* Write Review Button */}
+          {user && (
+            <div className="mt-4 sm:mt-6">
+              {userComment && (
+                <div className="p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg mb-3 sm:mb-4">
+                  <p className="text-xs sm:text-sm text-blue-800">
+                    You have already reviewed this product. You can edit your review below.
+                  </p>
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  if (userComment) {
+                    // If user has already reviewed, open edit mode
+                    setEditingComment(userComment);
+                    setShowCommentModal(true);
+                  } else {
+                    // If user hasn't reviewed, open new review mode
+                    setEditingComment(null);
+                    setShowCommentModal(true);
+                  }
+                }}
+                className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 active:from-blue-800 active:to-indigo-800 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 touch-manipulation text-sm sm:text-base w-full"
+              >
+                <FaPen className="w-4 h-4" />
+                <span className="font-medium">
+                  {userComment ? 'Edit Your Review' : 'Write a Review'}
+                </span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Enhanced Filters */}
@@ -292,9 +283,9 @@ const CommentSection = ({ productId }) => {
 
         {/* Enhanced Pagination */}
         {pagination.totalPages > 1 && (
-          <div className="p-6 border-t border-gray-100 bg-gray-50">
+          <div className="p-4 sm:p-6 border-t border-gray-100 bg-gray-50">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="text-sm text-gray-600 text-center sm:text-left">
+              <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
                 Showing <span className="font-semibold">{((pagination.currentPage - 1) * pagination.limit) + 1}</span> to{' '}
                 <span className="font-semibold">{Math.min(pagination.currentPage * pagination.limit, pagination.totalItems)}</span> of{' '}
                 <span className="font-semibold">{pagination.totalItems}</span> reviews

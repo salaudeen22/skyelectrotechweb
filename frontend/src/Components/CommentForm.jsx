@@ -125,13 +125,13 @@ const CommentForm = ({ productId, onCommentCreated, onCancel, editComment = null
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
       {/* Rating Section */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-        <label className="block text-base font-semibold text-gray-900 mb-4">
+      <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
+        <label className="block text-sm sm:text-base font-semibold text-gray-900 mb-3 sm:mb-4">
           Your Rating *
         </label>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -143,7 +143,7 @@ const CommentForm = ({ productId, onCommentCreated, onCancel, editComment = null
                 className="focus:outline-none transform hover:scale-110 transition-transform duration-200"
               >
                 <FaStar
-                  className={`w-8 h-8 ${
+                  className={`w-6 h-6 sm:w-8 sm:h-8 ${
                     star <= (hoveredRating || formData.rating)
                       ? 'text-yellow-400 fill-current drop-shadow-sm'
                       : 'text-gray-300 hover:text-yellow-300'
@@ -164,7 +164,7 @@ const CommentForm = ({ productId, onCommentCreated, onCancel, editComment = null
       </div>
 
       {/* Title Section */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+      <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
         <label htmlFor="title" className="block text-base font-semibold text-gray-900 mb-3">
           Review Title *
         </label>
@@ -190,7 +190,7 @@ const CommentForm = ({ productId, onCommentCreated, onCancel, editComment = null
       </div>
 
       {/* Comment Section */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+      <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
         <label htmlFor="comment" className="block text-base font-semibold text-gray-900 mb-3">
           Detailed Review *
         </label>
@@ -216,13 +216,13 @@ const CommentForm = ({ productId, onCommentCreated, onCancel, editComment = null
       </div>
 
       {/* Images Section */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-        <label className="block text-base font-semibold text-gray-900 mb-4">
+      <div className="bg-white p-4 sm:p-6 rounded-xl border border-gray-200 shadow-sm">
+        <label className="block text-sm sm:text-base font-semibold text-gray-900 mb-3 sm:mb-4">
           Add Photos (Optional)
         </label>
         <div className="space-y-4">
           {/* Image Upload */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             <label className="cursor-pointer flex items-center justify-center gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 px-6 py-4 rounded-xl border-2 border-dashed border-blue-300 hover:border-blue-400 transition-all duration-200">
               <FaCamera className="w-5 h-5 text-blue-600" />
               <span className="font-medium text-blue-700">

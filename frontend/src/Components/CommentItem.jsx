@@ -91,22 +91,22 @@ const CommentItem = ({ comment, currentUser, onCommentUpdated, onCommentDeleted,
   };
 
   return (
-    <div className="p-6 hover:bg-gray-50 transition-colors duration-200">
+    <div className="p-4 sm:p-6 hover:bg-gray-50 transition-colors duration-200">
       {/* Enhanced Comment Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-        <div className="flex items-start gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+        <div className="flex items-start gap-3 sm:gap-4">
           <div className="flex-shrink-0">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-md">
-              <span className="text-white font-semibold text-lg">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-md">
+              <span className="text-white font-semibold text-sm sm:text-lg">
                 {comment.user.name?.charAt(0)?.toUpperCase() || 'U'}
               </span>
             </div>
           </div>
           
           <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-gray-900 text-lg">{comment.user.name}</span>
+                <span className="font-semibold text-gray-900 text-base sm:text-lg">{comment.user.name}</span>
                 {comment.isVerifiedPurchase && (
                   <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
                     <FaCheckCircle className="w-3 h-3" />
@@ -116,7 +116,7 @@ const CommentItem = ({ comment, currentUser, onCommentUpdated, onCommentDeleted,
               </div>
             </div>
             
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs sm:text-sm text-gray-600">
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <FaStar
@@ -163,25 +163,25 @@ const CommentItem = ({ comment, currentUser, onCommentUpdated, onCommentDeleted,
       </div>
 
       {/* Comment Content */}
-      <div className="mb-4">
-        <h4 className="font-bold text-gray-900 text-lg mb-3">{comment.title}</h4>
-        <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{comment.comment}</p>
+      <div className="mb-3 sm:mb-4">
+        <h4 className="font-bold text-gray-900 text-base sm:text-lg mb-2 sm:mb-3">{comment.title}</h4>
+        <p className="text-gray-700 text-sm sm:text-base leading-relaxed whitespace-pre-wrap">{comment.comment}</p>
       </div>
 
       {/* Enhanced Comment Images */}
       {comment.images && comment.images.length > 0 && (
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-3">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 mb-2 sm:mb-3">
             <FaImage className="w-4 h-4 text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">Review Images</span>
+            <span className="text-xs sm:text-sm font-medium text-gray-700">Review Images</span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
             {comment.images.map((image, index) => (
               <div key={index} className="group relative">
                 <img
                   src={image.url}
                   alt={`Review image ${index + 1}`}
-                  className="w-full h-24 sm:h-28 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-all duration-200 shadow-sm hover:shadow-md"
+                  className="w-full h-20 sm:h-24 md:h-28 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-all duration-200 shadow-sm hover:shadow-md"
                   onClick={() => window.open(image.url, '_blank')}
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-all duration-200 flex items-center justify-center">
@@ -194,15 +194,15 @@ const CommentItem = ({ comment, currentUser, onCommentUpdated, onCommentDeleted,
       )}
 
       {/* Enhanced Voting */}
-      <div className="flex flex-wrap items-center gap-4 mb-6">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+        <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={() => onVote(comment._id, 'helpful')}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-gray-100 hover:bg-green-100 hover:text-green-700 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-600 bg-gray-100 hover:bg-green-100 hover:text-green-700 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
             disabled={!currentUser}
           >
             <FaThumbsUp className="w-4 h-4" />
-            <span className="font-medium">Helpful</span>
+            <span className="font-medium hidden sm:inline">Helpful</span>
             <span className="bg-white px-2 py-1 rounded-full text-xs font-bold text-gray-700">
               {comment.isHelpful || 0}
             </span>
@@ -210,11 +210,11 @@ const CommentItem = ({ comment, currentUser, onCommentUpdated, onCommentDeleted,
           
           <button
             onClick={() => onVote(comment._id, 'not_helpful')}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-gray-100 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-600 bg-gray-100 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
             disabled={!currentUser}
           >
             <FaThumbsDown className="w-4 h-4" />
-            <span className="font-medium">Not Helpful</span>
+            <span className="font-medium hidden sm:inline">Not Helpful</span>
           </button>
         </div>
         

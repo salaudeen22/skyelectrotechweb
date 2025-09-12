@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import SEO from '../Components/SEO';
 
 const PrivacyPolicy = () => {
@@ -14,25 +14,25 @@ const PrivacyPolicy = () => {
         description="Learn about how SkyElectroTech collects, uses, and protects your personal information. Read our comprehensive privacy policy."
         keywords="privacy policy, data protection, personal information, SkyElectroTech privacy"
       />
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="bg-gray-50 min-h-screen flex flex-col">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Privacy Policy</h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <div className="text-center mb-8 sm:mb-12">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">Privacy Policy</h1>
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-2">
               How we collect, use, and protect your personal information
             </p>
-            <p className="text-sm text-gray-500 mt-2">Last updated: {new Date().toLocaleDateString()}</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-2">Last updated: {new Date().toLocaleDateString()}</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-8">
-            <div className="prose max-w-none">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">1. Information We Collect</h2>
-              <p className="text-gray-700 mb-4">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
+            <div className="prose max-w-none text-sm sm:text-base">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">1. Information We Collect</h2>
+              <p className="text-gray-700 mb-3 sm:mb-4">
                 We collect information you provide directly to us, such as when you create an account, 
                 make a purchase, or contact our support team. This may include:
               </p>
-              <ul className="list-disc pl-6 text-gray-700 mb-6">
+              <ul className="list-disc pl-4 sm:pl-6 text-gray-700 mb-4 sm:mb-6 space-y-1 sm:space-y-0">
                 <li>Name, email address, and phone number</li>
                 <li>Billing and shipping addresses</li>
                 <li>Payment information (processed securely by our payment partners)</li>
@@ -40,11 +40,11 @@ const PrivacyPolicy = () => {
                 <li>Communications with our support team</li>
               </ul>
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">2. How We Use Your Information</h2>
-              <p className="text-gray-700 mb-4">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">2. How We Use Your Information</h2>
+              <p className="text-gray-700 mb-3 sm:mb-4">
                 We use the information we collect to:
               </p>
-              <ul className="list-disc pl-6 text-gray-700 mb-6">
+              <ul className="list-disc pl-4 sm:pl-6 text-gray-700 mb-4 sm:mb-6 space-y-1 sm:space-y-0">
                 <li>Process and fulfill your orders</li>
                 <li>Provide customer support and technical assistance</li>
                 <li>Send order confirmations and shipping updates</li>
@@ -53,12 +53,12 @@ const PrivacyPolicy = () => {
                 <li>Comply with legal obligations</li>
               </ul>
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">3. Information Sharing</h2>
-              <p className="text-gray-700 mb-4">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">3. Information Sharing</h2>
+              <p className="text-gray-700 mb-3 sm:mb-4">
                 We do not sell, trade, or rent your personal information to third parties. We may share 
                 your information only in the following circumstances:
               </p>
-              <ul className="list-disc pl-6 text-gray-700 mb-6">
+              <ul className="list-disc pl-4 sm:pl-6 text-gray-700 mb-4 sm:mb-6 space-y-1 sm:space-y-0">
                 <li>With payment processors to complete transactions</li>
                 <li>With shipping partners to deliver your orders</li>
                 <li>With service providers who assist in our operations</li>

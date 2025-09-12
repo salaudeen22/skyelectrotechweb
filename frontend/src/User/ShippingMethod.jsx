@@ -185,7 +185,22 @@ const ShippingMethod = () => {
         
         {/* Progress Indicator */}
         <div className="mb-8">
-          <div className="flex items-center justify-center space-x-4">
+          {/* Mobile Progress Indicator */}
+          <div className="block sm:hidden">
+            <div className="flex items-center justify-center space-x-2 mb-4">
+              <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">✓</div>
+              <div className="w-4 h-1 bg-green-600"></div>
+              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+              <div className="w-4 h-1 bg-gray-300"></div>
+              <div className="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">3</div>
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-medium text-blue-600">Step 2: Shipping Method</p>
+            </div>
+          </div>
+          
+          {/* Desktop Progress Indicator */}
+          <div className="hidden sm:flex items-center justify-center space-x-4">
             <div className="flex items-center">
               <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">✓</div>
               <span className="ml-2 text-sm font-medium text-green-600">Shipping Information</span>
@@ -204,9 +219,9 @@ const ShippingMethod = () => {
         </div>
 
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight sm:text-5xl">Shipping Method</h1>
-          <p className="mt-4 max-w-2xl mx-auto text-lg text-slate-600">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">Shipping Method</h1>
+          <p className="mt-2 sm:mt-4 max-w-2xl mx-auto text-base sm:text-lg text-slate-600">
             Choose your preferred delivery method for your order.
           </p>
         </div>

@@ -283,22 +283,22 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
-          <p className="text-gray-600 mt-2">Manage your account information</p>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Profile</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">Manage your account information</p>
         </div>
 
         {/* Avatar Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div className="flex items-center space-x-6">
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
             {/* Avatar Display */}
             <div className="relative">
               {user.avatar && user.avatar.url ? (
                 <img
                   src={user.avatar.url}
                   alt={user.name}
-                  className="w-24 h-24 rounded-full object-cover border-4 border-gray-200"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-200"
                   onError={(e) => {
                     // Hide the broken image and show fallback
                     e.target.style.display = 'none';
@@ -309,7 +309,7 @@ const Profile = () => {
               
               {/* Fallback Avatar - Always present but hidden when image loads successfully */}
               <div 
-                className={`w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center text-white text-3xl font-bold border-4 border-gray-200 ${
+                className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl sm:text-3xl font-bold border-4 border-gray-200 ${
                   user.avatar && user.avatar.url ? 'hidden' : ''
                 }`}
               >
@@ -326,16 +326,16 @@ const Profile = () => {
 
             {/* Avatar Actions */}
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Profile Picture</h3>
-              <p className="text-gray-600 mb-4">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Profile Picture</h3>
+              <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
                 {user.avatar ? 'Update your profile picture' : 'Add a profile picture to personalize your account'}
               </p>
               
-              <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <button
                   onClick={triggerFileInput}
                   disabled={avatarLoading}
-                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
                 >
                   <FiCamera className="w-4 h-4 mr-2" />
                   {user.avatar ? 'Change Photo' : 'Upload Photo'}
@@ -345,7 +345,7 @@ const Profile = () => {
                   <button
                     onClick={handleAvatarDelete}
                     disabled={avatarLoading}
-                    className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
                   >
                     <FiTrash className="w-4 h-4 mr-2" />
                     Remove
@@ -369,9 +369,9 @@ const Profile = () => {
           {/* Profile Card */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-sm">
-              <div className="p-6 border-b border-gray-200">
+              <div className="p-4 sm:p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">Personal Information</h2>
+                  <h2 className="text-base sm:text-lg font-semibold text-gray-900">Personal Information</h2>
                   {!isEditing ? (
                     <button
                       onClick={() => setIsEditing(true)}
@@ -381,29 +381,29 @@ const Profile = () => {
                       Edit
                     </button>
                   ) : (
-                    <div className="flex flex-col space-y-2">
+                    <div className="flex flex-col gap-2 sm:gap-2">
                       {!otpSent ? (
                         <button
                           onClick={handleRequestOTP}
                           disabled={loading}
-                          className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
+                          className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base font-medium disabled:opacity-50 w-full sm:w-auto"
                         >
                           <FiMail className="w-4 h-4 mr-1" />
                           {loading ? 'Sending OTP...' : 'Send OTP'}
                         </button>
                       ) : (
-                        <div className="flex items-center space-x-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                           <button
                             onClick={handleSave}
                             disabled={loading || !formData.otp}
-                            className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
+                            className="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base font-medium disabled:opacity-50 w-full sm:w-auto"
                           >
                             <FiSave className="w-4 h-4 mr-1" />
                             {loading ? 'Saving...' : 'Save'}
                           </button>
                           <button
                             onClick={handleCancel}
-                            className="flex items-center text-gray-600 hover:text-gray-700 px-4 py-2 rounded-lg font-medium"
+                            className="flex items-center justify-center text-gray-600 hover:text-gray-700 px-3 sm:px-4 py-2 rounded-lg text-sm sm:text-base font-medium w-full sm:w-auto border border-gray-300 hover:bg-gray-50"
                           >
                             <FiX className="w-4 h-4 mr-1" />
                             Cancel
@@ -415,11 +415,11 @@ const Profile = () => {
                 </div>
               </div>
 
-              <div className="p-6 space-y-6">
+              <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                 {/* Basic Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                       Full Name
                     </label>
                     {isEditing ? (
@@ -428,29 +428,29 @@ const Profile = () => {
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                       />
                     ) : (
                       <div className="flex items-center space-x-2">
                         <FiUser className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900">{user?.name || 'Not provided'}</span>
+                        <span className="text-sm sm:text-base text-gray-900">{user?.name || 'Not provided'}</span>
                       </div>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                       Email Address
                     </label>
                     <div className="flex items-center space-x-2">
                       <FiMail className="w-5 h-5 text-gray-400" />
-                      <span className="text-gray-900">{user?.email}</span>
+                      <span className="text-sm sm:text-base text-gray-900">{user?.email}</span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1">Email cannot be changed</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                       Phone Number
                     </label>
                     {isEditing ? (
@@ -459,19 +459,19 @@ const Profile = () => {
                         name="phone"
                         value={formData.phone}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                       />
                     ) : (
                       <div className="flex items-center space-x-2">
                         <FiPhone className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900">{user?.phone || 'Not provided'}</span>
+                        <span className="text-sm sm:text-base text-gray-900">{user?.phone || 'Not provided'}</span>
                       </div>
                     )}
                   </div>
 
                   {isEditing && otpSent && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                         OTP Verification
                       </label>
                       <input
@@ -481,7 +481,7 @@ const Profile = () => {
                         onChange={handleInputChange}
                         placeholder="Enter 6-digit OTP sent to your email"
                         maxLength="6"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                       />
                       <p className="text-xs text-blue-600 mt-1">
                         Check your email for the OTP. It expires in 10 minutes.
@@ -490,7 +490,7 @@ const Profile = () => {
                   )}
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                       Member Since
                     </label>
                     <div className="flex items-center space-x-2">
@@ -505,9 +505,9 @@ const Profile = () => {
                 {/* Address Information */}
                 <div className="border-t border-gray-200 pt-6">
                   <h3 className="text-md font-medium text-gray-900 mb-4">Address Information</h3>
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                         Street Address
                       </label>
                       {isEditing ? (
@@ -516,7 +516,7 @@ const Profile = () => {
                           name="address.street"
                           value={formData.address.street}
                           onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                         />
                       ) : (
                         <div className="flex items-start space-x-2">
@@ -528,7 +528,7 @@ const Profile = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                           City
                         </label>
                         {isEditing ? (
@@ -537,7 +537,7 @@ const Profile = () => {
                             name="address.city"
                             value={formData.address.city}
                             onChange={handleInputChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                           />
                         ) : (
                           <span className="text-gray-900 break-words">{defaultAddress?.city || 'Not provided'}</span>
@@ -545,7 +545,7 @@ const Profile = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                           State
                         </label>
                         {isEditing ? (
@@ -554,7 +554,7 @@ const Profile = () => {
                             name="address.state"
                             value={formData.address.state}
                             onChange={handleInputChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                           />
                         ) : (
                           <span className="text-gray-900 break-words">{defaultAddress?.state || 'Not provided'}</span>
@@ -562,7 +562,7 @@ const Profile = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                           ZIP Code
                         </label>
                         {isEditing ? (
@@ -571,7 +571,7 @@ const Profile = () => {
                             name="address.zipCode"
                             value={formData.address.zipCode}
                             onChange={handleInputChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                           />
                         ) : (
                           <span className="text-gray-900 break-words">{defaultAddress?.zipCode || 'Not provided'}</span>
@@ -579,7 +579,7 @@ const Profile = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                           Country
                         </label>
                         {isEditing ? (
@@ -587,7 +587,7 @@ const Profile = () => {
                             name="address.country"
                             value={formData.address.country}
                             onChange={handleInputChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                           >
                             <option value="India">India</option>
                             <option value="USA">United States</option>
@@ -607,63 +607,63 @@ const Profile = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Account Stats */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Overview</h3>
-              <div className="space-y-4">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Account Overview</h3>
+              <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Account Status</span>
+                  <span className="text-xs sm:text-sm text-gray-600">Account Status</span>
                   <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium">
                     Active
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Role</span>
-                  <span className="text-gray-900 capitalize">{user?.role || 'User'}</span>
+                  <span className="text-xs sm:text-sm text-gray-600">Role</span>
+                  <span className="text-xs sm:text-sm text-gray-900 capitalize">{user?.role || 'User'}</span>
                 </div>
               </div>
             </div>
 
             {/* Address Management */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                   My Addresses
                   {addresses.length > 0 && (
-                    <span className="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                    <span className="ml-1 sm:ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
                       {addresses.length}
                     </span>
                   )}
                 </h3>
                 <button
                   onClick={() => setShowAddresses(!showAddresses)}
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-blue-600 hover:text-blue-700 text-sm sm:text-base font-medium"
                 >
                   {showAddresses ? 'Hide' : 'Manage'}
                 </button>
               </div>
 
               {showAddresses && (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <button
                     onClick={() => setShowAddressForm(true)}
-                    className="w-full flex items-center justify-center p-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                    className="w-full flex items-center justify-center p-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors text-sm sm:text-base"
                   >
                     <FiPlus className="w-5 h-5 mr-2 text-gray-400" />
-                    <span className="text-gray-600">Add New Address</span>
+                    <span className="text-gray-600 text-sm sm:text-base">Add New Address</span>
                   </button>
 
                   {addresses.length === 0 && (
                     <div className="text-center py-8">
                       <FiMapPin className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500 text-sm">No addresses saved yet</p>
-                      <p className="text-gray-400 text-xs mt-1">Add your first address to get started</p>
+                      <p className="text-gray-500 text-xs sm:text-sm">No addresses saved yet</p>
+                      <p className="text-gray-400 text-xs sm:text-sm mt-1">Add your first address to get started</p>
                     </div>
                   )}
 
                   {addresses.map((address) => (
-                    <div key={address.id} className="border border-gray-200 rounded-lg p-4">
+                    <div key={address.id} className="border border-gray-200 rounded-lg p-3 sm:p-4">
                                               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -707,14 +707,14 @@ const Profile = () => {
 
                   {/* Address Form Modal */}
                   {showAddressForm && (
-                    <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
-                      <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-2 sm:p-4">
+                      <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">
                           {editingAddress ? 'Edit Address' : 'Add New Address'}
                         </h3>
-                        <div className="space-y-6">
+                        <div className="space-y-4 sm:space-y-6">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                               Address Name
                             </label>
                             <input
@@ -723,11 +723,11 @@ const Profile = () => {
                               value={addressFormData.name}
                               onChange={handleAddressFormChange}
                               placeholder="e.g., Home, Office"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                               Street Address
                             </label>
                             <input
@@ -735,12 +735,12 @@ const Profile = () => {
                               name="street"
                               value={addressFormData.street}
                               onChange={handleAddressFormChange}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                             />
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                                 City
                               </label>
                               <input
@@ -748,11 +748,11 @@ const Profile = () => {
                                 name="city"
                                 value={addressFormData.city}
                                 onChange={handleAddressFormChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                                 State
                               </label>
                               <input
@@ -760,13 +760,13 @@ const Profile = () => {
                                 name="state"
                                 value={addressFormData.state}
                                 onChange={handleAddressFormChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                               />
                             </div>
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                                 ZIP Code
                               </label>
                               <input
@@ -774,18 +774,18 @@ const Profile = () => {
                                 name="zipCode"
                                 value={addressFormData.zipCode}
                                 onChange={handleAddressFormChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                               />
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                                 Country
                               </label>
                               <select
                                 name="country"
                                 value={addressFormData.country}
                                 onChange={handleAddressFormChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                               >
                                 <option value="India">India</option>
                                 <option value="USA">United States</option>
@@ -804,7 +804,7 @@ const Profile = () => {
                               disabled={addresses.length === 0}
                               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             />
-                            <label className="ml-2 text-sm text-gray-700">
+                            <label className="ml-2 text-xs sm:text-sm text-gray-700">
                               Set as default address
                               {addresses.length === 0 && (
                                 <span className="text-blue-600"> (First address will be default)</span>
@@ -812,19 +812,19 @@ const Profile = () => {
                             </label>
                           </div>
                         </div>
-                        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 mt-6">
+                        <div className="flex flex-col sm:flex-row items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
                           <button
                             onClick={() => {
                               setShowAddressForm(false);
                               setEditingAddress(null);
                             }}
-                            className="w-full sm:w-auto px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                            className="w-full sm:w-auto px-4 py-2.5 sm:py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm sm:text-base font-medium transition-colors"
                           >
                             Cancel
                           </button>
                           <button
                             onClick={editingAddress ? handleUpdateAddress : handleAddAddress}
-                            className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm sm:text-base font-medium transition-colors"
                           >
                             {editingAddress ? 'Update' : 'Add'} Address
                           </button>
@@ -837,43 +837,43 @@ const Profile = () => {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-              <div className="space-y-3">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Quick Actions</h3>
+              <div className="space-y-2 sm:space-y-3">
                 <button 
                   onClick={() => setShowAddresses(true)}
-                  className="w-full flex items-center justify-between text-left p-3 rounded-lg hover:bg-gray-50 border border-gray-200"
+                  className="w-full flex items-center justify-between text-left p-3 sm:p-4 rounded-lg hover:bg-gray-50 border border-gray-200 transition-colors"
                 >
-                  <div className="flex items-center space-x-3">
-                    <FiMapPin className="w-5 h-5 text-gray-400" />
-                    <span className="text-gray-700">Manage Addresses</span>
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <FiMapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                    <span className="text-gray-700 text-sm sm:text-base">Manage Addresses</span>
                   </div>
                 </button>
                 <button 
                   onClick={() => navigate('/auth/change-password')}
-                  className="w-full flex items-center justify-between text-left p-3 rounded-lg hover:bg-gray-50 border border-gray-200"
+                  className="w-full flex items-center justify-between text-left p-3 sm:p-4 rounded-lg hover:bg-gray-50 border border-gray-200 transition-colors"
                 >
-                  <div className="flex items-center space-x-3">
-                    <FiLock className="w-5 h-5 text-gray-400" />
-                    <span className="text-gray-700">Change Password</span>
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <FiLock className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                    <span className="text-gray-700 text-sm sm:text-base">Change Password</span>
                   </div>
                 </button>
                 <button 
                   onClick={() => navigate('/orders')}
-                  className="w-full flex items-center justify-between text-left p-3 rounded-lg hover:bg-gray-50 border border-gray-200"
+                  className="w-full flex items-center justify-between text-left p-3 sm:p-4 rounded-lg hover:bg-gray-50 border border-gray-200 transition-colors"
                 >
-                  <div className="flex items-center space-x-3">
-                    <FiPackage className="w-5 h-5 text-gray-400" />
-                    <span className="text-gray-700">Order History</span>
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <FiPackage className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                    <span className="text-gray-700 text-sm sm:text-base">Order History</span>
                   </div>
                 </button>
                 <button 
                   onClick={() => navigate('/wishlist')}
-                  className="w-full flex items-center justify-between text-left p-3 rounded-lg hover:bg-gray-50 border border-gray-200"
+                  className="w-full flex items-center justify-between text-left p-3 sm:p-4 rounded-lg hover:bg-gray-50 border border-gray-200 transition-colors"
                 >
-                  <div className="flex items-center space-x-3">
-                    <FiHeart className="w-5 h-5 text-gray-400" />
-                    <span className="text-gray-700">Wishlist</span>
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <FiHeart className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                    <span className="text-gray-700 text-sm sm:text-base">Wishlist</span>
                   </div>
                 </button>
               </div>

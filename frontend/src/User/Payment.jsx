@@ -473,7 +473,26 @@ const Payment = () => {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Progress Indicator */}
         <div className="mb-8">
-          <div className="flex items-center justify-center space-x-4">
+          {/* Mobile Progress Indicator */}
+          <div className="block sm:hidden">
+            <div className="flex items-center justify-center space-x-2 mb-4">
+              <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <FiCheck className="w-4 h-4" />
+              </div>
+              <div className="w-4 h-1 bg-green-600"></div>
+              <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                <FiCheck className="w-4 h-4" />
+              </div>
+              <div className="w-4 h-1 bg-green-600"></div>
+              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-medium text-blue-600">Step 3: Payment</p>
+            </div>
+          </div>
+          
+          {/* Desktop Progress Indicator */}
+          <div className="hidden sm:flex items-center justify-center space-x-4">
             <div className="flex items-center">
               <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                 <FiCheck className="w-4 h-4" />
@@ -495,9 +514,9 @@ const Payment = () => {
           </div>
         </div>
 
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight sm:text-5xl">Payment</h1>
-          <p className="mt-4 max-w-2xl mx-auto text-lg text-slate-600">
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight lg:text-5xl">Payment</h1>
+          <p className="mt-2 sm:mt-4 max-w-2xl mx-auto text-base sm:text-lg text-slate-600">
             Choose your preferred payment method to complete your order.
           </p>
         </div>

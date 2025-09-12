@@ -358,7 +358,7 @@ const ProductDetails = () => {
         
         <SEO {...seoData} />
         <div className="min-h-screen bg-gray-50" style={{ scrollBehavior: 'auto' }}>
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Breadcrumb */}
         <nav className="flex mb-4 sm:mb-8" aria-label="Breadcrumb">
           <ol className="inline-flex items-center space-x-1 md:space-x-3">
@@ -384,7 +384,7 @@ const ProductDetails = () => {
             <li>
               <div className="flex items-center">
                 <span className="mx-1 sm:mx-2 text-gray-400">/</span>
-                <span className="text-xs sm:text-sm text-gray-500 truncate max-w-20 sm:max-w-none">{product.name}</span>
+                <span className="text-xs sm:text-sm text-gray-500 truncate max-w-32 sm:max-w-none">{product.name}</span>
               </div>
             </li>
           </ol>
@@ -404,7 +404,7 @@ const ProductDetails = () => {
               />
             </div>
             {product.images && product.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-4 gap-2 sm:gap-3">
                 {product.images.map((image, index) => (
                   <button
                     key={image._id || index}
@@ -502,7 +502,7 @@ const ProductDetails = () => {
               <div className="space-y-3">
                 <button
                   onClick={handleBuyNow}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 sm:py-3 px-6 rounded-lg text-sm sm:text-base font-medium transition-colors"
+                  className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white py-3 sm:py-3 px-6 rounded-lg text-base sm:text-base font-medium transition-colors touch-manipulation"
                 >
                   Buy Now
                 </button>
@@ -510,14 +510,14 @@ const ProductDetails = () => {
                   <button
                     onClick={handleAddToCart}
                     disabled={addingToCart}
-                    className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-900 py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg text-xs sm:text-sm font-medium transition-colors disabled:opacity-50"
+                    className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-900 py-3 sm:py-3 px-4 sm:px-6 rounded-lg text-sm sm:text-sm font-medium transition-colors disabled:opacity-50 touch-manipulation"
                   >
                     <FiShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
                     {addingToCart ? 'Adding...' : 'Add to Cart'}
                   </button>
                   <button
                     onClick={handleAddToWishlist}
-                    className="flex items-center justify-center border border-gray-300 hover:bg-gray-50 text-gray-900 py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg text-xs sm:text-sm font-medium transition-colors"
+                    className="flex items-center justify-center border border-gray-300 hover:bg-gray-50 active:bg-gray-100 text-gray-900 py-3 sm:py-3 px-4 sm:px-6 rounded-lg text-sm sm:text-sm font-medium transition-colors touch-manipulation"
                   >
                     <FiHeart className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
                     Wishlist
@@ -548,16 +548,15 @@ const ProductDetails = () => {
         {/* Product Details Tabs */}
         <div className="bg-white rounded-lg shadow-sm">
           <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto">
+            <nav className="-mb-px flex space-x-6 sm:space-x-8 overflow-x-auto scrollbar-hide px-4 sm:px-0">
               {[
                 { id: 'description', name: 'Description' },
-                { id: 'specifications', name: 'Specifications' },
-                { id: 'reviews', name: 'Reviews' }
+                { id: 'specifications', name: 'Specifications' }
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => handleTabSelect(tab.id)}
-                  className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                  className={`py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-medium text-sm sm:text-base whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -606,11 +605,14 @@ const ProductDetails = () => {
               </div>
             )}
 
-            {activeTab === 'reviews' && (
-              <div className="min-h-screen">
-                <CommentSection productId={product._id} />
-              </div>
-            )}
+          </div>
+        </div>
+
+        {/* Customer Reviews Section */}
+        <div className="bg-white rounded-lg shadow-sm mt-6 sm:mt-8">
+          <div className="p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Customer Reviews</h2>
+            <CommentSection productId={product._id} />
           </div>
         </div>
 

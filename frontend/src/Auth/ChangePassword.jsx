@@ -82,23 +82,23 @@ const ChangePassword = () => {
   const strengthColor = strengthScore < 2 ? 'red' : strengthScore < 4 ? 'yellow' : 'green';
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center px-4 py-8 relative overflow-hidden">
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center px-3 sm:px-4 py-6 sm:py-8 relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+        <div className="absolute -top-40 -right-40 w-60 h-60 sm:w-80 sm:h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-60 h-60 sm:w-80 sm:h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-60 h-60 sm:w-80 sm:h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
       <div className="relative max-w-lg w-full mx-auto">
         {/* Card Container */}
         <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
-          <div className="p-8">
+          <div className="p-6 sm:p-8">
             {/* Header */}
             <div className="mb-8">
               <button 
                 onClick={handleCancel} 
-                className="text-sm font-medium text-blue-600 hover:text-blue-700 inline-flex items-center mb-6 transition-colors duration-200 group"
+                className="text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-700 inline-flex items-center mb-4 sm:mb-6 transition-colors duration-200 group"
               >
                 <FiArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />
                 Back to Profile
@@ -107,23 +107,23 @@ const ChangePassword = () => {
               <div className="text-center mb-6">
                 <div className="flex justify-center mb-4">
                   <div className="relative">
-                    <div className="h-20 w-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                      <FiKey className="h-10 w-10 text-white" />
+                    <div className="h-16 w-16 sm:h-20 sm:w-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <FiKey className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
                     </div>
-                    <div className="absolute -top-2 -right-2 h-6 w-6 bg-green-500 rounded-full flex items-center justify-center">
-                      <FiShield className="h-3 w-3 text-white" />
+                    <div className="absolute -top-2 -right-2 h-5 w-5 sm:h-6 sm:w-6 bg-green-500 rounded-full flex items-center justify-center">
+                      <FiShield className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
                     </div>
                   </div>
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-3">Change Password</h1>
-                <p className="text-gray-600 text-lg leading-relaxed">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">Change Password</h1>
+                <p className="text-gray-600 text-sm sm:text-lg leading-relaxed">
                   Update your password to keep your account secure
                 </p>
               </div>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               {errors.api && (
                 <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl flex items-start space-x-3 animate-in slide-in-from-top-2 duration-300">
                   <FiXCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
@@ -136,17 +136,17 @@ const ChangePassword = () => {
 
               {/* Current Password */}
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">Current Password</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700">Current Password</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <FiLock className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                    <FiLock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
                   </div>
                   <input 
                     type={showPasswords.current ? 'text' : 'password'} 
                     name="currentPassword" 
                     value={formData.currentPassword} 
                     onChange={handleInputChange} 
-                    className={`w-full pl-12 pr-12 py-4 border-2 ${errors.currentPassword ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'} rounded-xl focus:ring-4 transition-all duration-200 bg-white/50 backdrop-blur-sm`}
+                    className={`w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 border-2 ${errors.currentPassword ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'} rounded-xl focus:ring-4 transition-all duration-200 bg-white/50 backdrop-blur-sm text-sm sm:text-base`}
                     placeholder="Enter your current password"
                   />
                   <button 
@@ -154,7 +154,7 @@ const ChangePassword = () => {
                     onClick={() => togglePasswordVisibility('current')} 
                     className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    {showPasswords.current ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                    {showPasswords.current ? <FiEyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <FiEye className="h-4 w-4 sm:h-5 sm:w-5" />}
                   </button>
                 </div>
                 {errors.currentPassword && <p className="mt-1 text-sm text-red-600">{errors.currentPassword}</p>}
@@ -162,17 +162,17 @@ const ChangePassword = () => {
 
               {/* New Password */}
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">New Password</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700">New Password</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <FiLock className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                    <FiLock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
                   </div>
                   <input 
                     type={showPasswords.new ? 'text' : 'password'} 
                     name="newPassword" 
                     value={formData.newPassword} 
                     onChange={handleInputChange} 
-                    className={`w-full pl-12 pr-12 py-4 border-2 ${errors.newPassword ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'} rounded-xl focus:ring-4 transition-all duration-200 bg-white/50 backdrop-blur-sm`}
+                    className={`w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 border-2 ${errors.newPassword ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'} rounded-xl focus:ring-4 transition-all duration-200 bg-white/50 backdrop-blur-sm text-sm sm:text-base`}
                     placeholder="Enter your new password"
                   />
                   <button 
@@ -180,7 +180,7 @@ const ChangePassword = () => {
                     onClick={() => togglePasswordVisibility('new')} 
                     className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    {showPasswords.new ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                    {showPasswords.new ? <FiEyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <FiEye className="h-4 w-4 sm:h-5 sm:w-5" />}
                   </button>
                 </div>
                 {errors.newPassword && <p className="mt-1 text-sm text-red-600">{errors.newPassword}</p>}
@@ -188,17 +188,17 @@ const ChangePassword = () => {
 
               {/* Confirm Password */}
               <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700">Confirm New Password</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700">Confirm New Password</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <FiLock className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                    <FiLock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
                   </div>
                   <input 
                     type={showPasswords.confirm ? 'text' : 'password'} 
                     name="confirmPassword" 
                     value={formData.confirmPassword} 
                     onChange={handleInputChange} 
-                    className={`w-full pl-12 pr-12 py-4 border-2 ${errors.confirmPassword ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'} rounded-xl focus:ring-4 transition-all duration-200 bg-white/50 backdrop-blur-sm`}
+                    className={`w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 border-2 ${errors.confirmPassword ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : 'border-gray-200 focus:border-blue-500 focus:ring-blue-100'} rounded-xl focus:ring-4 transition-all duration-200 bg-white/50 backdrop-blur-sm text-sm sm:text-base`}
                     placeholder="Confirm your new password"
                   />
                   <button 
@@ -206,11 +206,11 @@ const ChangePassword = () => {
                     onClick={() => togglePasswordVisibility('confirm')} 
                     className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    {showPasswords.confirm ? <FiEyeOff className="h-5 w-5" /> : <FiEye className="h-5 w-5" />}
+                    {showPasswords.confirm ? <FiEyeOff className="h-4 w-4 sm:h-5 sm:w-5" /> : <FiEye className="h-4 w-4 sm:h-5 sm:w-5" />}
                   </button>
                   {formData.confirmPassword && formData.newPassword === formData.confirmPassword && !errors.confirmPassword && (
                     <div className="absolute inset-y-0 right-12 pr-4 flex items-center pointer-events-none">
-                      <FiCheck className="h-5 w-5 text-green-500" />
+                      <FiCheck className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                     </div>
                   )}
                 </div>
@@ -219,10 +219,10 @@ const ChangePassword = () => {
 
               {/* Password Strength Indicator */}
               {formData.newPassword && (
-                <div className="bg-gradient-to-r from-gray-50 to-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="bg-gradient-to-r from-gray-50 to-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-sm font-semibold text-gray-900">Password Strength</h4>
-                    <span className={`text-sm font-medium px-2 py-1 rounded-full ${
+                    <h4 className="text-xs sm:text-sm font-semibold text-gray-900">Password Strength</h4>
+                    <span className={`text-xs sm:text-sm font-medium px-2 py-1 rounded-full ${
                       strengthColor === 'red' ? 'bg-red-100 text-red-700' :
                       strengthColor === 'yellow' ? 'bg-yellow-100 text-yellow-700' :
                       'bg-green-100 text-green-700'
@@ -240,10 +240,10 @@ const ChangePassword = () => {
                       style={{ width: `${(strengthScore / 5) * 100}%` }}
                     ></div>
                   </div>
-                  <ul className="space-y-2 text-sm text-gray-700">
+                  <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-700">
                     {requirementList.map((req, index) => (
                       <li key={index} className={`flex items-center ${req.valid ? 'text-green-600' : 'text-gray-500'}`}>
-                        <FiCheck className={`w-4 h-4 mr-2 ${req.valid ? 'text-green-500' : 'text-gray-400'}`} />
+                        <FiCheck className={`w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 ${req.valid ? 'text-green-500' : 'text-gray-400'}`} />
                         {req.text}
                       </li>
                     ))}
@@ -252,18 +252,18 @@ const ChangePassword = () => {
               )}
 
               {/* Action Buttons */}
-              <div className="flex space-x-4 pt-4">
+              <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0 pt-3 sm:pt-4">
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="flex-1 py-4 px-6 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full sm:flex-1 py-3 sm:py-4 px-4 sm:px-6 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-base"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+                  className="w-full sm:flex-1 py-3 sm:py-4 px-4 sm:px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl text-sm sm:text-base"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center">
@@ -275,7 +275,7 @@ const ChangePassword = () => {
                     </span>
                   ) : (
                     <span className="flex items-center justify-center">
-                      <FiSave className="mr-2 h-5 w-5" />
+                      <FiSave className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                       Update Password
                     </span>
                   )}
@@ -286,8 +286,8 @@ const ChangePassword = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-sm text-gray-500">
+        <div className="text-center mt-6 sm:mt-8">
+          <p className="text-xs sm:text-sm text-gray-500">
             Forgot your password? <Link to="/auth/forgot-password" className="text-blue-600 hover:text-blue-700 font-medium">Reset it here</Link>
           </p>
         </div>

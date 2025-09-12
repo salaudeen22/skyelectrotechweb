@@ -162,14 +162,14 @@ const Home = memo(() => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="py-20 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gray-50 min-h-screen flex flex-col">
       {/* Enhanced SEO for Homepage */}
       <SEO 
         title="SkyElectroTech - Premier Electronics Store in Bangalore | Arduino, Raspberry Pi, Industrial Automation"
@@ -183,7 +183,7 @@ const Home = memo(() => {
       {/* FAQ Schema for better search visibility */}
       <FAQSchema faqs={defaultElectronicsFAQs} />
       
-      <main className="pt-0"> 
+      <div className="flex-1 pt-0"> {/* Changed from main to div and added flex-1 */} 
         
         {/* Hero Section */}
         <section className="relative">
@@ -537,7 +537,7 @@ const Home = memo(() => {
             </div>
         </section>
 
-      </main>
+      </div>
     </div>
   );
 });

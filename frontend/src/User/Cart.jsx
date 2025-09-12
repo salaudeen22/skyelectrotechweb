@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useMemo } from 'react';
+import { useContext, useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaMinus, FaTrash, FaShoppingCart } from 'react-icons/fa';
 import { CartContext } from '../contexts/CartContext';
@@ -63,27 +63,32 @@ const Cart = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-blue-600"></div>
+      <div className="bg-slate-50 min-h-screen flex flex-col">
+        <div className="flex-1 flex justify-center items-center min-h-[70vh]">
+          <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-blue-600"></div>
+        </div>
       </div>
     );
   }
 
   if (!cartItems || cartItems.length === 0) {
       return (
-          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-              <FaShoppingCart className="text-4xl sm:text-6xl text-slate-300 mb-3 sm:mb-4" />
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">Your cart is empty</h1>
-              <p className="text-slate-500 mt-2 text-sm sm:text-base">Looks like you haven't added anything to your cart yet.</p>
-              <Link to="/products" className="mt-4 sm:mt-6 bg-blue-600 text-white font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-blue-700 transition text-sm sm:text-base">
-                  Continue Shopping
-              </Link>
+          <div className="bg-slate-50 min-h-screen flex flex-col">
+            <div className="flex-1 flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
+                <FaShoppingCart className="text-4xl sm:text-6xl text-slate-300 mb-3 sm:mb-4" />
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">Your cart is empty</h1>
+                <p className="text-slate-500 mt-2 text-sm sm:text-base">Looks like you haven't added anything to your cart yet.</p>
+                <Link to="/products" className="mt-4 sm:mt-6 bg-blue-600 text-white font-semibold px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-blue-700 transition text-sm sm:text-base">
+                    Continue Shopping
+                </Link>
+            </div>
           </div>
       );
   }
 
   return (
-    <div className="bg-slate-50 py-4 sm:py-8 lg:py-12">
+    <div className="bg-slate-50 min-h-screen flex flex-col">
+      <div className="flex-1 py-4 sm:py-8 lg:py-12">
         <div className="max-w-screen-xl mx-auto px-2 sm:px-4 lg:px-8">
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 mb-4 sm:mb-6 lg:mb-8">Your Shopping Cart</h1>
             
@@ -210,6 +215,7 @@ const Cart = () => {
                 </div>
             </div>
         </div>
+      </div>
     </div>
   );
 };

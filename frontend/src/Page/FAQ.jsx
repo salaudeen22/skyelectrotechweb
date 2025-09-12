@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import SEO from '../Components/SEO';
 
@@ -78,29 +78,29 @@ const FAQ = () => {
         description="Find answers to frequently asked questions about SkyElectroTech products, shipping, returns, payment methods, and technical support."
         keywords="FAQ, frequently asked questions, SkyElectroTech support, shipping, returns, payment methods"
       />
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="bg-gray-50 min-h-screen flex flex-col">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <div className="text-center mb-8 sm:mb-12">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">Frequently Asked Questions</h1>
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-2">
               Find answers to common questions about our products, services, and policies
             </p>
           </div>
 
           {/* FAQ Categories */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-blue-600 text-white p-6 rounded-lg text-center">
-              <h3 className="text-lg font-semibold mb-2">Orders & Shipping</h3>
-              <p className="text-blue-100">Payment, delivery, and tracking</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <div className="bg-blue-600 text-white p-4 sm:p-6 rounded-lg text-center">
+              <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">Orders & Shipping</h3>
+              <p className="text-blue-100 text-sm sm:text-base">Payment, delivery, and tracking</p>
             </div>
-            <div className="bg-green-600 text-white p-6 rounded-lg text-center">
-              <h3 className="text-lg font-semibold mb-2">Products & Support</h3>
-              <p className="text-green-100">Quality, warranty, and technical help</p>
+            <div className="bg-green-600 text-white p-4 sm:p-6 rounded-lg text-center">
+              <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">Products & Support</h3>
+              <p className="text-green-100 text-sm sm:text-base">Quality, warranty, and technical help</p>
             </div>
-            <div className="bg-purple-600 text-white p-6 rounded-lg text-center">
-              <h3 className="text-lg font-semibold mb-2">Returns & Policies</h3>
-              <p className="text-purple-100">Returns, refunds, and customer service</p>
+            <div className="bg-purple-600 text-white p-4 sm:p-6 rounded-lg text-center">
+              <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">Returns & Policies</h3>
+              <p className="text-purple-100 text-sm sm:text-base">Returns, refunds, and customer service</p>
             </div>
           </div>
 
@@ -110,20 +110,20 @@ const FAQ = () => {
               <div key={index} className="border-b border-gray-200 last:border-b-0">
                 <button
                   onClick={() => toggleItem(index)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 sm:px-6 py-3 sm:py-4 text-left flex items-center justify-between hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                 >
-                  <h3 className="text-lg font-semibold text-gray-900 pr-4">
+                  <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 pr-3 sm:pr-4 leading-tight">
                     {faq.question}
                   </h3>
                   {openItems.has(index) ? (
-                    <FiChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                    <FiChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 flex-shrink-0" />
                   ) : (
-                    <FiChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                    <FiChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 flex-shrink-0" />
                   )}
                 </button>
                 {openItems.has(index) && (
-                  <div className="px-6 pb-4">
-                    <p className="text-gray-700 leading-relaxed">
+                  <div className="px-4 sm:px-6 pb-3 sm:pb-4 animate-in slide-in-from-top-1 duration-200">
+                    <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                       {faq.answer}
                     </p>
                   </div>
@@ -133,21 +133,21 @@ const FAQ = () => {
           </div>
 
           {/* Contact CTA */}
-          <div className="mt-12 bg-blue-600 rounded-lg p-8 text-center text-white">
-            <h2 className="text-2xl font-bold mb-4">Still Have Questions?</h2>
-            <p className="text-blue-100 mb-6">
+          <div className="mt-8 sm:mt-12 bg-blue-600 rounded-lg p-4 sm:p-6 lg:p-8 text-center text-white">
+            <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Still Have Questions?</h2>
+            <p className="text-blue-100 mb-4 sm:mb-6 text-sm sm:text-base px-2">
               Can't find what you're looking for? Our support team is here to help.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <a 
                 href="/contact" 
-                className="inline-block bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                className="inline-block bg-white text-blue-600 px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-gray-100 transition-colors"
               >
                 Contact Us
               </a>
               <a 
                 href="/products" 
-                className="inline-block border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
+                className="inline-block border-2 border-white text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold hover:bg-white hover:text-blue-600 transition-colors"
               >
                 Browse Products
               </a>

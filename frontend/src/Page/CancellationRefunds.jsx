@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import SEO from '../Components/SEO';
 
 const CancellationRefunds = () => {
@@ -14,23 +14,23 @@ const CancellationRefunds = () => {
         description="Learn about SkyElectroTech's cancellation and refunds policy. Understand our return process, refund timelines, and conditions for returns."
         keywords="cancellation policy, refunds, returns, SkyElectroTech returns, refund policy, cancellation process"
       />
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="bg-gray-50 min-h-screen flex flex-col">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Cancellation & Refunds Policy</h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <div className="text-center mb-8 sm:mb-12">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">Cancellation & Refunds Policy</h1>
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-2">
               Our comprehensive policy for order cancellations, returns, and refunds to ensure customer satisfaction.
             </p>
-            <p className="text-sm text-gray-500 mt-2">Last updated: {new Date().toLocaleDateString()}</p>
+            <p className="text-xs sm:text-sm text-gray-500 mt-2">Last updated: {new Date().toLocaleDateString()}</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-8">
-            <div className="prose max-w-none">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
+            <div className="prose max-w-none text-sm sm:text-base">
               {/* Quick Summary */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-8">
-                <h2 className="text-xl font-bold text-green-900 mb-4">Quick Summary</h2>
-                <ul className="list-disc pl-6 text-green-800 space-y-2">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
+                <h2 className="text-lg sm:text-xl font-bold text-green-900 mb-3 sm:mb-4">Quick Summary</h2>
+                <ul className="list-disc pl-4 sm:pl-6 text-green-800 space-y-1 sm:space-y-2 text-xs sm:text-sm">
                   <li><strong>Order Cancellation:</strong> Free cancellation before shipping</li>
                   <li><strong>Return Window:</strong> 24 hours from delivery date</li>
                   <li><strong>Refund Processing:</strong> 3-7 business days after return</li>
@@ -38,29 +38,29 @@ const CancellationRefunds = () => {
                 </ul>
               </div>
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">1. Order Cancellation Policy</h2>
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">1. Order Cancellation Policy</h2>
               
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Before Shipping</h3>
-              <ul className="list-disc pl-6 text-gray-700 mb-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Before Shipping</h3>
+              <ul className="list-disc pl-4 sm:pl-6 text-gray-700 mb-4 sm:mb-6 space-y-1 sm:space-y-0">
                 <li><strong>Free Cancellation:</strong> Orders can be cancelled free of charge before they are shipped</li>
                 <li><strong>How to Cancel:</strong> Log into your account or contact customer support</li>
                 <li><strong>Processing Time:</strong> Cancellation requests are processed within 2-4 hours during business hours</li>
                 <li><strong>Refund Timeline:</strong> Refunds for cancelled orders are processed within 3-5 business days</li>
               </ul>
 
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">After Shipping</h3>
-              <ul className="list-disc pl-6 text-gray-700 mb-6">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">After Shipping</h3>
+              <ul className="list-disc pl-4 sm:pl-6 text-gray-700 mb-4 sm:mb-6 space-y-1 sm:space-y-0">
                 <li>Once shipped, orders cannot be cancelled directly</li>
                 <li>You can refuse delivery or initiate a return request upon delivery</li>
                 <li>Return shipping charges will apply (₹100-200 depending on location)</li>
                 <li>Refund will be processed after we receive the returned item</li>
               </ul>
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">2. Return Policy</h2>
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">2. Return Policy</h2>
               
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Return Window</h3>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <p className="text-blue-800">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Return Window</h3>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+                <p className="text-blue-800 text-sm sm:text-base">
                   <strong>24 Hours Return Policy:</strong> You can return most items within 24 hours of delivery. 
                   This policy ensures quick resolution and product freshness for our small business operations.
                 </p>
@@ -88,21 +88,21 @@ const CancellationRefunds = () => {
 
               <h2 className="text-2xl font-bold text-gray-900 mb-6">3. Return Process</h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
-                  <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">1</div>
-                  <h4 className="font-semibold mb-2">Initiate Return</h4>
-                  <p className="text-sm text-gray-600">Log in to your account and select the item to return, or contact customer support</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-lg text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 text-lg sm:text-xl font-bold">1</div>
+                  <h4 className="text-sm sm:text-base font-semibold mb-1 sm:mb-2">Initiate Return</h4>
+                  <p className="text-xs sm:text-sm text-gray-600">Log in to your account and select the item to return, or contact customer support</p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
-                  <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">2</div>
-                  <h4 className="font-semibold mb-2">Schedule Pickup</h4>
-                  <p className="text-sm text-gray-600">Our team will schedule a pickup from your address within 2-3 business days</p>
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-lg text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 text-lg sm:text-xl font-bold">2</div>
+                  <h4 className="text-sm sm:text-base font-semibold mb-1 sm:mb-2">Schedule Pickup</h4>
+                  <p className="text-xs sm:text-sm text-gray-600">Our team will schedule a pickup from your address within 2-3 business days</p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg text-center">
-                  <div className="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">3</div>
-                  <h4 className="font-semibold mb-2">Receive Refund</h4>
-                  <p className="text-sm text-gray-600">Refund processed within 3-7 business days after we receive the item</p>
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-lg text-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 text-lg sm:text-xl font-bold">3</div>
+                  <h4 className="text-sm sm:text-base font-semibold mb-1 sm:mb-2">Receive Refund</h4>
+                  <p className="text-xs sm:text-sm text-gray-600">Refund processed within 3-7 business days after we receive the item</p>
                 </div>
               </div>
 
@@ -117,35 +117,86 @@ const CancellationRefunds = () => {
 
               <h2 className="text-2xl font-bold text-gray-900 mb-6">4. Return Shipping Charges</h2>
               
-              <div className="overflow-x-auto mb-6">
+              {/* Mobile-friendly table - stacked layout */}
+              <div className="block sm:hidden mb-6">
+                <div className="space-y-4">
+                  <div className="bg-white border border-gray-300 rounded-lg p-3">
+                    <h4 className="font-semibold text-sm mb-2">Defective/Damaged Item</h4>
+                    <div className="flex justify-between text-sm">
+                      <span>Shipping:</span>
+                      <span className="text-green-600 font-semibold">FREE</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Paid By:</span>
+                      <span>SkyElectroTech</span>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 border border-gray-300 rounded-lg p-3">
+                    <h4 className="font-semibold text-sm mb-2">Wrong Item Delivered</h4>
+                    <div className="flex justify-between text-sm">
+                      <span>Shipping:</span>
+                      <span className="text-green-600 font-semibold">FREE</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Paid By:</span>
+                      <span>SkyElectroTech</span>
+                    </div>
+                  </div>
+                  <div className="bg-white border border-gray-300 rounded-lg p-3">
+                    <h4 className="font-semibold text-sm mb-2">Changed Mind/Not Satisfied</h4>
+                    <div className="flex justify-between text-sm">
+                      <span>Shipping:</span>
+                      <span>₹100-200</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Paid By:</span>
+                      <span>Customer</span>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 border border-gray-300 rounded-lg p-3">
+                    <h4 className="font-semibold text-sm mb-2">Size/Compatibility Issues</h4>
+                    <div className="flex justify-between text-sm">
+                      <span>Shipping:</span>
+                      <span>₹100-200</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Paid By:</span>
+                      <span>Customer</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop table */}
+              <div className="hidden sm:block overflow-x-auto mb-6">
                 <table className="min-w-full border border-gray-300">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="border border-gray-300 px-4 py-2 text-left font-semibold">Return Reason</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left font-semibold">Shipping Charges</th>
-                      <th className="border border-gray-300 px-4 py-2 text-left font-semibold">Paid By</th>
+                      <th className="border border-gray-300 px-3 sm:px-4 py-2 text-left font-semibold text-sm sm:text-base">Return Reason</th>
+                      <th className="border border-gray-300 px-3 sm:px-4 py-2 text-left font-semibold text-sm sm:text-base">Shipping Charges</th>
+                      <th className="border border-gray-300 px-3 sm:px-4 py-2 text-left font-semibold text-sm sm:text-base">Paid By</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">Defective/Damaged Item</td>
-                      <td className="border border-gray-300 px-4 py-2 text-green-600 font-semibold">FREE</td>
-                      <td className="border border-gray-300 px-4 py-2">SkyElectroTech</td>
+                      <td className="border border-gray-300 px-3 sm:px-4 py-2 text-sm sm:text-base">Defective/Damaged Item</td>
+                      <td className="border border-gray-300 px-3 sm:px-4 py-2 text-green-600 font-semibold text-sm sm:text-base">FREE</td>
+                      <td className="border border-gray-300 px-3 sm:px-4 py-2 text-sm sm:text-base">SkyElectroTech</td>
                     </tr>
                     <tr className="bg-gray-50">
-                      <td className="border border-gray-300 px-4 py-2">Wrong Item Delivered</td>
-                      <td className="border border-gray-300 px-4 py-2 text-green-600 font-semibold">FREE</td>
-                      <td className="border border-gray-300 px-4 py-2">SkyElectroTech</td>
+                      <td className="border border-gray-300 px-3 sm:px-4 py-2 text-sm sm:text-base">Wrong Item Delivered</td>
+                      <td className="border border-gray-300 px-3 sm:px-4 py-2 text-green-600 font-semibold text-sm sm:text-base">FREE</td>
+                      <td className="border border-gray-300 px-3 sm:px-4 py-2 text-sm sm:text-base">SkyElectroTech</td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">Changed Mind/Not Satisfied</td>
-                      <td className="border border-gray-300 px-4 py-2">₹100-200</td>
-                      <td className="border border-gray-300 px-4 py-2">Customer</td>
+                      <td className="border border-gray-300 px-3 sm:px-4 py-2 text-sm sm:text-base">Changed Mind/Not Satisfied</td>
+                      <td className="border border-gray-300 px-3 sm:px-4 py-2 text-sm sm:text-base">₹100-200</td>
+                      <td className="border border-gray-300 px-3 sm:px-4 py-2 text-sm sm:text-base">Customer</td>
                     </tr>
                     <tr className="bg-gray-50">
-                      <td className="border border-gray-300 px-4 py-2">Size/Compatibility Issues</td>
-                      <td className="border border-gray-300 px-4 py-2">₹100-200</td>
-                      <td className="border border-gray-300 px-4 py-2">Customer</td>
+                      <td className="border border-gray-300 px-3 sm:px-4 py-2 text-sm sm:text-base">Size/Compatibility Issues</td>
+                      <td className="border border-gray-300 px-3 sm:px-4 py-2 text-sm sm:text-base">₹100-200</td>
+                      <td className="border border-gray-300 px-3 sm:px-4 py-2 text-sm sm:text-base">Customer</td>
                     </tr>
                   </tbody>
                 </table>
