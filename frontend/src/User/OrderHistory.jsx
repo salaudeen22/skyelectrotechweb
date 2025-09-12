@@ -117,7 +117,7 @@ const OrderHistory = () => {
   const handleCancelOrder = async (orderId, formData) => {
     try {
       await ordersAPI.cancelOrder(orderId, formData);
-      toast.success('Order cancelled successfully');
+      toast.success('Order cancelled successfully! Refund will be processed in 3-7 business days.');
       // Refresh orders
       const response = await ordersAPI.getMyOrders();
       setOrders(response.data.orders || []);
