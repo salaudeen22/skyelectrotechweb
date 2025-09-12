@@ -206,6 +206,7 @@ const HeroSlider = () => {
       {/* Navigation Arrows - Always visible but more prominent on hover */}
       <button 
         onClick={prevSlide}
+        aria-label="Previous slide"
         className={`absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full z-20 transition-all duration-300 ${
           isHovered ? 'opacity-100 scale-110' : 'opacity-70 scale-100'
         } hover:bg-black/50 hover:scale-125`}
@@ -214,6 +215,7 @@ const HeroSlider = () => {
       </button>
       <button 
         onClick={nextSlide}
+        aria-label="Next slide"
         className={`absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full z-20 transition-all duration-300 ${
           isHovered ? 'opacity-100 scale-110' : 'opacity-70 scale-100'
         } hover:bg-black/50 hover:scale-125`}
