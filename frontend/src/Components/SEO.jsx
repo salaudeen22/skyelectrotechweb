@@ -306,7 +306,26 @@ const SEO = ({
                 "itemOffered": {
                   "@type": "Product",
                   "name": "Arduino Development Boards",
-                  "category": "Microcontroller Boards"
+                  "category": "Microcontroller Boards",
+                  "offers": {
+                    "@type": "AggregateOffer",
+                    "priceCurrency": "INR",
+                    "lowPrice": "200",
+                    "highPrice": "8000",
+                    "offerCount": 25,
+                    "availability": "https://schema.org/InStock",
+                    "seller": {
+                      "@type": "Organization",
+                      "name": "SkyElectroTech"
+                    }
+                  },
+                  "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "4.3",
+                    "reviewCount": "75",
+                    "bestRating": "5",
+                    "worstRating": "1"
+                  }
                 }
               }]
             },
@@ -318,7 +337,26 @@ const SEO = ({
                 "itemOffered": {
                   "@type": "Product",
                   "name": "PLCs & Industrial Components",
-                  "category": "Industrial Automation"
+                  "category": "Industrial Automation",
+                  "offers": {
+                    "@type": "AggregateOffer",
+                    "priceCurrency": "INR",
+                    "lowPrice": "500",
+                    "highPrice": "50000",
+                    "offerCount": 15,
+                    "availability": "https://schema.org/InStock",
+                    "seller": {
+                      "@type": "Organization",
+                      "name": "SkyElectroTech"
+                    }
+                  },
+                  "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "4.5",
+                    "reviewCount": "50",
+                    "bestRating": "5",
+                    "worstRating": "1"
+                  }
                 }
               }]
             },
@@ -330,7 +368,26 @@ const SEO = ({
                 "itemOffered": {
                   "@type": "Product",
                   "name": "Electronic Sensors & Components",
-                  "category": "Electronic Components"
+                  "category": "Electronic Components",
+                  "offers": {
+                    "@type": "AggregateOffer",
+                    "priceCurrency": "INR",
+                    "lowPrice": "50",
+                    "highPrice": "5000",
+                    "offerCount": 100,
+                    "availability": "https://schema.org/InStock",
+                    "seller": {
+                      "@type": "Organization",
+                      "name": "SkyElectroTech"
+                    }
+                  },
+                  "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "4.2",
+                    "reviewCount": "120",
+                    "bestRating": "5",
+                    "worstRating": "1"
+                  }
                 }
               }]
             }
