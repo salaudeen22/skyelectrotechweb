@@ -239,88 +239,22 @@ const Contact = () => {
                 </div>
               </div>
 
-              {/* Google Maps */}
-              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
-                  Store Location - SkyElectroTech Bangalore
-                </h2>
-                <div className="w-full h-64 sm:h-80 rounded-lg overflow-hidden">
-                  <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.112478761705!2d77.57936717531959!3d12.964653787350109!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae150076391a2b%3A0x8f80be7dae9c0a59!2sSky%20Electro%20Tech!5e0!3m2!1sen!2sin!4v1756483257812!5m2!1sen!2sin" 
-                    width="100%" 
-                    height="100%" 
-                    style={{border: 0}} 
-                    allowFullScreen="" 
-                    loading="lazy" 
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="SkyElectroTech Location"
-                  />
-                </div>
-                <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600">
-                  <p className="font-semibold">Business Hours:</p>
-                  <p>Monday - Friday: 10:30 AM - 7:30 PM</p>
-                  <p>Saturday: 10:30 AM - 7:30 PM</p>
-                  <p>Sunday: 10:30 AM - 2:30 PM</p>
-                </div>
-              </div>
+            
 
-              {/* SEO-Enhanced FAQ Section */}
-              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
-                  Frequently Asked Questions - Electronics Support
-                </h2>
-                <div className="space-y-4 sm:space-y-6">
-                  <div className="border-l-4 border-blue-500 pl-4">
-                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">
-                      How quickly can I get Arduino and Raspberry Pi components in Bangalore?
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-600">
-                      We offer same-day delivery within Bangalore for urgent Arduino, Raspberry Pi, and sensor requirements. 
-                      Standard delivery takes 1-3 business days across Karnataka and India.
-                    </p>
-                  </div>
-                  <div className="border-l-4 border-green-500 pl-4">
-                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">
-                      Do you provide technical support for PLCs and automation projects?
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-600">
-                      Yes, our experienced team provides comprehensive technical support for PLCs, SCADA systems, 
-                      industrial automation, Arduino programming, and Raspberry Pi projects.
-                    </p>
-                  </div>
-                  <div className="border-l-4 border-purple-500 pl-4">
-                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">
-                      What electronic components and sensors do you stock?
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-600">
-                      We stock Arduino boards, Raspberry Pi, sensors (temperature, pressure, proximity), motors, 
-                      PLCs, displays, microcontrollers, and complete automation solutions.
-                    </p>
-                  </div>
-                  <div className="border-l-4 border-orange-500 pl-4">
-                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">
-                      What payment methods are accepted for electronics purchases?
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-600">
-                      We accept all major payment methods: UPI, credit/debit cards, net banking, and cash for in-store purchases.
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
 
-            {/* Contact Form */}
-            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+            {/* Contact Form - Compact design */}
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-5 max-h-fit">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
                 Contact Form - Get Electronics Support
               </h2>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-sm text-gray-600 mb-3">
                 Need help with Arduino, Raspberry Pi, sensors, PLCs or industrial automation? 
                 Fill out the form below and our technical experts will get back to you promptly.
               </p>
-              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="name" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                  <label htmlFor="name" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                     Full Name *
                   </label>
                   <input
@@ -330,13 +264,13 @@ const Contact = () => {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter your full name"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                  <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                     Email Address *
                   </label>
                   <input
@@ -346,13 +280,13 @@ const Contact = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter your email address"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="subject" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                  <label htmlFor="subject" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                     Subject *
                   </label>
                   <input
@@ -362,13 +296,13 @@ const Contact = () => {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter subject"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                  <label htmlFor="message" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                     Message *
                   </label>
                   <textarea
@@ -378,14 +312,14 @@ const Contact = () => {
                     onChange={handleChange}
                     required
                     rows={4}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical min-h-[80px]"
                     placeholder="Enter your message"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-md text-sm sm:text-base font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                  className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-md text-sm font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                 >
                   Send Message
                 </button>
