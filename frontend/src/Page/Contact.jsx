@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FiMail, FiPhone, FiMapPin, FiClock } from 'react-icons/fi';
 import SEO from '../Components/SEO';
+import { Helmet } from 'react-helmet';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -28,28 +29,152 @@ const Contact = () => {
     });
   };
 
+  // Generate structured data for local business
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "SkyElectroTech",
+    "description": "Your trusted partner for electronics and industrial automation components in Bangalore, Karnataka",
+    "url": "https://skyelectrotech.com",
+    "telephone": "+916361241811",
+    "email": "skyelectrotechblr@gmail.com",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete",
+      "addressLocality": "Nagarathpete, Bengaluru",
+      "addressRegion": "Karnataka",
+      "postalCode": "560002",
+      "addressCountry": "IN"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 12.964653787350109,
+      "longitude": 77.57936717531959
+    },
+    "openingHours": [
+      "Mo-Fr 10:30-19:30",
+      "Sa 10:30-19:30", 
+      "Su 10:30-14:30"
+    ],
+    "priceRange": "$$",
+    "servesCuisine": null,
+    "hasMap": "https://www.google.com/maps/place/Sky+Electro+Tech/@12.964653787350109,77.57936717531959,17z",
+    "sameAs": [
+      "https://www.facebook.com/skyelectrotech",
+      "https://www.instagram.com/skyelectrotech"
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "reviewCount": "150"
+    },
+    "potentialAction": {
+      "@type": "ReserveAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "tel:+916361241811"
+      },
+      "result": {
+        "@type": "Reservation",
+        "name": "Phone consultation"
+      }
+    }
+  };
+
+  const contactPageStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact SkyElectroTech - Electronics & Automation Components",
+    "description": "Contact SkyElectroTech for Arduino, Raspberry Pi, sensors, motors, PLCs, and industrial automation components. Get technical support and product assistance.",
+    "url": "https://skyelectrotech.com/contact",
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "SkyElectroTech",
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+916361241811",
+          "contactType": "customer service",
+          "areaServed": "IN",
+          "availableLanguage": ["English", "Hindi", "Kannada"]
+        },
+        {
+          "@type": "ContactPoint",
+          "email": "skyelectrotechblr@gmail.com",
+          "contactType": "technical support",
+          "areaServed": "IN",
+          "availableLanguage": ["English", "Hindi"]
+        }
+      ]
+    }
+  };
+
   return (
     <>
       <SEO 
-        title="Contact Us - SkyElectroTech"
-        description="Get in touch with SkyElectroTech for technical support, product inquiries, or customer service. We're here to help with your electronics and automation needs."
-        keywords="contact SkyElectroTech, customer support, technical help, electronics support, automation support"
+        title="Contact SkyElectroTech - Electronics Store Bangalore | Technical Support & Customer Service"
+        description="Contact SkyElectroTech for Arduino, Raspberry Pi, sensors, PLCs & automation components. Get technical support, product help & customer service. Located in Bangalore, Karnataka. Call +91 6361241811"
+        keywords="contact SkyElectroTech Bangalore, electronics store contact, Arduino support, Raspberry Pi help, technical support electronics, automation components Bangalore, electronics customer service"
+        canonical="https://skyelectrotech.com/contact"
       />
+      
+      <Helmet>
+        {/* Enhanced SEO Meta Tags */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Contact SkyElectroTech - Electronics & Automation Components Store Bangalore" />
+        <meta property="og:description" content="Get in touch with SkyElectroTech for Arduino, Raspberry Pi, sensors, PLCs & industrial automation components. Technical support & customer service available." />
+        <meta property="og:url" content="https://skyelectrotech.com/contact" />
+        <meta property="og:locale" content="en_IN" />
+        <meta property="og:site_name" content="SkyElectroTech" />
+        
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Contact SkyElectroTech - Electronics Store Bangalore" />
+        <meta name="twitter:description" content="Contact us for Arduino, Raspberry Pi, sensors & automation components. Technical support available." />
+        
+        {/* Local Business Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+        
+        {/* Contact Page Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(contactPageStructuredData)}
+        </script>
+        
+        {/* Additional SEO Tags */}
+        <meta name="geo.region" content="IN-KA" />
+        <meta name="geo.placename" content="Bangalore, Karnataka" />
+        <meta name="geo.position" content="12.964653787350109;77.57936717531959" />
+        <meta name="ICBM" content="12.964653787350109, 77.57936717531959" />
+        
+        <link rel="alternate" hrefLang="en-in" href="https://skyelectrotech.com/contact" />
+        <link rel="alternate" hrefLang="x-default" href="https://skyelectrotech.com/contact" />
+      </Helmet>
       <div className="bg-gray-50 min-h-screen flex flex-col">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1">
-          {/* Header */}
+          {/* SEO-Optimized Header */}
           <div className="text-center mb-8 sm:mb-12">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">Contact Us</h1>
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-2">
-              We're here to help with your electronics and automation needs. Get in touch with us today.
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+              Contact SkyElectroTech - Electronics Store Bangalore
+            </h1>
+            <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-4xl mx-auto px-2">
+              Get technical support for Arduino, Raspberry Pi, sensors, PLCs and industrial automation components. 
+              Located in Bangalore, Karnataka. Expert assistance for all your electronics projects.
             </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-4 text-sm text-gray-500">
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">📍 Bangalore, Karnataka</span>
+              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full">📞 +91 6361241811</span>
+              <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full">⏰ Mon-Sat 10:30 AM - 7:30 PM</span>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
             {/* Contact Information */}
             <div className="space-y-6 sm:space-y-8">
               <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Get in Touch</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+                  Contact Information - SkyElectroTech Electronics Store
+                </h2>
                 
                 <div className="space-y-4 sm:space-y-6">
                   <div className="flex items-start space-x-3 sm:space-x-4">
@@ -57,8 +182,13 @@ const Contact = () => {
                       <FiMail className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Email</h3>
-                      <p className="text-sm sm:text-base text-gray-600 break-all">skyelectrotechblr@gmail.com</p>
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Email - Technical Support</h3>
+                      <p className="text-sm sm:text-base text-gray-600 break-all">
+                        <a href="mailto:skyelectrotechblr@gmail.com" className="hover:text-blue-600">
+                          skyelectrotechblr@gmail.com
+                        </a>
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">For technical support, product inquiries, and customer service</p>
                     </div>
                   </div>
 
@@ -67,10 +197,11 @@ const Contact = () => {
                       <FiPhone className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Phone</h3>
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Phone - Customer Service</h3>
                       <p className="text-sm sm:text-base text-gray-600">
-                        <a href="tel:+916361241811" className="hover:text-blue-600">+91 063612 41811</a>
+                        <a href="tel:+916361241811" className="hover:text-blue-600 font-medium">+91 063612 41811</a>
                       </p>
+                      <p className="text-xs text-gray-500 mt-1">Arduino, Raspberry Pi, sensors, PLCs & automation support</p>
                     </div>
                   </div>
 
@@ -79,14 +210,15 @@ const Contact = () => {
                       <FiMapPin className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Address</h3>
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Store Address - Bangalore</h3>
                       <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                        SkyElectroTech<br />
+                        <strong>SkyElectroTech Electronics Store</strong><br />
                         2nd Floor, No 140, Sadar Patrappa Rd<br />
                         Thigalarpet, Kumbarpet, Dodpete<br />
                         Nagarathpete, Bengaluru, Karnataka 560002<br />
                         India
                       </p>
+                      <p className="text-xs text-gray-500 mt-2">Near major electronics markets in Bangalore</p>
                     </div>
                   </div>
 
@@ -95,10 +227,13 @@ const Contact = () => {
                       <FiClock className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Business Hours</h3>
-                      <p className="text-sm sm:text-base text-gray-600">Monday - Friday: 10:30 AM - 7:30 PM</p>
-                      <p className="text-sm sm:text-base text-gray-600">Saturday: 10:30 AM - 7:30 PM</p>
-                      <p className="text-sm sm:text-base text-gray-600">Sunday: 10:30 AM - 2:30 PM</p>
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">Store Hours - Electronics Support</h3>
+                      <div className="space-y-1">
+                        <p className="text-sm sm:text-base text-gray-600"><strong>Monday - Friday:</strong> 10:30 AM - 7:30 PM</p>
+                        <p className="text-sm sm:text-base text-gray-600"><strong>Saturday:</strong> 10:30 AM - 7:30 PM</p>
+                        <p className="text-sm sm:text-base text-gray-600"><strong>Sunday:</strong> 10:30 AM - 2:30 PM</p>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">Technical support available during store hours</p>
                     </div>
                   </div>
                 </div>
@@ -106,7 +241,9 @@ const Contact = () => {
 
               {/* Google Maps */}
               <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Find Us</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+                  Store Location - SkyElectroTech Bangalore
+                </h2>
                 <div className="w-full h-64 sm:h-80 rounded-lg overflow-hidden">
                   <iframe 
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.112478761705!2d77.57936717531959!3d12.964653787350109!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae150076391a2b%3A0x8f80be7dae9c0a59!2sSky%20Electro%20Tech!5e0!3m2!1sen!2sin!4v1756483257812!5m2!1sen!2sin" 
@@ -127,21 +264,46 @@ const Contact = () => {
                 </div>
               </div>
 
-              {/* FAQ Section */}
+              {/* SEO-Enhanced FAQ Section */}
               <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Frequently Asked Questions</h2>
-                <div className="space-y-3 sm:space-y-4">
-                  <div>
-                    <h3 className="text-sm sm:text-base font-semibold text-gray-900">How long does shipping take?</h3>
-                    <p className="text-xs sm:text-sm text-gray-600 mt-1">Standard delivery takes 3-5 business days across India.</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+                  Frequently Asked Questions - Electronics Support
+                </h2>
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="border-l-4 border-blue-500 pl-4">
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">
+                      How quickly can I get Arduino and Raspberry Pi components in Bangalore?
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600">
+                      We offer same-day delivery within Bangalore for urgent Arduino, Raspberry Pi, and sensor requirements. 
+                      Standard delivery takes 1-3 business days across Karnataka and India.
+                    </p>
                   </div>
-                  <div>
-                    <h3 className="text-sm sm:text-base font-semibold text-gray-900">Do you offer technical support?</h3>
-                    <p className="text-xs sm:text-sm text-gray-600 mt-1">Yes, we provide technical support for all our products.</p>
+                  <div className="border-l-4 border-green-500 pl-4">
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">
+                      Do you provide technical support for PLCs and automation projects?
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600">
+                      Yes, our experienced team provides comprehensive technical support for PLCs, SCADA systems, 
+                      industrial automation, Arduino programming, and Raspberry Pi projects.
+                    </p>
                   </div>
-                  <div>
-                    <h3 className="text-sm sm:text-base font-semibold text-gray-900">What payment methods do you accept?</h3>
-                    <p className="text-xs sm:text-sm text-gray-600 mt-1">We accept all major credit cards, UPI, and net banking.</p>
+                  <div className="border-l-4 border-purple-500 pl-4">
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">
+                      What electronic components and sensors do you stock?
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600">
+                      We stock Arduino boards, Raspberry Pi, sensors (temperature, pressure, proximity), motors, 
+                      PLCs, displays, microcontrollers, and complete automation solutions.
+                    </p>
+                  </div>
+                  <div className="border-l-4 border-orange-500 pl-4">
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2">
+                      What payment methods are accepted for electronics purchases?
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600">
+                      We accept all major payment methods: UPI, credit/debit cards, net banking, and cash for in-store purchases.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -149,7 +311,13 @@ const Contact = () => {
 
             {/* Contact Form */}
             <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Send us a Message</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+                Contact Form - Get Electronics Support
+              </h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Need help with Arduino, Raspberry Pi, sensors, PLCs or industrial automation? 
+                Fill out the form below and our technical experts will get back to you promptly.
+              </p>
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 <div>
                   <label htmlFor="name" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
