@@ -170,21 +170,36 @@ const ReturnRequests = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
+    <div className="p-4 sm:p-6">
+      <div className="space-y-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Return Requests</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Return Requests</h1>
           <p className="text-gray-600 text-sm mt-1">Review and process customer return requests</p>
         </div>
-        <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:items-center sm:flex-wrap gap-2 sm:gap-3">
+        
+        {/* Mobile-first search and controls */}
+        <div className="space-y-3">
           <input
             type="text"
             value={search}
             onChange={(e) => { setPage(1); setSearch(e.target.value); }}
             placeholder="Search by customer name or email"
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm w-full sm:w-64 sm:flex-none min-w-0"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base"
           />
-          <div className="hidden sm:flex items-center flex-wrap gap-2">
+          
+          <div className="flex items-center justify-between">
+            <button
+              className="sm:hidden inline-flex items-center gap-2 px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white hover:bg-gray-50"
+              onClick={() => setFiltersOpen((v) => !v)}
+            >
+              <FiFilter className="w-4 h-4" />
+              More Filters
+            </button>
+            <div className="text-sm text-gray-600 font-medium">Page {page} of {totalPages}</div>
+          </div>
+
+          {/* Desktop filters */}
+          <div className="hidden sm:flex items-center flex-wrap gap-3">
             <FiFilter className="w-4 h-4 text-gray-500" />
             <select
               value={filter}
@@ -219,16 +234,6 @@ const ReturnRequests = () => {
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
             </select>
-          </div>
-          <div className="flex items-center justify-between sm:justify-start">
-            <button
-              className="sm:hidden inline-flex items-center gap-2 px-3 py-2 border rounded-lg text-sm"
-              onClick={() => setFiltersOpen((v) => !v)}
-            >
-              <FiFilter className="w-4 h-4" />
-              Filters
-            </button>
-            <div className="ml-auto sm:ml-0 text-sm text-gray-600">Page {page} of {totalPages}</div>
           </div>
         </div>
       </div>
@@ -441,24 +446,28 @@ const ReturnRequests = () => {
                 </div>
               )}
 
-              <div className="flex justify-between items-center">
+              {/* Order Total and Actions */}
+              <div className="space-y-3">
                 <div className="text-sm text-gray-600">
                   <span className="font-medium">Order Total:</span> ₹{request.order.totalPrice}
                 </div>
-                <div className="flex space-x-2">
+                
+                {/* Mobile-friendly action buttons */}
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <button
                     onClick={() => openModal(request)}
-                    className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800"
+                    className="flex items-center justify-center space-x-2 px-4 py-3 text-sm font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors"
                   >
                     <FiEye className="w-4 h-4" />
                     <span>View Details</span>
                   </button>
+                  
                   {request.status === 'pending' && (
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <button
                         onClick={() => processReturnRequest(request._id, 'approved')}
                         disabled={processingRequest === request._id}
-                        className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-green-600 hover:text-green-800 disabled:opacity-50"
+                        className="flex items-center justify-center space-x-2 px-4 py-3 text-sm font-medium text-green-600 hover:text-green-800 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 disabled:opacity-50 transition-colors"
                       >
                         <FiCheck className="w-4 h-4" />
                         <span>Approve</span>
@@ -466,35 +475,35 @@ const ReturnRequests = () => {
                       <button
                         onClick={() => processReturnRequest(request._id, 'rejected')}
                         disabled={processingRequest === request._id}
-                        className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800 disabled:opacity-50"
+                        className="flex items-center justify-center space-x-2 px-4 py-3 text-sm font-medium text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 disabled:opacity-50 transition-colors"
                       >
                         <FiX className="w-4 h-4" />
                         <span>Reject</span>
                       </button>
                     </div>
                   )}
+                  
                   {request.status === 'approved' && !request.adminPickupConfirmed && (
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => {
-                          setPickupRequest(request);
-                          setPickupDate(request.pickupDate ? new Date(request.pickupDate).toISOString().slice(0,10) : '');
-                          setPickupModalOpen(true);
-                        }}
-                        className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-indigo-600 hover:text-indigo-800"
-                      >
-                        <FiCheck className="w-4 h-4" />
-                        <span>Confirm Pickup</span>
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => {
+                        setPickupRequest(request);
+                        setPickupDate(request.pickupDate ? new Date(request.pickupDate).toISOString().slice(0,10) : '');
+                        setPickupModalOpen(true);
+                      }}
+                      className="flex items-center justify-center space-x-2 px-4 py-3 text-sm font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200 transition-colors"
+                    >
+                      <FiCheck className="w-4 h-4" />
+                      <span>Confirm Pickup</span>
+                    </button>
                   )}
+                  
                   {request.status === 'approved' && request.adminPickupConfirmed && (
-                    <div className="flex space-x-2">
-                      <span className="px-2 py-1 rounded bg-indigo-100 text-indigo-800 text-xs">Pickup Confirmed</span>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                      <span className="px-3 py-2 rounded-lg bg-indigo-100 text-indigo-800 text-sm font-medium">Pickup Confirmed</span>
                       <button
                         onClick={() => markReceived(request._id)}
                         disabled={processingRequest === request._id}
-                        className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                        className="flex items-center justify-center space-x-2 px-4 py-3 text-sm font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 disabled:opacity-50 transition-colors"
                         title="Mark item received and process refund (if prepaid)"
                       >
                         <FiCheck className="w-4 h-4" />
@@ -510,23 +519,27 @@ const ReturnRequests = () => {
       )}
 
       {/* Pagination */}
-      <div className="mt-6 flex items-center justify-center space-x-2">
-        <button
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          disabled={page <= 1}
-          className="px-3 py-1 border rounded disabled:opacity-50"
-        >
-          Prev
-        </button>
-        <span className="text-sm">Page {page} of {totalPages}</span>
-        <button
-          onClick={() => setPage((p) => (p < totalPages ? p + 1 : p))}
-          disabled={page >= totalPages}
-          className="px-3 py-1 border rounded disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
+      {totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-center space-x-3">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50 text-sm font-medium"
+          >
+            Previous
+          </button>
+          <span className="text-sm font-medium text-gray-700 px-3 py-2">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => (p < totalPages ? p + 1 : p))}
+            disabled={page >= totalPages}
+            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50 text-sm font-medium"
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Modal */}
       {modalOpen && selectedRequest && (

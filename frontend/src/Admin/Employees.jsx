@@ -27,7 +27,11 @@ const EmployeeModal = ({ employee, onClose, onSave }) => {
         password: '',
         role: employee?.role || 'employee',
         phone: employee?.phone || '',
-        address: employee?.address?.street || ''
+        address: employee?.address 
+            ? typeof employee.address === 'string' 
+                ? employee.address 
+                : `${employee.address.street || ''} ${employee.address.city || ''} ${employee.address.state || ''} ${employee.address.country || ''}`.trim()
+            : ''
     });
     const [loading, setLoading] = useState(false);
 
@@ -77,18 +81,22 @@ const EmployeeModal = ({ employee, onClose, onSave }) => {
 
     return (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex justify-center items-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-                <div className="p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-slate-800">
+            <div className="bg-white rounded-lg shadow-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto">
+                {/* Sticky Header */}
+                <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 rounded-t-lg">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-800">
                             {isEditing ? 'Edit Employee' : 'Add New Employee'}
                         </h2>
-                        <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+                        <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1">
                             <FaTimes size={20} />
                         </button>
                     </div>
+                </div>
+                
+                <div className="p-4 sm:p-6">
                     
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form id="employeeForm" onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-slate-700">Full Name *</label>
                             <input 
@@ -97,7 +105,7 @@ const EmployeeModal = ({ employee, onClose, onSave }) => {
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                className="mt-1 block w-full px-3 py-3 sm:py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
                             />
                         </div>
                         
@@ -109,7 +117,7 @@ const EmployeeModal = ({ employee, onClose, onSave }) => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                className="mt-1 block w-full px-3 py-3 sm:py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
                             />
                         </div>
 
@@ -123,7 +131,7 @@ const EmployeeModal = ({ employee, onClose, onSave }) => {
                                     onChange={handleChange}
                                     required={!isEditing}
                                     minLength={6}
-                                    className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                    className="mt-1 block w-full px-3 py-3 sm:py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
                                 />
                             </div>
                         )}
@@ -149,7 +157,7 @@ const EmployeeModal = ({ employee, onClose, onSave }) => {
                                 name="phone"
                                 value={formData.phone}
                                 onChange={handleChange}
-                                className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                className="mt-1 block w-full px-3 py-3 sm:py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
                             />
                         </div>
 
@@ -160,28 +168,33 @@ const EmployeeModal = ({ employee, onClose, onSave }) => {
                                 name="address"
                                 value={formData.address}
                                 onChange={handleChange}
-                                className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
+                                className="mt-1 block w-full px-3 py-3 sm:py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" 
                             />
                         </div>
                         
-                        <div className="flex justify-end space-x-4 pt-4">
-                            <button 
-                                type="button" 
-                                onClick={onClose} 
-                                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200"
-                                disabled={loading}
-                            >
-                                Cancel
-                            </button>
-                            <button 
-                                type="submit" 
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                                disabled={loading}
-                            >
-                                {loading ? 'Saving...' : 'Save Employee'}
-                            </button>
-                        </div>
                     </form>
+                </div>
+                
+                {/* Sticky Footer */}
+                <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 sm:p-6 rounded-b-lg">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+                        <button 
+                            type="button" 
+                            onClick={onClose} 
+                            className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 font-medium"
+                            disabled={loading}
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            type="submit" 
+                            form="employeeForm"
+                            className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium"
+                            disabled={loading}
+                        >
+                            {loading ? 'Saving...' : 'Save Employee'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -273,7 +286,7 @@ const Employees = () => {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="p-4 sm:p-6 space-y-6">
             {isModalOpen && (
                 <EmployeeModal 
                     employee={selectedEmployee} 
@@ -282,21 +295,23 @@ const Employees = () => {
                 />
             )}
 
+            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">Employee Management</h1>
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800">Employee Management</h1>
                     <p className="text-slate-500 mt-1 text-sm sm:text-base">
                         Manage your team members and their roles. Total: {employees.length} staff members
                     </p>
                 </div>
                 <button 
                     onClick={() => handleOpenModal()} 
-                    className="flex items-center justify-center bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors whitespace-nowrap"
+                    className="w-full sm:w-auto flex items-center justify-center bg-blue-600 text-white font-semibold py-3 sm:py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors"
                 >
                     <FaPlus className="mr-2" /> Add Employee
                 </button>
             </div>
 
+            {/* Search */}
             <div className="bg-white p-4 rounded-lg shadow-lg">
                 <div className="relative">
                     <FaSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400" />
@@ -305,61 +320,59 @@ const Employees = () => {
                         placeholder="Search by name, role, or email..." 
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full pl-10 pr-4 py-3 sm:py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     />
                 </div>
             </div>
             
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block bg-white rounded-lg shadow-lg overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-slate-50 border-b border-slate-200">
                             <tr>
-                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Employee</th>
-                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider hidden sm:table-cell">Role</th>
-                                <th className="px-3 sm:px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider hidden md:table-cell">Status</th>
-                                <th className="px-3 sm:px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Employee</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Role</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Contact</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200">
                             {filteredEmployees.map((emp) => (
                                 <tr key={emp._id} className="hover:bg-slate-50">
-                                    <td className="px-3 sm:px-6 py-4">
+                                    <td className="px-6 py-4">
                                         <div className="flex items-center">
-                                            <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
+                                            <div className="flex-shrink-0 h-10 w-10">
                                                 {emp.avatar?.url ? (
-                                                    <img className="h-8 w-8 sm:h-10 sm:w-10 rounded-full" src={emp.avatar.url} alt={emp.name} />
+                                                    <img className="h-10 w-10 rounded-full" src={emp.avatar.url} alt={emp.name} />
                                                 ) : (
-                                                    <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                                                        <FaUser className="text-gray-600 w-3 h-3 sm:w-4 sm:h-4" />
+                                                    <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                        <FaUser className="text-gray-600 w-4 h-4" />
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="ml-2 sm:ml-4 min-w-0 flex-1">
-                                                <div className="text-sm font-medium text-slate-900 truncate">{emp.name}</div>
-                                                <div className="text-xs sm:text-sm text-slate-500 truncate">{emp.email}</div>
-                                                {emp.phone && (
-                                                    <div className="text-xs text-slate-400 truncate">{emp.phone}</div>
-                                                )}
-                                                <div className="sm:hidden mt-1">
-                                                    <RoleBadge role={emp.role} />
-                                                </div>
-                                                <div className="md:hidden mt-1">
-                                                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                                        emp.isActive 
-                                                            ? 'bg-green-100 text-green-800' 
-                                                            : 'bg-red-100 text-red-800'
-                                                    }`}>
-                                                        {emp.isActive ? 'Active' : 'Inactive'}
-                                                    </span>
-                                                </div>
+                                            <div className="ml-4">
+                                                <div className="text-sm font-medium text-slate-900">{emp.name}</div>
+                                                <div className="text-sm text-slate-500">{emp.email}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-4 hidden sm:table-cell">
+                                    <td className="px-6 py-4">
                                         <RoleBadge role={emp.role} />
                                     </td>
-                                    <td className="px-3 sm:px-6 py-4 hidden md:table-cell">
+                                    <td className="px-6 py-4">
+                                        <div className="text-sm text-slate-900">{emp.phone || 'N/A'}</div>
+                                        <div className="text-sm text-slate-500">
+                                            {emp.address 
+                                                ? typeof emp.address === 'string' 
+                                                    ? emp.address 
+                                                    : `${emp.address.street || ''} ${emp.address.city || ''} ${emp.address.state || ''} ${emp.address.country || ''}`.trim() || 'No address'
+                                                : 'No address'
+                                            }
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
                                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                                             emp.isActive 
                                                 ? 'bg-green-100 text-green-800' 
@@ -368,21 +381,21 @@ const Employees = () => {
                                             {emp.isActive ? 'Active' : 'Inactive'}
                                         </span>
                                     </td>
-                                    <td className="px-3 sm:px-6 py-4 text-center">
-                                        <div className="flex items-center justify-center space-x-2 sm:space-x-4">
+                                    <td className="px-6 py-4 text-center">
+                                        <div className="flex items-center justify-center space-x-4">
                                             <button 
                                                 onClick={() => handleOpenModal(emp)} 
-                                                className="text-blue-600 hover:text-blue-900 p-1 sm:p-2" 
+                                                className="text-blue-600 hover:text-blue-900 p-2" 
                                                 title="Edit Employee"
                                             >
-                                                <FaPencilAlt className="w-3 h-3 sm:w-4 sm:h-4" />
+                                                <FaPencilAlt className="w-4 h-4" />
                                             </button>
                                             <button 
                                                 onClick={() => handleDeleteEmployee(emp._id, emp.name)}
-                                                className="text-red-600 hover:text-red-900 p-1 sm:p-2" 
+                                                className="text-red-600 hover:text-red-900 p-2" 
                                                 title="Remove Employee"
                                             >
-                                                <FaTrashAlt className="w-3 h-3 sm:w-4 sm:h-4" />
+                                                <FaTrashAlt className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </td>
@@ -390,17 +403,105 @@ const Employees = () => {
                             ))}
                         </tbody>
                     </table>
-                    
-                    {filteredEmployees.length === 0 && (
-                        <div className="text-center py-12 text-slate-500">
-                            <p className="font-semibold">No employees found.</p>
-                            <p className="text-sm">
-                                {searchTerm ? 'Try adjusting your search.' : 'Add your first employee to get started.'}
-                            </p>
-                        </div>
-                    )}
                 </div>
             </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden space-y-4">
+                {filteredEmployees.map((emp) => (
+                    <div key={emp._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                        {/* Employee Header */}
+                        <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center flex-1">
+                                <div className="flex-shrink-0 h-12 w-12">
+                                    {emp.avatar?.url ? (
+                                        <img className="h-12 w-12 rounded-full" src={emp.avatar.url} alt={emp.name} />
+                                    ) : (
+                                        <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
+                                            <FaUser className="text-gray-600 w-5 h-5" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="ml-3 flex-1 min-w-0">
+                                    <h3 className="text-base font-medium text-slate-900 truncate">{emp.name}</h3>
+                                    <p className="text-sm text-slate-500 truncate">{emp.email}</p>
+                                </div>
+                            </div>
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ml-2 ${
+                                emp.isActive 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-red-100 text-red-800'
+                            }`}>
+                                {emp.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                        </div>
+
+                        {/* Employee Details */}
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Role</div>
+                                <RoleBadge role={emp.role} />
+                            </div>
+                            <div>
+                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Phone</div>
+                                <div className="text-sm text-slate-900">{emp.phone || 'N/A'}</div>
+                            </div>
+                        </div>
+
+                        {emp.address && (
+                            <div className="mb-4">
+                                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Address</div>
+                                <div className="text-sm text-slate-600">
+                                    {typeof emp.address === 'string' 
+                                        ? emp.address 
+                                        : `${emp.address.street || ''} ${emp.address.city || ''} ${emp.address.state || ''} ${emp.address.country || ''}`.trim()
+                                    }
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <button 
+                                onClick={() => handleOpenModal(emp)} 
+                                className="flex items-center justify-center px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200 active:bg-blue-300"
+                            >
+                                <FaPencilAlt className="w-4 h-4 mr-2" />
+                                Edit
+                            </button>
+                            <button 
+                                onClick={() => handleDeleteEmployee(emp._id, emp.name)}
+                                className="flex items-center justify-center px-4 py-2 text-sm font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200 active:bg-red-300"
+                            >
+                                <FaTrashAlt className="w-4 h-4 mr-2" />
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Empty State */}
+            {filteredEmployees.length === 0 && (
+                <div className="bg-white rounded-lg shadow-lg">
+                    <div className="text-center py-12 text-slate-500">
+                        <FaUserTie className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+                        <p className="text-lg font-semibold mb-2">No employees found</p>
+                        <p className="text-sm">
+                            {searchTerm ? 'Try adjusting your search terms.' : 'Add your first employee to get started.'}
+                        </p>
+                        {!searchTerm && (
+                            <button 
+                                onClick={() => handleOpenModal()} 
+                                className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
+                            >
+                                <FaPlus className="mr-2" />
+                                Add Employee
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

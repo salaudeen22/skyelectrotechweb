@@ -156,10 +156,10 @@ const CategoriesManagement = () => {
           <div key={category._id} className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
             {/* Main Category */}
             <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-100">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+              <div className="flex flex-col gap-3 sm:gap-4">
                 <div className="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
                   {/* Category Image */}
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="w-16 h-16 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                     {category.image?.url ? (
                       <img
                         src={category.image.url}
@@ -171,16 +171,16 @@ const CategoriesManagement = () => {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                        <FaImage className="w-4 h-4 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-gray-400" />
+                        <FaImage className="w-6 h-6 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-gray-400" />
                       </div>
                     )}
                   </div>
 
                   {/* Category Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-2 gap-1 sm:gap-0">
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{category.name}</h3>
-                      <div className="flex flex-wrap gap-1 sm:gap-2">
+                    <div className="flex flex-col gap-2 mb-3">
+                      <h3 className="text-lg sm:text-lg font-semibold text-gray-900">{category.name}</h3>
+                      <div className="flex flex-wrap gap-2">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           category.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
@@ -192,35 +192,35 @@ const CategoriesManagement = () => {
                       </div>
                     </div>
                     {category.description && (
-                      <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">{category.description}</p>
+                      <p className="text-gray-600 text-sm mb-2 line-clamp-2">{category.description}</p>
                     )}
                     <p className="text-xs text-gray-500">Created by {category.createdBy?.name}</p>
                   </div>
                 </div>
 
-                {/* Action buttons */}
-                <div className="flex items-center justify-end sm:justify-start space-x-1 sm:space-x-2 flex-shrink-0">
+                {/* Action buttons - Full width on mobile */}
+                <div className="flex items-center gap-2 sm:gap-3 pt-2 border-t border-gray-100 sm:border-t-0 sm:pt-0">
                   <button
                     onClick={() => handleCreateSubcategory(category)}
-                    className="px-2 sm:px-3 py-1.5 bg-green-600 text-white text-xs sm:text-sm rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1"
+                    className="flex-1 sm:flex-none px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                     title="Add Subcategory"
                   >
                     <FaPlus className="w-3 h-3" />
-                    <span className="hidden sm:inline">Sub</span>
+                    <span>Add Subcategory</span>
                   </button>
                   <button
                     onClick={() => handleEdit(category)}
-                    className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    className="px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200"
                     title="Edit Category"
                   >
-                    <FaPencilAlt className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <FaPencilAlt className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(category._id)}
-                    className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200"
                     title="Delete Category"
                   >
-                    <FaTrashAlt className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <FaTrashAlt className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -229,45 +229,49 @@ const CategoriesManagement = () => {
             {/* Subcategories */}
             {category.subcategories && category.subcategories.length > 0 && (
               <div className="bg-gray-50 px-3 sm:px-6 py-3 sm:py-4">
-                <h4 className="text-xs sm:text-sm font-medium text-gray-700 mb-3">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">
                   Subcategories ({category.subcategories.length})
                 </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {category.subcategories.map((subcategory) => (
-                    <div key={subcategory._id} className="bg-white p-2 sm:p-3 rounded-lg border border-gray-200">
-                      <div className="flex items-start justify-between">
+                    <div key={subcategory._id} className="bg-white p-3 rounded-lg border border-gray-200">
+                      <div className="space-y-3">
                         <div className="flex-1 min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 mb-1 gap-1 sm:gap-0">
-                            <h5 className="font-medium text-gray-900 text-xs sm:text-sm truncate">{subcategory.name}</h5>
+                          <div className="flex flex-col gap-2 mb-2">
+                            <h5 className="font-medium text-gray-900 text-sm">{subcategory.name}</h5>
                             <div className="flex flex-wrap gap-1">
-                              <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+                              <span className={`px-2 py-1 rounded-full text-xs ${
                                 subcategory.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                               }`}>
                                 {subcategory.isActive ? 'Active' : 'Inactive'}
                               </span>
+                              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                                {subcategory.productCount || 0} products
+                              </span>
                             </div>
                           </div>
                           {subcategory.description && (
-                            <p className="text-gray-600 text-xs mb-1 line-clamp-2">{subcategory.description}</p>
+                            <p className="text-gray-600 text-xs mb-2 line-clamp-2">{subcategory.description}</p>
                           )}
-                          <div className="flex items-center justify-between text-xs text-gray-500">
-                            <span>{subcategory.productCount || 0} products</span>
-                          </div>
                         </div>
-                        <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
+                        
+                        {/* Mobile-friendly action buttons */}
+                        <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
                           <button
                             onClick={() => handleEdit(subcategory)}
-                            className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                            className="flex-1 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200 flex items-center justify-center gap-1 text-xs"
                             title="Edit Subcategory"
                           >
                             <FaPencilAlt className="w-3 h-3" />
+                            <span>Edit</span>
                           </button>
                           <button
                             onClick={() => handleDelete(subcategory._id)}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                            className="flex-1 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200 flex items-center justify-center gap-1 text-xs"
                             title="Delete Subcategory"
                           >
                             <FaTrashAlt className="w-3 h-3" />
+                            <span>Delete</span>
                           </button>
                         </div>
                       </div>
@@ -400,25 +404,27 @@ const CategoryModal = ({ category, parentCategory, allCategories, onClose, onSav
 
   return (
     <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg w-full max-w-md max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b">
-          <h2 className="text-lg sm:text-xl font-semibold">
-            {isEditing 
-              ? `Edit ${isSubcategory ? 'Subcategory' : 'Category'}` 
-              : `Create ${isSubcategory ? 'Subcategory' : 'Category'}`
-            }
+        <div className="flex items-start justify-between p-4 sm:p-6 border-b sticky top-0 bg-white">
+          <div className="flex-1 pr-4">
+            <h2 className="text-lg sm:text-xl font-semibold">
+              {isEditing 
+                ? `Edit ${isSubcategory ? 'Subcategory' : 'Category'}` 
+                : `Create ${isSubcategory ? 'Subcategory' : 'Category'}`
+              }
+            </h2>
             {parentCategory && !isEditing && (
-              <span className="text-xs sm:text-sm font-normal text-gray-600 ml-2 block sm:inline">
+              <p className="text-sm font-normal text-gray-600 mt-1">
                 under "{parentCategory.name}"
-              </span>
+              </p>
             )}
-          </h2>
+          </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-2 -mr-2 -mt-2 rounded-lg"
           >
-            <FaTimes className="w-4 h-4 sm:w-5 sm:h-5" />
+            <FaTimes className="w-5 h-5" />
           </button>
         </div>
 
@@ -548,18 +554,18 @@ const CategoryModal = ({ category, parentCategory, allCategories, onClose, onSav
           </div>
 
           {/* Submit Buttons */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-6 sticky bottom-0 bg-white border-t border-gray-100 -mx-4 sm:-mx-6 px-4 sm:px-6 py-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+              className="flex-1 px-4 py-3 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors text-base font-medium"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || uploadingImage}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm"
+              className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-base font-medium"
             >
               {loading ? (uploadingImage ? 'Uploading...' : 'Saving...') : isEditing ? 'Update' : 'Create'}
             </button>

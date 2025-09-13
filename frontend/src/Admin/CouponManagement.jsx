@@ -246,23 +246,25 @@ const CouponManagement = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Coupon Management</h1>
+    <div className="p-4 sm:p-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Coupon Management</h1>
         <button
           onClick={() => {
             resetForm();
             setEditingCoupon(null);
             setShowCreateModal(true);
           }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+          className="w-full sm:w-auto bg-blue-600 text-white px-4 py-3 sm:py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center font-medium"
         >
           <FiPlus className="w-4 h-4 mr-2" />
           Create Coupon
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      {/* Desktop Table View */}
+      <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -400,16 +402,146 @@ const CouponManagement = () => {
         </div>
       </div>
 
+      {/* Mobile Card View */}
+      <div className="lg:hidden space-y-4">
+        {coupons.map((coupon) => {
+          const status = getCouponStatus(coupon);
+          return (
+            <div key={coupon._id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+              {/* Coupon Header */}
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <div className="flex items-center mb-1">
+                    <FiTag className="w-4 h-4 text-blue-500 mr-2" />
+                    <span className="font-mono font-bold text-gray-900">{coupon.code}</span>
+                  </div>
+                  <h3 className="text-sm font-medium text-gray-900 mb-1">{coupon.name}</h3>
+                  {coupon.description && (
+                    <p className="text-xs text-gray-500 line-clamp-2">{coupon.description}</p>
+                  )}
+                </div>
+                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full text-white ${status.color} ml-2`}>
+                  {status.text}
+                </span>
+              </div>
+
+              {/* Discount Info */}
+              <div className="grid grid-cols-2 gap-4 mb-3">
+                <div>
+                  <div className="flex items-center mb-1">
+                    <FiPercent className="w-4 h-4 text-green-500 mr-1" />
+                    <span className="text-sm font-medium text-gray-900">
+                      {coupon.discountType === 'percentage' 
+                        ? `${coupon.discountValue}%`
+                        : `₹${coupon.discountValue}`}
+                    </span>
+                  </div>
+                  {coupon.minimumOrderAmount > 0 && (
+                    <div className="text-xs text-gray-500">Min: ₹{coupon.minimumOrderAmount}</div>
+                  )}
+                </div>
+                <div>
+                  <div className="flex items-center text-sm text-gray-900 mb-1">
+                    <FiCalendar className="w-4 h-4 text-gray-400 mr-1" />
+                    <span className="text-xs">{formatDate(coupon.expirationDate)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Usage Stats */}
+              <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <div className="flex items-center mb-1">
+                    <FiUsers className="w-4 h-4 text-gray-400 mr-1" />
+                    <span className="text-xs font-medium text-gray-900">
+                      Used: {coupon.usedCount}/{coupon.usageLimit || '∞'}
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Max {coupon.userUsageLimit}/user
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs font-medium text-gray-900 mb-1">
+                    Issued: {coupon.issuedCount}/{coupon.issuanceLimit || '∞'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => handleViewCoupon(coupon._id)}
+                  className="flex items-center justify-center px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 active:bg-gray-300"
+                >
+                  <FiEye className="w-4 h-4 mr-1" />
+                  View
+                </button>
+                <button
+                  onClick={() => handleViewUsageTracking(coupon)}
+                  className="flex items-center justify-center px-3 py-2 text-xs font-medium text-purple-700 bg-purple-100 rounded-lg hover:bg-purple-200 active:bg-purple-300"
+                >
+                  <FiBarChart className="w-4 h-4 mr-1" />
+                  Stats
+                </button>
+                <button
+                  onClick={() => handleIssueCoupon(coupon)}
+                  className="flex items-center justify-center px-3 py-2 text-xs font-medium text-orange-700 bg-orange-100 rounded-lg hover:bg-orange-200 active:bg-orange-300 disabled:opacity-50"
+                  disabled={coupon.issuanceLimit && coupon.issuedCount >= coupon.issuanceLimit}
+                >
+                  <FiUserPlus className="w-4 h-4 mr-1" />
+                  Issue
+                </button>
+              </div>
+
+              {/* Secondary Actions */}
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                <button
+                  onClick={() => handleToggleActive(coupon._id, coupon.isActive)}
+                  className={`flex items-center justify-center px-3 py-2 text-xs font-medium rounded-lg ${
+                    coupon.isActive 
+                      ? 'text-green-700 bg-green-100 hover:bg-green-200 active:bg-green-300' 
+                      : 'text-gray-700 bg-gray-100 hover:bg-gray-200 active:bg-gray-300'
+                  }`}
+                >
+                  {coupon.isActive ? <FiToggleRight className="w-4 h-4 mr-1" /> : <FiToggleLeft className="w-4 h-4 mr-1" />}
+                  {coupon.isActive ? 'Active' : 'Inactive'}
+                </button>
+                <button
+                  onClick={() => handleEdit(coupon)}
+                  className="flex items-center justify-center px-3 py-2 text-xs font-medium text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200 active:bg-blue-300"
+                >
+                  <FiEdit3 className="w-4 h-4 mr-1" />
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(coupon._id)}
+                  className="flex items-center justify-center px-3 py-2 text-xs font-medium text-red-700 bg-red-100 rounded-lg hover:bg-red-200 active:bg-red-300"
+                >
+                  <FiTrash2 className="w-4 h-4 mr-1" />
+                  Delete
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       {/* Create/Edit Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4 max-h-screen overflow-y-auto">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {editingCoupon ? 'Edit Coupon' : 'Create New Coupon'}
-            </h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-lg max-h-screen overflow-y-auto">
+            {/* Sticky Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 rounded-t-lg">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                {editingCoupon ? 'Edit Coupon' : 'Create New Coupon'}
+              </h2>
+            </div>
             
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 sm:p-6">
+            
+            <form id="couponForm" onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Coupon Code *
@@ -473,7 +605,7 @@ const CouponManagement = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Discount Value *
@@ -510,7 +642,7 @@ const CouponManagement = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Minimum Order Amount
@@ -582,7 +714,7 @@ const CouponManagement = () => {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     User Usage Limit
@@ -633,7 +765,11 @@ const CouponManagement = () => {
                 </label>
               </div>
 
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t">
+            </form>
+            
+            {/* Sticky Footer */}
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 sm:p-6 rounded-b-lg">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
                 <button
                   type="button"
                   onClick={() => {
@@ -641,40 +777,46 @@ const CouponManagement = () => {
                     setEditingCoupon(null);
                     resetForm();
                   }}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="w-full sm:w-auto px-4 py-3 sm:py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  form="couponForm"
+                  className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
                 >
                   {editingCoupon ? 'Update' : 'Create'} Coupon
                 </button>
               </div>
-            </form>
+            </div>
+            </div>
           </div>
         </div>
       )}
 
       {/* View Coupon Modal */}
       {showViewModal && viewingCoupon && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-screen overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Coupon Details</h2>
-              <button
-                onClick={() => {
-                  setShowViewModal(false);
-                  setViewingCoupon(null);
-                }}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <FiX className="w-5 h-5" />
-              </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-2xl max-h-screen overflow-y-auto">
+            {/* Sticky Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 rounded-t-lg">
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">Coupon Details</h2>
+                <button
+                  onClick={() => {
+                    setShowViewModal(false);
+                    setViewingCoupon(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 p-1"
+                >
+                  <FiX className="w-5 h-5" />
+                </button>
+              </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-4 sm:p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Basic Information */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-gray-800 border-b pb-2">Basic Information</h3>
@@ -824,27 +966,31 @@ const CouponManagement = () => {
                 )}
               </div>
             </div>
+            </div>
 
-            <div className="flex justify-end mt-6 pt-4 border-t">
-              <button
-                onClick={() => {
-                  setShowViewModal(false);
-                  setViewingCoupon(null);
-                  handleEdit(viewingCoupon);
-                }}
-                className="mr-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Edit Coupon
-              </button>
-              <button
-                onClick={() => {
-                  setShowViewModal(false);
-                  setViewingCoupon(null);
-                }}
-                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                Close
-              </button>
+            {/* Sticky Footer */}
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 sm:p-6 rounded-b-lg">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+                <button
+                  onClick={() => {
+                    setShowViewModal(false);
+                    setViewingCoupon(null);
+                  }}
+                  className="w-full sm:w-auto px-4 py-3 sm:py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setShowViewModal(false);
+                    setViewingCoupon(null);
+                    handleEdit(viewingCoupon);
+                  }}
+                  className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                >
+                  Edit Coupon
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -862,21 +1008,26 @@ const CouponManagement = () => {
 
       {/* Issue Coupon Modal */}
       {showIssuanceModal && issuingCoupon && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Issue Coupon</h2>
-              <button
-                onClick={() => {
-                  setShowIssuanceModal(false);
-                  setIssuingCoupon(null);
-                  setIssuanceUserEmails('');
-                }}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <FiX className="w-5 h-5" />
-              </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-lg max-h-screen overflow-y-auto">
+            {/* Sticky Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 rounded-t-lg">
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">Issue Coupon</h2>
+                <button
+                  onClick={() => {
+                    setShowIssuanceModal(false);
+                    setIssuingCoupon(null);
+                    setIssuanceUserEmails('');
+                  }}
+                  className="text-gray-400 hover:text-gray-600 p-1"
+                >
+                  <FiX className="w-5 h-5" />
+                </button>
+              </div>
             </div>
+            
+            <div className="p-4 sm:p-6">
             
             <div className="mb-4 p-4 bg-blue-50 rounded-lg">
               <div className="flex items-center mb-2">
@@ -894,7 +1045,7 @@ const CouponManagement = () => {
               </div>
             </div>
 
-            <form onSubmit={handleSubmitIssuance} className="space-y-4">
+            <form id="issuanceForm" onSubmit={handleSubmitIssuance} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   User Emails (comma-separated)
@@ -912,7 +1063,12 @@ const CouponManagement = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end space-x-3 pt-4 border-t">
+            </form>
+            </div>
+
+            {/* Sticky Footer */}
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 sm:p-6 rounded-b-lg">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
                 <button
                   type="button"
                   onClick={() => {
@@ -920,20 +1076,21 @@ const CouponManagement = () => {
                     setIssuingCoupon(null);
                     setIssuanceUserEmails('');
                   }}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="w-full sm:w-auto px-4 py-3 sm:py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center"
+                  form="issuanceForm"
+                  className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center justify-center font-medium disabled:opacity-50"
                   disabled={issuingCoupon.issuanceLimit && issuingCoupon.issuedCount >= issuingCoupon.issuanceLimit}
                 >
                   <FiUserPlus className="w-4 h-4 mr-2" />
                   Issue Coupon
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

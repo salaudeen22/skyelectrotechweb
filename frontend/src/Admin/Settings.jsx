@@ -508,17 +508,17 @@ const Settings = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">Store Settings</h1>
-          <p className="text-slate-500 mt-1">Configure your e-commerce store settings</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800">Store Settings</h1>
+          <p className="text-sm sm:text-base text-slate-500 mt-1">Configure your e-commerce store settings</p>
         </div>
         <button
           onClick={handleSaveSettings}
           disabled={saving}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition flex items-center space-x-2 disabled:opacity-50"
+          className="w-full sm:w-auto bg-blue-600 text-white px-4 sm:px-6 py-3 sm:py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center space-x-2 disabled:opacity-50 font-medium"
         >
           <FaSave className="w-4 h-4" />
           <span>{saving ? 'Saving...' : 'Save Settings'}</span>
@@ -528,37 +528,37 @@ const Settings = () => {
       {/* Tabs */}
       <div className="bg-white rounded-xl shadow-lg">
         <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6 overflow-x-auto" aria-label="Tabs">
+          <nav className="flex space-x-2 sm:space-x-4 lg:space-x-8 px-4 sm:px-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 whitespace-nowrap ${
+                className={`py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center space-x-1 sm:space-x-2 whitespace-nowrap min-w-0 ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                {tab.icon}
-                <span>{tab.name}</span>
+                <span className="flex-shrink-0">{tab.icon}</span>
+                <span className="hidden sm:inline">{tab.name}</span>
               </button>
             ))}
           </nav>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* Store Info Tab */}
           {activeTab === 'store' && (
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900">Store Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Store Name</label>
                   <input
                     type="text"
                     value={formData.storeInfo.name}
                     onChange={(e) => handleInputChange('storeInfo', 'name', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -567,7 +567,7 @@ const Settings = () => {
                     type="email"
                     value={formData.storeInfo.email}
                     onChange={(e) => handleInputChange('storeInfo', 'email', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -576,7 +576,7 @@ const Settings = () => {
                     type="text"
                     value={formData.storeInfo.phone}
                     onChange={(e) => handleInputChange('storeInfo', 'phone', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -585,25 +585,25 @@ const Settings = () => {
                     type="text"
                     value={formData.storeInfo.logo}
                     onChange={(e) => handleInputChange('storeInfo', 'logo', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
-                <div className="md:col-span-2">
+                <div className="lg:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                   <textarea
                     value={formData.storeInfo.description}
                     onChange={(e) => handleInputChange('storeInfo', 'description', e.target.value)}
                     rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
-                <div className="md:col-span-2">
+                <div className="lg:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
                   <textarea
                     value={formData.storeInfo.address}
                     onChange={(e) => handleInputChange('storeInfo', 'address', e.target.value)}
                     rows="2"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -613,7 +613,7 @@ const Settings = () => {
                     value={formData.storeInfo.gstin}
                     onChange={(e) => handleInputChange('storeInfo', 'gstin', e.target.value)}
                     placeholder="e.g., 27AABCS1234Z1Z5"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -622,7 +622,7 @@ const Settings = () => {
                     type="text"
                     value={formData.storeInfo.city}
                     onChange={(e) => handleInputChange('storeInfo', 'city', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -631,7 +631,7 @@ const Settings = () => {
                     type="text"
                     value={formData.storeInfo.state}
                     onChange={(e) => handleInputChange('storeInfo', 'state', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -640,7 +640,7 @@ const Settings = () => {
                     type="text"
                     value={formData.storeInfo.pincode}
                     onChange={(e) => handleInputChange('storeInfo', 'pincode', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
               </div>
@@ -694,7 +694,7 @@ const Settings = () => {
                       type="number"
                       value={heroSliderSettings.slideInterval}
                       onChange={(e) => setHeroSliderSettings(prev => ({ ...prev, slideInterval: parseInt(e.target.value) }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                       min="1000"
                       max="30000"
                     />
@@ -717,7 +717,7 @@ const Settings = () => {
                     <p>No slides added yet. Click "Add New Slide" to get started.</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {heroSlides.map((slide) => (
                       <div key={slide.id} className="border rounded-lg p-4 bg-white shadow-sm">
                         <div className="aspect-video mb-3 overflow-hidden rounded-lg">
@@ -757,19 +757,24 @@ const Settings = () => {
               {/* Slide Form Modal */}
               {showSlideForm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                  <div className="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
-                    <div className="p-6">
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-semibold">
+                  <div className="bg-white rounded-lg max-w-2xl w-full max-h-[95vh] overflow-hidden">
+                    {/* Sticky Header */}
+                    <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 rounded-t-lg">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-base sm:text-lg font-semibold">
                           {editingSlide ? 'Edit Slide' : 'Add New Slide'}
                         </h3>
                         <button
                           onClick={resetSlideForm}
-                          className="text-gray-400 hover:text-gray-600"
+                          className="text-gray-400 hover:text-gray-600 p-1"
                         >
-                          ×
+                          <span className="text-xl">×</span>
                         </button>
                       </div>
+                    </div>
+                    
+                    <div className="overflow-y-auto max-h-[calc(95vh-140px)]">
+                      <div className="p-4 sm:p-6">
 
                       <div className="space-y-4">
                         <div>
@@ -778,7 +783,7 @@ const Settings = () => {
                             type="text"
                             value={slideForm.title}
                             onChange={(e) => setSlideForm(prev => ({ ...prev, title: e.target.value }))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                             placeholder="Enter slide title"
                           />
                         </div>
@@ -788,7 +793,7 @@ const Settings = () => {
                           <textarea
                             value={slideForm.subtitle}
                             onChange={(e) => setSlideForm(prev => ({ ...prev, subtitle: e.target.value }))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                             rows="2"
                             placeholder="Enter slide subtitle"
                           />
@@ -848,7 +853,7 @@ const Settings = () => {
                                       setImagePreview(url);
                                     }
                                   }}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                                   placeholder="Or paste image URL"
                                 />
                               </div>
@@ -860,14 +865,14 @@ const Settings = () => {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
                             <input
                               type="text"
                               value={slideForm.buttonText}
                               onChange={(e) => setSlideForm(prev => ({ ...prev, buttonText: e.target.value }))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                               placeholder="Shop Now"
                             />
                           </div>
@@ -878,19 +883,19 @@ const Settings = () => {
                               type="text"
                               value={slideForm.buttonLink}
                               onChange={(e) => setSlideForm(prev => ({ ...prev, buttonLink: e.target.value }))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                               placeholder="/products"
                             />
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Gradient Color</label>
                             <select
                               value={slideForm.gradientColor}
                               onChange={(e) => setSlideForm(prev => ({ ...prev, gradientColor: e.target.value }))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                             >
                               <option value="">Transparent / No Color</option>
                               <option value="from-blue-900/80 to-blue-700/60">Blue</option>
@@ -908,7 +913,7 @@ const Settings = () => {
                               type="number"
                               value={slideForm.order}
                               onChange={(e) => setSlideForm(prev => ({ ...prev, order: parseInt(e.target.value) || 0 }))}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                               min="0"
                               placeholder="0"
                             />
@@ -918,20 +923,25 @@ const Settings = () => {
                           </div>
                         </div>
 
-                        <div className="flex justify-end gap-3 pt-4">
-                          <button
-                            onClick={resetSlideForm}
-                            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={editingSlide ? handleUpdateSlide : handleAddSlide}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                          >
-                            {editingSlide ? 'Update' : 'Add'} Slide
-                          </button>
-                        </div>
+                      </div>
+                    </div>
+                    </div>
+                    
+                    {/* Sticky Footer */}
+                    <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 sm:p-6 rounded-b-lg">
+                      <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+                        <button
+                          onClick={resetSlideForm}
+                          className="w-full sm:w-auto px-4 py-3 sm:py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={editingSlide ? handleUpdateSlide : handleAddSlide}
+                          className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                        >
+                          {editingSlide ? 'Update' : 'Add'} Slide
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -945,7 +955,7 @@ const Settings = () => {
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900">Shipping Configuration</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Enable Shipping</label>
                   <div className="flex items-center">
@@ -964,7 +974,7 @@ const Settings = () => {
                     type="number"
                     value={formData.shipping.freeShippingThreshold}
                     onChange={(e) => handleInputChange('shipping', 'freeShippingThreshold', Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -973,7 +983,7 @@ const Settings = () => {
                     type="number"
                     value={formData.shipping.defaultShippingCost}
                     onChange={(e) => handleInputChange('shipping', 'defaultShippingCost', Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
               </div>
@@ -1028,11 +1038,17 @@ const Settings = () => {
 
                 {/* Add/Edit Shipping Method Form */}
                 {showShippingMethodForm && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-                      <h3 className="text-lg font-semibold mb-4">
-                        {editingShippingMethod ? 'Edit Shipping Method' : 'Add Shipping Method'}
-                      </h3>
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg w-full max-w-md max-h-[95vh] overflow-hidden">
+                      {/* Sticky Header */}
+                      <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 rounded-t-lg">
+                        <h3 className="text-base sm:text-lg font-semibold">
+                          {editingShippingMethod ? 'Edit Shipping Method' : 'Add Shipping Method'}
+                        </h3>
+                      </div>
+                      
+                      <div className="overflow-y-auto max-h-[calc(95vh-140px)]">
+                        <div className="p-4 sm:p-6">
                       <div className="space-y-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Method Name</label>
@@ -1040,7 +1056,7 @@ const Settings = () => {
                             type="text"
                             value={shippingMethodForm.name}
                             onChange={(e) => setShippingMethodForm(prev => ({...prev, name: e.target.value}))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                             placeholder="e.g., Standard Delivery"
                           />
                         </div>
@@ -1050,7 +1066,7 @@ const Settings = () => {
                             type="number"
                             value={shippingMethodForm.cost}
                             onChange={(e) => setShippingMethodForm(prev => ({...prev, cost: Number(e.target.value)}))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                             placeholder="0"
                           />
                         </div>
@@ -1060,7 +1076,7 @@ const Settings = () => {
                             type="text"
                             value={shippingMethodForm.estimatedDays}
                             onChange={(e) => setShippingMethodForm(prev => ({...prev, estimatedDays: e.target.value}))}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                             placeholder="e.g., 3-5 business days"
                           />
                         </div>
@@ -1074,23 +1090,29 @@ const Settings = () => {
                           <span className="ml-2 text-sm text-gray-700">Active</span>
                         </div>
                       </div>
-                      <div className="flex space-x-3 mt-6">
-                        <button
-                          onClick={() => {
-                            setShowShippingMethodForm(false);
-                            setEditingShippingMethod(null);
-                            setShippingMethodForm({ name: '', cost: 0, estimatedDays: '', isActive: true });
-                          }}
-                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={handleAddOrUpdateShippingMethod}
-                          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                        >
-                          {editingShippingMethod ? 'Update' : 'Add'} Method
-                        </button>
+                      </div>
+                      </div>
+                      
+                      {/* Sticky Footer */}
+                      <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 sm:p-6 rounded-b-lg">
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <button
+                            onClick={() => {
+                              setShowShippingMethodForm(false);
+                              setEditingShippingMethod(null);
+                              setShippingMethodForm({ name: '', cost: 0, estimatedDays: '', isActive: true });
+                            }}
+                            className="flex-1 px-4 py-3 sm:py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleAddOrUpdateShippingMethod}
+                            className="flex-1 px-4 py-3 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+                          >
+                            {editingShippingMethod ? 'Update' : 'Add'} Method
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1104,13 +1126,13 @@ const Settings = () => {
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900">Payment Configuration</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
                   <select
                     value={formData.payment.currency}
                     onChange={(e) => handleInputChange('payment', 'currency', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   >
                     <option value="INR">Indian Rupee (₹)</option>
                     <option value="USD">US Dollar ($)</option>
@@ -1123,7 +1145,7 @@ const Settings = () => {
                     type="text"
                     value={formData.payment.currencySymbol}
                     onChange={(e) => handleInputChange('payment', 'currencySymbol', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -1132,7 +1154,7 @@ const Settings = () => {
                     type="number"
                     value={formData.payment.taxRate}
                     onChange={(e) => handleInputChange('payment', 'taxRate', Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
               </div>
@@ -1189,14 +1211,14 @@ const Settings = () => {
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900">Order Configuration</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Order Prefix</label>
                   <input
                     type="text"
                     value={formData.order.orderPrefix}
                     onChange={(e) => handleInputChange('order', 'orderPrefix', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
                 <div>
@@ -1205,7 +1227,7 @@ const Settings = () => {
                     type="number"
                     value={formData.order.maxOrderQuantity}
                     onChange={(e) => handleInputChange('order', 'maxOrderQuantity', Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                   />
                 </div>
                 <div className="space-y-4">
@@ -1255,7 +1277,7 @@ const Settings = () => {
                     type="text"
                     value={formData.email.orderConfirmation.subject}
                     onChange={(e) => handleNestedInputChange('email', 'orderConfirmation', 'subject', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                     placeholder="Email subject"
                   />
                 </div>
@@ -1277,7 +1299,7 @@ const Settings = () => {
                     type="text"
                     value={formData.email.orderStatusUpdate.subject}
                     onChange={(e) => handleNestedInputChange('email', 'orderStatusUpdate', 'subject', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                     placeholder="Email subject"
                   />
                 </div>
@@ -1299,7 +1321,7 @@ const Settings = () => {
                     type="text"
                     value={formData.email.welcomeEmail.subject}
                     onChange={(e) => handleNestedInputChange('email', 'welcomeEmail', 'subject', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                     placeholder="Email subject"
                   />
                 </div>
@@ -1391,7 +1413,7 @@ const Settings = () => {
                     Choose which types of notifications to send to selected admin recipients
                   </p>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[
                       { key: 'newOrder', label: 'New Orders', description: 'When customers place new orders' },
                       { key: 'returnRequest', label: 'Return Requests', description: 'When customers request returns' },
@@ -1425,14 +1447,14 @@ const Settings = () => {
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900">Social Media Links</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Facebook</label>
                   <input
                     type="url"
                     value={formData.socialMedia.facebook}
                     onChange={(e) => handleInputChange('socialMedia', 'facebook', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                     placeholder="https://facebook.com/yourpage"
                   />
                 </div>
@@ -1442,7 +1464,7 @@ const Settings = () => {
                     type="url"
                     value={formData.socialMedia.twitter}
                     onChange={(e) => handleInputChange('socialMedia', 'twitter', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                     placeholder="https://twitter.com/yourhandle"
                   />
                 </div>
@@ -1452,7 +1474,7 @@ const Settings = () => {
                     type="url"
                     value={formData.socialMedia.instagram}
                     onChange={(e) => handleInputChange('socialMedia', 'instagram', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                     placeholder="https://instagram.com/yourhandle"
                   />
                 </div>
@@ -1462,7 +1484,7 @@ const Settings = () => {
                     type="url"
                     value={formData.socialMedia.linkedin}
                     onChange={(e) => handleInputChange('socialMedia', 'linkedin', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                     placeholder="https://linkedin.com/company/yourcompany"
                   />
                 </div>
@@ -1472,7 +1494,7 @@ const Settings = () => {
                     type="url"
                     value={formData.socialMedia.youtube}
                     onChange={(e) => handleInputChange('socialMedia', 'youtube', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
                     placeholder="https://youtube.com/yourchannel"
                   />
                 </div>
@@ -1487,27 +1509,29 @@ const Settings = () => {
       {/* Admin Recipients Modal */}
       {showAdminModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Manage Admin Recipients</h3>
-                  <p className="text-sm text-gray-600 mt-1">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[95vh] overflow-hidden">
+            {/* Sticky Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 sm:p-6 rounded-t-lg">
+              <div className="flex justify-between items-start">
+                <div className="flex-1 pr-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">Manage Admin Recipients</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 mt-1">
                     Select up to 2 admin or employee users to receive notifications
                   </p>
                 </div>
                 <button
                   onClick={() => setShowAdminModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 p-1 flex-shrink-0"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
             </div>
             
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
+            <div className="overflow-y-auto max-h-[calc(95vh-180px)]">
+              <div className="p-4 sm:p-6">
               <div className="space-y-6">
                 {/* Add Admin Dropdown Section */}
                 <div>
@@ -1694,20 +1718,22 @@ const Settings = () => {
                 )}
               </div>
             </div>
+            </div>
             
-            <div className="p-6 border-t border-gray-200 bg-gray-50">
-              <div className="flex justify-between items-center">
-                <div className="text-sm text-gray-600">
+            {/* Sticky Footer */}
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 sm:p-6 rounded-b-lg">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
                   {formData.notifications.adminRecipients.length > 0 && (
                     <span>
                       {formData.notifications.adminRecipients.length} recipient{formData.notifications.adminRecipients.length !== 1 ? 's' : ''} selected
                     </span>
                   )}
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-3 w-full sm:w-auto">
                   <button
                     onClick={() => setShowAdminModal(false)}
-                    className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg"
+                    className="flex-1 sm:flex-initial px-4 py-3 sm:py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium"
                   >
                     Cancel
                   </button>
@@ -1716,7 +1742,7 @@ const Settings = () => {
                       setShowAdminModal(false);
                       toast.success('Admin recipients updated successfully');
                     }}
-                    className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg"
+                    className="flex-1 sm:flex-initial px-4 py-3 sm:py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium"
                   >
                     Done
                   </button>

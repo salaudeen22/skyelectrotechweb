@@ -575,8 +575,9 @@ const OrdersAndSales = () => {
     const OrdersTab = () => (
         <div>
             {/* Header with Search and Filters */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                <div className="flex-1 max-w-md">
+            <div className="space-y-4 mb-6">
+                {/* Search Bar - Full width on mobile */}
+                <div className="w-full">
                     <div className="relative">
                         <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
@@ -584,16 +585,18 @@ const OrdersAndSales = () => {
                             placeholder="Search orders by customer or ID..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base"
                         />
                     </div>
                 </div>
-                
-                <div className="flex items-center gap-2">
+
+                {/* Filters and Actions */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                    {/* Status Filter */}
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="flex-1 sm:flex-none px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base"
                     >
                         <option value="">All Status</option>
                         <option value="pending">Pending</option>
@@ -605,37 +608,70 @@ const OrdersAndSales = () => {
                         <option value="refunded">Refunded</option>
                     </select>
                     
-                    <button
-                        onClick={() => setShowFilters(!showFilters)}
-                        className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg"
-                    >
-                        <FaFilter className="h-4 w-4" />
-                    </button>
-                    
-                    <button
-                        onClick={clearFilters}
-                        className="flex items-center px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
-                        title="Clear All Filters"
-                    >
-                        <FaTimes className="mr-1 h-3 w-3" />
-                        Clear
-                    </button>
-                    
-                    <button
-                        onClick={exportTodaySalesInvoice}
-                        disabled={exporting}
-                        className="flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
-                        title="Export Today's Sales Invoice"
-                    >
-                        {exporting ? (
-                            <FaSpinner className="animate-spin mr-1 h-3 w-3" />
-                        ) : (
-                            <FaDownload className="mr-1 h-3 w-3" />
-                        )}
-                        Export Invoice
-                    </button>
-                    
+                    {/* Desktop Action Buttons */}
+                    <div className="hidden sm:flex items-center gap-2">
+                        <button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className="p-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg"
+                        >
+                            <FaFilter className="h-4 w-4" />
+                        </button>
+                        
+                        <button
+                            onClick={clearFilters}
+                            className="flex items-center px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
+                            title="Clear All Filters"
+                        >
+                            <FaTimes className="mr-1 h-3 w-3" />
+                            Clear
+                        </button>
+                        
+                        <button
+                            onClick={exportTodaySalesInvoice}
+                            disabled={exporting}
+                            className="flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                            title="Export Today's Sales Invoice"
+                        >
+                            {exporting ? (
+                                <FaSpinner className="animate-spin mr-1 h-3 w-3" />
+                            ) : (
+                                <FaDownload className="mr-1 h-3 w-3" />
+                            )}
+                            Export Invoice
+                        </button>
+                    </div>
 
+                    {/* Mobile Action Buttons */}
+                    <div className="flex sm:hidden gap-2">
+                        <button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className="flex-1 py-3 px-4 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg border border-gray-300 flex items-center justify-center gap-2"
+                        >
+                            <FaFilter className="h-4 w-4" />
+                            <span>More Filters</span>
+                        </button>
+                        
+                        <button
+                            onClick={clearFilters}
+                            className="px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                            title="Clear All Filters"
+                        >
+                            <FaTimes className="h-4 w-4" />
+                        </button>
+                        
+                        <button
+                            onClick={exportTodaySalesInvoice}
+                            disabled={exporting}
+                            className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            title="Export Today's Sales Invoice"
+                        >
+                            {exporting ? (
+                                <FaSpinner className="animate-spin h-4 w-4" />
+                            ) : (
+                                <FaDownload className="h-4 w-4" />
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -725,7 +761,8 @@ const OrdersAndSales = () => {
                 </div>
             ) : (
                 <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="overflow-x-auto">
+                    {/* Desktop Table View */}
+                    <div className="hidden lg:block overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
@@ -747,8 +784,8 @@ const OrdersAndSales = () => {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Actions
                                     </th>
-                            </tr>
-                        </thead>
+                                </tr>
+                            </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {filteredOrders.map((order) => {
                                 const StatusIcon = getStatusIcon(order.orderStatus);
@@ -820,6 +857,90 @@ const OrdersAndSales = () => {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden divide-y divide-gray-200">
+                        {filteredOrders.map((order) => {
+                            const StatusIcon = getStatusIcon(order.orderStatus);
+                            return (
+                                <div key={order._id} className="p-4 hover:bg-gray-50">
+                                    <div className="space-y-3">
+                                        {/* Order Header */}
+                                        <div className="flex items-center justify-between">
+                                            <div className="font-medium text-gray-900">
+                                                Order #{order._id.slice(-8)}
+                                            </div>
+                                            <div className="flex items-center">
+                                                <StatusIcon className={`mr-2 h-4 w-4 ${getStatusColor(order.orderStatus)}`} />
+                                                <OrderStatus status={order.orderStatus} />
+                                            </div>
+                                        </div>
+
+                                        {/* Customer Info */}
+                                        <div>
+                                            <div className="text-sm font-medium text-gray-900">
+                                                {order.user?.name || 'Unknown'}
+                                            </div>
+                                            {order.user?.email && (
+                                                <div className="text-sm text-gray-500">
+                                                    {order.user.email}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Amount and Date */}
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <div className="text-lg font-semibold text-gray-900">
+                                                    {formatCurrency(order.totalPrice || order.totalAmount || 0)}
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-sm font-medium text-gray-900">
+                                                    {formatDate(order.createdAt).date}
+                                                </div>
+                                                <div className="text-xs text-gray-500">
+                                                    {formatDate(order.createdAt).time}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Action Buttons */}
+                                        <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                                            <button
+                                                onClick={() => openDetailsModal(order)}
+                                                disabled={detailsLoading}
+                                                className="flex-1 px-3 py-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors border border-indigo-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="View Details"
+                                            >
+                                                {detailsLoading ? (
+                                                    <FaSpinner className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    <FaEye className="h-4 w-4" />
+                                                )}
+                                                <span className="text-sm">Details</span>
+                                            </button>
+                                            <button
+                                                onClick={() => openStatusModal(order)}
+                                                className="flex-1 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200 flex items-center justify-center gap-2"
+                                                title="Update Status"
+                                            >
+                                                <FaEdit className="h-4 w-4" />
+                                                <span className="text-sm">Update</span>
+                                            </button>
+                                            <button
+                                                onClick={() => exportOrderInvoice(order._id)}
+                                                className="px-3 py-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors border border-green-200"
+                                                title="Export Invoice"
+                                            >
+                                                <FaDownload className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                     
                     {filteredOrders.length === 0 && (
                         <div className="text-center py-8">
@@ -835,16 +956,18 @@ const OrdersAndSales = () => {
     const SalesAnalyticsTab = () => (
         <div>
             {/* Header with Export Button */}
-            <div className="flex justify-between items-center mb-6">
+            <div className="space-y-4 mb-6">
                 <div>
-                    <h2 className="text-xl font-semibold text-gray-900">Sales Analytics</h2>
+                    <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">Sales Analytics</h2>
                     <p className="text-sm text-gray-600 mt-1">Export today's sales as PDF invoice</p>
                 </div>
-                <div className="flex items-center gap-3">
+                
+                {/* Mobile-first controls */}
+                <div className="flex flex-col sm:flex-row gap-3">
                     <select
                         value={dateRange}
                         onChange={(e) => setDateRange(e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="flex-1 sm:flex-none px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base"
                     >
                         <option value="week">Last Week</option>
                         <option value="month">Last Month</option>
@@ -855,14 +978,14 @@ const OrdersAndSales = () => {
                     <button
                         onClick={exportTodaySalesInvoice}
                         disabled={exporting}
-                        className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         {exporting ? (
                             <FaSpinner className="animate-spin mr-2 h-4 w-4" />
                         ) : (
                             <FaDownload className="mr-2 h-4 w-4" />
                         )}
-                        Export Today's Invoice
+                        <span className="text-sm sm:text-base">Export Today's Invoice</span>
                     </button>
                 </div>
             </div>
@@ -934,60 +1057,79 @@ const OrdersAndSales = () => {
                     </div>
 
                     {/* Charts */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-6">
                         {/* Sales Trend Chart */}
-                        <div className="bg-white p-6 rounded-lg shadow">
+                        <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Sales Trend</h3>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <LineChart data={salesData.chartData || []}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="name" />
-                                    <YAxis />
-                                    <Tooltip formatter={(value) => formatCurrency(value)} />
-                                    <Legend />
-                                    <Line type="monotone" dataKey="sales" stroke="#3B82F6" strokeWidth={2} />
-                                </LineChart>
-                            </ResponsiveContainer>
+                            <div className="w-full h-64 sm:h-80">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart data={salesData.chartData || []}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis 
+                                            dataKey="name" 
+                                            fontSize={12}
+                                            tick={{ fontSize: 12 }}
+                                        />
+                                        <YAxis 
+                                            fontSize={12}
+                                            tick={{ fontSize: 12 }}
+                                        />
+                                        <Tooltip 
+                                            formatter={(value) => formatCurrency(value)}
+                                            contentStyle={{ fontSize: 12 }}
+                                        />
+                                        <Legend wrapperStyle={{ fontSize: 12 }} />
+                                        <Line type="monotone" dataKey="sales" stroke="#3B82F6" strokeWidth={2} />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
                         </div>
 
                         {/* Order Status Distribution */}
-                        <div className="bg-white p-6 rounded-lg shadow">
+                        <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Status Distribution</h3>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <PieChart>
-                                    <Pie
-                                        data={salesData.orderStatusDistribution || [
-                                            { name: 'Delivered', value: 20, color: '#10B981' },
-                                            { name: 'Shipped', value: 15, color: '#3B82F6' },
-                                            { name: 'Processing', value: 8, color: '#8B5CF6' },
-                                            { name: 'Pending', value: 2, color: '#F59E0B' }
-                                        ]}
-                                        cx="50%"
-                                        cy="50%"
-                                        outerRadius={80}
-                                        dataKey="value"
-                                        fill="#8884d8"
-                                    >
-                                        {(salesData.orderStatusDistribution || [
-                                            { name: 'Delivered', value: 20, color: '#10B981' },
-                                            { name: 'Shipped', value: 15, color: '#3B82F6' },
-                                            { name: 'Processing', value: 8, color: '#8B5CF6' },
-                                            { name: 'Pending', value: 2, color: '#F59E0B' }
-                                        ]).map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                    <Legend />
-                                </PieChart>
-                            </ResponsiveContainer>
+                            <div className="w-full h-64 sm:h-80">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={salesData.orderStatusDistribution || [
+                                                { name: 'Delivered', value: 20, color: '#10B981' },
+                                                { name: 'Shipped', value: 15, color: '#3B82F6' },
+                                                { name: 'Processing', value: 8, color: '#8B5CF6' },
+                                                { name: 'Pending', value: 2, color: '#F59E0B' }
+                                            ]}
+                                            cx="50%"
+                                            cy="50%"
+                                            outerRadius="70%"
+                                            dataKey="value"
+                                            fill="#8884d8"
+                                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                            labelLine={false}
+                                            fontSize={12}
+                                        >
+                                            {(salesData.orderStatusDistribution || [
+                                                { name: 'Delivered', value: 20, color: '#10B981' },
+                                                { name: 'Shipped', value: 15, color: '#3B82F6' },
+                                                { name: 'Processing', value: 8, color: '#8B5CF6' },
+                                                { name: 'Pending', value: 2, color: '#F59E0B' }
+                                            ]).map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip contentStyle={{ fontSize: 12 }} />
+                                        <Legend wrapperStyle={{ fontSize: 12 }} />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
                         </div>
                     </div>
 
                     {/* Top Products */}
-                    <div className="bg-white p-6 rounded-lg shadow">
+                    <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Selling Products</h3>
-                        <div className="overflow-x-auto">
+                        
+                        {/* Desktop Table View */}
+                        <div className="hidden sm:block overflow-x-auto">
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
@@ -1007,14 +1149,34 @@ const OrdersAndSales = () => {
                                                     <div className="ml-4">
                                                         <div className="text-sm font-medium text-gray-900">{product.productName || product.name}</div>
                                                     </div>
-                                        </div>
-                                    </td>
+                                                </div>
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.totalSold || product.unitsSold}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(product.revenue)}</td>
-                                </tr>
+                                        </tr>
                                     ))}
-                        </tbody>
-                    </table>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile Card View */}
+                        <div className="sm:hidden space-y-3">
+                            {(salesData.topProducts || []).slice(0, 5).map((product, index) => (
+                                <div key={index} className="border border-gray-200 rounded-lg p-3">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="h-12 w-12 flex-shrink-0">
+                                            <img className="h-12 w-12 rounded-lg object-cover" src={product.productImage || product.image} alt={product.productName || product.name} />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="text-sm font-medium text-gray-900 truncate">{product.productName || product.name}</div>
+                                            <div className="flex items-center justify-between mt-1">
+                                                <span className="text-xs text-gray-500">Units: {product.totalSold || product.unitsSold}</span>
+                                                <span className="text-sm font-semibold text-gray-900">{formatCurrency(product.revenue)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
