@@ -61,7 +61,7 @@ export const defaultElectronicsFAQs = [
   },
   {
     question: "Do you offer same-day delivery in Bangalore?",
-    answer: "Yes, we offer same-day delivery for orders placed before 2 PM within Bangalore city limits. Standard delivery takes 1-3 business days across India. Free shipping available on orders above ₹1000.",
+    answer: "Yes, we offer same-day delivery for orders placed before 2 PM within Bangalore city limits. Standard delivery takes 1-3 business days across India.",
     upvoteCount: 32
   },
   {
