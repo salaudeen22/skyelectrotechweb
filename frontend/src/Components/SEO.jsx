@@ -298,10 +298,10 @@ const SEO = ({
         }],
         "sameAs": [
           "https://www.google.com/maps/place/Sky+Electro+Tech/@12.9646538,77.5793618,17z/",
-          "https://facebook.com/skyelectrotech",
-          "https://twitter.com/skyelectrotech",
-          "https://instagram.com/skyelectrotech",
-          "https://linkedin.com/company/skyelectrotech"
+       
+          "https://www.instagram.com/skyelectrotech/",
+          "https://www.linkedin.com/in/sky-electro-tech-453789384/",
+          "https://www.youtube.com/@skyelectrotech"
         ],
         "hasOfferCatalog": {
           "@type": "OfferCatalog",
