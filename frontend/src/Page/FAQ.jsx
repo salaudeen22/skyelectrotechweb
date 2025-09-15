@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import SEO from '../Components/SEO';
+import FAQSchema from '../Components/FAQSchema';
 
 const FAQ = () => {
   const [openItems, setOpenItems] = useState(new Set());
@@ -77,7 +78,11 @@ const FAQ = () => {
         title="FAQ - SkyElectroTech"
         description="Find answers to frequently asked questions about SkyElectroTech products, shipping, returns, payment methods, and technical support."
         keywords="FAQ, frequently asked questions, SkyElectroTech support, shipping, returns, payment methods"
+        canonical="https://skyelectrotech.in/faq"
       />
+      
+      {/* Add FAQ Schema for structured data */}
+      <FAQSchema faqs={faqs} />
       <div className="bg-gray-50 min-h-screen flex flex-col">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1">
           {/* Header */}

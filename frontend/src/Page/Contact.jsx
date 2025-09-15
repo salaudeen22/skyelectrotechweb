@@ -115,7 +115,7 @@ const Contact = () => {
         title="Contact SkyElectroTech - Electronics Store Bangalore | Technical Support & Customer Service"
         description="Contact SkyElectroTech for Arduino, Raspberry Pi, sensors, PLCs & automation components. Get technical support, product help & customer service. Located in Bangalore, Karnataka. Call +91 6361241811"
         keywords="contact SkyElectroTech Bangalore, electronics store contact, Arduino support, Raspberry Pi help, technical support electronics, automation components Bangalore, electronics customer service"
-        canonical="https://skyelectrotech.com/contact"
+        canonical="https://skyelectrotech.in/contact"
       />
       
       <Helmet>
@@ -123,7 +123,7 @@ const Contact = () => {
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Contact SkyElectroTech - Electronics & Automation Components Store Bangalore" />
         <meta property="og:description" content="Get in touch with SkyElectroTech for Arduino, Raspberry Pi, sensors, PLCs & industrial automation components. Technical support & customer service available." />
-        <meta property="og:url" content="https://skyelectrotech.com/contact" />
+        <meta property="og:url" content="https://skyelectrotech.in/contact" />
         <meta property="og:locale" content="en_IN" />
         <meta property="og:site_name" content="SkyElectroTech" />
         
