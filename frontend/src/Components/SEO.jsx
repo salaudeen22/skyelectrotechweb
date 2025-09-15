@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useSettings } from '../contexts/SettingsContext';
 
 const SEO = ({ 
   title, 
@@ -12,6 +13,14 @@ const SEO = ({
   category = null 
 }) => {
   const location = useLocation();
+  const { settings } = useSettings();
+  
+  // Use settings-based defaults with component props override
+  const finalTitle = title || settings?.seo?.metaTitle || 'SkyElectroTech - Electronic Components Store';
+  const finalDescription = description || settings?.seo?.metaDescription || 'Leading electronic components shop in Bangalore';
+  const finalKeywords = keywords || settings?.seo?.metaKeywords || 'electronics, components, Arduino, Raspberry Pi';
+  const finalImage = image || 'https://skyelectrotech.in/og-image.jpg';
+  const canonicalUrl = url || `https://skyelectrotech.in${location.pathname}`;
 
   const addStructuredData = useCallback((product, category) => {
     // Remove existing structured data
@@ -306,26 +315,7 @@ const SEO = ({
                 "itemOffered": {
                   "@type": "Product",
                   "name": "Arduino Development Boards",
-                  "category": "Microcontroller Boards",
-                  "offers": {
-                    "@type": "AggregateOffer",
-                    "priceCurrency": "INR",
-                    "lowPrice": "200",
-                    "highPrice": "8000",
-                    "offerCount": 25,
-                    "availability": "https://schema.org/InStock",
-                    "seller": {
-                      "@type": "Organization",
-                      "name": "SkyElectroTech"
-                    }
-                  },
-                  "aggregateRating": {
-                    "@type": "AggregateRating",
-                    "ratingValue": "4.3",
-                    "reviewCount": "75",
-                    "bestRating": "5",
-                    "worstRating": "1"
-                  }
+                  "category": "Microcontroller Boards"
                 }
               }]
             },
@@ -337,26 +327,7 @@ const SEO = ({
                 "itemOffered": {
                   "@type": "Product",
                   "name": "PLCs & Industrial Components",
-                  "category": "Industrial Automation",
-                  "offers": {
-                    "@type": "AggregateOffer",
-                    "priceCurrency": "INR",
-                    "lowPrice": "500",
-                    "highPrice": "50000",
-                    "offerCount": 15,
-                    "availability": "https://schema.org/InStock",
-                    "seller": {
-                      "@type": "Organization",
-                      "name": "SkyElectroTech"
-                    }
-                  },
-                  "aggregateRating": {
-                    "@type": "AggregateRating",
-                    "ratingValue": "4.5",
-                    "reviewCount": "50",
-                    "bestRating": "5",
-                    "worstRating": "1"
-                  }
+                  "category": "Industrial Automation"
                 }
               }]
             },
@@ -368,26 +339,7 @@ const SEO = ({
                 "itemOffered": {
                   "@type": "Product",
                   "name": "Electronic Sensors & Components",
-                  "category": "Electronic Components",
-                  "offers": {
-                    "@type": "AggregateOffer",
-                    "priceCurrency": "INR",
-                    "lowPrice": "50",
-                    "highPrice": "5000",
-                    "offerCount": 100,
-                    "availability": "https://schema.org/InStock",
-                    "seller": {
-                      "@type": "Organization",
-                      "name": "SkyElectroTech"
-                    }
-                  },
-                  "aggregateRating": {
-                    "@type": "AggregateRating",
-                    "ratingValue": "4.2",
-                    "reviewCount": "120",
-                    "bestRating": "5",
-                    "worstRating": "1"
-                  }
+                  "category": "Electronic Components"
                 }
               }]
             }
@@ -477,15 +429,35 @@ const SEO = ({
     }
   }, [url]);
 
+  // Add Google Analytics and Facebook Pixel
+  useEffect(() => {
+    // Add Google Analytics if configured
+    if (settings?.seo?.googleAnalytics) {
+      addGoogleAnalytics(settings.seo.googleAnalytics);
+    }
+    
+    // Add Facebook Pixel if configured
+    if (settings?.seo?.facebookPixel) {
+      addFacebookPixel(settings.seo.facebookPixel);
+    }
+  }, [settings?.seo?.googleAnalytics, settings?.seo?.facebookPixel]);
+
   useEffect(() => {
     // Update document title
-    if (title) {
-      document.title = title;
+    document.title = finalTitle;
+
+    // Set canonical URL
+    let linkCanonical = document.querySelector('link[rel="canonical"]');
+    if (!linkCanonical) {
+      linkCanonical = document.createElement('link');
+      linkCanonical.rel = 'canonical';
+      document.head.appendChild(linkCanonical);
     }
+    linkCanonical.href = canonicalUrl;
 
     // Enhanced meta tags for better SEO
-    updateMetaTag('name', 'description', description);
-    updateMetaTag('name', 'keywords', keywords);
+    updateMetaTag('name', 'description', finalDescription);
+    updateMetaTag('name', 'keywords', finalKeywords);
     updateMetaTag('name', 'author', 'SkyElectroTech');
     updateMetaTag('name', 'viewport', 'width=device-width, initial-scale=1.0');
     updateMetaTag('name', 'robots', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
@@ -500,7 +472,7 @@ const SEO = ({
     updateMetaTag('name', 'ICBM', '12.9716, 77.5946');
     
     // Enhanced content categorization
-    updateMetaTag('name', 'news_keywords', keywords);
+    updateMetaTag('name', 'news_keywords', finalKeywords);
     updateMetaTag('name', 'article:publisher', 'https://skyelectrotech.in');
     updateMetaTag('name', 'article:author', 'SkyElectroTech');
     
@@ -520,11 +492,11 @@ const SEO = ({
     updateMetaTag('name', 'referrer', 'origin-when-cross-origin');
     
     // Open Graph enhanced
-    updateMetaTag('property', 'og:title', title);
-    updateMetaTag('property', 'og:description', description);
+    updateMetaTag('property', 'og:title', finalTitle);
+    updateMetaTag('property', 'og:description', finalDescription);
     updateMetaTag('property', 'og:url', url || window.location.href);
     updateMetaTag('property', 'og:type', type);
-    updateMetaTag('property', 'og:image', image);
+    updateMetaTag('property', 'og:image', finalImage);
     updateMetaTag('property', 'og:image:width', '1200');
     updateMetaTag('property', 'og:image:height', '630');
     updateMetaTag('property', 'og:site_name', 'SkyElectroTech');
@@ -534,9 +506,9 @@ const SEO = ({
     updateMetaTag('name', 'twitter:card', 'summary_large_image');
     updateMetaTag('name', 'twitter:site', '@skyelectrotech');
     updateMetaTag('name', 'twitter:creator', '@skyelectrotech');
-    updateMetaTag('name', 'twitter:title', title);
-    updateMetaTag('name', 'twitter:description', description);
-    updateMetaTag('name', 'twitter:image', image);
+    updateMetaTag('name', 'twitter:title', finalTitle);
+    updateMetaTag('name', 'twitter:description', finalDescription);
+    updateMetaTag('name', 'twitter:image', finalImage);
     
     // Additional SEO meta tags
     updateMetaTag('name', 'theme-color', '#2563eb');
@@ -548,13 +520,13 @@ const SEO = ({
     updateMetaTag('name', 'apple-mobile-web-app-capable', 'yes');
     updateMetaTag('name', 'apple-mobile-web-app-status-bar-style', 'default');
 
-    // Update canonical URL
-    updateCanonical(url || window.location.href);
+    // Update canonical URL - using our canonical component instead
+    // updateCanonical(url || window.location.href);
 
     // Add structured data
     addStructuredData(product, category);
 
-  }, [title, description, keywords, image, url, type, product, category, location, addStructuredData]);
+  }, [finalTitle, finalDescription, finalKeywords, finalImage, url, type, product, category, location, addStructuredData, canonicalUrl]);
 
   const updateMetaTag = (attr, value, content) => {
     if (!content) return;

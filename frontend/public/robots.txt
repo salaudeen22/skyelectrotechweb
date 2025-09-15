@@ -1,6 +1,10 @@
 User-agent: *
 Allow: /
 
+# Explicitly allow homepage
+Allow: /$
+Allow: /index.html
+
 # Block sensitive and private pages
 Disallow: /auth/
 Disallow: /user/

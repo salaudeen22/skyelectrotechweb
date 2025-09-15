@@ -5,12 +5,12 @@
   <meta charset="UTF-8" />
   
   <!-- Favicon and Icons -->
-  <link rel="icon" type="image/x-icon" href="/favicon_io (1)/favicon.ico" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io (1)/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon_io (1)/favicon-16x16.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/favicon_io (1)/apple-touch-icon.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/favicon_io (1)/android-chrome-192x192.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="/favicon_io (1)/android-chrome-512x512.png" />
+  <link rel="icon" type="image/x-icon" href="/favicon_io%20(1)/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io%20(1)/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon_io%20(1)/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon_io%20(1)/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon_io%20(1)/android-chrome-192x192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicon_io%20(1)/android-chrome-512x512.png" />
   
   <!-- Viewport and Mobile Optimization -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -26,6 +26,7 @@
   <meta name="robots" content="index, follow" />
   <meta name="language" content="English" />
   <meta name="revisit-after" content="7 days" />
+  <link rel="canonical" href="https://skyelectrotech.in/" />
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
@@ -81,7 +82,7 @@
         }
       ],
       "priceRange": "₹₹",
-      "telephone": "+91 063612 41811",
+      "telephone": "+91-XXXXXXXXXX",
       "url": "https://skyelectrotech.in/",
       "areaServed": ["Bengaluru", "Karnataka", "India"],
       "potentialAction": {
@@ -95,58 +96,79 @@
       "makesOffer": [
         {
           "@type": "Offer",
-          "price": "25000",
-          "priceCurrency": "INR",
-          "availability": "https://schema.org/InStock",
           "itemOffered": {
             "@type": "Product",
             "name": "Industrial Automation Components",
             "description": "PLCs, sensors, and control systems for industrial automation",
             "category": "Industrial Electronics",
+            "offers": {
+              "@type": "AggregateOffer",
+              "priceCurrency": "INR",
+              "lowPrice": "100",
+              "highPrice": "50000",
+              "offerCount": 25,
+              "availability": "https://schema.org/InStock",
+              "seller": {
+                "@type": "Organization",
+                "name": "SkyElectroTech"
+              }
+            },
             "aggregateRating": {
               "@type": "AggregateRating",
               "ratingValue": "4.5",
-              "reviewCount": "50",
-              "bestRating": "5",
-              "worstRating": "1"
+              "reviewCount": "50"
             }
           }
         },
         {
           "@type": "Offer",
-          "price": "7500",
-          "priceCurrency": "INR",
-          "availability": "https://schema.org/InStock",
           "itemOffered": {
             "@type": "Product",
             "name": "Development Boards",
             "description": "Arduino, Raspberry Pi, and other microcontroller boards for DIY projects",
             "category": "Development Tools",
+            "offers": {
+              "@type": "AggregateOffer",
+              "priceCurrency": "INR",
+              "lowPrice": "200",
+              "highPrice": "15000",
+              "offerCount": 15,
+              "availability": "https://schema.org/InStock",
+              "seller": {
+                "@type": "Organization",
+                "name": "SkyElectroTech"
+              }
+            },
             "aggregateRating": {
               "@type": "AggregateRating",
               "ratingValue": "4.3",
-              "reviewCount": "75",
-              "bestRating": "5",
-              "worstRating": "1"
+              "reviewCount": "75"
             }
           }
         },
         {
           "@type": "Offer",
-          "price": "2500",
-          "priceCurrency": "INR",
-          "availability": "https://schema.org/InStock",
           "itemOffered": {
             "@type": "Product",
             "name": "Electronic Components",
             "description": "Resistors, capacitors, ICs, and other electronic parts",
             "category": "Electronic Parts",
+            "offers": {
+              "@type": "AggregateOffer",
+              "priceCurrency": "INR",
+              "lowPrice": "5",
+              "highPrice": "5000",
+              "offerCount": 100,
+              "availability": "https://schema.org/InStock",
+              "seller": {
+                "@type": "Organization",
+                "name": "SkyElectroTech"
+              }
+            },
             "aggregateRating": {
               "@type": "AggregateRating",
               "ratingValue": "4.2",
-              "reviewCount": "120",
-              "bestRating": "5",
-              "worstRating": "1"
+              "reviewCount": "120"
             }
           }
         }
@@ -204,10 +226,38 @@
   <!-- Canonical URL -->
   <link rel="canonical" href="https://skyelectrotech.in/" />
   
-  <!-- Preconnect to external domains for performance -->
+  <!-- Performance optimizations - Resource Preloading -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://checkout.razorpay.com" />
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+  <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+  
+  <!-- Critical resource preloading -->
+  <link rel="preload" href="/logo.svg" as="image" type="image/svg+xml" />
+  <link rel="preload" href="/logo-large.svg" as="image" type="image/svg+xml" />
+  <link rel="modulepreload" href="/src/main.jsx" />
+  
+  <!-- Critical CSS inlined for faster FCP -->
+  <style>
+    /* Prevent FOUC and improve initial loading */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f8fafc;
+    }
+    
+    #root {
+      min-height: 100vh;
+      opacity: 0;
+      transition: opacity 0.2s ease-in;
+    }
+    
+    #root.loaded {
+      opacity: 1;
+    }
+  </style>
   
   <!-- Google Tag Manager -->
   <script>(function (w, d, s, l, i) {
@@ -231,7 +281,36 @@
   <!-- End Google Tag Manager (noscript) -->
   
   <div id="root"></div>
+  
+  <!-- Performance-optimized script loading -->
   <script type="module" src="/src/main.jsx"></script>
+  
+  <!-- Service Worker Registration -->
+  <script>
+    // Register service worker for performance optimization
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('SW registered: ', registration);
+          })
+          .catch(registrationError => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+    
+    // Fade in app when ready
+    window.addEventListener('DOMContentLoaded', () => {
+      const root = document.getElementById('root');
+      if (root) {
+        // Small delay to ensure React has rendered
+        setTimeout(() => {
+          root.classList.add('loaded');
+        }, 100);
+      }
+    });
+  </script>
 </body>
 
 </html>

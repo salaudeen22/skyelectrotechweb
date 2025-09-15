@@ -332,7 +332,7 @@ const Home = memo(() => {
         description="Buy Arduino boards, MAX7219 displays, NE555 timer ICs, humidity modules, obstacle detection sensors & electronic components in Bangalore. Electronic components shop near me with same-day delivery & technical support."
         keywords="arduino bangalore, MAX7219 display, NE555 timer IC, humidity sensor module, obstacle detection sensor, electronic components shop near me, electronics components shop near me, arduino supplier bangalore, raspberry pi bangalore, sensors bangalore"
         image="https://skyelectrotech.in/og-image.jpg"
-        url="https://skyelectrotech.in"
+        url="https://skyelectrotech.in/"
         type="website"
       />
       
