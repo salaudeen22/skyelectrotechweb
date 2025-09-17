@@ -381,7 +381,7 @@ const SEO = ({
         "aggregateRating": {
           "@type": "AggregateRating",
           "ratingValue": "4.6",
-          "reviewCount": "150+",
+          "reviewCount": 150,
           "bestRating": "5",
           "worstRating": "1"
         }

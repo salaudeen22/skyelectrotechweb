@@ -93,86 +93,58 @@
         },
         "query-input": "required name=search_term_string"
       },
-      "makesOffer": [
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Product",
-            "name": "Industrial Automation Components",
-            "description": "PLCs, sensors, and control systems for industrial automation",
-            "category": "Industrial Electronics",
-            "offers": {
-              "@type": "AggregateOffer",
-              "priceCurrency": "INR",
-              "lowPrice": "100",
-              "highPrice": "50000",
-              "offerCount": 25,
-              "availability": "https://schema.org/InStock",
-              "seller": {
-                "@type": "Organization",
-                "name": "SkyElectroTech"
-              }
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Electronic Components & Automation Products",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Industrial Automation Components",
+              "description": "PLCs, sensors, and control systems for industrial automation",
+              "category": "Industrial Electronics"
             },
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": "4.5",
-              "reviewCount": "50"
-            }
-          }
-        },
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Product",
-            "name": "Development Boards",
-            "description": "Arduino, Raspberry Pi, and other microcontroller boards for DIY projects",
-            "category": "Development Tools",
-            "offers": {
-              "@type": "AggregateOffer",
-              "priceCurrency": "INR",
-              "lowPrice": "200",
-              "highPrice": "15000",
-              "offerCount": 15,
-              "availability": "https://schema.org/InStock",
-              "seller": {
-                "@type": "Organization",
-                "name": "SkyElectroTech"
-              }
+            "priceCurrency": "INR",
+            "lowPrice": "100",
+            "highPrice": "50000",
+            "availability": "https://schema.org/InStock"
+          },
+          {
+            "@type": "Offer", 
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Development Boards",
+              "description": "Arduino, Raspberry Pi, and other microcontroller boards for DIY projects",
+              "category": "Development Tools"
             },
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": "4.3",
-              "reviewCount": "75"
-            }
-          }
-        },
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Product",
-            "name": "Electronic Components",
-            "description": "Resistors, capacitors, ICs, and other electronic parts",
-            "category": "Electronic Parts",
-            "offers": {
-              "@type": "AggregateOffer",
-              "priceCurrency": "INR",
-              "lowPrice": "5",
-              "highPrice": "5000",
-              "offerCount": 100,
-              "availability": "https://schema.org/InStock",
-              "seller": {
-                "@type": "Organization",
-                "name": "SkyElectroTech"
-              }
+            "priceCurrency": "INR",
+            "lowPrice": "200", 
+            "highPrice": "15000",
+            "availability": "https://schema.org/InStock"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Product",
+              "name": "Electronic Components", 
+              "description": "Resistors, capacitors, ICs, and other electronic parts",
+              "category": "Electronic Parts"
             },
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": "4.2",
-              "reviewCount": "120"
-            }
+            "priceCurrency": "INR",
+            "lowPrice": "5",
+            "highPrice": "5000", 
+            "availability": "https://schema.org/InStock"
           }
-        }
-      ],
+        ]
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.6",
+        "reviewCount": 150,
+        "bestRating": "5",
+        "worstRating": "1"
+      },
       "sameAs": [
         "https://www.google.com/maps/place/Sky+Electro+Tech/@12.9646538,77.5793618,17z/data=!3m1!4b1!4m6!3m5!1s0x3bae150076391a2b:0x8f80be7dae9c0a59!8m2!3d12.9646538!4d77.5819421!16s%2Fg%2F11x7spwjjy?entry=ttu&g_ep=EgoyMDI1MDgyNS4wIKXMDSoASAFQAw%3D%3D"
       ]

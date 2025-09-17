@@ -66,7 +66,7 @@ const Contact = () => {
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": "4.8",
-      "reviewCount": "150"
+      "reviewCount": 150
     },
     "potentialAction": {
       "@type": "ReserveAction",
