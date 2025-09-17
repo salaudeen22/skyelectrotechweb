@@ -10,17 +10,17 @@ const About = () => {
   return (
     <>
       <SEO 
-        title="About SkyElectroTech - Arduino & Raspberry Pi Dealer Bangalore | Industrial Electronics Supplier"
-        description="SkyElectroTech - Leading Arduino, Raspberry Pi & industrial automation components supplier in Bangalore, Karnataka. Electronic components shop in Nagarathpete with Arduino Uno R3, sensor kits, PLCs. Expert technical support & same-day delivery in Bangalore."
-        keywords="Arduino dealer Bangalore, Raspberry Pi supplier Karnataka, industrial automation components Bangalore, electronics store Nagarathpete, Arduino Uno R3 Bangalore, sensor kits India, PLC modules Bangalore, electronic components shop near me"
+        title="Arduino Uno R3 with Cable Dealer Bangalore | Raspberry Pi 4 Model B Supplier India - SkyElectroTech"
+        description="Arduino Uno R3 with Cable ₹899, Raspberry Pi 4 Model B 4GB ₹5999, 8GB ₹8999. Official Arduino dealer Bangalore & Raspberry Pi supplier India. 37-in-1 sensor kit, IR sensor module, ultrasonic sensor Arduino, PLC modules. Same-day delivery in Bangalore."
+        keywords="Arduino Uno R3 with cable dealer Bangalore, Raspberry Pi 4 Model B price India, Arduino kits India, Raspberry Pi accessories Bangalore, 37-in-1 sensor kit, IR sensor module, ultrasonic sensor Arduino, PLC modules Bangalore, proximity sensor India, industrial automation components"
       />
       <div className="bg-gray-50 min-h-screen flex flex-col">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1">
           {/* Header */}
           <div className="text-center mb-8 sm:mb-12">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">About SkyElectroTech - Arduino & Raspberry Pi Dealer in Bangalore</h1>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Arduino Uno R3 with Cable & Raspberry Pi 4 Model B Dealer in Bangalore</h1>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto">
-              Leading Arduino dealer, Raspberry Pi supplier & industrial automation components store in Nagarathpete, Bangalore, Karnataka
+              Official Arduino Uno R3 with Cable dealer & Raspberry Pi 4 Model B supplier in India. Best prices for Arduino kits, sensor modules & industrial automation components in Bangalore, Karnataka
             </p>
           </div>
 
@@ -34,14 +34,14 @@ const About = () => {
               <p className="mb-3 sm:mb-4">
                 As engineering graduates and passionate makers in Bangalore, we faced the same frustration that thousands 
                 of students, hobbyists, and professionals encounter daily across Karnataka and India - <em>finding reliable, affordable 
-                electronic components locally</em>. Whether it was for a college project, a startup prototype, 
-                or an industrial automation solution, we often found ourselves struggling with:
+                Arduino Uno R3 with Cable, Raspberry Pi 4 Model B, and electronic components locally</em>. Whether it was for a college project requiring an Arduino kit, 
+                a startup prototype needing Raspberry Pi accessories, or an industrial automation solution requiring PLC modules, we often found ourselves struggling with:
               </p>
               <ul className="mb-3 sm:mb-4 pl-4 sm:pl-6 space-y-1 sm:space-y-0">
-                <li>• Limited local availability of quality components</li>
-                <li>• Expensive international shipping and customs</li>
-                <li>• Lack of technical support and documentation</li>
-                <li>• Long delivery times that killed project momentum</li>
+                <li>• Limited local availability of Arduino Uno R3 with Cable and sensor kits</li>
+                <li>• High Raspberry Pi 4 Model B prices and expensive shipping</li>
+                <li>• Lack of technical support for 37-in-1 sensor kit and IR sensor modules</li>
+                <li>• Long delivery times for industrial automation components</li>
               </ul>
               <p className="mb-3 sm:mb-4">
                 That was our <strong>Eureka moment</strong>. We realized that India's growing maker community, 

@@ -47,37 +47,47 @@ const FAQSchema = ({ faqs = [] }) => {
   return null;
 };
 
-// Default FAQ data for electronics store
+// Default FAQ data for electronics store - optimized for competitor keywords
 export const defaultElectronicsFAQs = [
   {
-    question: "Do you provide technical support for Arduino and Raspberry Pi projects?",
-    answer: "Yes, SkyElectroTech provides comprehensive technical support for all Arduino, Raspberry Pi, and microcontroller projects. Our expert team helps with code debugging, circuit design, and troubleshooting. Contact us for personalized assistance.",
-    upvoteCount: 25
+    question: "What power supply does Arduino Uno R3 need?",
+    answer: "Arduino Uno R3 with Cable can be powered via USB (5V) or external adapter (7-12V DC). When buying Arduino Uno R3 from SkyElectroTech, the included USB cable provides power and programming interface. For standalone operation, use 9V DC adapter.",
+    upvoteCount: 45
   },
   {
-    question: "What is your warranty policy for electronic components?",
-    answer: "All genuine electronic components from SkyElectroTech come with manufacturer warranty ranging from 6 months to 2 years depending on the product. Industrial automation components and development boards typically have 1-year warranty. Defective items are replaced free of charge.",
-    upvoteCount: 18
+    question: "What's the price difference between Raspberry Pi 4 Model B 4GB vs 8GB in India?",
+    answer: "Raspberry Pi 4 Model B 4GB price in India is ₹5,999 while 8GB variant costs ₹8,999 at SkyElectroTech. The 8GB version is better for memory-intensive applications, multiple virtual machines, and heavy computing tasks.",
+    upvoteCount: 38
   },
   {
-    question: "Do you offer same-day delivery in Bangalore?",
-    answer: "Yes, we offer same-day delivery for orders placed before 2 PM within Bangalore city limits. Standard delivery takes 1-3 business days across India.",
-    upvoteCount: 32
+    question: "What sensors are included in the 37-in-1 sensor kit?",
+    answer: "Our 37-in-1 sensor kit includes IR sensor module, ultrasonic sensor Arduino compatible, temperature & humidity sensors, flame sensor, sound sensor, heartbeat sensor, vibration sensor, and 30+ more sensors. Perfect for Arduino and Raspberry Pi projects.",
+    upvoteCount: 52
   },
   {
-    question: "Can I get custom PCB design and fabrication services?",
-    answer: "SkyElectroTech offers professional PCB design and fabrication services for prototypes and small batch production. Our team specializes in Arduino-compatible boards, sensor modules, and industrial automation PCBs. Contact us with your requirements for a quote.",
-    upvoteCount: 15
+    question: "How do I connect IR sensor module with Arduino?",
+    answer: "IR sensor module connection: VCC to 5V, GND to GND, OUT to digital pin (e.g., pin 2). The IR sensor module detects obstacles and outputs HIGH/LOW signal. Ideal for obstacle avoidance robots and proximity detection projects.",
+    upvoteCount: 41
   },
   {
-    question: "Do you stock industrial automation components like PLCs and HMIs?",
-    answer: "Yes, we maintain extensive inventory of industrial automation components including PLCs, HMIs, servo drives, VFDs, sensors, and control panels from leading brands. Suitable for manufacturing, process automation, and industrial IoT applications.",
-    upvoteCount: 21
+    question: "Which proximity sensor is best for industrial automation in Bangalore?",
+    answer: "For industrial automation in Bangalore, we recommend inductive proximity sensors (metal detection) or capacitive proximity sensors (all materials). Our PLC modules are compatible with standard proximity sensors. Available with NPN/PNP outputs.",
+    upvoteCount: 29
   },
   {
-    question: "What programming and development tools do you recommend for beginners?",
-    answer: "For beginners, we recommend starting with Arduino IDE for Arduino boards, Thonny or Raspberry Pi OS for Raspberry Pi, and Fritzing for circuit design. We provide starter kits with tutorials, sample codes, and step-by-step guides for easy learning.",
-    upvoteCount: 28
+    question: "Do you provide same-day delivery for Arduino and Raspberry Pi in Bangalore?",
+    answer: "Yes, SkyElectroTech offers same-day delivery in Bangalore for Arduino Uno R3, Raspberry Pi 4, sensor kits, and other components. Order before 2 PM for same-day delivery within Bangalore city limits.",
+    upvoteCount: 56
+  },
+  {
+    question: "What's the range of ultrasonic sensor Arduino HC-SR04?",
+    answer: "Ultrasonic sensor Arduino HC-SR04 has measuring range of 2cm to 400cm with accuracy of ±3mm. Operating frequency is 40KHz. Perfect for distance measurement, water level monitoring, and robotic applications.",
+    upvoteCount: 33
+  },
+  {
+    question: "Are your Arduino kits suitable for beginners in India?",
+    answer: "Yes, our Arduino kits India are designed for beginners with step-by-step tutorials, sample codes, and project guides. Each Arduino kit includes Arduino Uno R3 with cable, breadboard, jumper wires, and essential components for learning.",
+    upvoteCount: 44
   }
 ];
 
