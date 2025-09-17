@@ -10,17 +10,17 @@ const About = () => {
   return (
     <>
       <SEO 
-        title="About Us - SkyElectroTech"
-        description="Learn about SkyElectroTech - your trusted partner for electronics and industrial automation components. Discover our story, mission, and commitment to quality."
-        keywords="about SkyElectroTech, electronics company, industrial automation, Arduino, Raspberry Pi, company history"
+        title="About SkyElectroTech - Electronics Store Bangalore | Arduino Raspberry Pi Supplier"
+        description="Learn about SkyElectroTech - your trusted Arduino & Raspberry Pi supplier in Bangalore, Karnataka. Premier electronics dealer in Nagarathpete with industrial automation components. Discover our story & commitment to quality."
+        keywords="about SkyElectroTech Bangalore, electronics company Karnataka, Arduino supplier Bangalore, Raspberry Pi dealer India, industrial automation Bangalore, electronics store Nagarathpete, company history"
       />
       <div className="bg-gray-50 min-h-screen flex flex-col">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1">
           {/* Header */}
           <div className="text-center mb-8 sm:mb-12">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">About SkyElectroTech</h1>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">About SkyElectroTech - Premier Electronics Store in Bangalore</h1>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto">
-              Your trusted partner for electronics and industrial automation components
+              Your trusted Arduino, Raspberry Pi & industrial automation components supplier in Bangalore, Karnataka
             </p>
           </div>
 
@@ -32,10 +32,10 @@ const About = () => {
                 <strong>Why does SkyElectroTech exist?</strong> This question takes us back to our founding story.
               </p>
               <p className="mb-3 sm:mb-4">
-                As engineering graduates and passionate makers, we faced the same frustration that thousands 
-                of students, hobbyists, and professionals encounter daily - <em>finding reliable, affordable 
-                electronic components in India</em>. Whether it was for a college project, a startup prototype, 
-                or an industrial solution, we often found ourselves struggling with:
+                As engineering graduates and passionate makers in Bangalore, we faced the same frustration that thousands 
+                of students, hobbyists, and professionals encounter daily across Karnataka and India - <em>finding reliable, affordable 
+                electronic components locally</em>. Whether it was for a college project, a startup prototype, 
+                or an industrial automation solution, we often found ourselves struggling with:
               </p>
               <ul className="mb-3 sm:mb-4 pl-4 sm:pl-6 space-y-1 sm:space-y-0">
                 <li>• Limited local availability of quality components</li>
@@ -49,14 +49,15 @@ const About = () => {
                 because we had lived them ourselves.
               </p>
               <p className="mb-3 sm:mb-4">
-                SkyElectroTech was born from this personal experience. We started with a simple promise: 
-                to bridge the gap between innovative minds and the components they need to bring their 
+                SkyElectroTech was born from this personal experience in Bangalore's thriving tech ecosystem. We started with a simple promise: 
+                to bridge the gap between innovative minds and the Arduino, Raspberry Pi, and automation components they need to bring their 
                 ideas to life. What began as solving our own problem has grown into serving thousands 
-                of makers, students, and professionals across India.
+                of makers, students, and professionals across Karnataka and throughout India.
               </p>
               <p className="mb-3 sm:mb-4">
-                Today, we're proud to be part of India's innovation revolution - supporting everything from 
-                student projects to industrial automation, from startup prototypes to research initiatives. 
+                Today, we're proud to be part of Bangalore's innovation revolution - supporting everything from 
+                student projects at top engineering colleges to industrial automation solutions for Karnataka's industries, 
+                from startup prototypes in the Silicon Valley of India to research initiatives. 
                 Because we believe that great ideas shouldn't be limited by component availability.
               </p>
             </div>
@@ -66,9 +67,9 @@ const About = () => {
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 border border-blue-100">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Our Vision</h2>
             <p className="text-base sm:text-lg text-gray-700 mb-4">
-              To accelerate India's innovation journey by making world-class electronic components 
-              accessible to every maker, student, and professional - because every great invention 
-              starts with the right components.
+              To accelerate Karnataka and India's innovation journey by making world-class Arduino, Raspberry Pi, 
+              and industrial automation components accessible to every maker, student, and professional in Bangalore and beyond - 
+              because every great invention starts with the right components.
             </p>
             <div className="bg-white/50 rounded-lg p-3 sm:p-4 border-l-4 border-blue-500">
               <p className="text-sm sm:text-base text-gray-700 italic">
@@ -96,6 +97,7 @@ const About = () => {
                 <strong>How we do it:</strong> By sourcing globally, stocking locally, and delivering 
                 with the technical support that every maker deserves.
               </p>
+              
             </div>
             <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8 border-l-4 border-purple-500">
               <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 flex items-center">
