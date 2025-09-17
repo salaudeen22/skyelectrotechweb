@@ -312,10 +312,21 @@ const SEO = ({
               "name": "Arduino & Development Boards",
               "itemListElement": [{
                 "@type": "Offer",
+                "price": "299",
+                "priceCurrency": "INR",
+                "availability": "https://schema.org/InStock",
+                "url": "https://skyelectrotech.in/products?category=arduino",
                 "itemOffered": {
                   "@type": "Product",
-                  "name": "Arduino Development Boards",
-                  "category": "Microcontroller Boards"
+                  "name": "Buy Arduino Development Boards Online in Bangalore – SkyElectroTech",
+                  "category": "Microcontroller Boards",
+                  "description": "Get Arduino Uno, Nano, Mega boards in Bangalore. Fast shipping, cash on delivery available. Expert technical support included.",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "299",
+                    "priceCurrency": "INR",
+                    "availability": "https://schema.org/InStock"
+                  }
                 }
               }]
             },
@@ -324,10 +335,21 @@ const SEO = ({
               "name": "Industrial Automation",
               "itemListElement": [{
                 "@type": "Offer",
+                "price": "1499",
+                "priceCurrency": "INR",
+                "availability": "https://schema.org/InStock",
+                "url": "https://skyelectrotech.in/products?category=industrial",
                 "itemOffered": {
                   "@type": "Product",
-                  "name": "PLCs & Industrial Components",
-                  "category": "Industrial Automation"
+                  "name": "Buy PLCs & Industrial Components Online in India – SkyElectroTech",
+                  "category": "Industrial Automation",
+                  "description": "Get PLCs, HMIs, industrial sensors in Bangalore. Same-day delivery, cash on delivery available.",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "1499",
+                    "priceCurrency": "INR",
+                    "availability": "https://schema.org/InStock"
+                  }
                 }
               }]
             },
@@ -336,10 +358,21 @@ const SEO = ({
               "name": "Sensors & Components", 
               "itemListElement": [{
                 "@type": "Offer",
+                "price": "99",
+                "priceCurrency": "INR",
+                "availability": "https://schema.org/InStock",
+                "url": "https://skyelectrotech.in/products?category=sensors",
                 "itemOffered": {
                   "@type": "Product",
-                  "name": "Electronic Sensors & Components",
-                  "category": "Electronic Components"
+                  "name": "Buy Electronic Sensors & Components Online in Bangalore – SkyElectroTech",
+                  "category": "Electronic Components",
+                  "description": "Get temperature, humidity, ultrasonic sensors in Bangalore. Fast shipping, cash on delivery available.",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "99",
+                    "priceCurrency": "INR",
+                    "availability": "https://schema.org/InStock"
+                  }
                 }
               }]
             }
