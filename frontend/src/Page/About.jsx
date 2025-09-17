@@ -10,17 +10,17 @@ const About = () => {
   return (
     <>
       <SEO 
-        title="About SkyElectroTech - Electronics Store Bangalore | Arduino Raspberry Pi Supplier"
-        description="Learn about SkyElectroTech - your trusted Arduino & Raspberry Pi supplier in Bangalore, Karnataka. Premier electronics dealer in Nagarathpete with industrial automation components. Discover our story & commitment to quality."
-        keywords="about SkyElectroTech Bangalore, electronics company Karnataka, Arduino supplier Bangalore, Raspberry Pi dealer India, industrial automation Bangalore, electronics store Nagarathpete, company history"
+        title="About SkyElectroTech - Arduino & Raspberry Pi Dealer Bangalore | Industrial Electronics Supplier"
+        description="SkyElectroTech - Leading Arduino, Raspberry Pi & industrial automation components supplier in Bangalore, Karnataka. Electronic components shop in Nagarathpete with Arduino Uno R3, sensor kits, PLCs. Expert technical support & same-day delivery in Bangalore."
+        keywords="Arduino dealer Bangalore, Raspberry Pi supplier Karnataka, industrial automation components Bangalore, electronics store Nagarathpete, Arduino Uno R3 Bangalore, sensor kits India, PLC modules Bangalore, electronic components shop near me"
       />
       <div className="bg-gray-50 min-h-screen flex flex-col">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1">
           {/* Header */}
           <div className="text-center mb-8 sm:mb-12">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">About SkyElectroTech - Premier Electronics Store in Bangalore</h1>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">About SkyElectroTech - Arduino & Raspberry Pi Dealer in Bangalore</h1>
             <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto">
-              Your trusted Arduino, Raspberry Pi & industrial automation components supplier in Bangalore, Karnataka
+              Leading Arduino dealer, Raspberry Pi supplier & industrial automation components store in Nagarathpete, Bangalore, Karnataka
             </p>
           </div>
 
