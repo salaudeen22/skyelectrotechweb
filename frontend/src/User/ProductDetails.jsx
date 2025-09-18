@@ -269,16 +269,26 @@ const ProductDetails = () => {
   }, [product?.specifications]);
 
   // Memoize SEO data
-  const seoData = useMemo(() => ({
-    title: `${product?.name} - SkyElectroTech`,
-    description: product?.description,
-    keywords: `${product?.name}, ${product?.brand || 'electronics'}, ${product?.category?.name || 'electronics'}, SkyElectroTech`,
-    image: product?.images?.[0]?.url,
-    url: product ? `https://skyelectrotech.in${generateProductUrl(product)}` : `https://skyelectrotech.in/products`,
-    type: "product",
-    product: product,
-    category: product?.category
-  }), [product]);
+  const seoData = useMemo(() => {
+    // Use manual SEO keywords if available, otherwise generate from product data
+    const generateKeywords = () => {
+      if (product?.seoKeywords?.trim()) {
+        return `${product.seoKeywords}, SkyElectroTech`;
+      }
+      return `${product?.name}, ${product?.brand || 'electronics'}, ${product?.category?.name || 'electronics'}, SkyElectroTech`;
+    };
+
+    return {
+      title: `${product?.name} - SkyElectroTech`,
+      description: product?.description,
+      keywords: generateKeywords(),
+      image: product?.images?.[0]?.url,
+      url: product ? `https://skyelectrotech.in${generateProductUrl(product)}` : `https://skyelectrotech.in/products`,
+      type: "product",
+      product: product,
+      category: product?.category
+    };
+  }, [product]);
 
   if (shouldRedirect || isRedirecting) {
     return (

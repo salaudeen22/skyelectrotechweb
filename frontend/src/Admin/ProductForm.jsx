@@ -61,6 +61,7 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
         specifications: [{ name: '', value: '' }],
         features: [''],
         tags: [],
+        seoKeywords: '',
         warranty: '',
         isFeatured: false
     });
@@ -105,6 +106,7 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
                     specifications: product.specifications?.length ? product.specifications : [{ name: '', value: '' }],
                     features: product.features?.length ? product.features : [''],
                     tags: product.tags || [],
+                    seoKeywords: product.seoKeywords || '',
                     warranty: product.warranty || '',
                     isFeatured: product.isFeatured || false
                 });
@@ -391,6 +393,7 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
                                         </div>
                                         <FormInput label="Brand" name="brand" value={formData.brand} onChange={handleInputChange} placeholder="e.g., Quantum" />
                                         <FormInput label="SKU *" name="sku" value={formData.sku} onChange={handleInputChange} error={errors.sku} placeholder="Auto-generated if empty" />
+                                        <FormInput label="SEO Keywords" name="seoKeywords" value={formData.seoKeywords} onChange={handleInputChange} placeholder="e.g., arduino, microcontroller, development board" />
                                         <FormInput label="Warranty" name="warranty" value={formData.warranty} onChange={handleInputChange} placeholder="e.g., 2 Years Limited" />
                                         <div className="flex items-center pt-2"><input type="checkbox" id="isFeatured" name="isFeatured" checked={formData.isFeatured} onChange={handleInputChange} className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" /><label htmlFor="isFeatured" className="ml-3 block text-sm font-medium text-gray-700">Mark as a featured product</label></div>
                                     </div>

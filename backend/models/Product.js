@@ -57,6 +57,11 @@ const productSchema = new mongoose.Schema({
   }],
   features: [String],
   tags: [String],
+  seoKeywords: {
+    type: String,
+    maxlength: [200, 'SEO keywords cannot exceed 200 characters'],
+    trim: true
+  },
   ratings: {
     average: {
       type: Number,
