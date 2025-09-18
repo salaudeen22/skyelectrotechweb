@@ -109,8 +109,9 @@ const getProducts = asyncHandler(async (req, res) => {
   
   // Query with lean() for better performance and select only needed fields
   const products = await Product.find(query)
-    .select('name description price images brand category ratings isFeatured discount sku')
+    .select('name description price images brand category subcategory ratings isFeatured discount sku')
     .populate('category', 'name')
+    .populate('subcategory', 'name')
     .sort(sortOptions)
     .skip(skip)
     .limit(pageLimit)
@@ -135,6 +136,7 @@ const getProducts = asyncHandler(async (req, res) => {
 const getProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id)
     .populate('category', 'name description')
+    .populate('subcategory', 'name description')
     .populate('reviews.user', 'name avatar')
     .populate('createdBy', 'name')
     .lean();
@@ -176,6 +178,7 @@ const createProduct = asyncHandler(async (req, res) => {
     originalPrice,
     discount,
     category,
+    subcategory,
     brand,
     specifications,
     features,
@@ -190,6 +193,14 @@ const createProduct = asyncHandler(async (req, res) => {
   const categoryExists = await Category.findById(category);
   if (!categoryExists) {
     return sendError(res, 400, 'Invalid category');
+  }
+
+  // Check if subcategory exists (if provided)
+  if (subcategory) {
+    const subcategoryExists = await Category.findById(subcategory);
+    if (!subcategoryExists) {
+      return sendError(res, 400, 'Invalid subcategory');
+    }
   }
 
   // Generate SKU if not provided
@@ -211,6 +222,7 @@ const createProduct = asyncHandler(async (req, res) => {
     originalPrice,
     discount,
     category,
+    subcategory,
     brand,
     sku,
     specifications,
@@ -224,6 +236,9 @@ const createProduct = asyncHandler(async (req, res) => {
   });
 
   await product.populate('category', 'name');
+  if (subcategory) {
+    await product.populate('subcategory', 'name');
+  }
 
   // Invalidate cache
   cacheUtils.invalidateSearch();
@@ -247,6 +262,14 @@ const updateProduct = asyncHandler(async (req, res) => {
     const categoryExists = await Category.findById(req.body.category);
     if (!categoryExists) {
       return sendError(res, 400, 'Invalid category');
+    }
+  }
+
+  // If subcategory is being updated, verify it exists
+  if (req.body.subcategory) {
+    const subcategoryExists = await Category.findById(req.body.subcategory);
+    if (!subcategoryExists) {
+      return sendError(res, 400, 'Invalid subcategory');
     }
   }
 
@@ -274,7 +297,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     req.params.id,
     req.body,
     { new: true, runValidators: true }
-  ).populate('category', 'name');
+  ).populate('category', 'name').populate('subcategory', 'name');
 
   // Send price drop notifications if price decreased
   if (hasPriceDrop && newPrice < oldPrice) {
@@ -429,6 +452,7 @@ const getFeaturedProducts = asyncHandler(async (req, res) => {
     isFeatured: true 
   })
     .populate('category', 'name')
+    .populate('subcategory', 'name')
     .sort('-createdAt')
     .limit(parseInt(limit))
     .lean();
@@ -455,6 +479,7 @@ const searchProducts = asyncHandler(async (req, res) => {
 
   const products = await Product.find(query)
     .populate('category', 'name')
+    .populate('subcategory', 'name')
     .sort({ score: { $meta: 'textScore' } })
     .skip(skip)
     .limit(pageLimit)
@@ -492,6 +517,7 @@ const getProductsByCategory = asyncHandler(async (req, res) => {
 
   const products = await Product.find(query)
     .populate('category', 'name')
+    .populate('subcategory', 'name')
     .sort(sort)
     .skip(skip)
     .limit(pageLimit)

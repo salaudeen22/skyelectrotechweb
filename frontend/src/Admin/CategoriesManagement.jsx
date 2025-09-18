@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { FaPlus, FaSearch, FaPencilAlt, FaTrashAlt, FaTimes, FaImage } from 'react-icons/fa';
+import React, { useState, useEffect, useMemo } from 'react';
+import { FaPlus, FaSearch, FaPencilAlt, FaTrashAlt, FaTimes, FaImage, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { categoriesAPI, uploadAPI } from '../services/apiServices';
 import toast from 'react-hot-toast';
 
 const CategoriesManagement = () => {
   const [categories, setCategories] = useState([]);
-  const [filteredCategories, setFilteredCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [parentCategory, setParentCategory] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -19,7 +20,6 @@ const CategoriesManagement = () => {
       const response = await categoriesAPI.getCategories();
       if (response.success) {
         setCategories(response.data.categories);
-        setFilteredCategories(response.data.categories);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -34,16 +34,33 @@ const CategoriesManagement = () => {
   }, []);
 
   // Filter categories based on search
-  useEffect(() => {
-    const filtered = categories.filter(category =>
+  const filteredCategories = useMemo(() => 
+    categories.filter(category =>
       category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       category.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (category.subcategories && category.subcategories.some(sub => 
         sub.name.toLowerCase().includes(searchTerm.toLowerCase())
       ))
-    );
-    setFilteredCategories(filtered);
-  }, [searchTerm, categories]);
+    ),
+    [categories, searchTerm]
+  );
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
+  const paginatedCategories = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredCategories.slice(startIndex, endIndex);
+  }, [filteredCategories, currentPage, itemsPerPage]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
 
   const handleCreate = () => {
     setSelectedCategory(null);
@@ -105,8 +122,8 @@ const CategoriesManagement = () => {
     setParentCategory(null);
   };
 
-  const handleSave = () => {
-    fetchCategories();
+  const handleSave = async () => {
+    await fetchCategories();
     handleModalClose();
   };
 
@@ -144,7 +161,7 @@ const CategoriesManagement = () => {
             type="text"
             placeholder="Search categories..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
             className="w-full pl-8 sm:pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
           />
         </div>
@@ -152,7 +169,7 @@ const CategoriesManagement = () => {
 
       {/* Categories Grid */}
       <div className="space-y-4 sm:space-y-6">
-        {filteredCategories.map((category) => (
+        {paginatedCategories.map((category) => (
           <div key={category._id} className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
             {/* Main Category */}
             <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-100">
@@ -284,6 +301,104 @@ const CategoriesManagement = () => {
         ))}
       </div>
 
+      {/* Pagination Controls */}
+      {filteredCategories.length > 0 && (
+        <div className="bg-white border-t border-slate-200 px-4 py-4 sm:px-6 rounded-lg shadow-md">
+          {/* Mobile Pagination */}
+          <div className="md:hidden">
+            <div className="text-sm text-slate-500 text-center mb-3">
+              Page {currentPage} of {totalPages} ({filteredCategories.length} categories)
+            </div>
+            
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center space-x-3">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 text-sm border border-slate-300 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                >
+                  <FaChevronLeft className="w-3 h-3 mr-1" />
+                  Previous
+                </button>
+                
+                <span className="text-sm text-slate-600 font-medium">
+                  {currentPage} / {totalPages}
+                </span>
+                
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 text-sm border border-slate-300 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                >
+                  Next
+                  <FaChevronRight className="w-3 h-3 ml-1" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Pagination */}
+          <div className="hidden md:flex items-center justify-between">
+            <div className="text-sm text-slate-500">
+              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredCategories.length)} of {filteredCategories.length} categories
+            </div>
+            
+            {totalPages > 1 && (
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 text-sm border border-slate-300 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                >
+                  <FaChevronLeft className="w-3 h-3 mr-1" />
+                  Previous
+                </button>
+                
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                    // Show first page, last page, current page, and pages around current
+                    const showPage = page === 1 || 
+                                    page === totalPages || 
+                                    (page >= currentPage - 1 && page <= currentPage + 1);
+                    
+                    if (!showPage) {
+                      // Show ellipsis if there's a gap
+                      if (page === currentPage - 2 || page === currentPage + 2) {
+                        return <span key={page} className="px-2 text-slate-400">...</span>;
+                      }
+                      return null;
+                    }
+                    
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`px-3 py-1 text-sm border rounded-md ${
+                          currentPage === page
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+                </div>
+                
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 text-sm border border-slate-300 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                >
+                  Next
+                  <FaChevronRight className="w-3 h-3 ml-1" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {filteredCategories.length === 0 && !loading && (
         <div className="text-center py-8 sm:py-12">
           <FaImage className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
@@ -392,6 +507,9 @@ const CategoryModal = ({ category, parentCategory, allCategories, onClose, onSav
       if (response.success) {
         toast.success(`${isSubcategory ? 'Subcategory' : 'Category'} ${isEditing ? 'updated' : 'created'} successfully`);
         onSave();
+        onClose();
+      } else {
+        toast.error(response.message || `Failed to ${isEditing ? 'update' : 'create'} ${isSubcategory ? 'subcategory' : 'category'}`);
       }
     } catch (error) {
       console.error('Error saving category:', error);

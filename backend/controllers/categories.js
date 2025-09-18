@@ -29,7 +29,8 @@ const getCategories = asyncHandler(async (req, res) => {
           cat.parentCategory && cat.parentCategory._id.toString() === category._id.toString()
         );
         
-        const productCount = await Product.countDocuments({ 
+        // Get direct products for this category
+        const directProductCount = await Product.countDocuments({ 
           category: category._id, 
           isActive: true 
         });
@@ -37,8 +38,10 @@ const getCategories = asyncHandler(async (req, res) => {
         const subcategoriesWithCount = await Promise.all(
           subcategories.map(async (subcat) => {
             const subProductCount = await Product.countDocuments({ 
-              category: subcat._id, 
-              isActive: true 
+              $or: [
+                { category: subcat._id, isActive: true },
+                { subcategory: subcat._id, isActive: true }
+              ]
             });
             return {
               ...subcat,
@@ -47,9 +50,13 @@ const getCategories = asyncHandler(async (req, res) => {
           })
         );
 
+        // Calculate total product count including products in subcategories
+        const subcategoryProductCount = subcategoriesWithCount.reduce((sum, subcat) => sum + subcat.productCount, 0);
+        const totalProductCount = directProductCount + subcategoryProductCount;
+
         return {
           ...category,
-          productCount,
+          productCount: totalProductCount,
           subcategories: subcategoriesWithCount
         };
       })
@@ -66,13 +73,35 @@ const getCategories = asyncHandler(async (req, res) => {
     // Add product count for each category
     categories = await Promise.all(
       categories.map(async (category) => {
-        const productCount = await Product.countDocuments({ 
+        // Get all subcategories for this category
+        const subcategories = await Category.find({ 
+          parentCategory: category._id, 
+          isActive: true 
+        }).lean();
+        
+        // Get direct products for this category
+        const directProductCount = await Product.countDocuments({ 
           category: category._id, 
           isActive: true 
         });
+        
+        // Get products from subcategories
+        let subcategoryProductCount = 0;
+        if (subcategories.length > 0) {
+          const subcategoryIds = subcategories.map(sub => sub._id);
+          subcategoryProductCount = await Product.countDocuments({
+            $or: [
+              { category: { $in: subcategoryIds }, isActive: true },
+              { subcategory: { $in: subcategoryIds }, isActive: true }
+            ]
+          });
+        }
+        
+        const totalProductCount = directProductCount + subcategoryProductCount;
+        
         return {
           ...category,
-          productCount
+          productCount: totalProductCount
         };
       })
     );
@@ -108,8 +137,10 @@ const getCategory = asyncHandler(async (req, res) => {
     subcategories = await Promise.all(
       subcategories.map(async (subcat) => {
         const subProductCount = await Product.countDocuments({ 
-          category: subcat._id, 
-          isActive: true 
+          $or: [
+            { category: subcat._id, isActive: true },
+            { subcategory: subcat._id, isActive: true }
+          ]
         });
         return {
           ...subcat,
@@ -119,16 +150,19 @@ const getCategory = asyncHandler(async (req, res) => {
     );
   }
 
-  // Get product count for this category
-  const productCount = await Product.countDocuments({ 
+  // Get product count for this category (direct + subcategory products)
+  const directProductCount = await Product.countDocuments({ 
     category: category._id, 
     isActive: true 
   });
+  
+  const subcategoryProductCount = subcategories.reduce((sum, subcat) => sum + subcat.productCount, 0);
+  const totalProductCount = directProductCount + subcategoryProductCount;
 
   sendResponse(res, 200, { 
     category: {
       ...category,
-      productCount,
+      productCount: totalProductCount,
       subcategories
     }
   }, 'Category retrieved successfully');
@@ -181,6 +215,10 @@ const createCategory = asyncHandler(async (req, res) => {
   if (parentCategory) {
     await category.populate('parentCategory', 'name');
   }
+
+  // Invalidate cache
+  cacheUtils.invalidateCategoryCache();
+  cacheUtils.invalidateSearch();
 
   sendResponse(res, 201, { category }, 'Category created successfully');
 });
@@ -240,6 +278,8 @@ const updateCategory = asyncHandler(async (req, res) => {
     updateData,
     { new: true, runValidators: true }
   ).populate('createdBy', 'name').populate('parentCategory', 'name');
+
+
 
   sendResponse(res, 200, { category }, 'Category updated successfully');
 });

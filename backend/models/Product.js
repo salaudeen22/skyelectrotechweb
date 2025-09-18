@@ -32,6 +32,10 @@ const productSchema = new mongoose.Schema({
     ref: 'Category',
     required: [true, 'Product category is required']
   },
+  subcategory: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category'
+  },
   brand: {
     type: String,
     maxlength: [50, 'Brand name cannot exceed 50 characters']

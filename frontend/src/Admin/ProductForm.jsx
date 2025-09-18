@@ -56,6 +56,7 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
         originalPrice: '',
         discount: 0,
         category: '',
+        subcategory: '',
         brand: '',
         sku: '',
         specifications: [{ name: '', value: '' }],
@@ -77,7 +78,7 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
 
     const fetchCategories = useCallback(async () => {
         try {
-            const response = await categoriesAPI.getCategories();
+             const response = await categoriesAPI.getCategories();
             if (response.success) {
                 setCategories(response.data.categories || []);
             }
@@ -101,6 +102,7 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
                     originalPrice: product.originalPrice || '',
                     discount: product.discount || 0,
                     category: product.category?._id || '',
+                    subcategory: product.subcategory?._id || '',
                     brand: product.brand || '',
                     sku: product.sku || '',
                     specifications: product.specifications?.length ? product.specifications : [{ name: '', value: '' }],
@@ -133,12 +135,38 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
         };
     }, [fetchCategories, fetchProduct, isEdit]);
 
+    useEffect(() => {
+        const price = parseFloat(formData.price) || 0;
+        const originalPrice = parseFloat(formData.originalPrice) || 0;
+        
+        if (originalPrice > 0 && price > 0 && originalPrice > price) {
+            const calculatedDiscount = ((originalPrice - price) / originalPrice) * 100;
+            const roundedDiscount = Math.round(calculatedDiscount);
+            
+            if (formData.discount !== roundedDiscount) {
+                setFormData(prev => ({
+                    ...prev,
+                    discount: roundedDiscount
+                }));
+            }
+        } else if (originalPrice <= price || originalPrice <= 0 || price <= 0) {
+            if (formData.discount !== 0) {
+                setFormData(prev => ({
+                    ...prev,
+                    discount: 0
+                }));
+            }
+        }
+    }, [formData.price, formData.originalPrice]);
+
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: type === 'checkbox' ? checked : value,
+            // Reset subcategory when category changes
+            ...(name === 'category' && { subcategory: '' })
         }));
         
         if (errors[name]) {
@@ -247,7 +275,9 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
                 images: allImages,
                 price: parseFloat(formData.price),
                 originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : undefined,
-                discount: parseFloat(formData.discount) || 0
+                discount: parseFloat(formData.discount) || 0,
+                // Only include subcategory if one is selected
+                ...(formData.subcategory && { subcategory: formData.subcategory })
             };
 
             let response;
@@ -278,6 +308,111 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
     const addFeature = () => setFormData(p => ({ ...p, features: [...p.features, ''] }));
     const removeFeature = (index) => setFormData(p => ({ ...p, features: p.features.filter((_, i) => i !== index) }));
     const updateFeature = (index, value) => setFormData(p => ({ ...p, features: p.features.map((f, i) => i === index ? value : f) }));
+    
+    const handleFeaturePaste = (index, e) => {
+        const pastedText = e.clipboardData.getData('text');
+        
+        // Check if pasted text contains comma-separated values or bullet points
+        const hasCommas = pastedText.includes(',');
+        const hasBullets = /^[\s]*[•\-\*]\s/m.test(pastedText);
+        
+        if (hasCommas || hasBullets) {
+            e.preventDefault();
+            
+            let features;
+            if (hasBullets) {
+                // Split by bullet points and clean up
+                features = pastedText
+                    .split(/\n/)
+                    .map(line => line.replace(/^[\s]*[•\-\*]\s*/, '').trim())
+                    .filter(feature => feature.length > 0);
+            } else {
+                // Split by commas and clean up
+                features = pastedText
+                    .split(',')
+                    .map(feature => feature.trim())
+                    .filter(feature => feature.length > 0);
+            }
+            
+            if (features.length > 0) {
+                setFormData(prev => {
+                    const newFeatures = [...prev.features];
+                    // Replace current field with first feature
+                    newFeatures[index] = features[0];
+                    // Add remaining features as new fields
+                    if (features.length > 1) {
+                        newFeatures.push(...features.slice(1));
+                    }
+                    return { ...prev, features: newFeatures };
+                });
+            }
+        }
+    };
+
+    // Get subcategories for selected category
+    const getSubcategories = () => {
+        if (!formData.category) return [];
+        const selectedCategory = categories.find(cat => cat._id === formData.category);
+        return selectedCategory?.subcategories || [];
+    };
+
+    const handleSpecificationPaste = (index, field, e) => {
+        const pastedText = e.clipboardData.getData('text');
+        
+        // Check if pasted text contains specifications in "Name: Value" format
+        const hasSpecFormat = pastedText.includes(':');
+        const hasCommas = pastedText.includes(',');
+        const hasMultipleLines = pastedText.includes('\n');
+        
+        if (hasSpecFormat && (hasCommas || hasMultipleLines)) {
+            e.preventDefault();
+            
+            let specifications;
+            
+            if (hasCommas) {
+                // Split by commas first, then parse each specification
+                specifications = pastedText
+                    .split(',')
+                    .map(spec => spec.trim())
+                    .filter(spec => spec.length > 0 && spec.includes(':'))
+                    .map(spec => {
+                        const [name, ...valueParts] = spec.split(':');
+                        return {
+                            name: name.trim(),
+                            value: valueParts.join(':').trim()
+                        };
+                    })
+                    .filter(spec => spec.name && spec.value);
+            } else {
+                // Split by lines and parse each specification
+                specifications = pastedText
+                    .split(/\n/)
+                    .map(line => line.trim())
+                    .filter(line => line.length > 0 && line.includes(':'))
+                    .map(line => {
+                        const [name, ...valueParts] = line.split(':');
+                        return {
+                            name: name.trim(),
+                            value: valueParts.join(':').trim()
+                        };
+                    })
+                    .filter(spec => spec.name && spec.value);
+            }
+            
+            if (specifications.length > 0) {
+                setFormData(prev => {
+                    const newSpecs = [...prev.specifications];
+                    // Replace current field with first specification
+                    newSpecs[index] = specifications[0];
+                    // Add remaining specifications as new fields
+                    if (specifications.length > 1) {
+                        newSpecs.push(...specifications.slice(1));
+                    }
+                    return { ...prev, specifications: newSpecs };
+                });
+            }
+        }
+    };
     // --- End of logic ---
 
     return (
@@ -362,14 +497,14 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
                                         <div>
                                             <h4 className="text-md font-semibold text-gray-700 mb-3">Key Features</h4>
                                             <div className="space-y-3">
-                                                {formData.features.map((feature, index) => (<div key={index} className="flex items-center gap-2"><input type="text" value={feature} onChange={(e) => updateFeature(index, e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50" placeholder="e.g., Ultra-fast processor"/><button type="button" onClick={() => removeFeature(index)} className="p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-100 transition-colors"><FaTimes /></button></div>))}
+                                                {formData.features.map((feature, index) => (<div key={index} className="flex items-center gap-2"><input type="text" value={feature} onChange={(e) => updateFeature(index, e.target.value)} onPaste={(e) => handleFeaturePaste(index, e)} className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50" placeholder="e.g., Ultra-fast processor"/><button type="button" onClick={() => removeFeature(index)} className="p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-100 transition-colors"><FaTimes /></button></div>))}
                                                 <button type="button" onClick={addFeature} className="text-indigo-600 hover:text-indigo-800 text-sm font-semibold flex items-center gap-1.5 pt-2"><FaPlus size={12} /> Add Feature</button>
                                             </div>
                                         </div>
                                         <div>
                                             <h4 className="text-md font-semibold text-gray-700 mb-3">Specifications</h4>
                                             <div className="space-y-3">
-                                                {formData.specifications.map((spec, index) => (<div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-2 items-center"><input type="text" value={spec.name} onChange={(e) => updateSpecification(index, 'name', e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50" placeholder="Name (e.g., Color)"/><div className="flex items-center gap-2"><input type="text" value={spec.value} onChange={(e) => updateSpecification(index, 'value', e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50" placeholder="Value (e.g., Midnight Black)"/><button type="button" onClick={() => removeSpecification(index)} className="p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-100 transition-colors"><FaTimes /></button></div></div>))}
+                                                {formData.specifications.map((spec, index) => (<div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-2 items-center"><input type="text" value={spec.name} onChange={(e) => updateSpecification(index, 'name', e.target.value)} onPaste={(e) => handleSpecificationPaste(index, 'name', e)} className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50" placeholder="Name (e.g., Color)"/><div className="flex items-center gap-2"><input type="text" value={spec.value} onChange={(e) => updateSpecification(index, 'value', e.target.value)} onPaste={(e) => handleSpecificationPaste(index, 'value', e)} className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50" placeholder="Value (e.g., Midnight Black)"/><button type="button" onClick={() => removeSpecification(index)} className="p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-100 transition-colors"><FaTimes /></button></div></div>))}
                                                 <button type="button" onClick={addSpecification} className="text-indigo-600 hover:text-indigo-800 text-sm font-semibold flex items-center gap-1.5 pt-2"><FaPlus size={12} /> Add Specification</button>
                                             </div>
                                         </div>
@@ -391,6 +526,15 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
                                             </select>
                                             {errors.category && <p className="mt-1.5 flex items-center text-sm text-red-600"><FaExclamationCircle className="mr-1.5" /> {errors.category}</p>}
                                         </div>
+                                        {getSubcategories().length > 0 && (
+                                            <div>
+                                                <label htmlFor="subcategory" className="block text-sm font-medium text-gray-600 mb-1">Subcategory</label>
+                                                <select id="subcategory" name="subcategory" value={formData.subcategory} onChange={handleInputChange} className="w-full py-2.5 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:border-indigo-500 focus:ring-indigo-500/50 bg-gray-50 transition-colors">
+                                                    <option value="">Select a subcategory (optional)</option>
+                                                    {getSubcategories().map(subcat => (<option key={subcat._id} value={subcat._id}>{subcat.name}</option>))}
+                                                </select>
+                                            </div>
+                                        )}
                                         <FormInput label="Brand" name="brand" value={formData.brand} onChange={handleInputChange} placeholder="e.g., Quantum" />
                                         <FormInput label="SKU *" name="sku" value={formData.sku} onChange={handleInputChange} error={errors.sku} placeholder="Auto-generated if empty" />
                                         <FormInput label="SEO Keywords" name="seoKeywords" value={formData.seoKeywords} onChange={handleInputChange} placeholder="e.g., arduino, microcontroller, development board" />
@@ -403,7 +547,7 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
                                     <div className="space-y-6">
                                         <FormInput label="Price *" name="price" type="number" value={formData.price} onChange={handleInputChange} error={errors.price} step="0.01" min="0" placeholder="0.00" icon={<FaRupeeSign  className="text-gray-400" />} />
                                         <FormInput label="Original Price" name="originalPrice" type="number" value={formData.originalPrice} onChange={handleInputChange} step="0.01" min="0" placeholder="0.00" icon={<FaRupeeSign className="text-gray-400" />} />
-                                        <FormInput label="Discount (%)" name="discount" type="number" value={formData.discount} onChange={handleInputChange} min="0" max="100" placeholder="0" />
+                                        <FormInput label="Discount (%)" name="discount" type="number" value={formData.discount} onChange={handleInputChange} min="0" max="100" placeholder="0" readOnly />
                                     </div>
                                 </div>
                             </div>
