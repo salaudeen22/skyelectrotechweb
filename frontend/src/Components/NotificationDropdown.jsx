@@ -9,9 +9,9 @@ const NotificationDropdown = ({ onClose }) => {
     notifications, 
     loading, 
     markAsRead, 
-    deleteNotification, 
-    unreadCount,
-    refetch 
+    markAllAsRead,
+    bulkDeleteNotifications,
+    unreadCount
   } = useNotifications();
   
   const [selectedNotifications, setSelectedNotifications] = useState([]);
@@ -37,7 +37,21 @@ const NotificationDropdown = ({ onClose }) => {
       await markAsRead(selectedNotifications);
       setSelectedNotifications([]);
       toast.success('Notifications marked as read');
-      refetch();
+    } catch (error) {
+      toast.error('Failed to mark notifications as read');
+    } finally {
+      setIsMarkingRead(false);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    if (unreadCount === 0) return;
+    
+    setIsMarkingRead(true);
+    try {
+      // Use a special API call to mark ALL unread notifications as read
+      await markAllAsRead();
+      toast.success('All notifications marked as read');
     } catch (error) {
       toast.error('Failed to mark notifications as read');
     } finally {
@@ -50,10 +64,9 @@ const NotificationDropdown = ({ onClose }) => {
     
     setIsDeleting(true);
     try {
-      await Promise.all(selectedNotifications.map(id => deleteNotification(id)));
+      const result = await bulkDeleteNotifications(selectedNotifications);
       setSelectedNotifications([]);
-      toast.success('Notifications deleted');
-      refetch();
+      toast.success(`${result.deletedCount} notifications deleted`);
     } catch (error) {
       toast.error('Failed to delete notifications');
     } finally {
@@ -130,7 +143,7 @@ const NotificationDropdown = ({ onClose }) => {
           <div className="flex items-center space-x-1">
             {unreadCount > 0 && (
               <button
-                onClick={handleMarkAsRead}
+                onClick={handleMarkAllAsRead}
                 disabled={isMarkingRead}
                 className="p-1 text-green-600 hover:text-green-700 transition-colors"
                 title="Mark all as read"
@@ -294,7 +307,7 @@ const NotificationDropdown = ({ onClose }) => {
             <div className="flex items-center space-x-1">
               {unreadCount > 0 && (
                 <button
-                  onClick={handleMarkAsRead}
+                  onClick={handleMarkAllAsRead}
                   disabled={isMarkingRead}
                   className="p-2 text-green-600 hover:text-green-700 transition-colors"
                   title="Mark all as read"

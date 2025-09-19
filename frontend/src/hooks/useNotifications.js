@@ -10,7 +10,7 @@ export const useNotifications = () => {
   const [error, setError] = useState(null);
 
   // Fetch notifications
-  const fetchNotifications = useCallback(async () => {
+  const fetchNotifications = useCallback(async (updateCount = true) => {
     if (!isAuthenticated) return;
 
     setLoading(true);
@@ -18,7 +18,12 @@ export const useNotifications = () => {
     try {
       const response = await api.get('/notifications?limit=10');
       setNotifications(response.data.notifications);
-      setUnreadCount(response.data.unreadCount);
+      if (updateCount) {
+        console.log('fetchNotifications: Updating count to:', response.data.unreadCount);
+        setUnreadCount(response.data.unreadCount);
+      } else {
+        console.log('fetchNotifications: Skipping count update');
+      }
     } catch (err) {
       console.error('Error fetching notifications:', err);
       setError(err.response?.data?.message || 'Failed to fetch notifications');
@@ -44,10 +49,11 @@ export const useNotifications = () => {
     if (!isAuthenticated) return;
 
     try {
-      await api.patch('/notifications/mark-read', { notificationIds });
-      await fetchUnreadCount();
+      console.log('markAsRead: Marking notifications as read:', notificationIds);
+      const response = await api.patch('/notifications/mark-read', { notificationIds });
+      console.log('markAsRead: Server response:', response.data);
       
-      // Update local state
+      // Update local state first for immediate UI feedback
       setNotifications(prev => 
         prev.map(notification => 
           notificationIds.includes(notification._id) 
@@ -55,27 +61,91 @@ export const useNotifications = () => {
             : notification
         )
       );
+      
+      // Use the server response for accurate count
+      const newCount = response.data.unreadCount || 0;
+      console.log('markAsRead: Setting unread count to:', newCount);
+      setUnreadCount(newCount);
     } catch (err) {
       console.error('Error marking notifications as read:', err);
       throw err;
     }
-  }, [isAuthenticated, fetchUnreadCount]);
+  }, [isAuthenticated]);
+
+  // Mark all notifications as read
+  const markAllAsRead = useCallback(async () => {
+    if (!isAuthenticated) return;
+
+    try {
+      console.log('markAllAsRead: Starting mark all as read');
+      // First get all unread notifications
+      const response = await api.get('/notifications?unreadOnly=true&limit=1000');
+      const allUnreadIds = response.data.notifications.map(n => n._id);
+      console.log('markAllAsRead: Found unread IDs:', allUnreadIds);
+      
+      if (allUnreadIds.length === 0) {
+        console.log('markAllAsRead: No unread notifications found');
+        return;
+      }
+      
+      // Mark them all as read using the existing endpoint
+      const markResponse = await api.patch('/notifications/mark-read', { notificationIds: allUnreadIds });
+      console.log('markAllAsRead: Server response:', markResponse.data);
+      
+      // Update local state - mark all notifications as read
+      setNotifications(prev => 
+        prev.map(notification => ({ ...notification, isRead: true }))
+      );
+      
+      // Set unread count from server response immediately
+      const newCount = markResponse.data.unreadCount || 0;
+      console.log('markAllAsRead: Setting unread count to:', newCount);
+      setUnreadCount(newCount);
+    } catch (err) {
+      console.error('Error marking all notifications as read:', err);
+      throw err;
+    }
+  }, [isAuthenticated]);
 
   // Delete notification
   const deleteNotification = useCallback(async (notificationId) => {
     if (!isAuthenticated) return;
 
     try {
-      await api.delete(`/notifications/${notificationId}`);
+      const response = await api.delete(`/notifications/${notificationId}`);
       
       // Update local state
       setNotifications(prev => prev.filter(n => n._id !== notificationId));
-      await fetchUnreadCount();
+      
+      // Use the server response for accurate count
+      setUnreadCount(response.data.unreadCount || 0);
     } catch (err) {
       console.error('Error deleting notification:', err);
       throw err;
     }
-  }, [isAuthenticated, fetchUnreadCount]);
+  }, [isAuthenticated]);
+
+  // Bulk delete notifications
+  const bulkDeleteNotifications = useCallback(async (notificationIds) => {
+    if (!isAuthenticated) return;
+
+    try {
+      const response = await api.delete('/notifications/bulk/delete', {
+        data: { notificationIds }
+      });
+      
+      // Update local state
+      setNotifications(prev => prev.filter(n => !notificationIds.includes(n._id)));
+      
+      // Use the server response for accurate count
+      setUnreadCount(response.data.unreadCount || 0);
+      
+      return response.data;
+    } catch (err) {
+      console.error('Error bulk deleting notifications:', err);
+      throw err;
+    }
+  }, [isAuthenticated]);
 
   // Subscribe to push notifications
   const subscribeToPushNotifications = useCallback(async (subscription) => {
@@ -152,6 +222,11 @@ export const useNotifications = () => {
     setUnreadCount(prev => prev + 1);
   }, []);
 
+  // Debug unreadCount changes
+  useEffect(() => {
+    console.log('useNotifications: unreadCount changed to:', unreadCount);
+  }, [unreadCount]);
+
   // Initialize
   useEffect(() => {
     if (isAuthenticated) {
@@ -193,13 +268,16 @@ export const useNotifications = () => {
     fetchNotifications,
     fetchUnreadCount,
     markAsRead,
+    markAllAsRead,
     deleteNotification,
+    bulkDeleteNotifications,
     subscribeToPushNotifications,
     unsubscribeFromPushNotifications,
     updatePreferences,
     getPreferences,
     addNotification,
-    refetch: fetchNotifications
+    refetch: () => fetchNotifications(false),
+    refetchWithCount: fetchNotifications
   };
 };
 

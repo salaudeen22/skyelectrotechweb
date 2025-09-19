@@ -27,7 +27,7 @@ const NotificationSettings = () => {
     loadPreferences();
     checkPushStatus();
     checkPermissionStatus();
-  }, [loadPreferences, checkPushStatus, checkPermissionStatus]);
+  }, []);
 
   const checkPermissionStatus = useCallback(() => {
     const status = getPermissionStatus();
