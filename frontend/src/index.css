@@ -36,3 +36,30 @@
     display: none;
   }
 }
+
+/* Categories navbar animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fadeInDown {
+  animation: fadeInDown 0.2s ease-out forwards;
+}
+
+/* Custom gradient colors for categories */
+.from-blue-25 {
+  --tw-gradient-from: #f8faff;
+  --tw-gradient-to: #f8faff00;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.to-indigo-25 {
+  --tw-gradient-to: #f7f8ff;
+}
