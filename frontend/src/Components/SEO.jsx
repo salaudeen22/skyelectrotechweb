@@ -22,6 +22,48 @@ const SEO = ({
   const finalImage = image || 'https://skyelectrotech.in/og-image.jpg';
   const canonicalUrl = url || `https://skyelectrotech.in${location.pathname}`;
 
+  const addGoogleAnalytics = useCallback((gaId) => {
+    if (!gaId || typeof window === 'undefined') return;
+    
+    // Check if already added
+    if (window.dataLayer && window.gtag) return;
+    
+    // Add Google tag script
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+    document.head.appendChild(script);
+    
+    // Initialize dataLayer and gtag
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function() {
+      window.dataLayer.push(arguments);
+    };
+    window.gtag('js', new Date());
+    window.gtag('config', gaId);
+  }, []);
+
+  const addFacebookPixel = useCallback((pixelId) => {
+    if (!pixelId || typeof window === 'undefined') return;
+    
+    // Check if already added
+    if (window.fbq) return;
+    
+    // Facebook Pixel Code
+    !function(f,b,e,v,n,t,s) {
+      if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)
+    }(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    
+    window.fbq('init', pixelId);
+    window.fbq('track', 'PageView');
+  }, []);
+
   const addStructuredData = useCallback((product, category) => {
     // Remove existing structured data
     const existingScripts = document.querySelectorAll('script[type="application/ld+json"]');
@@ -37,7 +79,9 @@ const SEO = ({
         "@id": url || window.location.href,
         "name": product.name,
         "description": product.description || `High-quality ${product.name} available at SkyElectroTech. Expert technical support and genuine products guaranteed.`,
-        "image": product.images?.map(img => img.url || img) || [],
+        "image": product.images?.length > 0 
+          ? product.images.map(img => img.url || img) 
+          : ["https://skyelectrotech.in/og-image.jpg"], // Fallback image when no product images
         "brand": {
           "@type": "Brand",
           "name": product.brand || "SkyElectroTech",
@@ -50,8 +94,10 @@ const SEO = ({
         },
         "category": product.category?.name || "Electronic Components",
         "productID": product._id,
-        "gtin": product.gtin || product.sku || product._id,
-        "mpn": product.mpn || product.sku || `SKY-${product._id.slice(-8)}`,
+        // Use SKU as GTIN if it's a valid GTIN format (8-14 digits), otherwise omit
+        "gtin": product.sku && /^[0-9]{8,14}$/.test(product.sku) ? product.sku : undefined,
+        "mpn": product.sku || `SKY-${product._id.slice(-8)}`,
+        "sku": product.sku || `SKY-${product._id.slice(-8)}`,
         "offers": {
           "@type": "Offer",
           "@id": `${url || window.location.href}#offer`,
@@ -81,6 +127,11 @@ const SEO = ({
               "@type": "MonetaryAmount",
               "value": "0",
               "currency": "INR"
+            },
+            "shippingDestination": {
+              "@type": "DefinedRegion",
+              "addressCountry": "IN",
+              "name": "India"
             },
             "deliveryTime": {
               "@type": "ShippingDeliveryTime",
@@ -136,7 +187,19 @@ const SEO = ({
             "name": "Support",
             "value": "Technical Support Available"
           }
-        ]
+        ],
+        // Product variants if available
+        "hasVariant": product.variants?.map(variant => ({
+          "@type": "Product",
+          "name": `${product.name} - ${variant.name}`,
+          "sku": variant.sku || `${product.sku}-${variant.id}`,
+          "offers": {
+            "@type": "Offer",
+            "price": variant.price || product.price,
+            "priceCurrency": "INR",
+            "availability": variant.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+          }
+        }))
       };
 
       // Add aggregateRating - required by Google (either offers, review, or aggregateRating)
@@ -159,7 +222,7 @@ const SEO = ({
         };
         
         // Add a basic review to support the rating
-        structuredData.review = {
+        structuredData.review = [{
           "@type": "Review",
           "reviewRating": {
             "@type": "Rating",
@@ -173,16 +236,11 @@ const SEO = ({
           },
           "reviewBody": "Quality product from SkyElectroTech with reliable performance.",
           "datePublished": new Date().toISOString().split('T')[0]
-        };
+        }];
       }
 
       // Add category if available
       structuredData.category = category?.name || "Electronics";
-      
-      // Add SKU if available
-      if (product.sku) {
-        structuredData.sku = product.sku;
-      }
       
       // Add brand
       if (product.brand) {
@@ -460,7 +518,7 @@ const SEO = ({
         document.head.appendChild(script);
       }
     }
-  }, [url]);
+  }, [url, title, description]);
 
   // Add Google Analytics and Facebook Pixel
   useEffect(() => {
@@ -473,7 +531,7 @@ const SEO = ({
     if (settings?.seo?.facebookPixel) {
       addFacebookPixel(settings.seo.facebookPixel);
     }
-  }, [settings?.seo?.googleAnalytics, settings?.seo?.facebookPixel]);
+  }, [settings?.seo?.googleAnalytics, settings?.seo?.facebookPixel, addGoogleAnalytics, addFacebookPixel]);
 
   useEffect(() => {
     // Update document title
@@ -497,6 +555,11 @@ const SEO = ({
     updateMetaTag('name', 'googlebot', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
     updateMetaTag('name', 'bingbot', 'index, follow');
     updateMetaTag('name', 'yandex', 'index, follow');
+    
+    // Additional 2024 SEO best practices
+    updateMetaTag('name', 'generator', 'React');
+    updateMetaTag('name', 'copyright', `© ${new Date().getFullYear()} SkyElectroTech`);
+    updateMetaTag('name', 'publisher', 'SkyElectroTech');
     
     // Enhanced local SEO
     updateMetaTag('name', 'geo.region', 'IN-KA');
@@ -532,16 +595,36 @@ const SEO = ({
     updateMetaTag('property', 'og:image', finalImage);
     updateMetaTag('property', 'og:image:width', '1200');
     updateMetaTag('property', 'og:image:height', '630');
+    updateMetaTag('property', 'og:image:alt', finalTitle);
+    updateMetaTag('property', 'og:image:type', 'image/jpeg');
     updateMetaTag('property', 'og:site_name', 'SkyElectroTech');
-    updateMetaTag('property', 'og:locale', 'en_US');
+    updateMetaTag('property', 'og:locale', 'en_IN');
+    updateMetaTag('property', 'og:locale:alternate', 'en_US');
+    
+    // Product specific Open Graph tags
+    if (product) {
+      updateMetaTag('property', 'product:price:amount', product.price?.toString());
+      updateMetaTag('property', 'product:price:currency', 'INR');
+      updateMetaTag('property', 'product:availability', product.stock > 0 ? 'in stock' : 'out of stock');
+      updateMetaTag('property', 'product:brand', product.brand || 'SkyElectroTech');
+    }
     
     // Twitter Cards enhanced
-    updateMetaTag('name', 'twitter:card', 'summary_large_image');
+    updateMetaTag('name', 'twitter:card', product ? 'product' : 'summary_large_image');
     updateMetaTag('name', 'twitter:site', '@skyelectrotech');
     updateMetaTag('name', 'twitter:creator', '@skyelectrotech');
     updateMetaTag('name', 'twitter:title', finalTitle);
     updateMetaTag('name', 'twitter:description', finalDescription);
     updateMetaTag('name', 'twitter:image', finalImage);
+    updateMetaTag('name', 'twitter:image:alt', finalTitle);
+    
+    // Twitter Product Card specific
+    if (product) {
+      updateMetaTag('name', 'twitter:label1', 'Price');
+      updateMetaTag('name', 'twitter:data1', `₹${product.price}`);
+      updateMetaTag('name', 'twitter:label2', 'Availability');
+      updateMetaTag('name', 'twitter:data2', product.stock > 0 ? 'In Stock' : 'Out of Stock');
+    }
     
     // Additional SEO meta tags
     updateMetaTag('name', 'theme-color', '#2563eb');
@@ -552,9 +635,6 @@ const SEO = ({
     updateMetaTag('name', 'mobile-web-app-capable', 'yes');
     updateMetaTag('name', 'apple-mobile-web-app-capable', 'yes');
     updateMetaTag('name', 'apple-mobile-web-app-status-bar-style', 'default');
-
-    // Update canonical URL - using our canonical component instead
-    // updateCanonical(url || window.location.href);
 
     // Add structured data
     addStructuredData(product, category);
@@ -571,16 +651,6 @@ const SEO = ({
       document.head.appendChild(meta);
     }
     meta.setAttribute('content', content);
-  };
-
-  const updateCanonical = (url) => {
-    let canonical = document.querySelector('link[rel="canonical"]');
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', url);
   };
 
   return null; // This component doesn't render anything
