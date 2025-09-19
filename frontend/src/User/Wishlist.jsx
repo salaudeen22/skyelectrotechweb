@@ -6,66 +6,21 @@ import ProductCard from '../Components/ProductCard';
 import { wishlistAPI } from '../services/apiServices';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
+import { useWishlist } from '../hooks/useWishlist';
 import { generateProductUrl } from '../utils/urlHelpers';
 
 const Wishlist = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { addToCart } = useCart();
-  const [wishlistItems, setWishlistItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { items: wishlistItems, loading, error, removeFromWishlist, clearWishlist } = useWishlist();
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
   // Add meta tags for SEO
   const pageTitle = "My Wishlist - SkyElectroTech | Save Your Favorite Electronic Components";
   const pageDescription = "Save and organize your favorite electronic components, Arduino boards, PLCs, and automation parts. Create your personalized collection at SkyElectroTech's wishlist.";
 
-  useEffect(() => {
-    if (user) {
-      fetchWishlist();
-    }
-  }, [user]);
-
-  const fetchWishlist = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const response = await wishlistAPI.getWishlist();
-      
-      console.log('Wishlist API response:', response);
-      
-      // Handle the correct backend response structure
-      let items = [];
-      if (response && response.data && response.data.wishlist && response.data.wishlist.products) {
-        items = Array.isArray(response.data.wishlist.products) ? response.data.wishlist.products : [];
-      } else if (response && response.data && Array.isArray(response.data)) {
-        items = response.data;
-      } else if (response && Array.isArray(response)) {
-        items = response;
-      }
-      
-      console.log('Processed wishlist items:', items);
-      setWishlistItems(items);
-    } catch (error) {
-      console.error('Error fetching wishlist:', error);
-      setError(error.response?.data?.message || 'Failed to load wishlist');
-      setWishlistItems([]); // Ensure it's always an array
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const removeFromWishlist = async (productId) => {
-    try {
-      await wishlistAPI.removeFromWishlist(productId);
-      // Filter based on the product._id since that's what we're removing
-      setWishlistItems(prev => prev.filter(item => item.product._id !== productId));
-    } catch (error) {
-      console.error('Error removing from wishlist:', error);
-      setError('Failed to remove item from wishlist');
-    }
-  };
+  // Component will use wishlist context data directly
 
   const handleAddToCart = async (product) => {
     try {
@@ -77,15 +32,9 @@ const Wishlist = () => {
     }
   };
 
-  const clearWishlist = async () => {
+  const handleClearWishlist = async () => {
     if (window.confirm('Are you sure you want to clear your entire wishlist?')) {
-      try {
-        await wishlistAPI.clearWishlist();
-        setWishlistItems([]);
-      } catch (error) {
-        console.error('Error clearing wishlist:', error);
-        setError('Failed to clear wishlist');
-      }
+      await clearWishlist();
     }
   };
 
@@ -184,7 +133,7 @@ const Wishlist = () => {
 
                 {/* Clear Wishlist */}
                 <button
-                  onClick={clearWishlist}
+                  onClick={handleClearWishlist}
                   className="flex items-center px-3 sm:px-4 py-2 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 font-medium text-sm sm:text-base"
                 >
                   <FiTrash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />

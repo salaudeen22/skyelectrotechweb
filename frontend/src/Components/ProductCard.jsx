@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { FiShoppingCart, FiHeart } from 'react-icons/fi';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
-import { wishlistAPI, recommendationsAPI } from '../services/apiServices';
+import { useWishlist } from '../hooks/useWishlist';
+import { recommendationsAPI } from '../services/apiServices';
 import { toast } from 'react-hot-toast';
 import { getPrimaryImage } from '../utils/imageUtils';
 import { generateProductUrl } from '../utils/urlHelpers';
@@ -12,8 +13,8 @@ import OptimizedImage from './OptimizedImage';
 const ProductCard = memo(({ product, showWishlistButton = true }) => {
   const { addToCart, addingToCart } = useCart();
   const { isAuthenticated, user } = useAuth();
+  const { isInWishlist, toggleWishlistItem, loading: wishlistLoading } = useWishlist();
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
-  const [isInWishlist, setIsInWishlist] = useState(false);
 
   const handleAddToCart = useCallback(async (e) => {
     e.preventDefault();
@@ -68,16 +69,12 @@ const ProductCard = memo(({ product, showWishlistButton = true }) => {
     
     try {
       setIsAddingToWishlist(true);
-      if (isInWishlist) {
-        await wishlistAPI.removeFromWishlist(product._id);
-        setIsInWishlist(false);
-        toast.success('Removed from wishlist!');
-      } else {
-        await wishlistAPI.addToWishlist(product._id);
-        setIsInWishlist(true);
-        toast.success('Added to wishlist!');
-        
-        // Track wishlist interaction for recommendations
+      const wasInWishlist = isInWishlist(product._id);
+      
+      await toggleWishlistItem(product._id);
+      
+      // Track wishlist interaction for recommendations only when adding
+      if (!wasInWishlist) {
         try {
           await recommendationsAPI.trackInteraction(product._id, 'wishlist_add', {
             location: 'product_card'
@@ -89,15 +86,10 @@ const ProductCard = memo(({ product, showWishlistButton = true }) => {
       }
     } catch (error) {
       console.error('Wishlist error:', error);
-      if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error('Failed to update wishlist');
-      }
     } finally {
       setIsAddingToWishlist(false);
     }
-  }, [product._id, isAuthenticated, user?.role, isInWishlist]);
+  }, [product._id, isAuthenticated, user?.role, isInWishlist, toggleWishlistItem]);
 
   return (
     <div className="group relative bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2 flex flex-col">
@@ -108,12 +100,12 @@ const ProductCard = memo(({ product, showWishlistButton = true }) => {
           onClick={handleAddToWishlist}
           disabled={isAddingToWishlist}
           className="absolute top-3 right-3 z-20 p-2.5 sm:p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors disabled:opacity-50 touch-manipulation cursor-pointer"
-          title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
-          aria-label={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+          title={isInWishlist(product._id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+          aria-label={isInWishlist(product._id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
           type="button"
         >
           <FiHeart 
-            className={`w-6 h-6 sm:w-5 sm:h-5 ${isAddingToWishlist ? 'text-red-500 animate-pulse' : isInWishlist ? 'text-red-500 fill-current' : 'text-gray-600'}`} 
+            className={`w-6 h-6 sm:w-5 sm:h-5 ${isAddingToWishlist ? 'text-red-500 animate-pulse' : isInWishlist(product._id) ? 'text-red-500 fill-current' : 'text-gray-600'}`} 
             aria-hidden="true"
           />
         </button>

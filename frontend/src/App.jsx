@@ -8,6 +8,7 @@ import { io } from 'socket.io-client';
 // Context Providers
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
+import { WishlistProvider } from './contexts/WishlistContext';
 import { CategoriesProvider } from './contexts/CategoriesContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 
@@ -119,8 +120,9 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <CartProvider>
-          <CategoriesProvider>
-            <SettingsProvider>
+          <WishlistProvider>
+            <CategoriesProvider>
+              <SettingsProvider>
               <Router>
                 <ErrorBoundary>
                   <div className="App">
@@ -296,8 +298,9 @@ const App = () => {
             </div>
                   </ErrorBoundary>
                 </Router>
-              </SettingsProvider>
-            </CategoriesProvider>
+                </SettingsProvider>
+              </CategoriesProvider>
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </QueryClientProvider>

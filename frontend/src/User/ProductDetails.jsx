@@ -4,6 +4,7 @@ import { FiShoppingCart, FiHeart, FiMinus, FiPlus, FiStar, FiTruck, FiShield, Fi
 import { productsAPI } from '../services/apiServices';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
+import { useWishlist } from '../hooks/useWishlist';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { toast } from 'react-hot-toast';
 import CommentSection from '../Components/CommentSection';
@@ -33,8 +34,9 @@ const ProductDetails = () => {
   
   const { id, slugWithId } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { addToCart, addingToCart } = useCart();
+  const { isInWishlist, toggleWishlistItem } = useWishlist();
   const { trackProduct, trackCartAdd, trackWishlistAdd, trackClick } = useAnalytics();
 
   // Extract ID from either direct ID param or slug-with-id format
@@ -209,17 +211,36 @@ const ProductDetails = () => {
     }
   }, [isAuthenticated, product, quantity, addToCart, navigate]);
 
-  const handleAddToWishlist = useCallback(() => {
+  const handleAddToWishlist = useCallback(async () => {
     if (!isAuthenticated) {
       toast.error('Please login to add items to wishlist');
       return;
     }
     
-    // TODO: Implement wishlist functionality
-    memoizedTrackWishlistAdd(product);
-    memoizedTrackClick('add_to_wishlist_button', 'product_details');
-    toast.success('Added to wishlist!');
-  }, [isAuthenticated, product, memoizedTrackWishlistAdd, memoizedTrackClick]);
+    // Restrict wishlist functionality for admin/employee users
+    if (user?.role === 'admin' || user?.role === 'employee') {
+      toast.error('Wishlist functionality is only available for regular users');
+      return;
+    }
+    
+    if (!product?._id) {
+      toast.error('Product information not available');
+      return;
+    }
+    
+    try {
+      const wasInWishlist = isInWishlist(product._id);
+      await toggleWishlistItem(product._id);
+      
+      // Track wishlist interaction for analytics only when adding
+      if (!wasInWishlist) {
+        memoizedTrackWishlistAdd(product);
+        memoizedTrackClick('add_to_wishlist_button', 'product_details');
+      }
+    } catch (error) {
+      console.error('Wishlist error:', error);
+    }
+  }, [isAuthenticated, user?.role, product, isInWishlist, toggleWishlistItem, memoizedTrackWishlistAdd, memoizedTrackClick]);
 
   // Memoize quantity handlers
   const handleQuantityDecrease = useCallback(() => {
@@ -527,10 +548,16 @@ const ProductDetails = () => {
                   </button>
                   <button
                     onClick={handleAddToWishlist}
-                    className="flex items-center justify-center border border-gray-300 hover:bg-gray-50 active:bg-gray-100 text-gray-900 py-3 sm:py-3 px-4 sm:px-6 rounded-lg text-sm sm:text-sm font-medium transition-colors touch-manipulation"
+                    className={`flex items-center justify-center border transition-colors touch-manipulation py-3 sm:py-3 px-4 sm:px-6 rounded-lg text-sm sm:text-sm font-medium ${
+                      product && isInWishlist(product._id)
+                        ? 'border-red-300 bg-red-50 text-red-700 hover:bg-red-100'
+                        : 'border-gray-300 hover:bg-gray-50 active:bg-gray-100 text-gray-900'
+                    }`}
                   >
-                    <FiHeart className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
-                    Wishlist
+                    <FiHeart className={`w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2 ${
+                      product && isInWishlist(product._id) ? 'fill-current' : ''
+                    }`} />
+                    {product && isInWishlist(product._id) ? 'In Wishlist' : 'Add to Wishlist'}
                   </button>
                 </div>
                 {/* Share sheet trigger is floating; nothing inline here */}
