@@ -13,6 +13,20 @@ class PaymentService {
     this.timeoutMinutes = 30; // Payment timeout in minutes
     this.retryDelays = [5, 15, 30]; // Retry delays in minutes
     this.maxRetries = 3;
+    this.verificationCache = new Map(); // Cache for recent verifications
+    this.cacheTimeout = 5 * 60 * 1000; // 5 minutes cache
+  }
+
+  /**
+   * Clear expired cache entries
+   */
+  clearExpiredCache() {
+    const now = Date.now();
+    for (const [key, entry] of this.verificationCache.entries()) {
+      if (now - entry.timestamp > this.cacheTimeout) {
+        this.verificationCache.delete(key);
+      }
+    }
   }
 
   /**
@@ -109,18 +123,29 @@ class PaymentService {
   }
 
   /**
-   * Verify payment with retry mechanism
+   * Verify payment with optimized retry mechanism
    */
   async verifyPaymentWithRetry(razorpayOrderId, razorpayPaymentId, razorpaySignature, maxAttempts = 3) {
     let attempt = 0;
     let lastError = null;
+    let payment = null;
+
+    // Pre-fetch payment record to avoid repeated queries
+    try {
+      payment = await Payment.findOne({ razorpayOrderId });
+      if (!payment) {
+        throw new Error('Payment record not found');
+      }
+    } catch (error) {
+      throw new Error('Payment record not found');
+    }
 
     while (attempt < maxAttempts) {
       try {
         attempt++;
         console.log(`Payment verification attempt ${attempt}/${maxAttempts} for order ${razorpayOrderId}`);
 
-        // Verify signature
+        // Verify signature first (fastest operation)
         const isValidSignature = verifyPaymentSignature(
           razorpayOrderId,
           razorpayPaymentId,
@@ -131,25 +156,35 @@ class PaymentService {
           throw new Error('Invalid payment signature');
         }
 
-        // Get payment details from Razorpay
-        const paymentDetails = await getPaymentDetails(razorpayPaymentId);
+        // Parallel execution: Get payment details and prepare database update
+        const [paymentDetails] = await Promise.all([
+          getPaymentDetails(razorpayPaymentId, 8000), // 8 second timeout
+          // Pre-validate payment object
+          Promise.resolve(payment)
+        ]);
         
         if (paymentDetails.status !== 'captured') {
+          // For non-captured payments, check if it's a temporary status
+          if (paymentDetails.status === 'authorized' && attempt === 1) {
+            // Wait briefly for capture to complete
+            await this.sleep(2000);
+            continue;
+          }
           throw new Error(`Payment not captured. Status: ${paymentDetails.status}`);
         }
 
-        // Update payment record
-        const payment = await Payment.findOne({ razorpayOrderId });
-        if (!payment) {
-          throw new Error('Payment record not found');
+        // Update payment and order in parallel
+        const updatePromises = [
+          payment.markAsVerified(razorpayPaymentId)
+        ];
+        
+        if (payment.order) {
+          updatePromises.push(
+            this.updateOrderPaymentStatus(payment.order, 'completed', razorpayPaymentId)
+          );
         }
 
-        await payment.markAsVerified(razorpayPaymentId);
-        
-        // Update order payment status only if order exists
-        if (payment.order) {
-          await this.updateOrderPaymentStatus(payment.order, 'completed', razorpayPaymentId);
-        }
+        await Promise.all(updatePromises);
 
         console.log(`Payment verification successful on attempt ${attempt}`);
         return {
@@ -164,15 +199,14 @@ class PaymentService {
         console.error(`Payment verification attempt ${attempt} failed:`, error.message);
 
         if (attempt < maxAttempts) {
-          // Wait before retry (exponential backoff)
-          const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+          // Reduced retry delays for faster processing
+          const delay = attempt === 1 ? 1000 : 3000; // 1s, 3s instead of 2s, 4s, 8s
           await this.sleep(delay);
         }
       }
     }
 
     // All attempts failed
-    const payment = await Payment.findOne({ razorpayOrderId });
     if (payment) {
       await payment.markAsFailed(`Verification failed after ${maxAttempts} attempts: ${lastError.message}`);
     }

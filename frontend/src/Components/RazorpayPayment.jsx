@@ -122,7 +122,7 @@ const RazorpayPayment = ({
     try {
       setLoading(true);
 
-      // Verify payment
+      // Verify payment using fast endpoint first
       const verificationData = {
         razorpay_order_id: response.razorpay_order_id,
         razorpay_payment_id: response.razorpay_payment_id,
@@ -130,7 +130,15 @@ const RazorpayPayment = ({
         orderId: orderId
       };
 
-      const verificationResponse = await paymentAPI.verifyPayment(verificationData);
+      let verificationResponse;
+      try {
+        // Try fast verification first
+        verificationResponse = await paymentAPI.verifyPaymentFast(verificationData);
+      } catch (fastError) {
+        console.log('Fast verification failed, falling back to regular verification');
+        // Fall back to regular verification
+        verificationResponse = await paymentAPI.verifyPayment(verificationData);
+      }
 
       if (verificationResponse.success) {
         toast.success('Payment successful! Your order has been confirmed.');

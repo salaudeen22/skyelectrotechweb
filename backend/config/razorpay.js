@@ -65,13 +65,43 @@ const verifyPaymentSignature = (orderId, paymentId, signature) => {
   }
 };
 
-// Get payment details
-const getPaymentDetails = async (paymentId) => {
+// Get payment details with timeout and retry
+const getPaymentDetails = async (paymentId, timeout = 10000) => {
   try {
-    const payment = await razorpay.payments.fetch(paymentId);
+    // Create a promise that rejects after timeout
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Payment details fetch timeout')), timeout);
+    });
+    
+    // Race between actual API call and timeout
+    const payment = await Promise.race([
+      razorpay.payments.fetch(paymentId),
+      timeoutPromise
+    ]);
+    
     return payment;
   } catch (error) {
     console.error('Error fetching payment details:', error);
+    
+    // Retry once with shorter timeout if first attempt fails
+    if (error.message.includes('timeout')) {
+      try {
+        console.log('Retrying payment details fetch with shorter timeout');
+        const retryTimeout = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Payment details retry timeout')), 5000);
+        });
+        
+        const payment = await Promise.race([
+          razorpay.payments.fetch(paymentId),
+          retryTimeout
+        ]);
+        
+        return payment;
+      } catch (retryError) {
+        throw new Error('Failed to fetch payment details after retry');
+      }
+    }
+    
     throw new Error('Failed to fetch payment details');
   }
 };

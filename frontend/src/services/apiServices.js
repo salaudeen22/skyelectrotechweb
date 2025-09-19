@@ -537,6 +537,12 @@ export const paymentAPI = {
     return response.data;
   },
 
+  // Fast verify payment (optimized)
+  verifyPaymentFast: async (paymentData) => {
+    const response = await api.post('/payments/verify-fast', paymentData);
+    return response.data;
+  },
+
   // Get payment methods
   getPaymentMethods: async () => {
     const response = await api.get('/payments/methods');

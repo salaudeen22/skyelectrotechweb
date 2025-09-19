@@ -85,22 +85,29 @@ const verifyPayment = asyncHandler(async (req, res) => {
       razorpay_signature: razorpay_signature ? 'present' : 'missing'
     });
 
-    // Verify payment with retry mechanism
-    const verificationResult = await paymentService.verifyPaymentWithRetry(
+    // Start verification and order update in parallel if orderId is provided
+    const verificationPromise = paymentService.verifyPaymentWithRetry(
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      3 // max attempts
+      2 // Reduced max attempts for faster processing
     );
 
+    let orderPromise = null;
+    if (orderId) {
+      orderPromise = Order.findById(orderId);
+    }
+
+    // Wait for verification to complete
+    const verificationResult = await verificationPromise;
     console.log('Payment verification successful:', verificationResult);
 
-    // Update the corresponding order with payment details if provided
+    // Update order if needed (this may already be done in verifyPaymentWithRetry)
     let updatedOrder = null;
-    if (orderId) {
+    if (orderId && orderPromise) {
       try {
-        const order = await Order.findById(orderId);
-        if (order) {
+        const order = await orderPromise;
+        if (order && order.paymentInfo.status !== 'completed') {
           order.paymentInfo = {
             ...order.paymentInfo,
             status: 'completed',
@@ -109,12 +116,14 @@ const verifyPayment = asyncHandler(async (req, res) => {
           };
           order.razorpayOrderId = razorpay_order_id;
           order.razorpayPaymentId = razorpay_payment_id;
-          // Mark order confirmed on successful online payment
           order.orderStatus = 'confirmed';
           updatedOrder = await order.save();
+        } else {
+          updatedOrder = order;
         }
       } catch (updateError) {
         console.error('Failed to update order after payment verification:', updateError);
+        // Don't fail the entire verification if order update fails
       }
     }
 
@@ -124,7 +133,7 @@ const verifyPayment = asyncHandler(async (req, res) => {
       status: 'success',
       paymentDetails: verificationResult.paymentDetails,
       attempts: verificationResult.attempts,
-      order: updatedOrder
+      order: updatedOrder || verificationResult.payment?.order
     }, 'Payment verified successfully');
   } catch (error) {
     console.error('Payment verification error:', error);
@@ -320,6 +329,59 @@ const retryPayment = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Fast payment verification (optimized endpoint)
+// @route   POST /api/payments/verify-fast
+// @access  Private (User)
+const verifyPaymentFast = asyncHandler(async (req, res) => {
+  const { 
+    razorpay_order_id, 
+    razorpay_payment_id, 
+    razorpay_signature
+  } = req.body;
+
+  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+    return sendError(res, 400, 'Missing payment verification parameters');
+  }
+
+  try {
+    // Use optimized verification with reduced retries
+    const verificationResult = await paymentService.verifyPaymentWithRetry(
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      1 // Single attempt for fast verification
+    );
+
+    sendResponse(res, 200, {
+      paymentId: razorpay_payment_id,
+      orderId: razorpay_order_id,
+      status: 'success',
+      attempts: verificationResult.attempts
+    }, 'Payment verified successfully');
+  } catch (error) {
+    console.error('Fast payment verification error:', error);
+    // Fall back to regular verification on failure
+    try {
+      const fallbackResult = await paymentService.verifyPaymentWithRetry(
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
+        2
+      );
+      
+      sendResponse(res, 200, {
+        paymentId: razorpay_payment_id,
+        orderId: razorpay_order_id,
+        status: 'success',
+        attempts: fallbackResult.attempts,
+        fallback: true
+      }, 'Payment verified successfully (fallback)');
+    } catch (fallbackError) {
+      sendError(res, 500, `Failed to verify payment: ${fallbackError.message}`);
+    }
+  }
+});
+
 // @desc    Get payment statistics
 // @route   GET /api/payments/stats
 // @access  Private (Admin)
@@ -362,6 +424,7 @@ const retryFailedPayments = asyncHandler(async (req, res) => {
 module.exports = {
   createPaymentOrder,
   verifyPayment,
+  verifyPaymentFast,
   getPaymentInfo,
   processRefund,
   getPaymentMethods,

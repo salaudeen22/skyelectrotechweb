@@ -3,6 +3,7 @@ const { body } = require('express-validator');
 const {
   createPaymentOrder,
   verifyPayment,
+  verifyPaymentFast,
   getPaymentInfo,
   processRefund,
   getPaymentMethods,
@@ -90,6 +91,15 @@ router.post('/verify',
   validate, 
   logActivity('verify_payment', 'payment'),
   verifyPayment
+);
+
+router.post('/verify-fast', 
+  auth, 
+  userAccess, 
+  verifyPaymentValidation, 
+  validate, 
+  logActivity('verify_payment_fast', 'payment'),
+  verifyPaymentFast
 );
 
 // User/Admin routes

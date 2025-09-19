@@ -88,6 +88,12 @@ paymentSchema.index({ timeoutAt: 1 });
 paymentSchema.index({ nextRetryAt: 1 });
 paymentSchema.index({ createdAt: -1 });
 
+// Compound indexes for optimized queries
+paymentSchema.index({ status: 1, timeoutAt: 1 }); // For expired payments
+paymentSchema.index({ status: 1, retryCount: 1, nextRetryAt: 1 }); // For retry queries
+paymentSchema.index({ status: 1, razorpayOrderId: 1 }); // For verification queries
+paymentSchema.index({ user: 1, status: 1, createdAt: -1 }); // For user payment history
+
 // Update timestamp on save
 paymentSchema.pre('save', function(next) {
   this.updatedAt = new Date();

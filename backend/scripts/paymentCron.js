@@ -47,27 +47,43 @@ const retryFailedPaymentsJob = cron ? cron.schedule('*/10 * * * *', async () => 
   scheduled: false
 }) : null;
 
-// Synchronize payment status every 15 minutes
-const synchronizePaymentStatusJob = cron ? cron.schedule('*/15 * * * *', async () => {
+// Synchronize payment status every 20 minutes (reduced frequency)
+const synchronizePaymentStatusJob = cron ? cron.schedule('*/20 * * * *', async () => {
   try {
     console.log('Running payment status synchronization job:', new Date().toISOString());
     
-    // Get all pending payments
+    // Get all pending payments, prioritize recent ones
     const Payment = require('../models/Payment');
     const pendingPayments = await Payment.find({ 
       status: { $in: ['pending', 'processing'] },
-      razorpayOrderId: { $exists: true }
-    }).limit(50); // Process in batches
+      razorpayOrderId: { $exists: true },
+      createdAt: { $gte: new Date(Date.now() - 2 * 60 * 60 * 1000) } // Only last 2 hours
+    })
+    .sort({ createdAt: -1 })
+    .limit(30); // Reduced batch size for better performance
 
     let synchronizedCount = 0;
-    for (const payment of pendingPayments) {
-      try {
-        const result = await paymentService.synchronizePaymentStatus(payment._id);
-        if (result.synchronized) {
-          synchronizedCount++;
+    // Process payments in parallel batches of 5
+    const batchSize = 5;
+    for (let i = 0; i < pendingPayments.length; i += batchSize) {
+      const batch = pendingPayments.slice(i, i + batchSize);
+      
+      const batchPromises = batch.map(async (payment) => {
+        try {
+          const result = await paymentService.synchronizePaymentStatus(payment._id);
+          if (result.synchronized) {
+            synchronizedCount++;
+          }
+        } catch (error) {
+          console.error(`Error synchronizing payment ${payment._id}:`, error.message);
         }
-      } catch (error) {
-        console.error(`Error synchronizing payment ${payment._id}:`, error.message);
+      });
+      
+      await Promise.all(batchPromises);
+      
+      // Small delay between batches to prevent database overload
+      if (i + batchSize < pendingPayments.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
 
