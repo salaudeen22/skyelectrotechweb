@@ -382,7 +382,10 @@ const SEO = ({
                     "name": "Arduino Development Boards",
                     "category": "Microcontroller Boards",
                     "description": "Get Arduino Uno, Nano, Mega boards in Bangalore. Fast shipping, cash on delivery available. Expert technical support included.",
-                    "image": "https://skyelectrotech.in/og-image.jpg",
+                    "image": [
+                      "https://skyelectrotech-assets.s3.eu-north-1.amazonaws.com/products/1758210523513-wcnyyfhbstq.png",
+                      "https://skyelectrotech.in/favicon_io%20(1)/android-chrome-512x512.png"
+                    ],
                     "brand": {
                       "@type": "Brand",
                       "name": "Arduino"
@@ -417,7 +420,10 @@ const SEO = ({
                     "name": "PLCs & Industrial Components",
                     "category": "Industrial Automation",
                     "description": "Get PLCs, HMIs, industrial sensors in Bangalore. Same-day delivery, cash on delivery available.",
-                    "image": "https://skyelectrotech.in/og-image.jpg",
+                    "image": [
+                      "https://skyelectrotech-assets.s3.eu-north-1.amazonaws.com/products/1758210523513-wcnyyfhbstq.png",
+                      "https://skyelectrotech.in/favicon_io%20(1)/android-chrome-512x512.png"
+                    ],
                     "brand": {
                       "@type": "Brand",
                       "name": "Industrial"
@@ -452,7 +458,10 @@ const SEO = ({
                     "name": "Electronic Sensors & Components",
                     "category": "Electronic Components",
                     "description": "Get temperature, humidity, ultrasonic sensors in Bangalore. Fast shipping, cash on delivery available.",
-                    "image": "https://skyelectrotech.in/og-image.jpg",
+                    "image": [
+                      "https://skyelectrotech-assets.s3.eu-north-1.amazonaws.com/products/1758210523513-wcnyyfhbstq.png",
+                      "https://skyelectrotech.in/favicon_io%20(1)/android-chrome-512x512.png"
+                    ],
                     "brand": {
                       "@type": "Brand",
                       "name": "SkyElectroTech"
