@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { FaStar, FaThumbsUp, FaThumbsDown, FaReply, FaEdit, FaTrash, FaCheckCircle, FaPen, FaUsers, FaChartBar, FaFilter, FaSort } from 'react-icons/fa';
+import { FaThumbsUp, FaThumbsDown, FaReply, FaEdit, FaTrash, FaCheckCircle, FaUsers, FaChartBar, FaFilter, FaSort } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import CommentModal from './CommentModal';
 import CommentItem from './CommentItem';
@@ -147,101 +147,82 @@ const CommentSection = ({ productId }) => {
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-        {/* Enhanced Header */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 sm:p-6 border-b border-gray-200">
-          <div className="w-full">
-            <div className="w-full">
-              
-              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                <div className="flex items-center gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <FaStar
-                      key={star}
-                      className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                        star <= Math.round(averageRating)
-                          ? 'text-yellow-400 fill-current'
-                          : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
+      <div className="bg-white">
+        {/* Flipkart-style Header */}
+        <div className="border-b border-gray-200">
+          <div className="p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Ratings & Reviews</h2>
+            
+            {/* Rating Summary and Rate Product Button */}
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+              {/* Left side - Rating Summary */}
+              <div className="flex-1">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold text-gray-900">
+                      {averageRating.toFixed(1)}★
+                    </span>
+                  </div>
+                  <div className="text-gray-600">
+                    <span className="font-medium">{ratingStats.totalReviews.toLocaleString()} Ratings &</span>
+                    <br />
+                    <span className="font-medium">{comments.length} Reviews</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg sm:text-xl font-bold text-gray-900">
-                    {averageRating.toFixed(1)}
-                  </span>
-                  <span className="text-sm sm:text-base text-gray-600">
-                    out of 5
-                  </span>
+
+                {/* Rating Distribution */}
+                <div className="space-y-2">
+                  {[5, 4, 3, 2, 1].map((rating) => {
+                    const count = ratingStats.ratingDistribution[rating] || 0;
+                    const percentage = ratingStats.totalReviews > 0 
+                      ? (count / ratingStats.totalReviews) * 100 
+                      : 0;
+                    
+                    return (
+                      <div key={rating} className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-gray-700 w-8">{rating}★</span>
+                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        <span className="text-sm text-gray-600 w-12 text-right">
+                          {count.toLocaleString()}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
-                <span className="text-sm sm:text-base text-gray-500">
-                  ({ratingStats.totalReviews} reviews)
-                </span>
+              </div>
+
+              {/* Right side - Rate Product Button */}
+              <div className="flex-shrink-0 lg:self-start">
+                <button
+                  onClick={() => {
+                    if (!user) {
+                      toast.error('Please login to rate this product');
+                      return;
+                    }
+                    if (userComment) {
+                      setEditingComment(userComment);
+                      setShowCommentModal(true);
+                    } else {
+                      setEditingComment(null);
+                      setShowCommentModal(true);
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium text-sm transition-colors"
+                >
+                  {user && userComment ? 'Edit Review' : 'Rate this Product'}
+                </button>
               </div>
             </div>
           </div>
-
-          {/* Enhanced Rating Distribution */}
-          <div className="mt-4 sm:mt-6 grid grid-cols-5 gap-2 sm:gap-3">
-            {[5, 4, 3, 2, 1].map((rating) => {
-              const count = ratingStats.ratingDistribution[rating] || 0;
-              const percentage = ratingStats.totalReviews > 0 
-                ? (count / ratingStats.totalReviews) * 100 
-                : 0;
-              
-              return (
-                <div key={rating} className="text-center group cursor-pointer hover:bg-white hover:rounded-lg hover:shadow-sm p-1 sm:p-2 transition-all duration-200">
-                  <div className="flex items-center justify-center mb-1 sm:mb-2">
-                    <span className="text-xs sm:text-sm font-semibold text-gray-900">{rating}</span>
-                    <FaStar className="w-3 h-3 text-yellow-400 fill-current ml-1" />
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3 overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-yellow-400 to-yellow-500 h-2 sm:h-3 rounded-full transition-all duration-300"
-                      style={{ width: `${percentage}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-xs text-gray-600 mt-1 block font-medium">{count}</span>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Write Review Button */}
-          {user && (
-            <div className="mt-4 sm:mt-6">
-              {userComment && (
-                <div className="p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg mb-3 sm:mb-4">
-                  <p className="text-xs sm:text-sm text-blue-800">
-                    You have already reviewed this product. You can edit your review below.
-                  </p>
-                </div>
-              )}
-              <button
-                onClick={() => {
-                  if (userComment) {
-                    // If user has already reviewed, open edit mode
-                    setEditingComment(userComment);
-                    setShowCommentModal(true);
-                  } else {
-                    // If user hasn't reviewed, open new review mode
-                    setEditingComment(null);
-                    setShowCommentModal(true);
-                  }
-                }}
-                className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 active:from-blue-800 active:to-indigo-800 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 touch-manipulation text-sm sm:text-base w-full"
-              >
-                <FaPen className="w-4 h-4" />
-                <span className="font-medium">
-                  {userComment ? 'Edit Your Review' : 'Write a Review'}
-                </span>
-              </button>
-            </div>
-          )}
         </div>
 
-        {/* Enhanced Filters */}
-        <div className="p-4 border-b border-gray-100 bg-gray-50">
+        {/* Filters */}
+        <div className="p-4 border-b border-gray-100">
           <RatingFilter
             filters={filters}
             onFilterChange={handleFilterChange}
@@ -281,53 +262,29 @@ const CommentSection = ({ productId }) => {
           )}
         </div>
 
-        {/* Enhanced Pagination */}
+        {/* Simple Pagination */}
         {pagination.totalPages > 1 && (
-          <div className="p-4 sm:p-6 border-t border-gray-100 bg-gray-50">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
-                Showing <span className="font-semibold">{((pagination.currentPage - 1) * pagination.limit) + 1}</span> to{' '}
-                <span className="font-semibold">{Math.min(pagination.currentPage * pagination.limit, pagination.totalItems)}</span> of{' '}
-                <span className="font-semibold">{pagination.totalItems}</span> reviews
-              </div>
-              <div className="flex items-center justify-center gap-2">
-                <button
-                  onClick={() => handlePageChange(pagination.currentPage - 1)}
-                  disabled={pagination.currentPage === 1}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
-                >
-                  <span>←</span>
-                  <span className="hidden sm:inline">Previous</span>
-                </button>
-                
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                    const page = i + 1;
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                          page === pagination.currentPage
-                            ? 'bg-blue-600 text-white'
-                            : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
-                </div>
-                
-                <button
-                  onClick={() => handlePageChange(pagination.currentPage + 1)}
-                  disabled={pagination.currentPage === pagination.totalPages}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
-                >
-                  <span className="hidden sm:inline">Next</span>
-                  <span>→</span>
-                </button>
-              </div>
+          <div className="p-4 border-t border-gray-100 text-center">
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={() => handlePageChange(pagination.currentPage - 1)}
+                disabled={pagination.currentPage === 1}
+                className="px-4 py-2 text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ← Previous
+              </button>
+              
+              <span className="px-4 py-2 text-sm text-gray-600">
+                Page {pagination.currentPage} of {pagination.totalPages}
+              </span>
+              
+              <button
+                onClick={() => handlePageChange(pagination.currentPage + 1)}
+                disabled={pagination.currentPage === pagination.totalPages}
+                className="px-4 py-2 text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next →
+              </button>
             </div>
           </div>
         )}

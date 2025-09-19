@@ -32,7 +32,7 @@ const CommentModal = ({ isOpen, onClose, productId, onCommentCreated, editCommen
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-[9999] overflow-y-auto">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 backdrop-blur-sm bg-black/30 transition-opacity duration-300"
@@ -40,8 +40,8 @@ const CommentModal = ({ isOpen, onClose, productId, onCommentCreated, editCommen
       ></div>
 
       {/* Modal Container */}
-      <div className="flex min-h-full items-center justify-center p-2 sm:p-4">
-        <div className="relative w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
+      <div className="flex min-h-full items-center justify-center p-2 sm:p-4 pt-20 sm:pt-24">
+        <div className="relative w-full max-w-2xl max-h-[calc(95vh-5rem)] sm:max-h-[calc(90vh-6rem)] overflow-hidden">
           {/* Modal Content */}
           <div className="relative bg-white rounded-xl shadow-2xl overflow-hidden transform transition-all duration-300">
             {/* Modal Header */}
@@ -73,7 +73,7 @@ const CommentModal = ({ isOpen, onClose, productId, onCommentCreated, editCommen
             </div>
 
             {/* Modal Body */}
-            <div className="p-4 sm:p-6 max-h-[calc(95vh-120px)] sm:max-h-[calc(90vh-120px)] overflow-y-auto">
+            <div className="p-4 sm:p-6 max-h-[calc(95vh-10rem)] sm:max-h-[calc(90vh-10rem)] overflow-y-auto">
               <CommentForm
                 productId={productId}
                 onCommentCreated={(comment) => {

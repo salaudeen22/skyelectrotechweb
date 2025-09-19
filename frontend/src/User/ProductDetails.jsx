@@ -621,7 +621,6 @@ const ProductDetails = () => {
         {/* Customer Reviews Section */}
         <div className="bg-white rounded-lg shadow-sm mt-6 sm:mt-8">
           <div className="p-4 sm:p-6">
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Customer Reviews</h2>
             <CommentSection productId={product._id} />
           </div>
         </div>

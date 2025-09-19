@@ -92,53 +92,16 @@ const CommentItem = ({ comment, currentUser, onCommentUpdated, onCommentDeleted,
 
   return (
     <div className="p-4 sm:p-6 hover:bg-gray-50 transition-colors duration-200">
-      {/* Enhanced Comment Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
-        <div className="flex items-start gap-3 sm:gap-4">
-          <div className="flex-shrink-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-md">
-              <span className="text-white font-semibold text-sm sm:text-lg">
-                {comment.user.name?.charAt(0)?.toUpperCase() || 'U'}
-              </span>
-            </div>
+      {/* Flipkart-style Rating and Title */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">
+            <span>{comment.rating}</span>
+            <FaStar className="w-3 h-3 fill-current" />
           </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-gray-900 text-base sm:text-lg">{comment.user.name}</span>
-                {comment.isVerifiedPurchase && (
-                  <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                    <FaCheckCircle className="w-3 h-3" />
-                    <span>Verified</span>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs sm:text-sm text-gray-600">
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <FaStar
-                    key={star}
-                    className={`w-4 h-4 ${
-                      star <= comment.rating
-                        ? 'text-yellow-400 fill-current'
-                        : 'text-gray-300'
-                    }`}
-                  />
-                ))}
-                <span className="ml-1 font-medium text-gray-700">{comment.rating}/5</span>
-              </div>
-              
-              <div className="flex items-center gap-1 text-gray-500">
-                <FaCalendarAlt className="w-3 h-3" />
-                <span>{formatDate(comment.createdAt).date}</span>
-              </div>
-            </div>
-          </div>
+          <h4 className="font-medium text-gray-900 text-base">{comment.title}</h4>
         </div>
-
+        
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
           {canEdit && (
@@ -163,9 +126,24 @@ const CommentItem = ({ comment, currentUser, onCommentUpdated, onCommentDeleted,
       </div>
 
       {/* Comment Content */}
-      <div className="mb-3 sm:mb-4">
-        <h4 className="font-bold text-gray-900 text-base sm:text-lg mb-2 sm:mb-3">{comment.title}</h4>
-        <p className="text-gray-700 text-sm sm:text-base leading-relaxed whitespace-pre-wrap">{comment.comment}</p>
+      <div className="mb-4">
+        <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap mb-3">{comment.comment}</p>
+        
+        {/* User Info */}
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span className="font-medium text-gray-900">{comment.user.name}</span>
+          {comment.isVerifiedPurchase && (
+            <>
+              <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+              <div className="flex items-center gap-1 text-green-600">
+                <FaCheckCircle className="w-3 h-3" />
+                <span className="text-xs font-medium">Certified Buyer</span>
+              </div>
+            </>
+          )}
+          <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+          <span>{formatDate(comment.createdAt)}</span>
+        </div>
       </div>
 
       {/* Enhanced Comment Images */}
@@ -193,38 +171,35 @@ const CommentItem = ({ comment, currentUser, onCommentUpdated, onCommentDeleted,
         </div>
       )}
 
-      {/* Enhanced Voting */}
-      <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
-        <div className="flex items-center gap-2 sm:gap-4">
+      {/* Flipkart-style Voting */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
           <button
             onClick={() => onVote(comment._id, 'helpful')}
-            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-600 bg-gray-100 hover:bg-green-100 hover:text-green-700 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+            className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!currentUser}
           >
             <FaThumbsUp className="w-4 h-4" />
-            <span className="font-medium hidden sm:inline">Helpful</span>
-            <span className="bg-white px-2 py-1 rounded-full text-xs font-bold text-gray-700">
-              {comment.isHelpful || 0}
-            </span>
+            <span className="text-sm">{comment.isHelpful || 0}</span>
           </button>
           
           <button
             onClick={() => onVote(comment._id, 'not_helpful')}
-            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm text-gray-600 bg-gray-100 hover:bg-red-100 hover:text-red-700 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+            className="flex items-center gap-2 text-gray-600 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!currentUser}
           >
             <FaThumbsDown className="w-4 h-4" />
-            <span className="font-medium hidden sm:inline">Not Helpful</span>
+            <span className="text-sm">0</span>
           </button>
         </div>
         
         {canReply && (
           <button
             onClick={() => setShowReplyForm(!showReplyForm)}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-gray-100 hover:bg-blue-100 hover:text-blue-700 rounded-lg transition-all duration-200"
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
           >
             <FaReply className="w-4 h-4" />
-            <span className="font-medium">Reply</span>
+            <span className="text-sm font-medium">Reply</span>
           </button>
         )}
       </div>
