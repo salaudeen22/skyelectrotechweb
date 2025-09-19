@@ -11,11 +11,6 @@ import { useNotifications } from '../hooks/useNotifications';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
-  const [hoveredCategoryId, setHoveredCategoryId] = useState(null);
-  const [dropdownTimeout, setDropdownTimeout] = useState(null);
-  const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(false);
-  const [openMobileCategories, setOpenMobileCategories] = useState(new Set());
   const { user, logout } = useContext(AuthContext);
   const { items: cartItems, totalItems } = useContext(CartContext);
   const { settings } = useSettings();
@@ -29,67 +24,14 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const resetMobileStates = () => {
-    setIsMenuOpen(false);
-    setIsMobileProductsOpen(false);
-    setOpenMobileCategories(new Set());
-  };
-
-  // Helper functions for dropdown behavior
-  const handleDropdownEnter = () => {
-    if (dropdownTimeout) {
-      clearTimeout(dropdownTimeout);
-      setDropdownTimeout(null);
-    }
-    setIsProductsDropdownOpen(true);
-  };
-
-  const handleDropdownLeave = () => {
-    const timeout = setTimeout(() => {
-      setIsProductsDropdownOpen(false);
-      setHoveredCategoryId(null);
-    }, 150); // Small delay to allow mouse movement
-    setDropdownTimeout(timeout);
-  };
-
-  const handleCategoryEnter = (categoryId) => {
-    setHoveredCategoryId(categoryId);
-  };
-
-  const handleCategoryLeave = () => {
-    // Don't immediately hide subcategory, let the main dropdown handle it
-  };
-
-  const toggleMobileCategory = (categoryId) => {
-    setOpenMobileCategories(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(categoryId)) {
-        newSet.delete(categoryId);
-      } else {
-        newSet.add(categoryId);
-      }
-      return newSet;
-    });
-  };
 
   const cartItemCount = totalItems || cartItems?.length || 0;
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (dropdownTimeout) {
-        clearTimeout(dropdownTimeout);
-      }
-    };
-  }, [dropdownTimeout]);
 
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isMenuOpen && !event.target.closest('nav')) {
         setIsMenuOpen(false);
-        setIsMobileProductsOpen(false);
-        setOpenMobileCategories(new Set()); // Reset expanded categories
       }
     };
 
@@ -127,84 +69,12 @@ const Navbar = () => {
               Home
             </Link>
             
-            {/* Products with Categories Dropdown */}
-            <div className="relative">
-              <button
-                onMouseEnter={handleDropdownEnter}
-                onMouseLeave={handleDropdownLeave}
-                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
-              >
-                Products
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {isProductsDropdownOpen && (
-                <div 
-                  className="absolute left-0 mt-1 w-64 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200"
-                  onMouseEnter={handleDropdownEnter}
-                  onMouseLeave={handleDropdownLeave}
-                >
-                  {/* All Products Link */}
-                  <Link
-                    to="/products"
-                    className="block px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 font-medium transition-colors"
-                  >
-                    All Products
-                  </Link>
-                  
-                  {/* Divider */}
-                  {categories.length > 0 && (
-                    <div className="border-t border-gray-200 my-1"></div>
-                  )}
-                  
-                  {/* Categories */}
-                  {categories.map((category) => (
-                    <div key={category._id} className="relative">
-                      <div
-                        onMouseEnter={() => handleCategoryEnter(category._id)}
-                        onMouseLeave={handleCategoryLeave}
-                        className="relative"
-                      >
-                        <Link
-                          to={`/products?category=${category._id}`}
-                          className="flex items-center justify-between px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                        >
-                          <span>{category.name}</span>
-                          {category.subcategories && category.subcategories.length > 0 && (
-                            <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          )}
-                        </Link>
-                        
-                        {/* Subcategories Dropdown */}
-                        {category.subcategories && 
-                         category.subcategories.length > 0 && 
-                         hoveredCategoryId === category._id && (
-                          <div 
-                            className="absolute left-full top-0 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200"
-                            onMouseEnter={() => handleCategoryEnter(category._id)}
-                            onMouseLeave={handleCategoryLeave}
-                          >
-                            {category.subcategories.map((subcategory) => (
-                              <Link
-                                key={subcategory._id}
-                                to={`/products?category=${subcategory._id}`}
-                                className="block px-3 py-1 text-xs text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                              >
-                                {subcategory.name}
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <Link 
+              to="/products" 
+              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Products
+            </Link>
             
             {user ? (
               <>
@@ -412,109 +282,13 @@ const Navbar = () => {
                 Home
               </Link>
               
-              {/* Mobile Products Dropdown */}
-              <div className="border-b border-gray-200 pb-2 mb-2">
-                <button
-                  onClick={() => setIsMobileProductsOpen(!isMobileProductsOpen)}
-                  className="flex items-center justify-between w-full px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                >
-                  <span>Products</span>
-                  <svg 
-                    className={`w-4 h-4 transition-transform ${isMobileProductsOpen ? 'rotate-180' : ''}`} 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                
-                {isMobileProductsOpen && (
-                  <div className="ml-4 mt-2 space-y-1">
-                    {/* All Products Link */}
-                    <Link
-                      to="/products"
-                      className="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                      onClick={resetMobileStates}
-                    >
-                      All Products
-                    </Link>
-                    
-                    {/* Categories for Mobile */}
-                    {categories.length > 0 ? (
-                      categories.map((category) => (
-                        <div key={category._id} className="border-l-2 border-gray-200 ml-2">
-                          <div className="flex items-center justify-between">
-                            <Link
-                              to={`/products?category=${category._id}`}
-                              className="flex-1 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                              onClick={resetMobileStates}
-                            >
-                              {category.name}
-                            </Link>
-                            
-                            {/* Toggle button for subcategories */}
-                            {category.subcategories && category.subcategories.length > 0 && (
-                              <button
-                                onClick={() => toggleMobileCategory(category._id)}
-                                className="px-2 py-2 text-gray-500 hover:text-gray-700"
-                              >
-                                <svg 
-                                  className={`w-4 h-4 transition-transform ${openMobileCategories.has(category._id) ? 'rotate-90' : ''}`} 
-                                  fill="none" 
-                                  stroke="currentColor" 
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                              </button>
-                            )}
-                          </div>
-                          
-                          {/* Mobile Subcategories - Only show when expanded */}
-                          {category.subcategories && 
-                           category.subcategories.length > 0 && 
-                           openMobileCategories.has(category._id) && (
-                            <div className="ml-4 mt-1 space-y-1">
-                              {category.subcategories.map((subcategory) => (
-                                <div key={subcategory._id}>
-                                  <Link
-                                    to={`/products?category=${subcategory._id}`}
-                                    className="block px-3 py-1.5 rounded-md text-xs font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50"
-                                    onClick={resetMobileStates}
-                                  >
-                                    • {subcategory.name}
-                                  </Link>
-                                  
-                                  {/* Sub-subcategories (if they exist) */}
-                                  {subcategory.subcategories && subcategory.subcategories.length > 0 && (
-                                    <div className="ml-4 mt-1">
-                                      {subcategory.subcategories.map((subSubcategory) => (
-                                        <Link
-                                          key={subSubcategory._id}
-                                          to={`/products?category=${subSubcategory._id}`}
-                                          className="block px-3 py-1 rounded-md text-xs font-medium text-gray-500 hover:text-blue-600 hover:bg-gray-50"
-                                          onClick={resetMobileStates}
-                                        >
-                                          ◦ {subSubcategory.name}
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="px-3 py-2 text-sm text-gray-500">
-                        Loading categories...
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+              <Link
+                to="/products"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 border-b border-gray-200 pb-2 mb-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Products
+              </Link>
               
               {user ? (
                 <>
@@ -524,28 +298,28 @@ const Navbar = () => {
                       <Link
                         to="/user/cart"
                         className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                        onClick={resetMobileStates}
+                        onClick={() => setIsMenuOpen(false)}
                       >
                         Cart ({cartItemCount})
                       </Link>
                       <Link
                         to="/user/profile"
                         className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                        onClick={resetMobileStates}
+                        onClick={() => setIsMenuOpen(false)}
                       >
                         Profile
                       </Link>
                       <Link
                         to="/user/orders"
                         className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                        onClick={resetMobileStates}
+                        onClick={() => setIsMenuOpen(false)}
                       >
                         Order History
                       </Link>
                       <Link
                         to="/notifications"
                         className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                        onClick={resetMobileStates}
+                        onClick={() => setIsMenuOpen(false)}
                       >
                         Notifications
                       </Link>
@@ -557,7 +331,7 @@ const Navbar = () => {
                     <Link
                       to="/admin"
                       className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                      onClick={resetMobileStates}
+                      onClick={() => setIsMenuOpen(false)}
                     >
                       Admin Dashboard
                     </Link>
@@ -565,7 +339,7 @@ const Navbar = () => {
                   <button
                     onClick={() => {
                       handleLogout();
-                      resetMobileStates();
+                      setIsMenuOpen(false);
                     }}
                     className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
                   >
@@ -577,14 +351,14 @@ const Navbar = () => {
                   <Link
                     to="/auth/login"
                     className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                    onClick={resetMobileStates}
+                    onClick={() => setIsMenuOpen(false)}
                   >
                     Login
                   </Link>
                   <Link
                     to="/auth/register"
                     className="block px-3 py-2 rounded-md text-base font-medium bg-blue-600 text-white hover:bg-blue-700"
-                    onClick={resetMobileStates}
+                    onClick={() => setIsMenuOpen(false)}
                   >
                     Register
                   </Link>

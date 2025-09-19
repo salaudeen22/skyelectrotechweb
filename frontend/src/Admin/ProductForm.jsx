@@ -73,6 +73,7 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
     const [loading, setLoading] = useState(false);
     const [uploadingImages, setUploadingImages] = useState(false);
     const [errors, setErrors] = useState({});
+    const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
 
     const isEdit = Boolean(productId);
 
@@ -217,6 +218,17 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
             const tempImageIndex = images.slice(0, indexToRemove).filter(img => img.isTemp).length;
             setImageFiles(prev => prev.filter((_, i) => i !== tempImageIndex));
         }
+        
+        // Adjust primary image index if needed
+        if (indexToRemove === primaryImageIndex) {
+            setPrimaryImageIndex(0); // Reset to first image
+        } else if (indexToRemove < primaryImageIndex) {
+            setPrimaryImageIndex(prev => prev - 1); // Decrement if removed image was before primary
+        }
+    };
+
+    const setPrimaryImage = (index) => {
+        setPrimaryImageIndex(index);
     };
 
     const uploadImages = async () => {
@@ -273,6 +285,7 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
             const productData = {
                 ...formData,
                 images: allImages,
+                primaryImageIndex: primaryImageIndex,
                 price: parseFloat(formData.price),
                 originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : undefined,
                 discount: parseFloat(formData.discount) || 0,
@@ -467,14 +480,17 @@ const ProductForm = ({ productId = null, onClose, onSuccess }) => {
                                 {/* Media Card */}
                                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Media</h3>
-                                    <p className="text-sm text-gray-500 mb-6">Add up to 5 images. The first image is the primary one.</p>
+                                    <p className="text-sm text-gray-500 mb-6">Add up to 5 images. Click the star icon to set as primary image.</p>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                                         {images.map((image, index) => (
                                             <div key={index} className="relative group aspect-square">
-                                                <img src={image.url} alt={`Product thumbnail ${index + 1}`} className="w-full h-full object-cover rounded-lg border-2 border-gray-200" />
-                                                {index === 0 && (<div className="absolute top-1.5 left-1.5 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full flex items-center"><FaStar className="mr-1" /> Primary</div>)}
+                                                <img src={image.url} alt={`Product thumbnail ${index + 1}`} className={`w-full h-full object-cover rounded-lg border-2 transition-colors ${index === primaryImageIndex ? 'border-yellow-400' : 'border-gray-200'}`} />
+                                                {index === primaryImageIndex && (<div className="absolute top-1.5 left-1.5 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full flex items-center"><FaStar className="mr-1" /> Primary</div>)}
                                                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
-                                                    <button type="button" onClick={() => removeImage(index)} className="text-white p-2 bg-red-600 rounded-full hover:bg-red-700 transition-colors"><FaTimes size={16} /></button>
+                                                    <div className="flex gap-2">
+                                                        <button type="button" onClick={() => setPrimaryImage(index)} className={`text-white p-2 rounded-full transition-colors ${index === primaryImageIndex ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-gray-600 hover:bg-gray-700'}`} title="Set as primary"><FaStar size={16} /></button>
+                                                        <button type="button" onClick={() => removeImage(index)} className="text-white p-2 bg-red-600 rounded-full hover:bg-red-700 transition-colors" title="Remove image"><FaTimes size={16} /></button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}

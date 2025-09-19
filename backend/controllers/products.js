@@ -25,13 +25,17 @@ const getProducts = asyncHandler(async (req, res) => {
   // Build query
   const query = { isActive: true };
 
-  // Category filter
+  // Category filter - now supports both categories and subcategories
   if (category) {
     const categoryIds = category.split(',').map(cat => cat.trim());
     const validCategoryIds = categoryIds.filter(cat => mongoose.Types.ObjectId.isValid(cat));
     
     if (validCategoryIds.length > 0) {
-      query.category = { $in: validCategoryIds };
+      // Search for products where category OR subcategory matches the provided IDs
+      query.$or = [
+        { category: { $in: validCategoryIds } },
+        { subcategory: { $in: validCategoryIds } }
+      ];
     } else {
       // If no valid category IDs, try to find by category names
       const categoryDocs = await Category.find({ 
@@ -40,7 +44,11 @@ const getProducts = asyncHandler(async (req, res) => {
       });
       
       if (categoryDocs.length > 0) {
-        query.category = { $in: categoryDocs.map(doc => doc._id) };
+        const foundCategoryIds = categoryDocs.map(doc => doc._id);
+        query.$or = [
+          { category: { $in: foundCategoryIds } },
+          { subcategory: { $in: foundCategoryIds } }
+        ];
       } else {
         // If no categories found, return empty results
         query.category = new mongoose.Types.ObjectId();
@@ -218,6 +226,18 @@ const createProduct = asyncHandler(async (req, res) => {
     return sendError(res, 400, 'Product with this SKU already exists');
   }
 
+  // Handle primary image logic - ensure primary image is at index 0
+  let processedImages = images || [];
+  if (req.body.primaryImageIndex !== undefined && processedImages.length > 0) {
+    const primaryIndex = parseInt(req.body.primaryImageIndex);
+    if (primaryIndex > 0 && primaryIndex < processedImages.length) {
+      // Move the selected primary image to index 0
+      const primaryImage = processedImages[primaryIndex];
+      processedImages.splice(primaryIndex, 1);
+      processedImages.unshift(primaryImage);
+    }
+  }
+
   const product = await Product.create({
     name,
     description,
@@ -234,7 +254,7 @@ const createProduct = asyncHandler(async (req, res) => {
     dimensions,
     warranty,
     isFeatured,
-    images: images || [], // Add images array
+    images: processedImages,
     createdBy: req.user._id
   });
 
@@ -300,6 +320,17 @@ const updateProduct = asyncHandler(async (req, res) => {
   const hasPriceDrop = newPrice < oldPrice;
 
   // No inventory management – remove stock change logic
+
+  // Handle primary image logic for update - ensure primary image is at index 0
+  if (req.body.images && req.body.primaryImageIndex !== undefined) {
+    const primaryIndex = parseInt(req.body.primaryImageIndex);
+    if (primaryIndex > 0 && primaryIndex < req.body.images.length) {
+      // Move the selected primary image to index 0
+      const primaryImage = req.body.images[primaryIndex];
+      req.body.images.splice(primaryIndex, 1);
+      req.body.images.unshift(primaryImage);
+    }
+  }
 
   // Update product
   req.body.updatedBy = req.user._id;

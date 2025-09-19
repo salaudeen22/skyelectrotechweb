@@ -414,7 +414,7 @@ const ProductDetails = () => {
               />
             </div>
             {product.images && product.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-2 sm:gap-3">
+              <div className="grid grid-cols-6 gap-1 sm:gap-2">
                 {product.images.map((image, index) => (
                   <button
                     key={image._id || index}
