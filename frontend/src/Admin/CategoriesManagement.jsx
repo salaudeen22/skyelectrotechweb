@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { FaPlus, FaSearch, FaPencilAlt, FaTrashAlt, FaTimes, FaImage, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { categoriesAPI, uploadAPI } from '../services/apiServices';
+import { useCategories } from '../hooks/useCategories';
 import toast from 'react-hot-toast';
 
 const CategoriesManagement = () => {
+  const { refreshCategories: refreshGlobalCategories } = useCategories();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,6 +22,8 @@ const CategoriesManagement = () => {
       const response = await categoriesAPI.getCategories();
       if (response.success) {
         setCategories(response.data.categories);
+        // Also refresh the global categories context
+        refreshGlobalCategories();
       }
     } catch (error) {
       console.error('Error fetching categories:', error);

@@ -1,6 +1,7 @@
 const Category = require('../models/Category');
 const Product = require('../models/Product');
 const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
+const { cacheUtils } = require('../utils/cache');
 
 // @desc    Get all categories with hierarchy
 // @route   GET /api/categories
@@ -279,7 +280,9 @@ const updateCategory = asyncHandler(async (req, res) => {
     { new: true, runValidators: true }
   ).populate('createdBy', 'name').populate('parentCategory', 'name');
 
-
+  // Invalidate cache
+  cacheUtils.invalidateCategoryCache();
+  cacheUtils.invalidateSearch();
 
   sendResponse(res, 200, { category }, 'Category updated successfully');
 });
@@ -336,6 +339,10 @@ const deleteCategory = asyncHandler(async (req, res) => {
 
   // Hard delete - permanently remove from database
   await Category.findByIdAndDelete(req.params.id);
+
+  // Invalidate cache
+  cacheUtils.invalidateCategoryCache();
+  cacheUtils.invalidateSearch();
 
   const message = force 
     ? `Category and all associated products/subcategories deleted successfully`

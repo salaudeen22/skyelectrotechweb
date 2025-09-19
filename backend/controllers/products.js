@@ -196,8 +196,11 @@ const createProduct = asyncHandler(async (req, res) => {
   }
 
   // Check if subcategory exists (if provided)
-  if (subcategory) {
-    const subcategoryExists = await Category.findById(subcategory);
+  // Convert empty string to null to avoid ObjectId casting errors
+  const validSubcategory = subcategory && subcategory.trim() !== '' ? subcategory : null;
+  
+  if (validSubcategory) {
+    const subcategoryExists = await Category.findById(validSubcategory);
     if (!subcategoryExists) {
       return sendError(res, 400, 'Invalid subcategory');
     }
@@ -222,7 +225,7 @@ const createProduct = asyncHandler(async (req, res) => {
     originalPrice,
     discount,
     category,
-    subcategory,
+    subcategory: validSubcategory,
     brand,
     sku,
     specifications,
@@ -236,13 +239,14 @@ const createProduct = asyncHandler(async (req, res) => {
   });
 
   await product.populate('category', 'name');
-  if (subcategory) {
+  if (validSubcategory) {
     await product.populate('subcategory', 'name');
   }
 
   // Invalidate cache
   cacheUtils.invalidateSearch();
   cacheUtils.invalidateProductCache();
+  cacheUtils.invalidateCategoryCache();
 
   sendResponse(res, 201, { product }, 'Product created successfully');
 });
@@ -266,10 +270,16 @@ const updateProduct = asyncHandler(async (req, res) => {
   }
 
   // If subcategory is being updated, verify it exists
-  if (req.body.subcategory) {
-    const subcategoryExists = await Category.findById(req.body.subcategory);
-    if (!subcategoryExists) {
-      return sendError(res, 400, 'Invalid subcategory');
+  // Convert empty string to null to avoid ObjectId casting errors
+  if (req.body.subcategory !== undefined) {
+    const validSubcategory = req.body.subcategory && req.body.subcategory.trim() !== '' ? req.body.subcategory : null;
+    req.body.subcategory = validSubcategory;
+    
+    if (validSubcategory) {
+      const subcategoryExists = await Category.findById(validSubcategory);
+      if (!subcategoryExists) {
+        return sendError(res, 400, 'Invalid subcategory');
+      }
     }
   }
 
@@ -333,6 +343,7 @@ const updateProduct = asyncHandler(async (req, res) => {
   // Invalidate cache
   cacheUtils.invalidateSearch();
   cacheUtils.invalidateProductCache(product._id);
+  cacheUtils.invalidateCategoryCache();
 
   sendResponse(res, 200, { product }, 'Product updated successfully');
 });
@@ -353,6 +364,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
   // Invalidate cache
   cacheUtils.invalidateSearch();
   cacheUtils.invalidateProductCache(product._id);
+  cacheUtils.invalidateCategoryCache();
 
   sendResponse(res, 200, null, 'Product deleted successfully');
 });

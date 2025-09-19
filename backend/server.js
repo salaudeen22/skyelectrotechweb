@@ -290,6 +290,27 @@ app.use((err, req, res, next) => {
   console.error('Method:', req.method);
   console.error('User:', req.user?.name || 'Not authenticated');
   
+  // Handle MongoDB CastError (invalid ObjectId)
+  if (err.name === 'CastError') {
+    return res.status(400).json({
+      message: 'Invalid ID format',
+      error: `Invalid ${err.path}: ${err.value}`,
+      path: req.originalUrl,
+      method: req.method
+    });
+  }
+  
+  // Handle MongoDB ValidationError
+  if (err.name === 'ValidationError') {
+    const errors = Object.values(err.errors).map(e => e.message);
+    return res.status(400).json({
+      message: 'Validation failed',
+      error: errors.join(', '),
+      path: req.originalUrl,
+      method: req.method
+    });
+  }
+  
   // Handle multer errors
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {

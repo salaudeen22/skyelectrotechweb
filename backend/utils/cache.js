@@ -96,12 +96,16 @@ const cacheUtils = {
   
   // Invalidate search cache
   invalidateSearch: () => {
+    console.log('🗑️ Invalidating search cache...');
     const keys = cache.keys();
+    const deletedKeys = [];
     keys.forEach(key => {
       if (key.startsWith(CACHE_KEYS.SEARCH_RESULTS)) {
         cache.del(key);
+        deletedKeys.push(key);
       }
     });
+    console.log(`🗑️ Deleted ${deletedKeys.length} search cache keys:`, deletedKeys);
   },
   
   // Invalidate product-related cache
@@ -113,6 +117,22 @@ const cacheUtils = {
       keys.forEach(key => {
         if (key.startsWith(CACHE_KEYS.PRODUCT_DETAILS) || 
             key.startsWith(CACHE_KEYS.FEATURED_PRODUCTS)) {
+          cache.del(key);
+        }
+      });
+    }
+  },
+  
+  // Invalidate category-related cache
+  invalidateCategoryCache: (categoryId = null) => {
+    if (categoryId) {
+      cache.del(`${CACHE_KEYS.CATEGORIES}:${categoryId}`);
+      cache.del(`${CACHE_KEYS.CATEGORY_PRODUCTS}:${categoryId}`);
+    } else {
+      const keys = cache.keys();
+      keys.forEach(key => {
+        if (key.startsWith(CACHE_KEYS.CATEGORIES) || 
+            key.startsWith(CACHE_KEYS.CATEGORY_PRODUCTS)) {
           cache.del(key);
         }
       });
