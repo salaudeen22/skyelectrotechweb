@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, memo, useRef } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiSearch, FiPrinter, FiCamera, FiTool } from 'react-icons/fi';
 import HeroSlider from '../Components/Subcompo/HeroSlider';
@@ -334,6 +334,7 @@ const Home = memo(() => {
         image="https://skyelectrotech.in/og-image.jpg"
         url="https://skyelectrotech.in/"
         type="website"
+        isHomepage={true}
       />
       
       {/* Current Testimonials Schema */}
