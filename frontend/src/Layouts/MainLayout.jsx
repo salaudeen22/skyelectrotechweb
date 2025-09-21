@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Navbar from '../Components/Navbar';
 import CategoriesNavbar from '../Components/CategoriesNavbar';
 import Footer from '../Components/Footer.jsx';
+import WhatsAppChat from '../Components/WhatsAppChat';
 
 const MainLayout = memo(() => {
   return (
@@ -15,6 +16,9 @@ const MainLayout = memo(() => {
         </div>
       </main>
       <Footer />
+      
+      {/* WhatsApp Chat Button - Available on all user pages */}
+      <WhatsAppChat />
     </div>
   );
 });

@@ -30,7 +30,7 @@ export const SettingsProvider = ({ children }) => {
     shipping: {
       enabled: true,
       freeShippingThreshold: 1000,
-      defaultShippingCost: 50,
+      defaultShippingCost: 15,
       shippingMethods: [],
       zones: []
     },

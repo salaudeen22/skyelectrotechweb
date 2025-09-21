@@ -41,8 +41,8 @@ const Payment = () => {
   // --- Calculations ---
   const totals = {
     subtotal: cartTotal,
-    shipping: selectedShippingMethod?.cost || settings.shipping.defaultShippingCost,
-    tax: Math.round(cartTotal * (settings.payment.taxRate / 100)), // Dynamic tax rate
+    shipping: selectedShippingMethod?.cost || 0,
+    tax: Math.round((cartTotal || 0) * (settings.payment.taxRate / 100)),
     discount: appliedCoupon?.discountAmount || 0,
     get total() { return Math.max(0, this.subtotal + this.shipping + this.tax - this.discount) }
   };
@@ -138,7 +138,6 @@ const Payment = () => {
         cost: selectedShippingMethod.cost
       } : undefined,
       itemsPrice: totals.subtotal,
-      taxPrice: totals.tax,
       shippingPrice: totals.shipping,
       totalPrice: totals.total,
       couponCode: appliedCoupon?.code || undefined,
@@ -660,7 +659,7 @@ const Payment = () => {
               <div className="p-6 border-t space-y-3">
                 <div className="flex justify-between text-slate-600"><span>Subtotal</span><span>{formatAmount(totals.subtotal)}</span></div>
                 <div className="flex justify-between text-slate-600"><span>Shipping</span><span>{formatAmount(totals.shipping)}</span></div>
-                <div className="flex justify-between text-slate-600"><span>Tax (18%)</span><span>{formatAmount(totals.tax)}</span></div>
+                <div className="flex justify-between text-slate-600"><span>Tax ({settings.payment.taxRate}%)</span><span>{formatAmount(totals.tax)}</span></div>
                 {appliedCoupon && (
                   <div className="flex justify-between text-green-600 font-medium">
                     <span>Discount ({appliedCoupon.code})</span>

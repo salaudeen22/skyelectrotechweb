@@ -309,9 +309,8 @@ const Checkout = () => {
   // --- Calculations ---
   const totals = {
     subtotal: cartTotal,
-    shipping: settings.shipping.defaultShippingCost,
-    tax: Math.round(cartTotal * (settings.payment.taxRate / 100)), // Dynamic tax rate
-    get total() { return this.subtotal + this.shipping + this.tax }
+    shipping: 0,
+    get total() { return this.subtotal }
   };
 
   // --- Effects ---
@@ -487,7 +486,6 @@ const Checkout = () => {
         })),
         shippingInfo: formData,
         itemsPrice: totals.subtotal,
-        taxPrice: totals.tax,
         shippingPrice: totals.shipping,
         totalPrice: totals.total,
     };
@@ -693,8 +691,6 @@ const Checkout = () => {
                          </div>
                         <div className="p-6 border-t space-y-3">
                             <div className="flex justify-between text-slate-600"><span>Subtotal</span><span>{formatAmount(totals.subtotal)}</span></div>
-                            <div className="flex justify-between text-slate-600"><span>Shipping</span><span>{formatAmount(totals.shipping)}</span></div>
-                            <div className="flex justify-between text-slate-600 mb-4"><span>Tax (18%)</span><span>{formatAmount(totals.tax)}</span></div>
                             <div className="border-t-2 border-dashed pt-4">
                                 <div className="flex justify-between font-bold text-xl text-slate-900"><span>Total</span><span>{formatAmount(totals.total)}</span></div>
                             </div>

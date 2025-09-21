@@ -22,12 +22,12 @@ const Cart = () => {
   }, [cartItems]);
   
   const shipping = useMemo(() => {
-    return settings.shipping.defaultShippingCost;
-  }, [settings.shipping.defaultShippingCost]);
+    return 0;
+  }, []);
   
   const total = useMemo(() => {
-    return subtotal + shipping;
-  }, [subtotal, shipping]);
+    return subtotal;
+  }, [subtotal]);
 
   // Check for incomplete checkout data
   useEffect(() => {
