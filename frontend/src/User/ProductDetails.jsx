@@ -572,7 +572,7 @@ const ProductDetails = () => {
               </div>
               <div className="text-center">
                 <FiShield className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 mx-auto mb-1 sm:mb-2" />
-                <p className="text-xs sm:text-sm text-gray-600">1 Year Warranty</p>
+                <p className="text-xs sm:text-sm text-gray-600">Quality Assured</p>
               </div>
               <div className="text-center">
                 <FiRefreshCw className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 mx-auto mb-1 sm:mb-2" />

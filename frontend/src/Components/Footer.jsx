@@ -127,6 +127,9 @@ const Footer = () => {
         </div>
         <div className="mt-8 sm:mt-10 md:mt-12 border-t border-gray-200 pt-6 sm:pt-8 text-center">
           <p className="text-xs sm:text-sm md:text-base text-gray-500">© {new Date().getFullYear()} {settings.storeInfo.name}. All Rights Reserved.</p>
+          <p className="text-xs text-gray-400 mt-2">
+            Developed by <a href="https://www.linkedin.com/company/the-pi-aerotech/about/" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors">PiAeroTech</a>
+          </p>
         </div>
       </div>
     </footer>
