@@ -22,6 +22,7 @@ import ProtectedRoute from './Components/ProtectedRoute';
 import AnalyticsTracker from './Components/AnalyticsTracker';
 import ErrorBoundary from './Components/ErrorBoundary';
 import LoadingSpinner from './Components/LoadingSpinner';
+import InstallPrompt from './Components/InstallPrompt';
 
 // Lazy loaded components
 const Home = React.lazy(() => import('./Page/Home'));
@@ -127,6 +128,7 @@ const App = () => {
                 <ErrorBoundary>
                   <div className="App">
                     <AnalyticsTracker />
+                    <InstallPrompt />
                     <Toaster
                       position="top-right"
                       toastOptions={{
