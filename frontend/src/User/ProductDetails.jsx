@@ -299,9 +299,18 @@ const ProductDetails = () => {
       return `${product?.name}, ${product?.brand || 'electronics'}, ${product?.category?.name || 'electronics'}, SkyElectroTech`;
     };
 
+    // Generate product-specific description
+    const generateDescription = () => {
+      if (product?.description?.trim()) {
+        return product.description.trim();
+      }
+      // Fallback to generated product description instead of generic store info
+      return `Buy ${product?.name} online at SkyElectroTech. ${product?.category?.name || 'Electronic component'} with fast delivery in Bangalore. Expert technical support included.`;
+    };
+
     return {
       title: `${product?.name} - SkyElectroTech`,
-      description: product?.description,
+      description: generateDescription(),
       keywords: generateKeywords(),
       image: product?.images?.[0]?.url,
       url: product ? `https://skyelectrotech.in${generateProductUrl(product)}` : `https://skyelectrotech.in/products`,

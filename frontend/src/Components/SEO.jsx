@@ -18,8 +18,8 @@ const SEO = ({
   
   // Use settings-based defaults with component props override
   const finalTitle = title || settings?.seo?.metaTitle || 'SkyElectroTech - Electronic Components Store';
-  const finalDescription = description || settings?.seo?.metaDescription || 'Leading electronic components shop in Bangalore';
-  const finalKeywords = keywords || settings?.seo?.metaKeywords || 'electronics, components, Arduino, Raspberry Pi';
+  const finalDescription = (description && description.trim()) || settings?.seo?.metaDescription || 'Leading electronic components shop in Bangalore';
+  const finalKeywords = (keywords && keywords.trim()) || settings?.seo?.metaKeywords || 'electronics, components, Arduino, Raspberry Pi';
   const finalImage = image || 'https://skyelectrotech.in/og-image.jpg';
   const canonicalUrl = url || `https://skyelectrotech.in${location.pathname}`;
 
@@ -583,6 +583,15 @@ const SEO = ({
   }, [settings?.seo?.googleAnalytics, settings?.seo?.facebookPixel, addGoogleAnalytics, addFacebookPixel]);
 
   useEffect(() => {
+    // Debug logging for development
+    if (import.meta.env.DEV) {
+      console.log('SEO Update:', {
+        title: finalTitle,
+        description: finalDescription,
+        source: description ? 'component-props' : 'fallback'
+      });
+    }
+    
     // Update document title
     document.title = finalTitle;
 
@@ -688,10 +697,11 @@ const SEO = ({
     // Add structured data
     addStructuredData(product, category);
 
-  }, [finalTitle, finalDescription, finalKeywords, finalImage, url, type, product, category, location, addStructuredData, canonicalUrl]);
+  }, [finalTitle, finalDescription, finalKeywords, finalImage, url, type, product, category, location, addStructuredData, canonicalUrl, description]);
 
   const updateMetaTag = (attr, value, content) => {
-    if (!content) return;
+    // Always update if content is provided, even if empty string
+    if (content === undefined || content === null) return;
 
     let meta = document.querySelector(`meta[${attr}="${value}"]`);
     if (!meta) {
@@ -699,6 +709,7 @@ const SEO = ({
       meta.setAttribute(attr, value);
       document.head.appendChild(meta);
     }
+    // Force update the content attribute even if it exists
     meta.setAttribute('content', content);
   };
 
