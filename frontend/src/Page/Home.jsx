@@ -157,7 +157,6 @@ const Home = memo(() => {
         
         // If no featured products found, fetch regular products (top performing)
         if (!productsResponse.data.products || productsResponse.data.products.length === 0) {
-          console.log('No featured products found, fetching regular products...');
           productsResponse = await productsAPI.getProducts({ 
             page: 1, 
             limit: 8,
@@ -222,7 +221,6 @@ const Home = memo(() => {
   const handleSearch = useCallback((e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      console.log('Searching for:', searchTerm.trim());
       navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
     } else {
       toast.error('Please enter a search term');
@@ -473,7 +471,7 @@ const Home = memo(() => {
             </div>
             {featuredProducts.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
                     {featuredProducts.map((product) => (
                     <ProductCard
                         key={product._id}

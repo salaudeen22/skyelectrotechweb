@@ -111,11 +111,9 @@ const OrdersAndSales = () => {
             if (searchTerm) queryParams.search = searchTerm;
             
             const response = await ordersAPI.getAllOrders(queryParams);
-            console.log('Orders API response:', response);
             
             if (response.success) {
                 const orders = response.data.orders || response.orders || [];
-                console.log('Processed orders:', orders);
                 setOrders(orders);
             } else {
                 throw new Error(response.message || 'Failed to fetch orders');
@@ -133,15 +131,10 @@ const OrdersAndSales = () => {
         try {
             setAnalyticsLoading(true);
             
-            console.log('Fetching sales analytics with dateRange:', dateRange);
-            
             const [statsResponse, salesResponse] = await Promise.all([
                 analyticsAPI.getDashboardStats(),
                 analyticsAPI.getSalesAnalytics({ period: dateRange })
             ]);
-
-            console.log('Analytics responses:', { statsResponse, salesResponse });
-            console.log('Sales data structure:', salesResponse.data?.analytics);
 
             if (statsResponse.success) {
                 const stats = statsResponse.data.stats;
@@ -217,14 +210,10 @@ const OrdersAndSales = () => {
         try {
             setInsightsLoading(true);
             
-            console.log('Fetching business insights with dateRange:', dateRange);
-            
             const [customerResponse, performanceResponse] = await Promise.all([
                 analyticsAPI.getCustomerAnalytics({ period: dateRange }),
                 analyticsAPI.getPerformanceMetrics({ period: dateRange })
             ]);
-
-            console.log('Business insights responses:', { customerResponse, performanceResponse });
 
             if (customerResponse.success) {
                 setCustomerAnalytics(customerResponse.data || {
@@ -282,7 +271,6 @@ const OrdersAndSales = () => {
     const exportTodaySalesInvoice = async () => {
         try {
             setExporting(true);
-            console.log('Exporting today\'s sales invoice...');
             
             // Show loading message
             toast.loading('Generating PDF invoice... This may take a few seconds.', {
@@ -291,20 +279,14 @@ const OrdersAndSales = () => {
             
             const response = await ordersAPI.exportTodaySalesInvoice();
             
-            console.log('Export response received:', response);
-            
             // Check content type to determine if it's PDF or HTML
             const contentType = response.headers?.['content-type'] || '';
             const isPDF = contentType.includes('application/pdf');
-            
-            console.log('Content type:', contentType, 'Is PDF:', isPDF);
             
             // Create blob with appropriate type
             const blob = new Blob([response.data], { 
                 type: isPDF ? 'application/pdf' : 'text/html' 
             });
-            
-            console.log('Blob created, size:', blob.size);
             
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -347,8 +329,6 @@ const OrdersAndSales = () => {
     // Export individual order invoice
     const exportOrderInvoice = async (orderId) => {
         try {
-            console.log('Exporting order invoice for order:', orderId);
-            
             // Show loading message
             toast.loading('Generating order invoice... This may take a few seconds.', {
                 duration: 0 // Don't auto-dismiss
@@ -356,20 +336,14 @@ const OrdersAndSales = () => {
             
             const response = await ordersAPI.exportOrderInvoice(orderId);
             
-            console.log('Order invoice export response received:', response);
-            
             // Check content type to determine if it's PDF or HTML
             const contentType = response.headers?.['content-type'] || '';
             const isPDF = contentType.includes('application/pdf');
-            
-            console.log('Content type:', contentType, 'Is PDF:', isPDF);
             
             // Create blob with appropriate type
             const blob = new Blob([response.data], { 
                 type: isPDF ? 'application/pdf' : 'text/html' 
             });
-            
-            console.log('Blob created, size:', blob.size);
             
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');

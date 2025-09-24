@@ -126,16 +126,13 @@ const Settings = () => {
 
   const loadAdminUsersData = async () => {
     try {
-      console.log('Loading admin users data...');
       const response = await api.get('/users/admins');
-      console.log('Admin users API response:', response.data);
       setAdminUsers(response.data.data?.adminUsers || []);
     } catch (error) {
       console.error('Error loading admin users:', error);
       // Fallback - try to get from regular users endpoint
       try {
         const fallbackResponse = await api.get('/users?role=admin');
-        console.log('Fallback users API response:', fallbackResponse.data);
         if (fallbackResponse.data.users) {
           setAdminUsers(fallbackResponse.data.users);
         }
@@ -257,7 +254,6 @@ const Settings = () => {
         }
       };
       
-      console.log('Sending sanitized settings data:', JSON.stringify(sanitizedData, null, 2));
       await settingsAPI.updateSettings(sanitizedData);
       toast.success('Settings saved successfully!');
       await fetchSettings();

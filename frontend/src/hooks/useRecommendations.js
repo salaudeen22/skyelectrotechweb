@@ -78,11 +78,8 @@ export const useRecommendations = () => {
       setLoading(prev => ({ ...prev, trending: true }));
       setError(prev => ({ ...prev, trending: null }));
       
-      console.log('🔥 Fetching trending products...');
       const response = await recommendationsAPI.getTrendingProducts(limit);
-      console.log('📊 Trending products response:', response);
       setTrendingProducts(response.products || []);
-              console.log('Set trending products:', response.products?.length || 0, 'products');
     } catch (err) {
               console.error('Error fetching trending products:', err);
       setError(prev => ({ 

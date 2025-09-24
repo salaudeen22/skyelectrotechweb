@@ -19,7 +19,6 @@ const Contact = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle form submission
-    console.log('Contact form submitted:', formData);
   };
 
   const handleChange = (e) => {

@@ -128,7 +128,7 @@ const ProductCard = memo(({ product, showWishlistButton = true }) => {
       </Link>
       
       {/* Product Details Section */}
-      <div className="p-4 sm:p-5 flex flex-col">
+      <div className="p-2 sm:p-4 lg:p-5 flex flex-col">
         <div>
           <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
             {product.category?.name || 'Electronics'}
@@ -137,13 +137,13 @@ const ProductCard = memo(({ product, showWishlistButton = true }) => {
             to={generateProductUrl(product)}
             aria-label={`View details for ${product.name}`}
           >
-            <h3 className="text-sm sm:text-lg font-bold text-gray-900 mt-2 hover:text-blue-600 transition-colors line-clamp-2" title={product.name}>
+            <h3 className="text-xs sm:text-sm lg:text-lg font-bold text-gray-900 mt-1 sm:mt-2 hover:text-blue-600 transition-colors line-clamp-2" title={product.name}>
               {product.name}
             </h3>
           </Link>
           
           {/* Rating */}
-          <div className="mt-2 sm:mt-3 min-h-[20px] sm:min-h-[24px]">
+          <div className="mt-1 sm:mt-2 lg:mt-3 min-h-[16px] sm:min-h-[20px] lg:min-h-[24px]">
             {product.averageRating > 0 ? (
               <div className="flex items-center" role="img" aria-label={`Rating: ${product.averageRating} out of 5 stars`}>
                 <div className="flex items-center">
@@ -173,13 +173,13 @@ const ProductCard = memo(({ product, showWishlistButton = true }) => {
           </div>
 
           {/* Price */}
-          <div className="mt-3 sm:mt-4">
+          <div className="mt-2 sm:mt-3 lg:mt-4">
             {product.originalPrice && product.originalPrice > product.price && (
               <span className="text-xs sm:text-sm text-gray-500 line-through mr-1 sm:mr-2">
                 ₹{product.originalPrice.toLocaleString()}
               </span>
             )}
-            <span className="text-lg sm:text-2xl font-extrabold text-gray-800">
+            <span className="text-sm sm:text-lg lg:text-2xl font-extrabold text-gray-800">
               ₹{product.price.toLocaleString()}
             </span>
             {product.originalPrice && product.originalPrice > product.price && (
@@ -192,11 +192,11 @@ const ProductCard = memo(({ product, showWishlistButton = true }) => {
         
         {/* Add to Cart Button - Only show for regular users */}
         {isAuthenticated && user?.role === 'user' && (
-          <div className="mt-4 pt-3 border-t border-gray-100">
+          <div className="mt-2 sm:mt-3 lg:mt-4 pt-2 sm:pt-3 border-t border-gray-100">
             <button 
               onClick={handleAddToCart}
               disabled={addingToCart}
-              className="w-full flex items-center justify-center py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300 touch-manipulation cursor-pointer"
+              className="w-full flex items-center justify-center py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300 touch-manipulation cursor-pointer"
               aria-label={`Add ${product.name} to cart`}
               type="button"
             >
@@ -208,10 +208,10 @@ const ProductCard = memo(({ product, showWishlistButton = true }) => {
         
         {/* For non-authenticated users, show login prompt */}
         {!isAuthenticated && (
-          <div className="mt-4 pt-3 border-t border-gray-100">
+          <div className="mt-2 sm:mt-3 lg:mt-4 pt-2 sm:pt-3 border-t border-gray-100">
             <Link 
               to="/auth/login"
-              className="w-full flex items-center justify-center py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-300 touch-manipulation cursor-pointer"
+              className="w-full flex items-center justify-center py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-300 touch-manipulation cursor-pointer"
               aria-label="Login to add items to cart"
             >
               <FiShoppingCart className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />

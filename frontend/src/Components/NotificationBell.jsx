@@ -9,15 +9,12 @@ const NotificationBell = () => {
   const { unreadCount } = useNotifications();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Debug logging
-  console.log('NotificationBell render:', { isAuthenticated, unreadCount });
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
   if (!isAuthenticated) {
-    console.log('NotificationBell: User not authenticated, returning null');
     return null;
   }
 

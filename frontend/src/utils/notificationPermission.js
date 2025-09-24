@@ -1,6 +1,5 @@
 // Notification permission utility with better user experience
 export const requestNotificationPermission = async () => {
-  console.log('Requesting notification permission...');
   
   // Check if notifications are supported
   if (!('Notification' in window)) {
@@ -9,10 +8,8 @@ export const requestNotificationPermission = async () => {
 
   // Check current permission status
   const currentPermission = Notification.permission;
-  console.log('Current permission status:', currentPermission);
 
   if (currentPermission === 'granted') {
-    console.log('Notification permission already granted');
     return true;
   }
 
@@ -28,13 +25,9 @@ export const requestNotificationPermission = async () => {
 
   // Request permission with better user experience
   try {
-    console.log('Requesting permission from user...');
     const permission = await Notification.requestPermission();
     
-    console.log('Permission result:', permission);
-    
     if (permission === 'granted') {
-      console.log('Notification permission granted!');
       return true;
     } else if (permission === 'denied') {
       throw new Error('Notification permission denied by user');
@@ -188,7 +181,6 @@ export const showBrowserSettingsInstructions = () => {
 // Enhanced push notification setup
 export const setupPushNotifications = async () => {
   try {
-    console.log('Setting up push notifications...');
 
     // Step 1: Check support
     const support = checkPushSupport();
@@ -204,7 +196,6 @@ export const setupPushNotifications = async () => {
     await requestNotificationPermission();
 
     // Step 3: Get VAPID public key
-    console.log('Getting VAPID public key...');
     const response = await fetch('/api/notifications/vapid-public-key');
     if (!response.ok) {
       throw new Error('Failed to get VAPID public key');
@@ -212,7 +203,6 @@ export const setupPushNotifications = async () => {
     const { publicKey } = await response.json();
 
     // Step 4: Subscribe to push notifications
-    console.log('Subscribing to push notifications...');
     const registration = await navigator.serviceWorker.ready;
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
@@ -220,10 +210,9 @@ export const setupPushNotifications = async () => {
     });
 
     // Step 5: Send subscription to server
-    console.log('Sending subscription to server...');
     const deviceInfo = {
       userAgent: navigator.userAgent,
-      platform: navigator.platform,
+      platform: navigator.userAgentData?.platform || 'unknown',
       browser: getBrowserInfo(),
       version: getBrowserVersion(),
       isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
@@ -255,7 +244,6 @@ export const setupPushNotifications = async () => {
       throw new Error('Failed to subscribe to push notifications');
     }
 
-    console.log('Push notifications setup complete!');
     return true;
   } catch (error) {
     console.error('Push notification setup failed:', error);

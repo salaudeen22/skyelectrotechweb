@@ -98,11 +98,11 @@ const App = () => {
 
     // Socket event listeners
     socket.on('connect', () => {
-      console.log('Socket.IO connected:', socket.id);
+       console.log('Socket.IO connected:');
     });
 
     socket.on('disconnect', () => {
-      console.log('Socket.IO disconnected');
+        console.log('Socket.IO disconnected');
     });
 
     socket.on('error', (error) => {

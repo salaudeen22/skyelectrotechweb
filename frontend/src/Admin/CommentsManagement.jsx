@@ -80,9 +80,7 @@ const CommentsManagement = () => {
         sort: `${filters.sortOrder === 'desc' ? '-' : ''}${filters.sortBy}`
       };
 
-      console.log('Fetching comments with params:', params);
       const response = await commentsAPI.getAllComments(params);
-      console.log('Comments API response:', response);
 
       if (response.success) {
         setComments(response.data.comments || []);
@@ -92,7 +90,6 @@ const CommentsManagement = () => {
           totalItems: 0,
           itemsPerPage: 20
         });
-        console.log('Set pagination:', response.data.pagination);
       } else {
         toast.error(response.message || 'Failed to load comments');
       }

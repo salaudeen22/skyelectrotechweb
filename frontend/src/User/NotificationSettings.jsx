@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiBell, FiBellOff, FiSave, FiCheck } from 'react-icons/fi';
+import { FiArrowLeft, FiBell, FiBellOff, FiSave } from 'react-icons/fi';
 import { useNotifications } from '../hooks/useNotifications';
 import { toast } from 'react-hot-toast';
 import LoadingSpinner from '../Components/LoadingSpinner';
@@ -32,13 +32,6 @@ const NotificationSettings = () => {
   const checkPermissionStatus = useCallback(() => {
     const status = getPermissionStatus();
     setPermissionStatus(status);
-    console.log('Permission status:', status);
-    
-    // Additional debugging
-    console.log('Notification.permission:', Notification.permission);
-    console.log('Service Worker support:', 'serviceWorker' in navigator);
-    console.log('Push Manager support:', 'PushManager' in window);
-    console.log('HTTPS/SSL:', window.location.protocol === 'https:' || window.location.hostname === 'localhost');
   }, []);
 
   const loadPreferences = useCallback(async () => {
@@ -121,7 +114,6 @@ const NotificationSettings = () => {
     try {
       // First check current permission status
       const currentPermission = Notification.permission;
-      console.log('Current notification permission:', currentPermission);
       
       if (currentPermission === 'denied') {
         toast.error('Notification permission is blocked. Please enable it in your browser settings and refresh the page.');
@@ -159,7 +151,6 @@ const NotificationSettings = () => {
   };
 
   const handleRefreshPermissionStatus = async () => {
-    console.log('Refreshing permission status...');
     
     // Force a page reload to clear any cached permission states
     if (Notification.permission === 'denied') {
@@ -172,7 +163,7 @@ const NotificationSettings = () => {
           try {
             await caches.delete('notification-cache');
           } catch {
-            console.log('No notification cache to clear');
+                console.log('No notification cache to clear');
           }
         }
         window.location.reload();
@@ -188,12 +179,10 @@ const NotificationSettings = () => {
   };
 
   const handleForcePermissionReset = async () => {
-    console.log('Force resetting notification permission...');
     
     try {
       // Try to request permission again to trigger browser dialog
       const permission = await Notification.requestPermission();
-      console.log('New permission result:', permission);
       
       if (permission === 'granted') {
         toast.success('Notification permission granted!');

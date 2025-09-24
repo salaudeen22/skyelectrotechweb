@@ -21,7 +21,6 @@ const InstallPrompt = () => {
 
     // Listen for the beforeinstallprompt event
     const handleBeforeInstallPrompt = (e) => {
-      console.log('beforeinstallprompt event fired');
       e.preventDefault();
       setDeferredPrompt(e);
       
@@ -33,7 +32,6 @@ const InstallPrompt = () => {
 
     // Listen for app installed event
     const handleAppInstalled = () => {
-      console.log('PWA was installed');
       setIsInstalled(true);
       setShowInstallPrompt(false);
       setDeferredPrompt(null);
@@ -58,13 +56,7 @@ const InstallPrompt = () => {
       // Wait for the user to respond to the prompt
       const { outcome } = await deferredPrompt.userChoice;
       
-      console.log(`User response to the install prompt: ${outcome}`);
       
-      if (outcome === 'accepted') {
-        console.log('User accepted the install prompt');
-      } else {
-        console.log('User dismissed the install prompt');
-      }
       
       // Clear the saved prompt since it can only be used once
       setDeferredPrompt(null);

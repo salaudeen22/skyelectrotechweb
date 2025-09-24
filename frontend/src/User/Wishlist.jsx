@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { FiHeart, FiShoppingCart, FiTrash2, FiGrid, FiList, FiStar } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from '../Components/ProductCard';
-import { wishlistAPI } from '../services/apiServices';
-import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
 import { useWishlist } from '../hooks/useWishlist';
 import { generateProductUrl } from '../utils/urlHelpers';
 
 const Wishlist = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+
   const { addToCart } = useCart();
   const { items: wishlistItems, loading, error, removeFromWishlist, clearWishlist } = useWishlist();
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
@@ -25,10 +23,8 @@ const Wishlist = () => {
   const handleAddToCart = async (product) => {
     try {
       await addToCart(product._id, 1);
-      console.log('Added to cart:', product.name);
     } catch (error) {
       console.error('Error adding to cart:', error);
-      setError('Failed to add item to cart');
     }
   };
 

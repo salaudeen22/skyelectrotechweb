@@ -32,8 +32,6 @@ const CommentSection = ({ productId }) => {
   const fetchComments = async () => {
     setLoading(true);
     try {
-      console.log('Fetching comments for product:', productId);
-      console.log('Filters:', filters);
       
       const params = {
         page: filters.page,
@@ -42,10 +40,8 @@ const CommentSection = ({ productId }) => {
         ...(filters.rating && { rating: filters.rating })
       };
 
-      console.log('API params:', params);
       const response = await commentsAPI.getProductComments(productId, params);
       
-      console.log('API response:', response);
       
       if (response.success) {
         setComments(response.data.comments || []);
@@ -54,7 +50,6 @@ const CommentSection = ({ productId }) => {
           ratingDistribution: response.data.ratingDistribution || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
           totalReviews: response.data.totalReviews || 0
         });
-        console.log('Comments loaded successfully:', response.data.comments?.length || 0, 'comments');
       } else {
         console.error('API returned error:', response.message);
         toast.error(response.message || 'Failed to load comments');

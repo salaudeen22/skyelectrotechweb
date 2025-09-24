@@ -19,10 +19,7 @@ export const useNotifications = () => {
       const response = await api.get('/notifications?limit=10');
       setNotifications(response.data.notifications);
       if (updateCount) {
-        console.log('fetchNotifications: Updating count to:', response.data.unreadCount);
         setUnreadCount(response.data.unreadCount);
-      } else {
-        console.log('fetchNotifications: Skipping count update');
       }
     } catch (err) {
       console.error('Error fetching notifications:', err);
@@ -49,9 +46,7 @@ export const useNotifications = () => {
     if (!isAuthenticated) return;
 
     try {
-      console.log('markAsRead: Marking notifications as read:', notificationIds);
       const response = await api.patch('/notifications/mark-read', { notificationIds });
-      console.log('markAsRead: Server response:', response.data);
       
       // Update local state first for immediate UI feedback
       setNotifications(prev => 
@@ -64,7 +59,6 @@ export const useNotifications = () => {
       
       // Use the server response for accurate count
       const newCount = response.data.unreadCount || 0;
-      console.log('markAsRead: Setting unread count to:', newCount);
       setUnreadCount(newCount);
     } catch (err) {
       console.error('Error marking notifications as read:', err);
@@ -77,20 +71,16 @@ export const useNotifications = () => {
     if (!isAuthenticated) return;
 
     try {
-      console.log('markAllAsRead: Starting mark all as read');
       // First get all unread notifications
       const response = await api.get('/notifications?unreadOnly=true&limit=1000');
       const allUnreadIds = response.data.notifications.map(n => n._id);
-      console.log('markAllAsRead: Found unread IDs:', allUnreadIds);
       
       if (allUnreadIds.length === 0) {
-        console.log('markAllAsRead: No unread notifications found');
         return;
       }
       
       // Mark them all as read using the existing endpoint
       const markResponse = await api.patch('/notifications/mark-read', { notificationIds: allUnreadIds });
-      console.log('markAllAsRead: Server response:', markResponse.data);
       
       // Update local state - mark all notifications as read
       setNotifications(prev => 
@@ -99,7 +89,6 @@ export const useNotifications = () => {
       
       // Set unread count from server response immediately
       const newCount = markResponse.data.unreadCount || 0;
-      console.log('markAllAsRead: Setting unread count to:', newCount);
       setUnreadCount(newCount);
     } catch (err) {
       console.error('Error marking all notifications as read:', err);
@@ -222,10 +211,6 @@ export const useNotifications = () => {
     setUnreadCount(prev => prev + 1);
   }, []);
 
-  // Debug unreadCount changes
-  useEffect(() => {
-    console.log('useNotifications: unreadCount changed to:', unreadCount);
-  }, [unreadCount]);
 
   // Initialize
   useEffect(() => {

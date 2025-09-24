@@ -69,9 +69,7 @@ const AdminDashboard = () => {
       }
       
       const salesResponse = await analyticsAPI.getSalesAnalytics(salesParams);
-      console.log('Sales response:', salesResponse);
       const salesData = salesResponse.data?.analytics?.chartData || salesResponse.data?.chartData || [];
-      console.log('Sales data:', salesData);
 
       // Fetch recent orders (only confirmed status)
       const ordersResponse = await ordersAPI.getAllOrders({ 
