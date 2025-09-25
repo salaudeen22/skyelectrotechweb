@@ -309,8 +309,8 @@ const ProductDetails = () => {
     };
 
     return {
-      title: `${product?.name} - SkyElectroTech`,
-      description: generateDescription(),
+      title: `Buy ${product?.name} Online | ₹${product?.price} | Free Delivery Bangalore - SkyElectroTech`,
+      description: `${product?.name} at best price ₹${product?.price}.  ✓ Same Day Delivery in Bangalore ✓ Expert Support ✓ Genuine Products. ${generateDescription()}`.substring(0, 160),
       keywords: generateKeywords(),
       image: product?.images?.[0]?.url,
       url: product ? `https://skyelectrotech.in${generateProductUrl(product)}` : `https://skyelectrotech.in/products`,

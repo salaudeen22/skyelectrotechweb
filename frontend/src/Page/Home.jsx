@@ -326,8 +326,8 @@ const Home = memo(() => {
       `}</style>
       {/* Enhanced SEO for Homepage */}
       <SEO 
-        title="Arduino, MAX7219, NE555, Humidity Sensors - SkyElectroTech Electronic Components Shop Bangalore"
-        description="Buy Arduino boards, MAX7219 displays, NE555 timer ICs, humidity modules, obstacle detection sensors & electronic components in Bangalore. Electronic components shop near me with same-day delivery & technical support."
+        title="Buy Arduino, NE555, MAX7219 Online | Same Day Delivery Bangalore - SkyElectroTech"
+        description="Arduino ₹299 | NE555 IC ₹15 | MAX7219 ₹99 | Humidity Sensor ₹49. ✓ COD ✓ Same Day Delivery ✓ 5000+ Products ✓ Technical Support. Electronic components shop Bangalore."
         keywords="arduino bangalore, MAX7219 display, NE555 timer IC, humidity sensor module, obstacle detection sensor, electronic components shop near me, electronics components shop near me, arduino supplier bangalore, raspberry pi bangalore, sensors bangalore"
         image="https://skyelectrotech.in/og-image.jpg"
         url="https://skyelectrotech.in/"
