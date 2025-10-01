@@ -98,15 +98,15 @@ const App = () => {
 
     // Socket event listeners
     socket.on('connect', () => {
-       console.log('Socket.IO connected:');
+       // Connected
     });
 
     socket.on('disconnect', () => {
-        console.log('Socket.IO disconnected');
+        // Disconnected
     });
 
-    socket.on('error', (error) => {
-      console.error('Socket.IO error:', error);
+    socket.on('error', () => {
+      // Handle error silently in production
     });
 
     // Cleanup on unmount
