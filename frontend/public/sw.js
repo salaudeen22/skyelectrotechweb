@@ -11,7 +11,8 @@ self.addEventListener('install', (event) => {
       '/',
       '/index.html',
       '/logo.svg',
-      '/vite.svg'
+      '/vite.svg',
+      '/manifest.json'
     ];
 
     // Cache each resource individually so one failure doesn't break install

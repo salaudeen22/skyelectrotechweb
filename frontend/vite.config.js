@@ -17,6 +17,8 @@ export default defineConfig({
       }
     },
     chunkSizeWarningLimit: 1000,
+    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
+    cssMinify: true,
     rollupOptions: {
       output: {
         manualChunks: {

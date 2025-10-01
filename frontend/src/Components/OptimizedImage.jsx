@@ -66,7 +66,7 @@ const OptimizedImage = ({
         }
       },
       {
-        rootMargin: '50px 0px',
+        rootMargin: '200px 0px', // Increased for better UX
         threshold: 0.01
       }
     );
