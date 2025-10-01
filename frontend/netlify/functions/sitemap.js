@@ -51,7 +51,6 @@ exports.handler = async (event, context) => {
         });
       }
     } catch (error) {
-      console.log('Error fetching categories for sitemap:', error.message);
     }
 
     // Try to fetch products from API (limit to 500 for performance)
@@ -69,7 +68,6 @@ exports.handler = async (event, context) => {
         });
       }
     } catch (error) {
-      console.log('Error fetching products for sitemap:', error.message);
     }
 
     sitemap += `
@@ -85,7 +83,6 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error('Error generating sitemap:', error);
     
     // Return a basic sitemap with static pages only if API fails
     const baseUrl = 'https://sweet-hamster-f11198.netlify.app';

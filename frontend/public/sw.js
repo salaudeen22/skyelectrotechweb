@@ -5,7 +5,6 @@ const DYNAMIC_CACHE = 'dynamic-v2';
 
 // Install event
 self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
   event.waitUntil((async () => {
     const cache = await caches.open(STATIC_CACHE);
     const urlsToCache = [
@@ -24,10 +23,8 @@ self.addEventListener('install', (event) => {
           if (response && response.ok) {
             await cache.put(request, response);
           } else {
-            console.warn('Skipping cache for', url, '- response not OK');
           }
         } catch (err) {
-          console.warn('Failed to cache', url, err);
         }
       })
     );
@@ -37,7 +34,6 @@ self.addEventListener('install', (event) => {
 
 // Activate event
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -54,7 +50,6 @@ self.addEventListener('activate', (event) => {
 
 // Push notification event
 self.addEventListener('push', (event) => {
-  console.log('Push notification received:', event);
   
   let notificationData = {
     title: 'SkyElectroTech',
@@ -75,7 +70,6 @@ self.addEventListener('push', (event) => {
         ...data
       };
     } catch (error) {
-      console.error('Error parsing push data:', error);
     }
   }
 
@@ -99,7 +93,6 @@ self.addEventListener('push', (event) => {
 
 // Notification click event
 self.addEventListener('notificationclick', (event) => {
-  console.log('Notification clicked:', event);
   
   event.notification.close();
 
@@ -127,18 +120,15 @@ self.addEventListener('notificationclick', (event) => {
 
 // Notification close event
 self.addEventListener('notificationclose', (event) => {
-  console.log('Notification closed:', event);
   
   // Track notification close for analytics
   if (event.notification.data?.notificationId) {
     // You can send analytics data here
-    console.log('Notification closed:', event.notification.data.notificationId);
   }
 });
 
 // Background sync event
 self.addEventListener('sync', (event) => {
-  console.log('Background sync event:', event);
   
   if (event.tag === 'background-sync') {
     event.waitUntil(doBackgroundSync());
@@ -178,7 +168,6 @@ self.addEventListener('fetch', (event) => {
 async function doBackgroundSync() {
   try {
     // Perform background tasks here
-    console.log('Performing background sync...');
     
     // Example: Sync offline data
     const offlineData = await getOfflineData();
@@ -186,7 +175,6 @@ async function doBackgroundSync() {
       await syncOfflineData(offlineData);
     }
   } catch (error) {
-    console.error('Background sync failed:', error);
   }
 }
 
@@ -199,12 +187,10 @@ async function getOfflineData() {
 // Helper function to sync offline data
 async function syncOfflineData(data) {
   // Implementation depends on your app's sync strategy
-  console.log('Syncing offline data:', data);
 }
 
 // Message event for communication with main thread
 self.addEventListener('message', (event) => {
-  console.log('Service Worker received message:', event.data);
   
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
@@ -217,10 +203,8 @@ self.addEventListener('message', (event) => {
 
 // Error event
 self.addEventListener('error', (event) => {
-  console.error('Service Worker error:', event.error);
 });
 
 // Unhandled rejection event
 self.addEventListener('unhandledrejection', (event) => {
-  console.error('Service Worker unhandled rejection:', event.reason);
 });

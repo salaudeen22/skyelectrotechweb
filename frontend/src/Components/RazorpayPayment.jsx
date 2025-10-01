@@ -31,7 +31,6 @@ const RazorpayPayment = ({
       const response = await paymentAPI.getPaymentMethods();
       setPaymentMethods(response.data.paymentMethods);
     } catch (error) {
-      console.error('Error loading payment methods:', error);
     }
   };
 
@@ -56,7 +55,6 @@ const RazorpayPayment = ({
 
       return paymentResponse.data;
     } catch (error) {
-      console.error('Error creating order:', error);
       toast.error('Failed to create order. Please try again.');
       throw error;
     } finally {
@@ -110,7 +108,6 @@ const RazorpayPayment = ({
       trackClick('razorpay_modal_opened', 'checkout');
 
     } catch (error) {
-      console.error('Payment error:', error);
       toast.error('Payment failed. Please try again.');
       onFailure?.(error);
     } finally {
@@ -135,7 +132,6 @@ const RazorpayPayment = ({
         // Try fast verification first
         verificationResponse = await paymentAPI.verifyPaymentFast(verificationData);
       } catch (fastError) {
-        console.log('Fast verification failed, falling back to regular verification');
         // Fall back to regular verification
         verificationResponse = await paymentAPI.verifyPayment(verificationData);
       }
@@ -155,7 +151,6 @@ const RazorpayPayment = ({
         throw new Error('Payment verification failed');
       }
     } catch (error) {
-      console.error('Payment verification error:', error);
       toast.error('Payment verification failed. Please contact support.');
       onFailure?.(error);
     } finally {
@@ -187,7 +182,6 @@ const RazorpayPayment = ({
       onSuccess?.({ order });
       navigate(`/orders/${order._id}`);
     } catch (error) {
-      console.error('COD order error:', error);
       toast.error('Failed to place order. Please try again.');
       onFailure?.(error);
     } finally {

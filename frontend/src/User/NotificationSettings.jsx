@@ -41,7 +41,6 @@ const NotificationSettings = () => {
         setPreferences(prefs);
       }
     } catch (err) {
-      console.error('Error loading preferences:', err);
     } finally {
       setLoading(false);
     }
@@ -54,7 +53,6 @@ const NotificationSettings = () => {
         const subscription = await registration.pushManager.getSubscription();
         setPushEnabled(!!subscription);
       } catch (error) {
-        console.error('Error checking push status:', error);
       }
     }
   }, []);
@@ -102,7 +100,6 @@ const NotificationSettings = () => {
       setPushEnabled(false);
       toast.success('Push notifications disabled');
     } catch (error) {
-      console.error('Error disabling push notifications:', error);
       toast.error('Failed to disable push notifications');
     }
   };
@@ -129,7 +126,6 @@ const NotificationSettings = () => {
         toast.error('Failed to enable push notifications. Please try again.');
       }
     } catch (error) {
-      console.error('Error enabling push notifications:', error);
       
       if (error.message.includes('denied')) {
         toast.error('Permission denied. Please allow notifications in your browser settings and try again.');
@@ -163,7 +159,6 @@ const NotificationSettings = () => {
           try {
             await caches.delete('notification-cache');
           } catch {
-                console.log('No notification cache to clear');
           }
         }
         window.location.reload();
@@ -194,7 +189,6 @@ const NotificationSettings = () => {
         toast.info('Permission request was dismissed. Please try again.');
       }
     } catch (error) {
-      console.error('Error requesting permission:', error);
       toast.error('Error requesting permission. Please try refreshing the page.');
     }
   };

@@ -3,7 +3,6 @@
 // Initialize Google Tag Manager
 export const initGA = () => {
   if (typeof window !== 'undefined' && window.dataLayer) {
-    console.log('Google Tag Manager initialized');
   }
 };
 
@@ -336,5 +335,4 @@ export const initializeAnalytics = () => {
     }
   });
   
-  console.log('Analytics initialized successfully');
 }; 

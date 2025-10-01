@@ -584,13 +584,6 @@ const SEO = ({
 
   useEffect(() => {
     // Debug logging for development
-    if (import.meta.env.DEV) {
-      console.log('SEO Update:', {
-        title: finalTitle,
-        description: finalDescription,
-        source: description ? 'component-props' : 'fallback'
-      });
-    }
     
     // Update document title
     document.title = finalTitle;

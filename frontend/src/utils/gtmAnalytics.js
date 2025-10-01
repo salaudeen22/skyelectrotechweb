@@ -4,7 +4,6 @@
 export const initGTM = () => {
   if (typeof window !== 'undefined') {
     window.dataLayer = window.dataLayer || [];
-    console.log('Google Tag Manager initialized');
   }
 };
 
@@ -292,5 +291,4 @@ export const initializeGTMAnalytics = () => {
     }
   });
   
-  console.log('GTM Analytics initialized successfully');
 }; 

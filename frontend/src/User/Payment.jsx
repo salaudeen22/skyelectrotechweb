@@ -59,7 +59,6 @@ const Payment = () => {
         setSelectedMethod(methods[0].id);
       }
     } catch (error) {
-      console.error('Error loading payment methods:', error);
       toast.error('Failed to load payment methods');
     }
   }, []);
@@ -151,7 +150,6 @@ const Payment = () => {
         await handleOnlinePayment(orderPayload);
       }
     } catch (error) {
-      console.error('Payment error:', error);
       toast.error('Payment failed. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -228,7 +226,6 @@ const Payment = () => {
       
       // Add payment failure handler
       razorpay.on('payment.failed', (response) => {
-        console.error('Payment failed:', response.error);
         toast.error(`Payment failed: ${response.error.description}`);
         
         // Show retry option for certain failure types
@@ -248,7 +245,6 @@ const Payment = () => {
       razorpay.open();
       
     } catch (error) {
-      console.error('Online payment error:', error);
       toast.error('Failed to initialize payment. Please try again.');
       throw error;
     }
@@ -256,7 +252,6 @@ const Payment = () => {
 
   const handlePaymentSuccess = async (response, orderPayload) => {
     try {
-      console.log('Payment success response:', response);
       
       setProcessingStep('Verifying payment...');
       setProcessingProgress(25);
@@ -269,17 +264,10 @@ const Payment = () => {
         razorpay_signature: response.razorpay_signature,
       };
       
-      console.log('Sending verification data:', verificationData);
       
       const verificationResponse = await paymentAPI.verifyPayment(verificationData);
-      console.log('Verification response:', verificationResponse);
-      console.log('Verification response success:', verificationResponse.success);
-      console.log('Verification response data:', verificationResponse.data);
-      console.log('Verification response type:', typeof verificationResponse.success);
-      console.log('Verification response keys:', Object.keys(verificationResponse));
 
       if (verificationResponse.success) {
-        console.log('Payment verification successful, creating order...');
         
         setProcessingStep('Creating your order...');
         setProcessingProgress(50);
@@ -298,7 +286,6 @@ const Payment = () => {
           razorpayOrderId: response.razorpay_order_id,
         };
         
-        console.log('Creating order with payload:', finalOrderPayload);
         
         // Add progress updates during order creation
         setTimeout(() => {
@@ -328,7 +315,6 @@ const Payment = () => {
         try {
           const orderResponse = await ordersAPI.createOrder(finalOrderPayload);
           clearTimeout(orderCreationTimeout);
-          console.log('Order creation response:', orderResponse);
           
           const order = orderResponse.data.order;
           
@@ -343,7 +329,6 @@ const Payment = () => {
           clearCart();
           clearAllCheckoutData();
           
-          console.log('Payment and order creation completed successfully!');
           setIsSubmitting(false);
           setProcessingStep('');
           setProcessingProgress(100);
@@ -351,7 +336,6 @@ const Payment = () => {
           navigate(`/user/orders/${order._id}`);
         } catch (orderError) {
           clearTimeout(orderCreationTimeout);
-          console.error('Order creation failed:', orderError);
           
           // If order creation fails after payment, initiate automatic refund
           setProcessingStep('Processing automatic refund...');
@@ -378,7 +362,6 @@ const Payment = () => {
               throw new Error('Refund failed');
             }
           } catch (refundError) {
-            console.error('Automatic refund failed:', refundError);
             setIsSubmitting(false);
             setProcessingStep('');
             setProcessingProgress(0);
@@ -391,16 +374,9 @@ const Payment = () => {
           throw orderError;
         }
       } else {
-        console.log('Payment verification failed:', verificationResponse);
         throw new Error('Payment verification failed');
       }
     } catch (error) {
-      console.error('Payment verification error:', error);
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        response: error.response?.data
-      });
       setIsSubmitting(false);
       setProcessingStep('');
       setProcessingProgress(0);
@@ -438,7 +414,6 @@ const Payment = () => {
       navigate(`/user/orders/${order._id}`);
       
     } catch (error) {
-      console.error('COD order error:', error);
       toast.error('Failed to place order. Please try again.', { id: 'cod-process' });
       throw error;
     }
