@@ -28,7 +28,7 @@ const FAQ = () => {
     },
     {
       question: "How long does shipping take?",
-      answer: "Standard delivery takes 3-5 business days across India. Express delivery (1-2 days) is available for select cities. International shipping takes 7-14 business days depending on the destination."
+      answer: "Same-day delivery is available within Bangalore city limits for orders placed before 6 PM. Standard delivery takes 3-5 business days across India. Express delivery (1-2 days) is available for major cities."
     },
     {
       question: "Do you offer technical support?",
@@ -36,7 +36,7 @@ const FAQ = () => {
     },
     {
       question: "What is your return policy?",
-      answer: "We offer a 7-day return policy for most products. Items must be in original packaging and unused condition. Some products like software and custom items are non-returnable. Return shipping is free for defective items."
+      answer: "We offer a 24-hour return policy for most products. Items must be in original packaging and unused condition. Some products like software and custom items are non-returnable. Return shipping is free for defective items."
     },
     {
       question: "Are your products genuine and authentic?",
@@ -52,7 +52,7 @@ const FAQ = () => {
     },
     {
       question: "Do you ship internationally?",
-      answer: "Yes, we ship to most countries worldwide. International shipping rates and delivery times vary by location. Contact us for specific shipping information to your country."
+      answer: "Currently, we only deliver within India. We are working on expanding our services to international markets and will update our customers when international shipping becomes available."
     },
     {
       question: "What if I receive a damaged product?",

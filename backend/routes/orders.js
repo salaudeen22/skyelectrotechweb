@@ -198,7 +198,7 @@ router.get('/today-sales-invoice', auth, async (req, res) => {
             name: 'Sky Electro Tech',
             description: 'Electronics & Components Store',
             email: 'skyelectrotechblr@gmail.com',
-            phone: '+91 063612 41811',
+            phone: '+91 63612 41811',
             address: '2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002',
             gstin: '27AABCS1234Z1Z5'
         };
@@ -413,7 +413,7 @@ router.get('/:id/invoice', auth, async (req, res) => {
             name: 'Sky Electro Tech',
             description: 'Electronics & Components Store',
             email: 'skyelectrotechblr@gmail.com',
-            phone: '+91 063612 41811',
+            phone: '+91 63612 41811',
             address: '2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002',
             gstin: '27AABCS1234Z1Z5'
         };
@@ -1015,7 +1015,7 @@ function generateInvoiceHTML(data) {
                     Sky Electro Tech<br>
                     GSTIN: 27AABCS1234Z1Z5<br>
                     Address: 2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002<br>
-                    Phone: +91 063612 41811 | Email: skyelectrotechblr@gmail.com
+                    Phone: +91 63612 41811 | Email: skyelectrotechblr@gmail.com
                 </div>
                 
                 <div class="summary">

@@ -17,7 +17,7 @@ const settingsSchema = new mongoose.Schema({
     },
     phone: {
       type: String,
-      default: '+91 063612 41811'
+      default: '+91 63612 41811'
     },
     address: {
       type: String,

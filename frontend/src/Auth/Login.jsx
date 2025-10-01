@@ -174,7 +174,7 @@ const Login = () => {
                         </div>
 
                         <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit} noValidate>
-                            <InputField icon={<FiMail />} name="email" type="email" placeholder="your.email@example.com" value={formData.email} onChange={handleChange} error={errors.email} />
+                            <InputField icon={<FiMail />} name="email" type="email" placeholder="your.email@domain.com" value={formData.email} onChange={handleChange} error={errors.email} />
                             <InputField icon={<FiLock />} name="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={formData.password} onChange={handleChange} error={errors.password}>
                                 <PasswordToggle isVisible={showPassword} onToggle={() => setShowPassword(!showPassword)} />
                             </InputField>

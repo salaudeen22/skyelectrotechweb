@@ -65,8 +65,11 @@ const TermsOfService = () => {
 
               <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">5. Shipping and Delivery</h2>
               <p className="text-gray-700 mb-3 sm:mb-4">
-                Delivery times are estimates only. We are not responsible for delays beyond our control. 
-                Risk of loss and title for items purchased pass to you upon delivery of the items to the carrier.
+                We offer same-day delivery within Bangalore city limits for orders placed before 6 PM. 
+                Delivery times for other locations are estimates only and typically range from 1-3 business days. 
+                We are not responsible for delays beyond our control including but not limited to weather, 
+                traffic, or courier service delays. Risk of loss and title for items purchased pass to you 
+                upon delivery of the items to the carrier.
               </p>
 
               <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">6. Returns and Refunds</h2>
@@ -143,7 +146,7 @@ const TermsOfService = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-gray-700">
                   <strong>Email:</strong> skyelectrotechblr@gmail.com<br />
-                  <strong>Phone:</strong> +91 063612 41811<br />
+                  <strong>Phone:</strong> +91 63612 41811<br />
                   <strong>Address:</strong> 2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002, India
                 </p>
               </div>

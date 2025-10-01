@@ -1055,7 +1055,7 @@ const CouponManagement = () => {
                   onChange={(e) => setIssuanceUserEmails(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   rows={4}
-                  placeholder="user1@example.com, user2@example.com, user3@example.com"
+                  placeholder="customer1@domain.com, customer2@domain.com"
                   required
                 />
                 <div className="text-xs text-gray-500 mt-1">

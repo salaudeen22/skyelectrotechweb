@@ -134,7 +134,7 @@ const Register = () => {
                                 <InputField icon={<FiUser />} name="name" type="text" placeholder="Your Name" value={formData.name} onChange={handleChange} error={errors.name} />
                                 <InputField icon={<FiPhone />} name="phone" type="tel" placeholder="10-digit Phone" value={formData.phone} onChange={handleChange} error={errors.phone} />
                             </div>
-                            <InputField icon={<FiMail />} name="email" type="email" placeholder="your.email@example.com" value={formData.email} onChange={handleChange} error={errors.email} />
+                            <InputField icon={<FiMail />} name="email" type="email" placeholder="your.email@domain.com" value={formData.email} onChange={handleChange} error={errors.email} />
                             <InputField icon={<FiLock />} name="password" type={showPassword ? 'text' : 'password'} placeholder="Password (min. 6 characters)" value={formData.password} onChange={handleChange} error={errors.password}>
                                 <PasswordToggle isVisible={showPassword} onToggle={() => setShowPassword(!showPassword)} />
                             </InputField>

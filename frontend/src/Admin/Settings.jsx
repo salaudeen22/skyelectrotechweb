@@ -54,7 +54,7 @@ const Settings = () => {
       name: 'Sky Electro Tech',
       description: 'Electronics & Components Store',
       email: 'skyelectrotechblr@gmail.com',
-      phone: '+91 063612 41811',
+      phone: '+91 63612 41811',
       address: '2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002',
       gstin: '27AABCS1234Z1Z5',
       city: 'Bengaluru',

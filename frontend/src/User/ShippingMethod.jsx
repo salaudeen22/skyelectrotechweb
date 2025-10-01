@@ -242,10 +242,23 @@ const ShippingMethod = () => {
 
             {/* Shipping Methods */}
             <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8">
-              <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center">
+              <h2 className="text-2xl font-bold text-slate-800 mb-4 flex items-center">
                 <FiTruck className="w-6 h-6 mr-3 text-blue-600" />
                 Delivery Options
               </h2>
+              
+              {/* Instant Delivery Note */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex items-start">
+                  <FiClock className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                  <div>
+                    <h3 className="text-sm font-semibold text-blue-900 mb-1">Instant Delivery Available</h3>
+                    <p className="text-sm text-blue-700">
+                      Same-day delivery is available within Bangalore city limits. Orders placed before 6 PM are delivered the same day.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               {/* Shipping Methods List */}
               {shippingMethods.length > 0 ? (

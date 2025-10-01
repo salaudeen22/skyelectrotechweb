@@ -54,8 +54,8 @@ const ShippingPolicy = () => {
                 </div>
                 <div className="bg-white border border-gray-300 rounded-lg p-4">
                   <h4 className="font-semibold text-gray-900 mb-2">Same Day Delivery</h4>
-                  <p className="text-sm text-gray-600 mb-1"><strong>Time:</strong> Within 24 hours</p>
-                  <p className="text-sm text-gray-600"><strong>Coverage:</strong> Selected metro cities</p>
+                  <p className="text-sm text-gray-600 mb-1"><strong>Time:</strong> Same day (orders before 6 PM)</p>
+                  <p className="text-sm text-gray-600"><strong>Coverage:</strong> Bangalore city limits only</p>
                 </div>
               </div>
 
@@ -82,8 +82,8 @@ const ShippingPolicy = () => {
                     </tr>
                     <tr>
                       <td className="border border-gray-300 px-4 py-2">Same Day Delivery</td>
-                      <td className="border border-gray-300 px-4 py-2">Within 24 hours</td>
-                      <td className="border border-gray-300 px-4 py-2">Selected metro cities</td>
+                      <td className="border border-gray-300 px-4 py-2">Same day (orders before 6 PM)</td>
+                      <td className="border border-gray-300 px-4 py-2">Bangalore city limits only</td>
                     </tr>
                   </tbody>
                 </table>
@@ -147,8 +147,9 @@ const ShippingPolicy = () => {
 
               <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">4. Order Processing Time</h2>
               <ul className="list-disc pl-4 sm:pl-6 text-gray-700 mb-4 sm:mb-6 space-y-1 sm:space-y-0">
-                <li>Orders placed before 2:00 PM on business days are processed the same day</li>
-                <li>Orders placed after 2:00 PM or on weekends/holidays are processed the next business day</li>
+                <li>Orders placed before 6:00 PM on business days are eligible for same-day delivery within Bangalore</li>
+                <li>Orders placed after 6:00 PM or on weekends/holidays are processed the next business day</li>
+                <li>Standard orders are typically processed within 24 hours</li>
                 <li>Custom or bulk orders may require additional processing time (2-3 business days)</li>
                 <li>During peak seasons or sales, processing may take 1-2 additional days</li>
               </ul>
@@ -242,7 +243,7 @@ const ShippingPolicy = () => {
               <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
                 <p className="text-gray-700 text-sm sm:text-base">
                   <strong>Email:</strong> skyelectrotechblr@gmail.com<br />
-                  <strong>Phone:</strong> +91 063612 41811<br />
+                  <strong>Phone:</strong> +91 63612 41811<br />
                   <strong>Customer Support Hours:</strong> 9:00 AM - 7:00 PM (Monday to Saturday)<br />
                   <strong>Address:</strong> 2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002, India
                 </p>

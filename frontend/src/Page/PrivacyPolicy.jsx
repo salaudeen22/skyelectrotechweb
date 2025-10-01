@@ -89,6 +89,16 @@ const PrivacyPolicy = () => {
                 <li>Provide personalized content and recommendations</li>
                 <li>Improve website functionality and performance</li>
               </ul>
+              
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Google Analytics</h3>
+              <p className="text-gray-700 mb-6">
+                We use Google Analytics to analyze website usage and improve our services. Google Analytics 
+                collects information such as how often users visit our site, what pages they visit, and what 
+                other sites they used prior to coming to our site. We use this information only to improve 
+                our website and services. Google Analytics collects only the IP address assigned to you on 
+                the date you visit our site, not your name or other personally identifying information. 
+                You can opt-out of Google Analytics by installing the Google Analytics opt-out browser add-on.
+              </p>
 
               <h2 className="text-2xl font-bold text-gray-900 mb-6">6. Your Rights</h2>
               <p className="text-gray-700 mb-4">
@@ -135,7 +145,7 @@ const PrivacyPolicy = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-gray-700">
                   <strong>Email:</strong> skyelectrotechblr@gmail.com<br />
-                  <strong>Phone:</strong> +91 063612 41811<br />
+                  <strong>Phone:</strong> +91 63612 41811<br />
                   <strong>Address:</strong> 2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002, India
                 </p>
               </div>

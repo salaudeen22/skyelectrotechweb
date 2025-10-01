@@ -198,7 +198,7 @@ const Contact = () => {
                     <div>
                       <h3 className="text-base sm:text-lg font-semibold text-gray-900">Phone - Customer Service</h3>
                       <p className="text-sm sm:text-base text-gray-600">
-                        <a href="tel:+916361241811" className="hover:text-blue-600 font-medium">+91 063612 41811</a>
+                        <a href="tel:+916361241811" className="hover:text-blue-600 font-medium">+91 63612 41811</a>
                       </p>
                       <p className="text-xs text-gray-500 mt-1">Arduino, Raspberry Pi, sensors, PLCs & automation support</p>
                     </div>

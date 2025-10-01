@@ -644,7 +644,7 @@ const ShippingInfo = () => {
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormInput id="name" name="name" type="text" label="Full Name" value={formData.name} placeholder="John Doe" error={errors.name} onChange={handleInputChange} onBlur={handleInputBlur} icon={<FiUser className="text-slate-400"/>} isRequired />
-                  <FormInput id="email" name="email" type="email" label="Email Address" value={formData.email} placeholder="you@example.com" error={errors.email} onChange={handleInputChange} onBlur={handleInputBlur} icon={<FiMail className="text-slate-400"/>} isRequired />
+                  <FormInput id="email" name="email" type="email" label="Email Address" value={formData.email} placeholder="your.email@domain.com" error={errors.email} onChange={handleInputChange} onBlur={handleInputBlur} icon={<FiMail className="text-slate-400"/>} isRequired />
                 </div>
                 <FormInput id="phone" name="phone" type="tel" label="Phone Number" value={formData.phone} placeholder="9876543210" error={errors.phone} onChange={handleInputChange} onBlur={handleInputBlur} icon={<FiPhone className="text-slate-400"/>} isRequired />
                 

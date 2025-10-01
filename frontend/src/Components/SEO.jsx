@@ -308,7 +308,7 @@ const SEO = ({
         "description": "Leading electronic components shop in Bangalore specializing in Arduino, Raspberry Pi, industrial automation, sensors, PLCs, and robotics components. Expert technical support and quality guaranteed.",
         "foundingDate": "2020",
         "priceRange": "₹₹",
-        "telephone": "+91 063612 41811",
+        "telephone": "+91 63612 41811",
         "email": "skyelectrotechblr@gmail.com",
         "address": {
           "@type": "PostalAddress",

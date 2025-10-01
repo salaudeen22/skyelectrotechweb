@@ -16,7 +16,7 @@ const testimonialPool = [
     name: "Rohan M.",
     role: "Engineering Student",
     rating: 5,
-    text: "Good selection of components. Found the Arduino Uno I needed for my project. Delivery to Koramangala took just 5 hours!",
+    text: "Good selection of components. Found the Arduino Uno I needed for my project. Same-day delivery to Koramangala. Fast service!",
     location: "Koramangala",
     photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
   },
@@ -24,7 +24,7 @@ const testimonialPool = [
     name: "Deepak R.",
     role: "Electronics Hobbyist",
     rating: 5,
-    text: "Shop owner was helpful in explaining sensor specifications. Order reached Whitefield in about 6 hours. Best electronics store in Bangalore!",
+    text: "Shop owner was helpful in explaining sensor specifications. Same-day delivery to Whitefield. Best electronics store in Bangalore!",
     location: "Whitefield",
     photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
   },
@@ -808,7 +808,7 @@ const Home = memo(() => {
                 <div className="text-xs sm:text-sm lg:text-base text-gray-600">Google Reviews</div>
               </div>
               <div className="bg-white rounded-lg p-3 sm:p-4 lg:p-6 shadow-md">
-                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-600 mb-1 sm:mb-2">4 Hours</div>
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-600 mb-1 sm:mb-2">Same Day</div>
                 <div className="text-xs sm:text-sm lg:text-base text-gray-600">Delivery in Bangalore</div>
               </div>
               <div className="bg-white rounded-lg p-3 sm:p-4 lg:p-6 shadow-md">

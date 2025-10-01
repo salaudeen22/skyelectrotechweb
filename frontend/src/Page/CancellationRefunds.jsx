@@ -44,7 +44,7 @@ const CancellationRefunds = () => {
               <ul className="list-disc pl-4 sm:pl-6 text-gray-700 mb-4 sm:mb-6 space-y-1 sm:space-y-0">
                 <li><strong>Free Cancellation:</strong> Orders can be cancelled free of charge before they are shipped</li>
                 <li><strong>How to Cancel:</strong> Log into your account or contact customer support</li>
-                <li><strong>Processing Time:</strong> Cancellation requests are processed within 2-4 hours during business hours</li>
+                <li><strong>Processing Time:</strong> Cancellation requests are processed within 24 hours during business hours</li>
                 <li><strong>Refund Timeline:</strong> Refunds for cancelled orders are processed within 3-5 business days</li>
               </ul>
 
@@ -310,10 +310,10 @@ const CancellationRefunds = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-gray-700">
                   <strong>Email:</strong> skyelectrotechblr@gmail.com<br />
-                  <strong>Phone:</strong> +91 063612 41811<br />
-                  <strong>WhatsApp:</strong> +91 063612 41811<br />
+                  <strong>Phone:</strong> +91 63612 41811<br />
+                  <strong>WhatsApp:</strong> +91 63612 41811<br />
                   <strong>Support Hours:</strong> 9:00 AM - 7:00 PM (Monday to Saturday)<br />
-                  <strong>Average Response Time:</strong> Within 4 hours during business hours<br />
+                  <strong>Average Response Time:</strong> Within 24 hours during business hours<br />
                   <strong>Address:</strong> 2nd Floor, No 140, Sadar Patrappa Rd, Thigalarpet, Kumbarpet, Dodpete, Nagarathpete, Bengaluru, Karnataka 560002, India
                 </p>
               </div>
