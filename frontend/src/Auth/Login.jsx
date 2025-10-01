@@ -134,7 +134,7 @@ const Login = () => {
                                     </Link>
                                     <div className="flex items-center">
                                         <img 
-                                            src="/favicon_io (1)/android-chrome-192x192.png" 
+                                            src="/favicon_io (1)/android-chrome-192x192.webp" 
                                             alt={settings.storeInfo.name} 
                                             className="h-8 w-8 object-contain"
                                         />

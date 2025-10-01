@@ -384,7 +384,7 @@ const SEO = ({
                     "description": "Get Arduino Uno, Nano, Mega boards in Bangalore. Fast shipping, cash on delivery available. Expert technical support included.",
                     "image": [
                       "https://skyelectrotech-assets.s3.eu-north-1.amazonaws.com/products/1758210523513-wcnyyfhbstq.png",
-                      "https://skyelectrotech.in/favicon_io%20(1)/android-chrome-512x512.png"
+                      "https://skyelectrotech.in/favicon_io%20(1)/android-chrome-512x512.webp"
                     ],
                     "brand": {
                       "@type": "Brand",
@@ -422,7 +422,7 @@ const SEO = ({
                     "description": "Get PLCs, HMIs, industrial sensors in Bangalore. Same-day delivery, cash on delivery available.",
                     "image": [
                       "https://skyelectrotech-assets.s3.eu-north-1.amazonaws.com/products/1758210523513-wcnyyfhbstq.png",
-                      "https://skyelectrotech.in/favicon_io%20(1)/android-chrome-512x512.png"
+                      "https://skyelectrotech.in/favicon_io%20(1)/android-chrome-512x512.webp"
                     ],
                     "brand": {
                       "@type": "Brand",
@@ -460,7 +460,7 @@ const SEO = ({
                     "description": "Get temperature, humidity, ultrasonic sensors in Bangalore. Fast shipping, cash on delivery available.",
                     "image": [
                       "https://skyelectrotech-assets.s3.eu-north-1.amazonaws.com/products/1758210523513-wcnyyfhbstq.png",
-                      "https://skyelectrotech.in/favicon_io%20(1)/android-chrome-512x512.png"
+                      "https://skyelectrotech.in/favicon_io%20(1)/android-chrome-512x512.webp"
                     ],
                     "brand": {
                       "@type": "Brand",

@@ -117,7 +117,7 @@ const AdminSidebar = ({ isOpen, onToggle }) => {
             <div className="flex items-center justify-center px-4 h-24 sm:h-32 border-b border-gray-200">
                 <Link to="/" className="flex items-center justify-center">
                     <img 
-                        src="/favicon_io (1)/android-chrome-512x512.png" 
+                        src="/favicon_io (1)/android-chrome-512x512.webp" 
                         alt={settings.storeInfo.name || "SkyElectroTech"} 
                         className="h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 object-contain"
                         onError={(e) => {

@@ -49,25 +49,25 @@ const sendEmail = async (options) => {
 // Helper function to get logo URL
 const getLogoUrl = () => {
   const baseUrl = process.env.CLIENT_URL || 'http://localhost:3000';
-  return `${baseUrl}/favicon_io%20(1)/android-chrome-512x512.png`;
+  return `${baseUrl}/favicon_io%20(1)/android-chrome-512x512.webp`;
 };
 
 // Helper function to get favicon URL
 const getFaviconUrl = () => {
   const baseUrl = process.env.CLIENT_URL || 'http://localhost:3000';
-  return `${baseUrl}/favicon_io%20(1)/favicon-32x32.png`;
+  return `${baseUrl}/favicon_io%20(1)/favicon-32x32.webp`;
 };
 
 // Helper function to get logo URL for emails (using local images)
 const getEmailLogoUrl = () => {
   const baseUrl = process.env.CLIENT_URL || 'http://localhost:3000';
-  return `${baseUrl}/favicon_io%20(1)/android-chrome-512x512.png`;
+  return `${baseUrl}/favicon_io%20(1)/android-chrome-512x512.webp`;
 };
 
 // Helper function to get favicon URL for emails
 const getEmailFaviconUrl = () => {
   const baseUrl = process.env.CLIENT_URL || 'http://localhost:3000';
-  return `${baseUrl}/favicon_io%20(1)/favicon-32x32.png`;
+  return `${baseUrl}/favicon_io%20(1)/favicon-32x32.webp`;
 };
 
 // -------------------------------------------------------------------
