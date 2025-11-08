@@ -2022,7 +2022,7 @@ const getOrderStatusUpdateEmailTemplate = (order, user, newStatus) => {
       'confirmed': '#3b82f6',
       'processing': '#8b5cf6',
       'packed': '#6366f1',
-      'shipped': '#10b981', // Green color for completion
+      'shipped': '#10b981', 
       'delivered': '#10b981',
       'cancelled': '#ef4444'
     };
