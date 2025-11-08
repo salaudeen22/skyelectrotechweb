@@ -4,7 +4,7 @@ const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 
 // @desc    Export products to CSV
 // @route   GET /api/bulk-upload/export
-// @access  Private (Admin)
+
 const exportProducts = asyncHandler(async (req, res) => {
   try {
     // Get all active products with populated category
