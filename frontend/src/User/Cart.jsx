@@ -15,8 +15,8 @@ const Cart = () => {
     if (!cartItems || cartItems.length === 0) return 0;
     
     return cartItems.reduce((total, item) => {
-      // Use currentPrice if available (from backend), otherwise fallback to product.price
-      const itemPrice = item.currentPrice || item.product.price;
+      // Use discountPrice if available (calculated price after discount), otherwise use currentPrice or fallback to product.price
+      const itemPrice = item.product.discountPrice || item.currentPrice || item.product.price;
       return total + (itemPrice * item.quantity);
     }, 0);
   }, [cartItems]);
@@ -122,8 +122,8 @@ const Cart = () => {
                 {/* Cart Items */}
                 <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
                     {cartItems.map((item) => {
-                      // Use currentPrice if available (from backend), otherwise fallback to product.price
-                      const itemPrice = item.currentPrice || item.product.price;
+                      // Use discountPrice if available (calculated price after discount), otherwise use currentPrice or fallback to product.price
+                      const itemPrice = item.product.discountPrice || item.currentPrice || item.product.price;
                       const itemTotal = itemPrice * item.quantity;
                       
                       return (
@@ -140,11 +140,6 @@ const Cart = () => {
                                 <h2 className="font-bold text-slate-800 text-sm sm:text-base lg:text-lg truncate">{item.product.name}</h2>
                                 <div className="flex items-center gap-2 mt-1">
                                   <p className="text-xs sm:text-sm text-slate-500">Price: ₹{itemPrice.toFixed(2)}</p>
-                                  {item.currentPrice && item.currentPrice !== item.product.price && (
-                                    <span className="text-xs text-green-600 font-medium">
-                                      {Math.round(((item.product.price - item.currentPrice) / item.product.price) * 100)}% OFF
-                                    </span>
-                                  )}
                                 </div>
                                 <p className="text-xs text-slate-400 mt-1">{item.product.brand}</p>
                             </div>

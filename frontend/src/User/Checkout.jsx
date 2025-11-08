@@ -685,7 +685,7 @@ const Checkout = () => {
                                  <p className="font-semibold text-slate-800">{item.product.name}</p>
                                  <p className="text-sm text-slate-500">Qty: {item.quantity}</p>
                                </div>
-                               <p className="font-medium text-slate-900">{formatAmount((item.product.price || 0) * item.quantity)}</p>
+                               <p className="font-medium text-slate-900">{formatAmount(((item.product.discountPrice || item.currentPrice || item.product.price) || 0) * item.quantity)}</p>
                              </div>
                            ))}
                          </div>

@@ -7,7 +7,7 @@ const { sendResponse, sendError, asyncHandler } = require('../utils/helpers');
 // @access  Private
 const getCart = asyncHandler(async (req, res) => {
   let cart = await Cart.findOne({ user: req.user._id })
-    .populate('items.product', 'name price discount images isActive')
+    .populate('items.product', 'name price originalPrice discount images isActive')
     .lean();
 
   let processedCart = null;
@@ -27,9 +27,8 @@ const getCart = asyncHandler(async (req, res) => {
 
     for (const item of cart.items) {
       if (item.product && item.product.isActive) {
-        const discountPrice = item.product.discount > 0 
-          ? Math.round(item.product.price * (1 - item.product.discount / 100))
-          : item.product.price;
+        // Use the virtual discountPrice field instead of manual calculation
+        const discountPrice = item.product.discountPrice || item.product.price;
         
         const itemTotal = discountPrice * item.quantity;
         totalPrice += itemTotal;
@@ -116,7 +115,7 @@ const addToCart = asyncHandler(async (req, res) => {
 
   // Populate and return updated cart with calculated totals
   cart = await Cart.findById(cart._id)
-    .populate('items.product', 'name price discount images isActive')
+    .populate('items.product', 'name price originalPrice discount images isActive')
     .lean();
 
   // Calculate total price with current product prices
@@ -125,8 +124,10 @@ const addToCart = asyncHandler(async (req, res) => {
 
   for (const item of cart.items) {
     if (item.product && item.product.isActive) {
+      // Calculate discountPrice - use originalPrice if available, otherwise use price
+      const basePrice = item.product.originalPrice || item.product.price;
       const discountPrice = item.product.discount > 0 
-        ? Math.round(item.product.price * (1 - item.product.discount / 100))
+        ? Math.round(basePrice * (1 - item.product.discount / 100))
         : item.product.price;
       
       const itemTotal = discountPrice * item.quantity;
@@ -185,7 +186,7 @@ const updateCartItem = asyncHandler(async (req, res) => {
 
   // Return updated cart with calculated totals
   const updatedCart = await Cart.findById(cart._id)
-    .populate('items.product', 'name price discount images isActive')
+    .populate('items.product', 'name price originalPrice discount images isActive')
     .lean();
 
   // Calculate total price with current product prices
@@ -194,8 +195,10 @@ const updateCartItem = asyncHandler(async (req, res) => {
 
   for (const item of updatedCart.items) {
     if (item.product && item.product.isActive) {
+      // Calculate discountPrice - use originalPrice if available, otherwise use price
+      const basePrice = item.product.originalPrice || item.product.price;
       const discountPrice = item.product.discount > 0 
-        ? Math.round(item.product.price * (1 - item.product.discount / 100))
+        ? Math.round(basePrice * (1 - item.product.discount / 100))
         : item.product.price;
       
       const itemTotal = discountPrice * item.quantity;
@@ -240,7 +243,7 @@ const removeFromCart = asyncHandler(async (req, res) => {
 
   // Return updated cart with calculated totals
   const updatedCart = await Cart.findById(cart._id)
-    .populate('items.product', 'name price discount images isActive')
+    .populate('items.product', 'name price originalPrice discount images isActive')
     .lean();
 
   // Calculate total price with current product prices
@@ -249,8 +252,10 @@ const removeFromCart = asyncHandler(async (req, res) => {
 
   for (const item of updatedCart.items) {
     if (item.product && item.product.isActive) {
+      // Calculate discountPrice - use originalPrice if available, otherwise use price
+      const basePrice = item.product.originalPrice || item.product.price;
       const discountPrice = item.product.discount > 0 
-        ? Math.round(item.product.price * (1 - item.product.discount / 100))
+        ? Math.round(basePrice * (1 - item.product.discount / 100))
         : item.product.price;
       
       const itemTotal = discountPrice * item.quantity;
