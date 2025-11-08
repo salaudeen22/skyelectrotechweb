@@ -254,7 +254,7 @@ const ShippingMethod = () => {
                   <div>
                     <h3 className="text-sm font-semibold text-blue-900 mb-1">Instant Delivery Available</h3>
                     <p className="text-sm text-blue-700">
-                      Same-day delivery is available within Bangalore city limits. Orders placed before 6 PM are delivered the same day.
+                      Same-day delivery is available within Bangalore city limits. Orders placed before 5 PM are delivered the same day.
                     </p>
                   </div>
                 </div>

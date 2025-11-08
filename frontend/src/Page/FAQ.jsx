@@ -28,7 +28,7 @@ const FAQ = () => {
     },
     {
       question: "How long does shipping take?",
-      answer: "Same-day delivery is available within Bangalore city limits for orders placed before 6 PM. Standard delivery takes 3-5 business days across India. Express delivery (1-2 days) is available for major cities."
+      answer: "Same-day delivery is available within Bangalore city limits for orders placed before 5 PM. Standard delivery takes 3-5 business days across India. Express delivery (1-2 days) is available for major cities."
     },
     {
       question: "Do you offer technical support?",

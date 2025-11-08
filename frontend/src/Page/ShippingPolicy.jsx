@@ -54,7 +54,7 @@ const ShippingPolicy = () => {
                 </div>
                 <div className="bg-white border border-gray-300 rounded-lg p-4">
                   <h4 className="font-semibold text-gray-900 mb-2">Same Day Delivery</h4>
-                  <p className="text-sm text-gray-600 mb-1"><strong>Time:</strong> Same day (orders before 6 PM)</p>
+                  <p className="text-sm text-gray-600 mb-1"><strong>Time:</strong> Same day (orders before 5 PM)</p>
                   <p className="text-sm text-gray-600"><strong>Coverage:</strong> Bangalore city limits only</p>
                 </div>
               </div>
@@ -82,7 +82,7 @@ const ShippingPolicy = () => {
                     </tr>
                     <tr>
                       <td className="border border-gray-300 px-4 py-2">Same Day Delivery</td>
-                      <td className="border border-gray-300 px-4 py-2">Same day (orders before 6 PM)</td>
+                      <td className="border border-gray-300 px-4 py-2">Same day (orders before 5 PM)</td>
                       <td className="border border-gray-300 px-4 py-2">Bangalore city limits only</td>
                     </tr>
                   </tbody>

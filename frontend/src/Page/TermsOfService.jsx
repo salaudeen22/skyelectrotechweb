@@ -65,7 +65,7 @@ const TermsOfService = () => {
 
               <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">5. Shipping and Delivery</h2>
               <p className="text-gray-700 mb-3 sm:mb-4">
-                We offer same-day delivery within Bangalore city limits for orders placed before 6 PM. 
+                We offer same-day delivery within Bangalore city limits for orders placed before 5 PM. 
                 Delivery times for other locations are estimates only and typically range from 1-3 business days. 
                 We are not responsible for delays beyond our control including but not limited to weather, 
                 traffic, or courier service delays. Risk of loss and title for items purchased pass to you 
