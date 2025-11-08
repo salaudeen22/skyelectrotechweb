@@ -2003,6 +2003,7 @@ const getOrderNotificationEmailTemplate = (order, user) => {
 const getOrderStatusUpdateEmailTemplate = (order, user, newStatus) => {
   const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
   const orderId = order._id.toString().slice(-6).toUpperCase();
+  const logoUrl = getEmailLogoUrl();
   
   const getStatusMessage = (status) => {
     const messages = {
