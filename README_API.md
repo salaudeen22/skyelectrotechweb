@@ -8,7 +8,7 @@ Welcome to the comprehensive API documentation for the SkyElectroTech e-commerce
 Essential information for developers to get started quickly:
 - Base URLs and authentication
 - Most commonly used endpoints
-- Request/response examples
+- Request/response example
 - Error codes and rate limiting
 - Development setup
 
