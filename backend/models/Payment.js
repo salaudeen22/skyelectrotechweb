@@ -88,7 +88,7 @@ paymentSchema.index({ timeoutAt: 1 });
 paymentSchema.index({ nextRetryAt: 1 });
 paymentSchema.index({ createdAt: -1 });
 
-// Compound indexes for optimized queries
+// Compound indexes for optimized querie
 paymentSchema.index({ status: 1, timeoutAt: 1 }); // For expired payments
 paymentSchema.index({ status: 1, retryCount: 1, nextRetryAt: 1 }); // For retry queries
 paymentSchema.index({ status: 1, razorpayOrderId: 1 }); // For verification queries
