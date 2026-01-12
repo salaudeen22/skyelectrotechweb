@@ -1,6 +1,7 @@
 name: Deploy Frontend to EC2
 
 on:
+  workflow_dispatch:  # Allow manual trigger
   push:
     branches:
       - master
