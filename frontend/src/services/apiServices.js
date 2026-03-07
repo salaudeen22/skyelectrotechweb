@@ -126,6 +126,12 @@ export const productsAPI = {
     return response.data;
   },
 
+  // Get all products for admin (no limit cap, includes inactive)
+  getAdminProducts: async (params = {}) => {
+    const response = await api.get('/products/admin/all', { params });
+    return response.data;
+  },
+
   // Delete product (Admin only)
   deleteProduct: async (id) => {
     const response = await api.delete(`/products/${id}`);

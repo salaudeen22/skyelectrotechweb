@@ -576,6 +576,67 @@ const getProductsByCategory = asyncHandler(async (req, res) => {
   }, 'Category products retrieved successfully');
 });
 
+// @desc    Get all products for admin (no limit cap, includes inactive)
+// @route   GET /api/products/admin/all
+// @access  Admin
+const getAdminProducts = asyncHandler(async (req, res) => {
+  const {
+    page = 1,
+    limit = 50,
+    sort = '-createdAt',
+    search
+  } = req.query;
+
+  // Admin can see all products (active + inactive)
+  const query = {};
+
+  // Search filter
+  if (search) {
+    const searchTerm = search.trim();
+    if (searchTerm.length >= 3) {
+      query.$text = { $search: searchTerm };
+    } else {
+      query.$or = [
+        { name: { $regex: searchTerm, $options: 'i' } },
+        { brand: { $regex: searchTerm, $options: 'i' } }
+      ];
+    }
+  }
+
+  // No hard cap on limit for admin — allow up to 500
+  const pageLimit = Math.min(parseInt(limit) || 50, 500);
+  const { skip } = paginate(page, pageLimit);
+
+  let sortOptions = sort;
+  if (typeof sortOptions === 'string') {
+    const field = sortOptions.startsWith('-') ? sortOptions.slice(1) : sortOptions;
+    const order = sortOptions.startsWith('-') ? -1 : 1;
+    sortOptions = { [field]: order };
+  }
+
+  if (search && search.trim().length >= 3) {
+    sortOptions = { score: { $meta: 'textScore' }, ...sortOptions };
+  }
+
+  const products = await Product.find(query)
+    .select('name description price images brand category subcategory ratings isFeatured isActive discount sku stock createdAt')
+    .populate('category', 'name')
+    .populate('subcategory', 'name')
+    .sort(sortOptions)
+    .skip(skip)
+    .limit(pageLimit)
+    .lean()
+    .maxTimeMS(10000);
+
+  const total = await Product.countDocuments(query).maxTimeMS(5000);
+  const pagination = getPaginationMeta(total, page, pageLimit);
+
+  sendResponse(res, 200, {
+    products,
+    pagination
+  }, 'Admin products retrieved successfully');
+});
+
 module.exports = {
   getProducts,
   getProduct,
@@ -586,5 +647,6 @@ module.exports = {
   deleteProductReview,
   getFeaturedProducts,
   searchProducts,
-  getProductsByCategory
+  getProductsByCategory,
+  getAdminProducts
 };

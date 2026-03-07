@@ -10,7 +10,8 @@ const {
   deleteProductReview,
   getFeaturedProducts,
   searchProducts,
-  getProductsByCategory
+  getProductsByCategory,
+  getAdminProducts
 } = require('../controllers/products');
 const { auth, adminOnly, adminOrEmployee } = require('../middleware/auth');
 const validate = require('../middleware/validate');
@@ -53,6 +54,9 @@ const reviewValidation = [
     .withMessage('Comment cannot exceed 500 characters')
 ];
 
+// Admin routes - get all products (no limit cap, includes inactive)
+router.get('/admin/all', auth, adminOnly, getAdminProducts);
+
 // Public routes with optimized caching (reduced for better admin experience)
 router.get('/', cacheSearchResults(60), getProducts); // 1 min cache (reduced from 10 min)
 router.get('/featured', cacheSearchResults(120), getFeaturedProducts); // 2 min cache (reduced from 15 min)
@@ -65,7 +69,7 @@ router.post('/:id/reviews', auth, reviewValidation, validate, addProductReview);
 router.delete('/:id/reviews/:reviewId', auth, deleteProductReview);
 
 // Admin/Employee routes
-router.post('/', 
+router.post('/',
   auth, 
   adminOnly, 
   productValidation, 

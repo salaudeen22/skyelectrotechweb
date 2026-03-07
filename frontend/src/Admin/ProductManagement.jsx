@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FaPlus, FaSearch, FaPencilAlt, FaTrashAlt, FaUpload, FaCog, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { productsAPI } from '../services/apiServices';
 import toast from 'react-hot-toast';
@@ -17,49 +17,49 @@ const ProductManagement = () => {
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+    const searchTimeoutRef = useRef(null);
 
-    useEffect(() => {
-        fetchProducts();
-    }, []);
-
-    const fetchProducts = async () => {
+    const fetchProducts = useCallback(async (page = 1, search = '') => {
         try {
             setLoading(true);
-            const response = await productsAPI.getProducts({ limit: 100 }); // Get more products for admin
+            const params = { page, limit: itemsPerPage };
+            if (search.trim()) {
+                params.search = search.trim();
+            }
+            const response = await productsAPI.getAdminProducts(params);
             setProducts(response.data.products);
+            setTotalPages(response.data.pagination?.totalPages || 1);
+            setTotalItems(response.data.pagination?.totalItems || 0);
         } catch (error) {
             console.error('Error fetching products:', error);
             toast.error('Failed to load products');
         } finally {
             setLoading(false);
         }
-    };
+    }, [itemsPerPage]);
 
-    const filteredProducts = useMemo(() => 
-        products.filter(p => 
-            p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.brand?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.category?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-        ),
-        [products, searchTerm]
-    );
+    useEffect(() => {
+        fetchProducts(currentPage, searchTerm);
+    }, [currentPage, fetchProducts]);
 
-    // Pagination logic
-    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-    const paginatedProducts = useMemo(() => {
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        return filteredProducts.slice(startIndex, endIndex);
-    }, [filteredProducts, currentPage, itemsPerPage]);
+    const paginatedProducts = products;
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
-        setSelectedProducts([]); // Clear selections when changing pages
+        setSelectedProducts([]);
     };
 
     const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
-        setCurrentPage(1); // Reset to first page when searching
+        const value = e.target.value;
+        setSearchTerm(value);
+        setCurrentPage(1);
+        // Debounce search to avoid too many API calls
+        if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+        searchTimeoutRef.current = setTimeout(() => {
+            fetchProducts(1, value);
+        }, 400);
     };    const handleOpenProductForm = (productId = null) => {
         setEditingProductId(productId);
         setShowProductForm(true);
@@ -72,7 +72,7 @@ const ProductManagement = () => {
 
     const handleSaveProduct = () => {
         handleCloseProductForm();
-        fetchProducts(); // Refresh the products list
+        fetchProducts(currentPage, searchTerm); // Refresh the products list
     };
 
     const handleOpenBulkUpload = () => {
@@ -84,7 +84,7 @@ const ProductManagement = () => {
     };
 
     const handleBulkUploadSuccess = () => {
-        fetchProducts(); // Refresh the products list
+        fetchProducts(currentPage, searchTerm); // Refresh the products list
     };
 
     const handleOpenBulkActions = () => {
@@ -97,7 +97,7 @@ const ProductManagement = () => {
     };
 
     const handleBulkActionsSuccess = () => {
-        fetchProducts(); // Refresh the products list
+        fetchProducts(currentPage, searchTerm); // Refresh the products list
         setSelectedProducts([]);
     };
 
@@ -130,7 +130,7 @@ const ProductManagement = () => {
             try {
                 await productsAPI.deleteProduct(productId);
                 toast.success('Product deleted successfully');
-                fetchProducts(); // Refresh the products list
+                fetchProducts(currentPage, searchTerm); // Refresh the products list
             } catch (error) {
                 console.error('Error deleting product:', error);
                 toast.error('Failed to delete product');
@@ -391,7 +391,7 @@ const ProductManagement = () => {
                     </div>
                 </div>
                 
-                {filteredProducts.length === 0 && (
+                {products.length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                         {searchTerm ? 'No products found matching your search.' : 'No products available.'}
                     </div>
@@ -399,12 +399,12 @@ const ProductManagement = () => {
             </div>
                 
             {/* Pagination Controls */}
-            {filteredProducts.length > 0 && (
+            {products.length > 0 && (
                 <div className="bg-white border-t border-slate-200 px-4 py-4 sm:px-6">
                     {/* Mobile Pagination */}
                     <div className="md:hidden">
                         <div className="text-sm text-slate-500 text-center mb-3">
-                            Page {currentPage} of {totalPages} ({filteredProducts.length} products)
+                            Page {currentPage} of {totalPages} ({totalItems} products)
                         </div>
                         
                         {totalPages > 1 && (
@@ -437,7 +437,7 @@ const ProductManagement = () => {
                     {/* Desktop Pagination */}
                     <div className="hidden md:flex items-center justify-between">
                         <div className="text-sm text-slate-500">
-                            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} products
+                            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} products
                         </div>
                         
                         {totalPages > 1 && (
